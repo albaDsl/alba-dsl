@@ -1,0 +1,12 @@
+-- Copyright (c) 2025 albaDsl
+
+import: ./lts-nightly-2024-10-11.config
+packages: alba.cabal bchn-secp256k1
+
+jobs: $ncpus
+semaphore: true
+
+source-repository-package
+    type: git
+    location: https://github.com/albaDsl/haskoin-core-bch-lite.git
+    tag: 545422ad587a7dd37ad17062ecac4dec4315a047

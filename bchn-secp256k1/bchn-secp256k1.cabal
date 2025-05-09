@@ -1,0 +1,51 @@
+cabal-version:  3.6
+name:           bchn-secp256k1
+version:        0.1.0.0
+category:       application
+author:         albaDsl
+
+common shared-properties
+  default-language: GHC2021
+  default-extensions:
+      AllowAmbiguousTypes
+      DataKinds
+      DeriveAnyClass
+      DuplicateRecordFields
+      GADTs
+      LambdaCase
+      OverloadedLabels
+      OverloadedRecordDot
+      OverloadedStrings
+      OverloadedLists
+      PatternSynonyms
+      PartialTypeSignatures
+      QuasiQuotes
+      RecordWildCards
+      TypeFamilies
+      UndecidableInstances
+  other-extensions: Strict TemplateHaskell
+  ghc-options: -O1 -j -fno-ignore-asserts -Wall -Werror
+               -- Disable some warnings during developent.
+               -- -Wno-partial-type-signatures
+               -- -Wno-unused-imports
+               -- -Wno-unused-top-binds
+               -- -Wno-unused-local-binds
+               -- -Wno-unused-matches
+  build-depends:
+      base,
+      bytestring,
+
+library
+  import: shared-properties
+  exposed-modules: Secp256k1
+  build-depends: base
+  hs-source-dirs: src
+  c-sources:
+    cbits/interface.c
+    secp256k1/src/secp256k1.c
+  include-dirs:
+    ./
+    secp256k1/
+    secp256k1/include
+    secp256k1/src/
+  cc-options: -DHAVE_CONFIG_H

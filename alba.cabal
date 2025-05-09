@@ -1,0 +1,232 @@
+cabal-version:  3.6
+name:           alba
+version:        0.1.0.0
+category:       application
+author:         albadsl@proton.me
+
+common shared-properties
+  default-language: GHC2021
+  default-extensions:
+      AllowAmbiguousTypes
+      DataKinds
+      DeriveAnyClass
+      DuplicateRecordFields
+      GADTs
+      LambdaCase
+      NoFieldSelectors
+      OverloadedLabels
+      OverloadedRecordDot
+      OverloadedStrings
+      OverloadedLists
+      PatternSynonyms
+      PartialTypeSignatures
+      QuasiQuotes
+      RecordWildCards
+      TypeFamilies
+      UndecidableInstances
+  other-extensions: Strict TemplateHaskell
+  ghc-options: -fno-ignore-asserts -Wall -Werror
+               -- Disable some warnings during development.
+               -- -Wno-partial-type-signatures
+               -- -Wno-unused-imports
+               -- -Wno-unused-top-binds
+               -- -Wno-unused-local-binds
+               -- -Wno-unused-matches
+
+  build-depends:
+      aeson,
+      aeson-pretty,
+      base,
+      base16,
+      binary,
+      bytestring,
+      containers,
+      crypton,
+      directory,
+      entropy,
+      filepath,
+      foldl,
+      generic-lens,
+      haskoin-core-bch-lite,
+      liquidhaskell == 0.9.8.2,
+      bchn-secp256k1,
+      memory,
+      microlens,
+      optparse-applicative,
+      pretty-simple,
+      secp256k1-haskell,
+      tasty,
+      tasty-hunit,
+      tasty-quickcheck,
+      template-haskell,
+      text,
+      time,
+      turtle,
+      QuickCheck,
+      vector
+
+library
+  import: shared-properties
+  exposed-modules:
+      Alba.Dsl.V1.Bch2025,
+      Alba.Dsl.V1.Bch2025.Compile,
+      Alba.Dsl.V1.Bch2025.CompilerUtils,
+      Alba.Dsl.V1.Bch2025.Contract.Prelude,
+      Alba.Dsl.V1.Bch2025.Infix,
+      Alba.Dsl.V1.Bch2025.Lang,
+      Alba.Dsl.V1.Bch2025.LangArgs,
+      Alba.Dsl.V1.Bch2025.LangDispatch,
+      Alba.Dsl.V1.Bch2025.Ops,
+      Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules,
+      Alba.Dsl.V1.Bch2025.Stack,
+      Alba.Dsl.V1.Bch2025.TxDsl,
+      Alba.Dsl.V1.Bch2025.Version,
+      Alba.Dsl.V1.Common,
+      Alba.Dsl.V1.Common.Contract,
+      Alba.Dsl.V1.Common.ContractCashScriptArtifact,
+      Alba.Dsl.V1.Common.ContractDoc,
+      Alba.Dsl.V1.Common.FlippedCons,
+      Alba.Dsl.V1.Common.Lang,
+      Alba.Dsl.V1.Common.LangArgs,
+      Alba.Dsl.V1.Common.Listing,
+      Alba.Dsl.V1.Common.Stack,
+      Alba.Dsl.V1.Common.TermClass,
+      Alba.Dsl.V1.Common.ThUtils,
+      Alba.Dsl.V1.Common.TypeFamilies,
+      Alba.Dsl.V1.Common.Version,
+      Alba.Misc.Cmd,
+      Alba.Misc.Debug,
+      Alba.Misc.Haskoin,
+      Alba.Misc.KeyPair,
+      Alba.Misc.MockVals,
+      Alba.Misc.Opts,
+      Alba.Misc.Utils,
+      Alba.Misc.Wallet,
+      Alba.Node.ValidateTokens,
+      Alba.Node.Validation,
+      Alba.Node.ValidationFailure,
+      Alba.Tx.Bch2025,
+      Alba.Tx.Bch2025.Constants,
+      Alba.Tx.Bch2025.Hash,
+      Alba.Tx.Bch2025.SerializationUtils,
+      Alba.Tx.Bch2025.Tx,
+      Alba.Tx.Bch2025.TxId,
+      Alba.Tx.Bch2025.TxIn,
+      Alba.Tx.Bch2025.TxOut,
+      Alba.Tx.Bch2025.TxOuts,
+      Alba.Vm.Bch2025,
+      Alba.Vm.Bch2025.OpClasses,
+      Alba.Vm.Bch2025.SigCheckUtils,
+      Alba.Vm.Bch2025.SigEncoding,
+      Alba.Vm.Bch2025.TxContext,
+      Alba.Vm.Bch2025.Utils,
+      Alba.Vm.Bch2025.Vm,
+      Alba.Vm.Bch2025.VmOpArithmetic,
+      Alba.Vm.Bch2025.VmOpBitwiseLogic,
+      Alba.Vm.Bch2025.VmOpBytes,
+      Alba.Vm.Bch2025.VmOpConstants,
+      Alba.Vm.Bch2025.VmOpDiscouragedNops,
+      Alba.Vm.Bch2025.VmOpEqualityAndConditionals,
+      Alba.Vm.Bch2025.VmOpHash,
+      Alba.Vm.Bch2025.VmOpIntrospection,
+      Alba.Vm.Bch2025.VmOpLocktime,
+      Alba.Vm.Bch2025.VmOpMultiSig,
+      Alba.Vm.Bch2025.VmOpSig,
+      Alba.Vm.Bch2025.VmOpStack,
+      Alba.Vm.Bch2025.VmOpTokenIntrospection,
+      Alba.Vm.Bch2025.VmOps,
+      Alba.Vm.Bch2025.VmParams,
+      Alba.Vm.Bch2025.VmSigHash,
+      Alba.Vm.Common,
+      Alba.Vm.Common.BasicTypes,
+      Alba.Vm.Common.Crypto,
+      Alba.Vm.Common.Logging,
+      Alba.Vm.Common.OpcodeL1,
+      Alba.Vm.Common.OpcodeL2,
+      Alba.Vm.Common.ScriptError,
+      Alba.Vm.Common.StackElement,
+      Alba.Vm.Common.Utils,
+      Alba.Vm.Common.VmBool,
+      Alba.Vm.Common.VmInteger,
+      Alba.Vm.Common.VmLimits,
+      Alba.Vm.Common.VmParams,
+      Alba.Vm.Common.VmState,
+  hs-source-dirs: src
+
+executable alba
+  import: shared-properties
+  main-is: main.hs
+  hs-source-dirs: apps/alba
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
+executable simpleP2pkh
+  import: shared-properties
+  hs-source-dirs: apps/contracts/simpleP2pkh
+  main-is: main.hs
+  other-modules: Opts
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
+executable transferWithTimeout
+  import: shared-properties
+  hs-source-dirs: apps/contracts/transferWithTimeout
+  main-is: main.hs
+  other-modules: Contract, ContractApi, Opts, Params, Spend, Test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
+executable lastWill
+  import: shared-properties
+  hs-source-dirs: apps/contracts/lastWill
+  main-is: main.hs
+  other-modules: Contract, ContractApi, Opts, Params, Spend, Test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
+executable demo
+  import: shared-properties
+  main-is: main.hs
+  hs-source-dirs: apps/demo
+  other-modules: Demo, DemoPrelude
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba, asciichart
+
+executable test
+  import: shared-properties
+  main-is: test.hs
+  hs-source-dirs:
+      test
+  other-modules:
+      QuickCheckSupport,
+      TestArguments,
+      TestCheckSig,
+      TestCheckMultiSig,
+      TestCustomTypes,
+      TestDataPushing,
+      TestDataSig,
+      TestIntPushing,
+      TestInteger,
+      TestIntrospection,
+      TestInvalidStack,
+      TestLibauthVectors,
+      TestLibauthVectorsExclusions,
+      TestOpcodes,
+      TestOpsArithmetic,
+      TestOpsBytes,
+      TestOpsConditional,
+      TestOpsHash,
+      TestOpsOrdering,
+      TestOpsStack,
+      TestOptimizer,
+      TestStackBranches,
+      TestUtils,
+  build-depends: alba, scientific
+
+executable benchmark
+  import: shared-properties
+  main-is: benchmark.hs
+  other-modules: BenchmarkOpcodeDispatch
+  hs-source-dirs: benchmark/
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba, criterion, deepseq
