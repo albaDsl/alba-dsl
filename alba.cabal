@@ -150,6 +150,7 @@ library
       Alba.Vm.Common.ScriptError,
       Alba.Vm.Common.StackElement,
       Alba.Vm.Common.Utils,
+      Alba.Vm.Common.Vm,
       Alba.Vm.Common.VmBool,
       Alba.Vm.Common.VmInteger,
       Alba.Vm.Common.VmLimits,
