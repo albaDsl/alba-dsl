@@ -1,19 +1,19 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Node.Validation (acceptToMemoryPool) where
+module Alba.Node.Validation (acceptToMemoryPool, VerifyScriptFun) where
 
 import Alba.Node.ValidateTokens (verifyTxTokens)
 import Alba.Node.ValidationFailure (ValidationFailure (..))
 import Alba.Tx.Bch2025 (Tx (..), TxIn (..), TxOut (..))
 import Alba.Vm.Bch2025
   ( TxContext,
-    VmParams (..),
     txContextCoins,
     txContextInputIndex,
     txContextTx,
-    verifyScript,
   )
+import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.ScriptError (ScriptError)
+import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmState (VerifyScriptResult)
 import Control.Monad (guard, unless)
 import Data.Binary (encode)
@@ -22,13 +22,20 @@ import Data.ByteString.Lazy qualified as BL
 import Data.Word (Word64)
 import Prelude hiding (sum)
 
+type VerifyScriptFun =
+  CodeL1 ->
+  TxContext ->
+  VmParams ->
+  Either (ScriptError, VerifyScriptResult) VerifyScriptResult
+
 acceptToMemoryPool ::
+  VerifyScriptFun ->
   TxContext ->
   VmParams ->
   Either
     ValidationFailure
     (Either (ScriptError, VerifyScriptResult) VerifyScriptResult)
-acceptToMemoryPool txContext vmParams = do
+acceptToMemoryPool verifyScript txContext vmParams = do
   let coins = txContextCoins txContext
       idx = txContextInputIndex txContext
       scriptPubKey = (coins !! idx).scriptPubKey

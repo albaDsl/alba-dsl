@@ -23,6 +23,7 @@ module Alba.Vm.Bch2025.Utils
 where
 {- ORMOLU_ENABLE -}
 
+import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement
   ( Bytes,
@@ -41,7 +42,8 @@ import Alba.Vm.Common.VmLimits
     addHashIterations,
   )
 import Alba.Vm.Common.VmParams (VmParams (..))
-import Alba.Vm.Common.VmState (CondStack, VmStack, VmState (..))
+import Alba.Vm.Common.VmStack (CondStack, CondStackElement (..), VmStack)
+import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
 import Data.ByteString qualified as B
 import Data.Foldable (toList)
@@ -381,7 +383,15 @@ verifyEqual :: (Eq a) => ScriptError -> a -> a -> Either ScriptError ()
 verifyEqual err x y = (x == y) `unless` Left err
 
 condStackExecuteP :: CondStack -> Bool
-condStackExecuteP = not . any not . toList
+condStackExecuteP = all execVal . takeWhile isExec . toList . S.reverse
+  where
+    execVal :: CondStackElement -> Bool
+    execVal (Exec x) = x
+    execVal (Eval _ _) = canNotHappen
+
+    isExec :: CondStackElement -> Bool
+    isExec (Exec _) = True
+    isExec (Eval _ _) = False
 
 indexCheck :: Int -> (Int -> a) -> (Integer -> Either ScriptError a)
 indexCheck _max _f x | x < 0 = Left SeInvalidTxInputIndex

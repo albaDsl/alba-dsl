@@ -6,6 +6,7 @@ import Alba.Vm.Bch2025.Utils (boa1, condStackExecuteP, op1v)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool')
+import Alba.Vm.Common.VmStack (CondStackElement (..))
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
 import Data.Sequence (Seq ((:|>)), (|>))
@@ -21,14 +22,15 @@ evalOpConditionals op st@(VmState {s, exec, params}) =
       if condStackExecuteP exec
         then do
           (s' :|> x1) <- pure s
-          Right $ st {s = s', exec = exec |> stackElementToBool' x1}
-        else Right $ st {exec = exec |> False}
+          Right $ st {s = s', exec = exec |> Exec (stackElementToBool' x1)}
+        else Right $ st {exec = exec |> Exec False}
     OP_NOTIF -> Just $ do
       if condStackExecuteP exec
         then do
           (s' :|> x1) <- pure s
-          Right $ st {s = s', exec = exec |> (not . stackElementToBool') x1}
-        else Right $ st {exec = exec |> False}
+          Right $
+            st {s = s', exec = exec |> Exec ((not . stackElementToBool') x1)}
+        else Right $ st {exec = exec |> Exec False}
     OP_ELSE   -> Just $ toggleTop >>= \exec' -> Right $ st {exec = exec'}
     OP_ENDIF  -> Just $ dropTop >>= \exec' -> Right $ st {exec = exec'}
     OP_NOP    -> Just $ Right st
@@ -37,10 +39,10 @@ evalOpConditionals op st@(VmState {s, exec, params}) =
     _ -> Nothing
   where
     toggleTop = case exec of
-      (rest :|> top) -> Right $ rest |> not top
+      (rest :|> Exec top) -> Right $ rest |> Exec (not top)
       _ -> Left SeUnbalancedConditional
 
     dropTop = case exec of
-      (rest :|> _top) -> Right rest
+      (rest :|> Exec _top) -> Right rest
       _ -> Left SeUnbalancedConditional
 {- ORMOLU_ENABLE -}

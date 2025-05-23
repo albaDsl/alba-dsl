@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module TestLibauthVectorsExclusions where
+module TestLibauthVectorsExclusions2025 where
 
 import Data.Text qualified as T
 

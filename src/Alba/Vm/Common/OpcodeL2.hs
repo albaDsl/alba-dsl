@@ -47,6 +47,7 @@ data OpcodeL2
   | OP_15
   | OP_16
   | OP_NOP
+  | OP_EVAL
   | OP_IF
   | OP_NOTIF
   | OP_ELSE
@@ -199,6 +200,7 @@ opcodeL2ToCodeL1 OP_14 = Just $ toCodeL1 L1.OP_14
 opcodeL2ToCodeL1 OP_15 = Just $ toCodeL1 L1.OP_15
 opcodeL2ToCodeL1 OP_16 = Just $ toCodeL1 L1.OP_16
 opcodeL2ToCodeL1 OP_NOP = Just $ toCodeL1 L1.OP_NOP
+opcodeL2ToCodeL1 OP_EVAL = Just $ toCodeL1 L1.OP_VER_OP_EVAL
 opcodeL2ToCodeL1 OP_IF = Just $ toCodeL1 L1.OP_IF
 opcodeL2ToCodeL1 OP_NOTIF = Just $ toCodeL1 L1.OP_NOTIF
 opcodeL2ToCodeL1 OP_ELSE = Just $ toCodeL1 L1.OP_ELSE
@@ -352,7 +354,7 @@ getOp' L1.OP_14 code = Just (OP_14, code)
 getOp' L1.OP_15 code = Just (OP_15, code)
 getOp' L1.OP_16 code = Just (OP_16, code)
 getOp' L1.OP_NOP code = Just (OP_NOP, code)
-getOp' op@L1.OP_VER code = Just (OP_UNUSED op, code)
+getOp' L1.OP_VER_OP_EVAL code = Just (OP_EVAL, code)
 getOp' L1.OP_IF code = Just (OP_IF, code)
 getOp' L1.OP_NOTIF code = Just (OP_NOTIF, code)
 getOp' op@L1.OP_VERIF code = Just (OP_UNUSED op, code)

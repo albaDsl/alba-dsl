@@ -115,7 +115,7 @@ data OpcodeL1
   | OP_15
   | OP_16
   | OP_NOP
-  | OP_VER
+  | OP_VER_OP_EVAL -- Repurposed in BCH2026.
   | OP_IF
   | OP_NOTIF
   | OP_VERIF

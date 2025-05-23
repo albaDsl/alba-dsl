@@ -16,12 +16,12 @@ import Alba.Vm.Common.ScriptError (ScriptError)
 import Alba.Vm.Common.StackElement (Labels, showStackElement)
 import Alba.Vm.Common.Utils (formatBytesWithLabels)
 import Alba.Vm.Common.VmLimits (dumpLimits, dumpMetrics)
+import Alba.Vm.Common.VmStack (VmStack)
 import Alba.Vm.Common.VmState
   ( LogEntry (..),
     VerifyScriptResult (..),
     VmLogs,
     VmMetrics (..),
-    VmStack,
     VmState (..),
   )
 import Control.Monad (when)

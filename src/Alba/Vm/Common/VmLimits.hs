@@ -8,6 +8,7 @@ module Alba.Vm.Common.VmLimits
     addHashIterations,
     addSigCheck,
     setLimits,
+    verifyStackSize,
     verifyCondStack,
     verifyMetrics,
     dumpMetrics,
@@ -112,10 +113,15 @@ setLimits code st =
       DclBased {..} -> (fixedCredit + B.length code) `div` denominator
       MaxLimit {..} -> limit
 
+verifyStackSize :: VmState -> Either (ScriptError, VmState) ()
+verifyStackSize st@(VmState {..})
+  | S.length s + S.length alt <= st.params.maxStackSize = Right ()
+verifyStackSize st = Left (SeStackSize, st)
+
 verifyCondStack :: VmState -> Either (ScriptError, VmState) ()
 verifyCondStack st@VmState {exec}
   | S.length exec <= st.params.maxExecStackSize = Right ()
-verifyCondStack st = Left (SeOpVmLimit, st)
+verifyCondStack st = Left (SeCondStackDepth, st)
 
 verifyMetrics :: VmState -> Either (ScriptError, VmState) ()
 verifyMetrics VmState {metrics, limits} | metrics <= limits = Right ()

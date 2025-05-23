@@ -1,26 +1,22 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Vm.Common.VmState
-  ( VmStack,
-    CodeL1,
-    VmState (..),
-    CondStack,
+  ( VmState (..),
     VmMetrics (..),
     VmParams (..),
     VmLogs,
     LogEntry (..),
     VerifyScriptResult (..),
+    CodeL1,
     zeroedMetrics,
     maxedMetrics,
-    stackTop,
-    stackInit,
   )
 where
 
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
-import Alba.Vm.Common.StackElement (StackElement)
 import Alba.Vm.Common.VmParams (VmParams (..))
+import Alba.Vm.Common.VmStack (CondStack, VmStack)
 import Data.Sequence qualified as S
 
 data VmState = VmState
@@ -36,10 +32,6 @@ data VmState = VmState
     logData :: !(Maybe VmLogs)
   }
   deriving (Eq, Show)
-
-type VmStack = S.Seq StackElement
-
-type CondStack = S.Seq Bool
 
 type VmLogs = S.Seq LogEntry
 
@@ -96,11 +88,3 @@ maxedMetrics =
       sigChecks = maxBound,
       cost = maxBound
     }
-
-stackTop :: VmStack -> Maybe StackElement
-stackTop (_ S.:|> x) = Just x
-stackTop _ = Nothing
-
-stackInit :: VmStack -> Maybe VmStack
-stackInit (xs S.:|> _) = Just xs
-stackInit _ = Nothing

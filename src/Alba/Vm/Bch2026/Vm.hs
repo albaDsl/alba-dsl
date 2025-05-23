@@ -1,11 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Bch2025.Vm
-  ( evaluateScript,
-    startState,
-    verifyScript,
-  )
-where
+module Alba.Vm.Bch2026.Vm (evaluateScript, startState, verifyScript) where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
 import Alba.Tx.Bch2025 (Tx (..), TxIn (..))
@@ -16,7 +11,7 @@ import Alba.Vm.Bch2025.TxContext
     txContextTx,
   )
 import Alba.Vm.Bch2025.Utils (condStackExecuteP)
-import Alba.Vm.Bch2025.VmOps (evalVmOp)
+import Alba.Vm.Bch2026.VmOps (evalVmOp)
 import Alba.Vm.Common.Logging (logOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
@@ -31,7 +26,7 @@ import Alba.Vm.Common.VmLimits
     verifyMetrics,
   )
 import Alba.Vm.Common.VmParams (VmParams (..))
-import Alba.Vm.Common.VmStack (stackInit, stackTop)
+import Alba.Vm.Common.VmStack (CondStackElement (..), stackInit, stackTop)
 import Alba.Vm.Common.VmState
   ( CodeL1,
     VerifyScriptResult (..),
@@ -43,6 +38,7 @@ import Control.Monad (unless, when)
 import Data.Bifunctor (second)
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
+import Data.Sequence (Seq ((:|>)))
 import Data.Sequence qualified as S
 
 evaluateScript ::
@@ -67,10 +63,20 @@ evaluateScript' ::
   VmState ->
   Either (ScriptError, VmState) VmState
 evaluateScript' _txContext state@(VmState {code, exec})
-  | B.null code = do
-      if S.null exec
-        then Right state
-        else Left (SeUnbalancedConditional, state)
+  | B.null code && S.null exec = Right state
+evaluateScript' txContext state@(VmState {code, exec})
+  | B.null code && not (S.null exec) =
+      case exec of
+        (exec' :|> (Eval {..})) ->
+          evaluateScript'
+            txContext
+            ( state
+                { code = cseCode,
+                  signedCode = cseSignedCode,
+                  exec = exec'
+                }
+            )
+        _ -> Left (SeUnbalancedConditional, state)
 evaluateScript' txContext state@(VmState {code, exec}) = do
   (op, rest) <- case getOp code of
     Just x -> Right x

@@ -8,6 +8,7 @@ data ScriptError
   | SeCheckMultiSigVerify
   | SeCheckSigVerify
   | SeCleanStack
+  | SeCondStackDepth
   | SeDisabledOpcode
   | SeDiscourageUpgradableNops
   | SeDivideByZero

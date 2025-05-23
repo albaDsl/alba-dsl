@@ -11,7 +11,8 @@ import TestIntPushing (testIntPushing)
 import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
-import TestLibauthVectors (testLibauthVectors)
+import TestLibauthVectors2025 (testLibauthVectors2025)
+import TestLibauthVectors2026 (testLibauthVectors2026)
 import TestOpcodes (testOpcodes)
 import TestOpsArithmetic (testOpsArithmetic)
 import TestOpsBytes (testOpsBytes)
@@ -39,7 +40,8 @@ tests =
       testInteger,
       testIntrospection,
       testInvalidStack,
-      testLibauthVectors,
+      testLibauthVectors2025,
+      testLibauthVectors2026,
       testOpcodes,
       testOpsArithmetic,
       testOpsBytes,

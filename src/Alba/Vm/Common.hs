@@ -12,6 +12,7 @@ module Alba.Vm.Common
     module Alba.Vm.Common.VmBool,
     module Alba.Vm.Common.VmInteger,
     module Alba.Vm.Common.VmParams,
+    module Alba.Vm.Common.VmStack,
     module Alba.Vm.Common.VmState,
   )
 where
@@ -27,4 +28,5 @@ import Alba.Vm.Common.Utils
 import Alba.Vm.Common.VmBool
 import Alba.Vm.Common.VmInteger
 import Alba.Vm.Common.VmParams
+import Alba.Vm.Common.VmStack
 import Alba.Vm.Common.VmState

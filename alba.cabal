@@ -69,6 +69,7 @@ library
   import: shared-properties
   exposed-modules:
       Alba.Dsl.V1.Bch2025,
+      Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules,
       Alba.Dsl.V1.Bch2025.Compile,
       Alba.Dsl.V1.Bch2025.CompilerUtils,
       Alba.Dsl.V1.Bch2025.Contract.Prelude,
@@ -77,7 +78,6 @@ library
       Alba.Dsl.V1.Bch2025.LangArgs,
       Alba.Dsl.V1.Bch2025.LangDispatch,
       Alba.Dsl.V1.Bch2025.Ops,
-      Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules,
       Alba.Dsl.V1.Bch2025.Stack,
       Alba.Dsl.V1.Bch2025.TxDsl,
       Alba.Dsl.V1.Bch2025.Version,
@@ -137,6 +137,10 @@ library
       Alba.Vm.Bch2025.VmOps,
       Alba.Vm.Bch2025.VmParams,
       Alba.Vm.Bch2025.VmSigHash,
+      Alba.Vm.Bch2026,
+      Alba.Vm.Bch2026.Vm,
+      Alba.Vm.Bch2026.VmOpEval,
+      Alba.Vm.Bch2026.VmOps,
       Alba.Vm.Common,
       Alba.Vm.Common.BasicTypes,
       Alba.Vm.Common.Crypto,
@@ -150,6 +154,7 @@ library
       Alba.Vm.Common.VmInteger,
       Alba.Vm.Common.VmLimits,
       Alba.Vm.Common.VmParams,
+      Alba.Vm.Common.VmStack,
       Alba.Vm.Common.VmState,
   hs-source-dirs: src
 
@@ -198,6 +203,7 @@ executable test
   hs-source-dirs:
       test
   other-modules:
+      LibauthSupport,
       QuickCheckSupport,
       TestArguments,
       TestCheckSig,
@@ -209,8 +215,10 @@ executable test
       TestInteger,
       TestIntrospection,
       TestInvalidStack,
-      TestLibauthVectors,
-      TestLibauthVectorsExclusions,
+      TestLibauthVectors2025,
+      TestLibauthVectors2026,
+      TestLibauthVectorsExclusions2025,
+      TestLibauthVectorsExclusions2026,
       TestOpcodes,
       TestOpsArithmetic,
       TestOpsBytes,
