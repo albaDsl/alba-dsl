@@ -47,9 +47,9 @@ import System.FilePath ((<.>), (</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
 import TestLibauthVectorsExclusions2025
-  ( exclude2025Invalid,
-    exclude2025NonStandardInStandardMode,
-    exclude2025Standard,
+  ( excludeInvalid,
+    excludeNonStandardInStandardMode,
+    excludeStandard,
   )
 import Text.Pretty.Simple (pPrintLightBg)
 import Text.Printf (printf)
@@ -75,18 +75,18 @@ testLibauthVectors2025 =
         tests <- nonStandardTests
         let tests' =
               filterTests
-                (`notElem` exclude2025NonStandardInStandardMode)
+                (`notElem` excludeNonStandardInStandardMode)
                 tests
         printSummary tests' tests
         mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
       testCase "bch_2025_invalid in standard-mode" $ do
         tests <- invalidTests
-        let tests' = filterTests (`notElem` exclude2025Invalid) tests
+        let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
       testCase "bch_2025_invalid in non-standard-mode" $ do
         tests <- invalidTests
-        let tests' = filterTests (`notElem` exclude2025Invalid) tests
+        let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript nonStandard >=> verifyTxNotApproved) tests'
     ]

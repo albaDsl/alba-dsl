@@ -47,9 +47,9 @@ import System.FilePath ((<.>), (</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
 import TestLibauthVectorsExclusions2026
-  ( exclude2026Invalid,
-    exclude2026NonStandardInStandardMode,
-    exclude2026Standard,
+  ( excludeInvalid,
+    excludeNonStandardInStandardMode,
+    excludeStandard,
   )
 import Text.Pretty.Simple (pPrintLightBg)
 import Text.Printf (printf)
@@ -60,12 +60,12 @@ testLibauthVectors2026 =
     "Libauth vectors"
     [ testCase "bch_2026_standard in standard-mode" $ do
         tests <- standardTests
-        let tests' = filterTests (`notElem` exclude2026Standard) tests
+        let tests' = filterTests (`notElem` excludeStandard) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript standard >=> verifyTxApproved) tests',
       testCase "bch_2026_standard in non-standard-mode" $ do
         tests <- standardTests
-        let tests' = filterTests (`notElem` exclude2026Standard) tests
+        let tests' = filterTests (`notElem` excludeStandard) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript nonStandard >=> verifyTxApproved) tests',
       testCase "bch_2026_nonstandard in non-standard-mode" $ do
@@ -77,18 +77,18 @@ testLibauthVectors2026 =
         tests <- nonStandardTests
         let tests' =
               filterTests
-                (`notElem` exclude2026NonStandardInStandardMode)
+                (`notElem` excludeNonStandardInStandardMode)
                 tests
         printSummary tests' tests
         mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
       testCase "bch_2026_invalid in standard-mode" $ do
         tests <- invalidTests
-        let tests' = filterTests (`notElem` exclude2026Invalid) tests
+        let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
       testCase "bch_2026_invalid in non-standard-mode" $ do
         tests <- invalidTests
-        let tests' = filterTests (`notElem` exclude2026Invalid) tests
+        let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
         mapM_ (runTest verifyScript nonStandard >=> verifyTxNotApproved) tests'
     ]

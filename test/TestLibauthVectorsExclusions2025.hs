@@ -4,11 +4,11 @@ module TestLibauthVectorsExclusions2025 where
 
 import Data.Text qualified as T
 
-exclude2025Standard :: [T.Text]
-exclude2025Standard = []
+excludeStandard :: [T.Text]
+excludeStandard = []
 
-exclude2025NonStandardInStandardMode :: [T.Text]
-exclude2025NonStandardInStandardMode =
+excludeNonStandardInStandardMode :: [T.Text]
+excludeNonStandardInStandardMode =
   [ "u33zrd", -- passed validation.
     "vd72vn", -- passed validation.
     "nsw96e", -- passed validation.
@@ -4794,8 +4794,8 @@ exclude2025NonStandardInStandardMode =
     "c7fmnh" -- passed validation.
   ]
 
-exclude2025Invalid :: [T.Text]
-exclude2025Invalid =
+excludeInvalid :: [T.Text]
+excludeInvalid =
   [ "h4d5nz", -- passed validation.
     "j8u53e", -- passed validation.
     "j07snz", -- passed validation.

@@ -4,8 +4,8 @@ module TestLibauthVectorsExclusions2026 where
 
 import Data.Text qualified as T
 
-exclude2026Standard :: [T.Text]
-exclude2026Standard =
+excludeStandard :: [T.Text]
+excludeStandard =
   [ "sl0m2j", -- failed with SeBadOpcode "OP_UNUSED OP_VERIF"
     "ye8js7", -- failed with SeBadOpcode "OP_UNUSED OP_VERIF"
     "snxadr", -- failed with SeBadOpcode "OP_UNUSED OP_VERIF"
@@ -59,8 +59,8 @@ exclude2026Standard =
     "ntndgy" -- validation failure VfTxScriptPubKeySize
   ]
 
-exclude2026NonStandardInStandardMode :: [T.Text]
-exclude2026NonStandardInStandardMode =
+excludeNonStandardInStandardMode :: [T.Text]
+excludeNonStandardInStandardMode =
   [ "u33zrd", -- passed validation.
     "vd72vn", -- passed validation.
     "nsw96e", -- passed validation.
@@ -128,8 +128,8 @@ exclude2026NonStandardInStandardMode =
     "x48wxa" -- passed validation.
   ]
 
-exclude2026Invalid :: [T.Text]
-exclude2026Invalid =
+excludeInvalid :: [T.Text]
+excludeInvalid =
   [ "h4d5nz", -- passed validation.
     "j8u53e", -- passed validation.
     "j07snz", -- passed validation.
