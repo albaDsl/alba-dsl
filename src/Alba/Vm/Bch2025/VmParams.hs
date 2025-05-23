@@ -37,7 +37,8 @@ vmParamsStandard =
           discourageNops = True,
           minTxSize = 65,
           maxStandardTxSize = 100000,
-          maxTxInScriptSigSize = Just 1650
+          maxTxInScriptSigSize = Just 1650,
+          maxCommitmentSize = 40
         }
 
 vmParamsNonStandard :: VmParams

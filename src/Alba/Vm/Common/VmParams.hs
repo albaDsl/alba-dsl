@@ -33,7 +33,8 @@ data VmParams = VmParams
     discourageNops :: Bool,
     minTxSize :: Int,
     maxStandardTxSize :: Int,
-    maxTxInScriptSigSize :: Maybe Int
+    maxTxInScriptSigSize :: Maybe Int,
+    maxCommitmentSize :: Int
   }
   deriving (Eq, Show)
 

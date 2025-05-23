@@ -8,7 +8,7 @@ module Alba.Vm.Bch2026
   )
 where
 
-import Alba.Vm.Bch2026.VmParams
 import Alba.Vm.Bch2026.Vm
+import Alba.Vm.Bch2026.VmParams
 import Alba.Vm.Common
 import Alba.Vm.Common.TxContext

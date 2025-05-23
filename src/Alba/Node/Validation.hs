@@ -40,7 +40,7 @@ acceptToMemoryPool verifyScript txContext vmParams = do
       idx = txContextInputIndex txContext
       scriptPubKey = (coins !! idx).scriptPubKey
   verifyTx txContext vmParams
-  verifyTxTokens txContext
+  verifyTxTokens txContext vmParams
   Right $ verifyScript scriptPubKey txContext vmParams
 
 verifyTx :: TxContext -> VmParams -> Either ValidationFailure ()
