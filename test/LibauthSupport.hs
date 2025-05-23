@@ -154,11 +154,11 @@ tryTest verifyScript vmParams test = do
   (testId, res) <- runTest verifyScript vmParams test
   case res of
     Right (Left err) -> do
-      printf "\"%s\" -- validation failure %s\n" testId (show err)
+      printf " , \"%s\" -- validation failure %s\n" testId (show err)
     Right (Right (Left (err, _))) -> do
-      printf "\"%s\" -- failed with %s\n" testId (show err)
+      printf " , \"%s\" -- failed with %s\n" testId (show err)
     Right (Right (Right _res')) -> do
-      printf "\"%s\" -- passed validation.\n" test.shortId
+      printf " , \"%s\" -- passed validation.\n" test.shortId
     Left err ->
-      printf "\"%s\" -- failure %s\n" testId (show err)
+      printf " , \"%s\" -- failure %s\n" testId (show err)
   1 @?= (1 :: Int)
