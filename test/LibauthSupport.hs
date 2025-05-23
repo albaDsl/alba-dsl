@@ -9,16 +9,14 @@ import Alba.Misc.Utils (decodeHex)
 import Alba.Node.Validation (VerifyScriptFun, acceptToMemoryPool)
 import Alba.Node.ValidationFailure (ValidationFailure (..))
 import Alba.Tx.Bch2025 (Tx (..), TxOuts (..))
-import Alba.Vm.Bch2025
+import Alba.Vm.Common
   ( LogDisplayOpts (..),
+    ScriptError,
+    VerifyScriptResult,
     VmParams,
     defaultDisplayOpts,
-    mkTxContext,
-  )
-import Alba.Vm.Common
-  ( ScriptError,
-    VerifyScriptResult,
     dumpVerifyScriptResult,
+    mkTxContext,
   )
 import Alba.Vm.Common.VmState (VerifyScriptResult)
 import Data.Aeson qualified as A

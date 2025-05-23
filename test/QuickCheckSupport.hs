@@ -3,11 +3,11 @@
 
 module QuickCheckSupport where
 
-import Alba.Vm.Bch2025
+import Alba.Vm.Bch2025 (vmParamsStandard)
+import Alba.Vm.Common
   ( Bytes,
     HugeInt (..),
     VmParams (integerMax, integerMin, maxScriptElementSize),
-    vmParamsStandard,
   )
 import Data.ByteString qualified as B
 import Data.Word (Word8)

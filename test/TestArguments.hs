@@ -4,7 +4,7 @@
 module TestArguments (testArguments) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Vm.Bch2025 (i2SeUnsafe)
+import Alba.Vm.Common (i2SeUnsafe)
 import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))

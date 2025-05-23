@@ -4,13 +4,13 @@
 module TestDataPushing (testDataPushing) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Vm.Bch2025
+import Alba.Vm.Bch2025 (vmParamsStandard)
+import Alba.Vm.Common
   ( CodeL2,
     OpcodeL2 (OP_DATA, OP_NOP),
     ScriptError (SeScriptSize),
     VmParams (..),
     b2SeUnsafe,
-    vmParamsStandard,
   )
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Data.ByteString qualified as B

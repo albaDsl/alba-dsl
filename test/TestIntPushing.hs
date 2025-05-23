@@ -17,7 +17,7 @@ import Alba.Dsl.V1.Bch2025
     type (>),
   )
 import Alba.Dsl.V1.Common.ThUtils qualified as TH
-import Alba.Vm.Bch2025
+import Alba.Vm.Common (CodeL2, OpcodeL2 (..), i2SeUnsafe)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Data.Sequence qualified as S
 import QuickCheckSupport (VmInteger (..))

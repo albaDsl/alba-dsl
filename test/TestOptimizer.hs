@@ -8,6 +8,12 @@ import Alba.Dsl.V1.Bch2025 (optimize)
 import Alba.Dsl.V1.Bch2025.CompilerUtils (pushIntegerCode)
 import Alba.Tx.Bch2025 (Tx (..))
 import Alba.Vm.Bch2025
+  ( CodeL2,
+    OpcodeL2 (..),
+    TxContext,
+    codeL2ToCodeL1,
+    mkTxContext,
+  )
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
@@ -20,6 +26,7 @@ import Test.Tasty.QuickCheck
     sized,
     testProperty,
   )
+import TestUtils (evaluateScript)
 
 newtype SetupStackCode = SetupStackCode CodeL2
   deriving (Show)
@@ -83,22 +90,18 @@ testOptimizer =
   testGroup "Optimizer" [testProperty "Integer arithmetic" propOptimizer]
 
 propOptimizer :: (SetupStackCode, CodeL2) -> Bool
-propOptimizer (SetupStackCode s, c) =
-  let code = s <> c
+propOptimizer (SetupStackCode setup, c) =
+  let code = setup <> c
       codeOpt = optimize code
-      Right vmState = ev code
-      Right vmStateOpt = ev codeOpt
-   in vmState.s == vmStateOpt.s
+      Right (s, _) = ev code
+      Right (s', _) = ev codeOpt
+   in s == s'
   where
     ev codeToRun =
       evaluateScript
+        (fromJust $ codeL2ToCodeL1 codeToRun)
+        (S.empty, S.empty)
         txContext
-        ( (startState vmParamsStandard)
-            { code = fromJust $ codeL2ToCodeL1 codeToRun,
-              s = S.empty,
-              alt = S.empty
-            }
-        )
 
 txContext :: TxContext
 txContext = fromJust $ mkTxContext tx 0 undefined

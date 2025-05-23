@@ -7,7 +7,7 @@ import Alba.Dsl.V1.Bch2025
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.Wallet (genKey)
 import Alba.Tx.Bch2025.Hash (sha256)
-import Alba.Vm.Bch2025 (exportPubKey, i2SeUnsafe, signDer)
+import Alba.Vm.Common (exportPubKey, i2SeUnsafe, signDer)
 import Crypto.Secp256k1 (withContext)
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S

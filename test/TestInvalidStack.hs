@@ -2,19 +2,14 @@
 
 module TestInvalidStack (testInvalidStack) where
 
-import Alba.Misc.Utils (mapLeft)
 import Alba.Tx.Bch2025 (Tx (..))
-import Alba.Vm.Bch2025
+import Alba.Vm.Common
   ( ScriptError (..),
     VmStack,
-    VmState (..),
     b2SeUnsafe,
     boolToStackElement,
-    evaluateScript,
     i2SeUnsafe,
     mkTxContext,
-    startState,
-    vmParamsStandard,
   )
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
@@ -24,6 +19,7 @@ import Data.Sequence qualified as S
 import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
+import TestUtils (evaluateScript)
 import Prelude hiding (exp)
 
 data ArgCount = Args Int | ZeroArg | PushData | Special | UnusedOp
@@ -38,27 +34,25 @@ testInvalidStack =
               let argCount = opArgCount opcodeL1
               case argCount of
                 Args argCount' ->
-                  mapLeft
-                    fst
-                    (evaluateWithStack opcodeL1 (stack (pred argCount')))
+                  evaluateWithStack opcodeL1 (stack (pred argCount'))
                     @?= Left SeInvalidStackOperation
                 _ -> pure ()
           )
           ([L1.OP_0 .. L1.OP_UNASSIGNED_FF] :: [OpcodeL1]),
       testCase "Invalid Stack — OP_FROMALTSTACK" $
-        mapLeft fst (evaluateWithStack L1.OP_FROMALTSTACK S.empty)
+        evaluateWithStack L1.OP_FROMALTSTACK S.empty
           @?= Left SeInvalidStackOperation,
       testCase "Invalid Stack — OP_CHECKMULTISIG" $
         mapM_
           ( \s -> do
-              mapLeft fst (evaluateWithStack L1.OP_CHECKMULTISIG s)
+              evaluateWithStack L1.OP_CHECKMULTISIG s
                 @?= Left SeInvalidStackOperation
           )
           multiSigStacks,
       testCase "Invalid Stack — OP_CHECKMULTISIGVERIFY" $
         mapM_
           ( \s -> do
-              mapLeft fst (evaluateWithStack L1.OP_CHECKMULTISIGVERIFY s)
+              evaluateWithStack L1.OP_CHECKMULTISIGVERIFY s
                 @?= Left SeInvalidStackOperation
           )
           multiSigStacks
@@ -69,14 +63,7 @@ testInvalidStack =
     tx = Tx {version = 2, inputs = undefined, outputs = undefined, lockTime = 0}
 
     evaluateWithStack op s =
-      evaluateScript
-        txContext
-        ( (startState vmParamsStandard)
-            { code = [fromIntegral $ fromEnum op],
-              s = s,
-              alt = S.empty
-            }
-        )
+      evaluateScript [fromIntegral $ fromEnum op] (s, S.empty) txContext
 
     multiSigStacks =
       [ S.empty,

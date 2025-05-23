@@ -8,15 +8,7 @@ import Alba.Misc.Haskoin (marshal)
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.Wallet (genKey)
 import Alba.Tx.Bch2025 (TxOut (..))
-import Alba.Vm.Bch2025
-  ( VmState (..),
-    b2SeUnsafe,
-    evaluateScript,
-    exportPubKey,
-    i2SeUnsafe,
-    startState,
-    vmParamsStandard,
-  )
+import Alba.Vm.Common (b2SeUnsafe, exportPubKey, i2SeUnsafe)
 import Crypto.Secp256k1 (PubKey, SecKey)
 import Crypto.Secp256k1.Internal.Context (withContext)
 import Data.Maybe (fromMaybe)
@@ -54,19 +46,18 @@ test prog = do
       txContext = TU.txContext utxo
   s1 <- signTx utxo sk1
   s2 <- signTx utxo sk2
-  let state =
-        (startState vmParamsStandard)
-          { code,
-            s =
-              S.fromList
-                [ i2SeUnsafe 0,
-                  b2SeUnsafe s1,
-                  b2SeUnsafe s2,
-                  i2SeUnsafe 2
-                ],
-            alt = S.empty
-          }
-  let Right VmState {s, alt} = evaluateScript txContext state
+  let Right (s, alt) =
+        TU.evaluateScript
+          code
+          ( S.fromList
+              [ i2SeUnsafe 0,
+                b2SeUnsafe s1,
+                b2SeUnsafe s2,
+                i2SeUnsafe 2
+              ],
+            S.empty
+          )
+          txContext
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
 signTx :: TxOut -> SecKey -> IO Bytes
