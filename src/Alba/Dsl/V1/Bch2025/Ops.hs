@@ -42,55 +42,55 @@ opTrue (S c) = S (aop c OP_1)
 opFalse :: FN s (s > TBool)
 opFalse (S c) = S (aop c OP_0)
 
-op0 :: FN s (s > TNat)
+op0 :: (StackNum x1) => FN s (s > x1)
 op0 (S c) = S (aop c OP_0)
 
-op1 :: FN s (s > TNat)
+op1 :: (StackNum x1) => FN s (s > x1)
 op1 (S c) = S (aop c OP_1)
 
-op2 :: FN s (s > TNat)
+op2 :: (StackNum x1) => FN s (s > x1)
 op2 (S c) = S (aop c OP_2)
 
-op3 :: FN s (s > TNat)
+op3 :: (StackNum x1) => FN s (s > x1)
 op3 (S c) = S (aop c OP_3)
 
-op4 :: FN s (s > TNat)
+op4 :: (StackNum x1) => FN s (s > x1)
 op4 (S c) = S (aop c OP_4)
 
-op5 :: FN s (s > TNat)
+op5 :: (StackNum x1) => FN s (s > x1)
 op5 (S c) = S (aop c OP_5)
 
-op6 :: FN s (s > TNat)
+op6 :: (StackNum x1) => FN s (s > x1)
 op6 (S c) = S (aop c OP_6)
 
-op7 :: FN s (s > TNat)
+op7 :: (StackNum x1) => FN s (s > x1)
 op7 (S c) = S (aop c OP_7)
 
-op8 :: FN s (s > TNat)
+op8 :: (StackNum x1) => FN s (s > x1)
 op8 (S c) = S (aop c OP_8)
 
-op9 :: FN s (s > TNat)
+op9 :: (StackNum x1) => FN s (s > x1)
 op9 (S c) = S (aop c OP_9)
 
-op10 :: FN s (s > TNat)
+op10 :: (StackNum x1) => FN s (s > x1)
 op10 (S c) = S (aop c OP_10)
 
-op11 :: FN s (s > TNat)
+op11 :: (StackNum x1) => FN s (s > x1)
 op11 (S c) = S (aop c OP_11)
 
-op12 :: FN s (s > TNat)
+op12 :: (StackNum x1) => FN s (s > x1)
 op12 (S c) = S (aop c OP_12)
 
-op13 :: FN s (s > TNat)
+op13 :: (StackNum x1) => FN s (s > x1)
 op13 (S c) = S (aop c OP_13)
 
-op14 :: FN s (s > TNat)
+op14 :: (StackNum x1) => FN s (s > x1)
 op14 (S c) = S (aop c OP_14)
 
-op15 :: FN s (s > TNat)
+op15 :: (StackNum x1) => FN s (s > x1)
 op15 (S c) = S (aop c OP_15)
 
-op16 :: FN s (s > TNat)
+op16 :: (StackNum x1) => FN s (s > x1)
 op16 (S c) = S (aop c OP_16)
 
 op1Negate :: (StackInt x1) => FN s (s > x1)

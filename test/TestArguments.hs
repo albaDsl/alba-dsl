@@ -60,7 +60,7 @@ progUnnamedArgsAtCallSite =
 progNamedArgsAtCallSite :: FN s (s > TNat > TNat)
 progNamedArgsAtCallSite =
   begin
-    # name @"does-not-interfere" op2
+    # name @"does-not-interfere" (nat 2)
     # name @"w" (nat 1 # nat 1 # opAdd)
     # name @"h" (nat 3)
     # calculateProperties

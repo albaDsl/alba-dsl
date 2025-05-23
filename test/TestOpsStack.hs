@@ -43,17 +43,19 @@ testOpsStack =
 progDupDropNipOver :: FN s (s > TBool)
 progDupDropNipOver =
   begin
-    # op1
+    # one
     # opFalse
     # opNip
     # opDup
     # opDrop
+  where
+    one = op1 :: FN s (s > TNat)
 
 progRotSwapTuck :: FN s (s > TNat)
 progRotSwapTuck =
   begin
     # opTrue ---- t
-    # op1 ------- t 1
+    # one ------- t 1
     # op2 ------- t 1 2
     # opRot ----- 1 2 t
     # opTuck ---- 1 t 2 t
@@ -62,6 +64,8 @@ progRotSwapTuck =
     # opVerify -- 1 2
     # opSwap ---- 2 1
     # opDrop
+  where
+    one = op1 :: FN s (s > TNat)
 
 prog2Dup2Drop2Over :: FN s (s > TNat)
 prog2Dup2Drop2Over =
@@ -69,13 +73,16 @@ prog2Dup2Drop2Over =
     # op1 ------- 1
     # op2 ------- 1 2
     # op2Dup ---- 1 2 1 2
-    # op3 ------- 1 2 1 2 3
-    # op4 ------- 1 2 1 2 3 4
+    # three ----- 1 2 1 2 3
+    # four ------ 1 2 1 2 3 4
     # op2Over --- 1 2 1 2 3 4 1 2
     # op2Drop --- 1 2 1 2 3 4
     # op2Drop --- 1 2 1 2
     # op2Drop --- 1 2
     # opAdd ----- 3
+  where
+    three = op3 :: FN s (s > TNat)
+    four = op4 :: FN s (s > TNat)
 
 progAltStack :: FN s (s > TNat)
 progAltStack =
@@ -97,15 +104,19 @@ progDifferentTypes =
 progPick :: FN s (s > TNat)
 progPick =
   begin
-    # op1
-    # op2
+    # one
+    # two
     # opFalse
-    # op4
+    # three
     # opPick @2
     # opNip
     # opNip
     # opNip
     # opNip
+  where
+    one = op1 :: FN s (s > TNat)
+    two = op2 :: FN s (s > TNat)
+    three = op3 :: FN s (s > TNat)
 
 progRoll :: FN s (s > TNat > TNat > TNat)
 progRoll =
