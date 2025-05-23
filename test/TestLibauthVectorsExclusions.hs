@@ -2750,6 +2750,12 @@ exclude2025NonStandardInStandardMode =
     "m82exw", -- passed validation.
     "cxytme", -- passed validation.
     "lfm0mw", -- passed validation.
+    "wtyasw", -- passed validation.
+    "80l4wu", -- passed validation.
+    "465xxr", -- passed validation.
+    "vkc3tk", -- passed validation.
+    "vxc6ku", -- passed validation.
+    "dqxeyg", -- passed validation.
     "lmsacj", -- passed validation.
     "jkcusz", -- passed validation.
     "tdhnzp", -- passed validation.
