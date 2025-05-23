@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Bch2025.OpClasses (isConditionalOp, isPushOp, isDisabledOp) where
+module Alba.Vm.Common.OpClasses (isConditionalOp, isPushOp, isDisabledOp) where
 
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))

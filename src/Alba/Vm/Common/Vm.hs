@@ -4,13 +4,13 @@ module Alba.Vm.Common.Vm (evaluateScript, startState, verifyScript) where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
 import Alba.Tx.Bch2025 (Tx (..), TxIn (..))
-import Alba.Vm.Bch2025.OpClasses (isConditionalOp, isDisabledOp, isPushOp)
 import Alba.Vm.Bch2025.TxContext
   ( TxContext,
     txContextInputIndex,
     txContextTx,
   )
 import Alba.Vm.Common.Logging (logOp)
+import Alba.Vm.Common.OpClasses (isConditionalOp, isDisabledOp, isPushOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2, getOp, isMinimal)
