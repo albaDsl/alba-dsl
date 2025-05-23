@@ -31,7 +31,7 @@ evalOpArithmetic op st@VmState {params} =
 
     OP_BOOLAND -> op2 st ((bor2 . boa2 . nc2) (&&))
     OP_BOOLOR ->  op2 st ((bor2 . boa2 . nc2) (||))
-    OP_NOT ->     op1 st ((bor1 . boa1 . nc1) not) --
+    OP_NOT ->     op1 st ((bor1 . boa1 . nc1) not)
 
     OP_0NOTEQUAL ->          op1  st ((bor1 . ia1 . nc1) (/= 0))
     OP_NUMEQUAL ->           op2  st ((bor2 . ia2 . nc2) (==))
