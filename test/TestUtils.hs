@@ -22,8 +22,8 @@ evaluateProgWithStack ::
   Either ScriptError (VmStack, VmStack)
 evaluateProgWithStack prog (s, alt) = do
   let code = compile None prog
-      state = (startState vmParamsStandard) {s = s, alt = alt}
-  case evaluateScript code context state of
+      state = (startState vmParamsStandard) {code, s, alt}
+  case evaluateScript context state of
     Left (err, _) -> Left err
     Right VmState {s = s', alt = alt'} -> Right (s', alt')
   where

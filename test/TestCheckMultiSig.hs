@@ -56,7 +56,8 @@ test prog = do
   s2 <- signTx utxo sk2
   let state =
         (startState vmParamsStandard)
-          { s =
+          { code,
+            s =
               S.fromList
                 [ i2SeUnsafe 0,
                   b2SeUnsafe s1,
@@ -65,7 +66,7 @@ test prog = do
                 ],
             alt = S.empty
           }
-  let Right VmState {s, alt} = evaluateScript code txContext state
+  let Right VmState {s, alt} = evaluateScript txContext state
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
 signTx :: TxOut -> SecKey -> IO Bytes

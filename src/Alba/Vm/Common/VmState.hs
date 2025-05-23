@@ -24,14 +24,15 @@ import Alba.Vm.Common.VmParams (VmParams (..))
 import Data.Sequence qualified as S
 
 data VmState = VmState
-  { s :: !VmStack,
+  { code :: !CodeL1,
+    signedCode :: !CodeL1,
+    s :: !VmStack,
     alt :: !VmStack,
     exec :: !CondStack,
-    pushOnly :: Bool,
-    signedCode :: !CodeL1,
+    pushOnly :: !Bool,
     metrics :: !VmMetrics,
     limits :: !VmMetrics,
-    params :: VmParams,
+    params :: !VmParams,
     logData :: !(Maybe VmLogs)
   }
   deriving (Eq, Show)

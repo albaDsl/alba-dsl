@@ -70,9 +70,13 @@ testInvalidStack =
 
     evaluateWithStack op s =
       evaluateScript
-        [fromIntegral $ fromEnum op]
         txContext
-        ((startState vmParamsStandard) {s = s, alt = S.empty})
+        ( (startState vmParamsStandard)
+            { code = [fromIntegral $ fromEnum op],
+              s = s,
+              alt = S.empty
+            }
+        )
 
     multiSigStacks =
       [ S.empty,

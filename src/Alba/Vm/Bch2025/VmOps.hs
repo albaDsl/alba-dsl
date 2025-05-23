@@ -18,16 +18,15 @@ import Alba.Vm.Bch2025.VmOpStack (evalOpStack)
 import Alba.Vm.Bch2025.VmOpTokenIntrospection (evalOpTokenIntrospection)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
-import Alba.Vm.Common.VmState (CodeL1, VmState (..))
+import Alba.Vm.Common.VmState (VmState (..))
 import Control.Applicative ((<|>))
 
 evalVmOp ::
   OpcodeL2 ->
-  CodeL1 ->
   TxContext ->
   VmState ->
   Maybe (Either ScriptError VmState)
-evalVmOp op code txContext state =
+evalVmOp op txContext state =
   evalOpConstants op state
     <|> evalOpConditionals op state
     <|> evalOpStack op state
@@ -35,8 +34,8 @@ evalVmOp op code txContext state =
     <|> evalOpBitwiseLogic op state
     <|> evalOpArithmetic op state
     <|> evalOpHash op state
-    <|> evalOpSig op code txContext state
-    <|> evalOpMultiSig op code txContext state
+    <|> evalOpSig op txContext state
+    <|> evalOpMultiSig op txContext state
     <|> evalOpLocktime op txContext state
     <|> evalOpIntrospection op txContext state
     <|> evalOpTokenIntrospection op txContext state

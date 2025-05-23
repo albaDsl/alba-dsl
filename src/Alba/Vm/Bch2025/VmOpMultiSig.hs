@@ -39,11 +39,10 @@ schnorrSigSize = 65
 
 evalOpMultiSig ::
   OpcodeL2 ->
-  CodeL1 ->
   TxContext ->
   VmState ->
   Maybe (Either ScriptError VmState)
-evalOpMultiSig op _code txContext st@VmState {..} =
+evalOpMultiSig op txContext st@VmState {..} =
   case op of
     OP_CHECKMULTISIG -> Just $ opCheckMultiSig txContext st
     OP_CHECKMULTISIGVERIFY ->

@@ -32,11 +32,11 @@ co :: (S s Base -> S s' alt') -> CodeL1
 co = compile Dsl.O1
 
 ev :: CodeL1 -> Integer -> Integer
-ev code x = toInt $ evaluateScript code txCtx startState'
+ev code x = toInt $ evaluateScript txCtx startState'
   where
     txCtx = fromJust $ mkTxContext tx 0 undefined
     tx = Tx {version = 2, inputs = undefined, outputs = undefined, lockTime = 0}
-    startState' = (startState vmParamsStandard) {s = [i2SeUnsafe x]}
+    startState' = (startState vmParamsStandard) {code, s = [i2SeUnsafe x]}
 
     toInt :: Either (ScriptError, Maybe VmState) VmState -> Integer
     toInt (Right state) =
@@ -46,11 +46,11 @@ ev code x = toInt $ evaluateScript code txCtx startState'
     toInt (Left err) = error (show err)
 
 evl :: CodeL1 -> Integer -> IO ()
-evl code x = dump $ evaluateScript code txCtx startState'
+evl code x = dump $ evaluateScript txCtx startState'
   where
     txCtx = fromJust $ mkTxContext tx 0 undefined
     tx = Tx {version = 2, inputs = undefined, outputs = undefined, lockTime = 0}
-    startState' = (startState vmParamsStandard) {s = [i2SeUnsafe x]}
+    startState' = (startState vmParamsStandard) {code, s = [i2SeUnsafe x]}
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
     dump res = dumpLog defaultDisplayOpts (fromRight (error "") res)

@@ -10,7 +10,6 @@ import Alba.Vm.Bch2025.SigEncoding
     checkPubKeyEncoding,
   )
 import Alba.Vm.Bch2025.TxContext (TxContext)
-import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement
@@ -27,11 +26,10 @@ import Prelude hiding (seq)
 
 evalOpSig ::
   OpcodeL2 ->
-  CodeL1 ->
   TxContext ->
   VmState ->
   Maybe (Either ScriptError VmState)
-evalOpSig op code txContext st@VmState {..} =
+evalOpSig op txContext st@VmState {..} =
   case op of
     OP_CHECKSIG -> Just $ opCheckSig txContext st
     OP_CHECKSIGVERIFY -> Just $ verifyOp opCheckSig SeCheckSigVerify

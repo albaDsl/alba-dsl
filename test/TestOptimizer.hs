@@ -92,9 +92,13 @@ propOptimizer (SetupStackCode s, c) =
   where
     ev codeToRun =
       evaluateScript
-        (fromJust $ codeL2ToCodeL1 codeToRun)
         txContext
-        ((startState vmParamsStandard) {s = S.empty, alt = S.empty})
+        ( (startState vmParamsStandard)
+            { code = fromJust $ codeL2ToCodeL1 codeToRun,
+              s = S.empty,
+              alt = S.empty
+            }
+        )
 
 txContext :: TxContext
 txContext = fromJust $ mkTxContext tx 0 undefined
