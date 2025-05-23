@@ -11,6 +11,7 @@ data ValidationFailure
   | VfTokensOverflow
   | VfTxOversize
   | VfTxScriptSigSize
+  | VfTxScriptPubKeySize
   | VfTxScriptSigPushOnly
   | VfTxUndersize
   | VfTxVersion

@@ -38,7 +38,8 @@ vmParamsStandard =
           minTxSize = 65,
           maxStandardTxSize = 100000,
           maxTxInScriptSigSize = Nothing,
-          maxCommitmentSize = 128
+          maxCommitmentSize = 128,
+          scriptPubKeyMaxLength = Just 201
         }
 
 vmParamsNonStandard :: VmParams
@@ -47,5 +48,6 @@ vmParamsNonStandard =
     { hashItersLimitNumerator = 7,
       hashDigestIterationCost = 64,
       sigLimit = MaxLimit {limit = 3000},
-      discourageNops = False
+      discourageNops = False,
+      scriptPubKeyMaxLength = Nothing
     }

@@ -34,7 +34,8 @@ data VmParams = VmParams
     minTxSize :: Int,
     maxStandardTxSize :: Int,
     maxTxInScriptSigSize :: Maybe Int,
-    maxCommitmentSize :: Int
+    maxCommitmentSize :: Int,
+    scriptPubKeyMaxLength :: Maybe Int
   }
   deriving (Eq, Show)
 

@@ -57,6 +57,12 @@ verifyTx txContext vmParams = do
         Nothing -> True
     )
     $ Left VfTxScriptSigSize
+  unless
+    ( case vmParams.scriptPubKeyMaxLength of
+        Just limit -> all (\x -> B.length x.scriptPubKey <= limit) utxos
+        Nothing -> True
+    )
+    $ Left VfTxScriptPubKeySize
   inSum <-
     maybe (Left VfAmounts) Right $ moneySum ((\o -> o.value) <$> utxos)
   outSum <-
