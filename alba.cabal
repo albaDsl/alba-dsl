@@ -199,8 +199,8 @@ executable lastWill
 executable demo
   import: shared-properties
   main-is: main.hs
-  hs-source-dirs: apps/demo
-  other-modules: Demo, DemoPrelude
+  hs-source-dirs: apps/demo, test
+  other-modules: Demo, DemoPrelude, Exponentiation, MergeSort
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, asciichart
 

@@ -52,3 +52,7 @@ f3 =
 
 prop3 :: Integer -> Property
 prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
+
+-- Example 4. Quick demo of pow function.
+f4 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
+f4 = int 2 # argRoll @"x" # pow
