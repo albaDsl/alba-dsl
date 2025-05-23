@@ -2,11 +2,11 @@
 
 module Alba.Vm.Bch2025.VmOpEqualityAndConditionals (evalOpConditionals) where
 
-import Alba.Vm.Bch2025.Utils (boa1, condStackExecuteP, op1v)
+import Alba.Vm.Bch2025.Utils (boa1, op1v)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool')
-import Alba.Vm.Common.VmStack (CondStackElement (..))
+import Alba.Vm.Common.VmStack (CondStackElement (..), condStackExecuteP)
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
 import Data.Sequence (Seq ((:|>)), (|>))

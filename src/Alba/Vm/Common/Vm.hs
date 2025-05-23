@@ -10,22 +10,26 @@ import Alba.Vm.Bch2025.TxContext
     txContextInputIndex,
     txContextTx,
   )
-import Alba.Vm.Bch2025.Utils (condStackExecuteP)
 import Alba.Vm.Common.Logging (logOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
-import Alba.Vm.Common.OpcodeL2 (getOp, isMinimal, OpcodeL2)
+import Alba.Vm.Common.OpcodeL2 (OpcodeL2, getOp, isMinimal)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool', stackElementToBytes)
 import Alba.Vm.Common.VmLimits
   ( addOperationCost,
     setLimits,
-    verifyStackSize,
     verifyCondStack,
     verifyMetrics,
+    verifyStackSize,
   )
 import Alba.Vm.Common.VmParams (VmParams (..))
-import Alba.Vm.Common.VmStack (CondStackElement (..), stackInit, stackTop)
+import Alba.Vm.Common.VmStack
+  ( CondStackElement (..),
+    condStackExecuteP,
+    stackInit,
+    stackTop,
+  )
 import Alba.Vm.Common.VmState
   ( CodeL1,
     VerifyScriptResult (..),

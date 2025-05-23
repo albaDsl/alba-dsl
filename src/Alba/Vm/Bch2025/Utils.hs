@@ -18,12 +18,11 @@ module Alba.Vm.Bch2025.Utils
   ( c1, c2, c3, op0, op1, op1a, op1v, op1vk, op1h, op2, op2a, op2q, op2v,
     op3, ia1, ia1p, ia2, ia3, ba1, ba2, boa1, boa2, bw2, bia2, ir0, ir1,
     ir2, br0, br1, br2, bor1, bor2, bor3, nc0, nc1, nc2, nc3,
-    verifyMinStackSize, verifyEqual, condStackExecuteP, indexCheck
+    verifyMinStackSize, verifyEqual, indexCheck
   )
 where
 {- ORMOLU_ENABLE -}
 
-import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement
   ( Bytes,
@@ -42,11 +41,10 @@ import Alba.Vm.Common.VmLimits
     addHashIterations,
   )
 import Alba.Vm.Common.VmParams (VmParams (..))
-import Alba.Vm.Common.VmStack (CondStack, CondStackElement (..), VmStack)
+import Alba.Vm.Common.VmStack (VmStack)
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
 import Data.ByteString qualified as B
-import Data.Foldable (toList)
 import Data.Sequence (Seq ((:|>)), (|>))
 import Data.Sequence qualified as S
 import Data.Word (Word8)
@@ -381,17 +379,6 @@ verifyMinStackSize minSize s =
 
 verifyEqual :: (Eq a) => ScriptError -> a -> a -> Either ScriptError ()
 verifyEqual err x y = (x == y) `unless` Left err
-
-condStackExecuteP :: CondStack -> Bool
-condStackExecuteP = all execVal . takeWhile isExec . toList . S.reverse
-  where
-    execVal :: CondStackElement -> Bool
-    execVal (Exec x) = x
-    execVal (Eval _ _) = canNotHappen
-
-    isExec :: CondStackElement -> Bool
-    isExec (Exec _) = True
-    isExec (Eval _ _) = False
 
 indexCheck :: Int -> (Int -> a) -> (Integer -> Either ScriptError a)
 indexCheck _max _f x | x < 0 = Left SeInvalidTxInputIndex
