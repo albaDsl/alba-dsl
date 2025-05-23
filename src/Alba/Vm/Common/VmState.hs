@@ -27,6 +27,7 @@ data VmState = VmState
   { s :: !VmStack,
     alt :: !VmStack,
     exec :: !CondStack,
+    pushOnly :: Bool,
     signedCode :: !CodeL1,
     metrics :: !VmMetrics,
     limits :: !VmMetrics,

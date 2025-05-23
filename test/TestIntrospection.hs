@@ -23,47 +23,47 @@ testIntrospection =
             ctx = txContext (utxoWithPubkey code)
             state'' = state' (S.singleton (b2SeUnsafe code)) S.empty
             Right VmState {s, alt} =
-              evaluateScript code ctx False state''
+              evaluateScript code ctx state''
         (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty),
       testCase "OP_TXVERSION" $ do
         let code = compile None opTxVersion
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 2), S.empty),
       testCase "OP_TXINPUTCOUNT" $ do
         let code = compile None opTxInputCount
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty),
       testCase "OP_TXOUTPUTCOUNT" $ do
         let code = compile None opTxOutputCount
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty),
       testCase "OP_OUTPOINTTXHASH" $ do
         let code = compile None (op0 # opOutPointTxHash)
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (b2SeUnsafe mockTxId.id.hash), S.empty),
       testCase "OP_TXOUTPOINTINDEX" $ do
         let code = compile None (op0 # opOutPointIndex)
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 0), S.empty),
       testCase "OP_INPUTBYTECODE" $ do
         let code = compile None (op0 # opInputBytecode)
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (b2SeUnsafe ""), S.empty),
       testCase "OP_INPUTSEQUENCENUMBER" $ do
         let code = compile None (op0 # opInputSequenceNumber)
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 0), S.empty),
       testCase "OP_CHECKLOCKTIMEVERIFY" $ do
         let code = compile None (op0 # opCheckLockTimeVerify # opDrop # opTrue)
             ctx = txContext (utxoWithPubkey code)
-            Right VmState {s, alt} = evaluateScript code ctx False state
+            Right VmState {s, alt} = evaluateScript code ctx state
         (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
     ]
   where

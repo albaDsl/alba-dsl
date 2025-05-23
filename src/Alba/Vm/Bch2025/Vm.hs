@@ -48,10 +48,9 @@ import Data.Sequence qualified as S
 evaluateScript ::
   CodeL1 ->
   TxContext ->
-  Bool ->
   VmState ->
   Either (ScriptError, Maybe VmState) VmState
-evaluateScript code txContext pushOnly state = do
+evaluateScript code txContext state = do
   verifyScriptSize
   let state' = state {exec = S.empty, signedCode = code}
   mapLeft
@@ -59,7 +58,6 @@ evaluateScript code txContext pushOnly state = do
     ( evaluateScript'
         code
         txContext
-        pushOnly
         (logOp Nothing False state')
     )
   where
@@ -72,24 +70,23 @@ evaluateScript code txContext pushOnly state = do
 evaluateScript' ::
   CodeL1 ->
   TxContext ->
-  Bool ->
   VmState ->
   Either (ScriptError, VmState) VmState
-evaluateScript' code _txContext _pushOnly state@(VmState {exec})
+evaluateScript' code _txContext state@(VmState {exec})
   | B.null code = do
       if S.null exec
         then Right state
         else Left (SeUnbalancedConditional, state)
-evaluateScript' code txContext pushOnly state@(VmState {exec}) = do
+evaluateScript' code txContext state@(VmState {exec}) = do
   (op, rest) <- case getOp code of
     Just x -> Right x
     Nothing -> Left (SeBadOpcode "", state)
   when (isDisabledOp op) $ Left (SeDisabledOpcode, state)
-  when (pushOnly && not (isPushOp op)) $ Left (SeSigPushOnly, state)
+  when (state.pushOnly && not (isPushOp op)) $ Left (SeSigPushOnly, state)
   let execP = condStackExecuteP exec || isConditionalOp op
   let state' = addOperationCost state
   if not execP
-    then evaluateScript' rest txContext pushOnly (logOp (Just op) execP state')
+    then evaluateScript' rest txContext (logOp (Just op) execP state')
     else do
       when (isPushOp op && not (isMinimal op)) $ Left (SeMinimalData, state)
       state'' <-
@@ -102,7 +99,7 @@ evaluateScript' code txContext pushOnly state@(VmState {exec}) = do
       verifyStackSize state''
       verifyMetrics state''
       verifyCondStack state''
-      evaluateScript' rest txContext pushOnly state''
+      evaluateScript' rest txContext state''
 
 verifyStackSize :: VmState -> Either (ScriptError, VmState) ()
 verifyStackSize st@(VmState {..})
@@ -115,6 +112,7 @@ startState params =
     { s = S.empty,
       alt = S.empty,
       exec = S.empty,
+      pushOnly = False,
       signedCode = B.empty,
       metrics = zeroedMetrics,
       limits = maxedMetrics,
@@ -131,14 +129,14 @@ verifyScript scriptPubKey txContext vmParams = do
   let tx = txContextTx txContext
       inputIndex = txContextInputIndex txContext
       scriptSig = (tx.inputs !! inputIndex).scriptSig
-      st0 = setLimits scriptSig (startState vmParams)
+      st0 = (setLimits scriptSig (startState vmParams)) {pushOnly = True}
   st1@VmState {s, metrics = m1} <-
-    case evaluateScript scriptSig txContext True st0 of
+    case evaluateScript scriptSig txContext st0 of
       Left (err, st) -> Left (err, VerifyScriptResult st Nothing Nothing)
       Right x -> Right x
   st2@VmState {metrics = m2} <-
-    let st0' = st0 {s, metrics = m1}
-     in case evaluateScript scriptPubKey txContext False st0' of
+    let st0' = st0 {s, metrics = m1, pushOnly = False}
+     in case evaluateScript scriptPubKey txContext st0' of
           Left (err, st) -> Left (err, VerifyScriptResult (Just st1) st Nothing)
           Right x -> Right x
   checkResult st2 (VerifyScriptResult (Just st1) (Just st2) Nothing)
@@ -146,9 +144,14 @@ verifyScript scriptPubKey txContext vmParams = do
     then do
       let redeemScript =
             stackElementToBytes $ fromMaybe canNotHappen (stackTop s)
-          st0' = st0 {s = fromMaybe canNotHappen (stackInit s), metrics = m2}
+          st0' =
+            st0
+              { s = fromMaybe canNotHappen (stackInit s),
+                metrics = m2,
+                pushOnly = False
+              }
       st3 <-
-        case evaluateScript redeemScript txContext False st0' of
+        case evaluateScript redeemScript txContext st0' of
           Left (err, st) ->
             Left (err, VerifyScriptResult (Just st1) (Just st2) st)
           Right x -> Right x

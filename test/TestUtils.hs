@@ -23,7 +23,7 @@ evaluateProgWithStack ::
 evaluateProgWithStack prog (s, alt) = do
   let code = compile None prog
       state = (startState vmParamsStandard) {s = s, alt = alt}
-  case evaluateScript code context False state of
+  case evaluateScript code context state of
     Left (err, _) -> Left err
     Right VmState {s = s', alt = alt'} -> Right (s', alt')
   where

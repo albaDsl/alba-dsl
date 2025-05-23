@@ -94,7 +94,6 @@ propOptimizer (SetupStackCode s, c) =
       evaluateScript
         (fromJust $ codeL2ToCodeL1 codeToRun)
         txContext
-        False
         ((startState vmParamsStandard) {s = S.empty, alt = S.empty})
 
 txContext :: TxContext

@@ -47,7 +47,7 @@ test prog = do
           { s = S.singleton (b2SeUnsafe sig),
             alt = S.empty
           }
-  let Right VmState {s, alt} = evaluateScript code txContext False state
+  let Right VmState {s, alt} = evaluateScript code txContext state
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
 signTx :: TxOut -> SecKey -> IO Bytes
