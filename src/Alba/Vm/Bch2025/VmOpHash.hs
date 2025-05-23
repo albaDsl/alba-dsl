@@ -2,11 +2,11 @@
 
 module Alba.Vm.Bch2025.VmOpHash (evalOpHash) where
 
-import Alba.Tx.Bch2025.Hash (hash160, hash256, ripemd160, sha1, sha256)
 import Alba.Vm.Bch2025.Utils (ba1, nc1, op1h)
 import Alba.Vm.Bch2025.Utils qualified as VU
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
+import Alba.Vm.Common.Tx (hash160, hash256, ripemd160, sha1, sha256)
 import Alba.Vm.Common.VmState (VmState (..))
 
 {- ORMOLU_DISABLE -}

@@ -8,6 +8,7 @@ module Alba.Vm.Common
     module Alba.Vm.Common.ScriptError,
     module Alba.Vm.Common.Crypto,
     module Alba.Vm.Common.StackElement,
+    module Alba.Vm.Common.TxContext,
     module Alba.Vm.Common.Utils,
     module Alba.Vm.Common.VmBool,
     module Alba.Vm.Common.VmInteger,
@@ -24,6 +25,7 @@ import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2
 import Alba.Vm.Common.ScriptError
 import Alba.Vm.Common.StackElement
+import Alba.Vm.Common.TxContext
 import Alba.Vm.Common.Utils
 import Alba.Vm.Common.VmBool
 import Alba.Vm.Common.VmInteger

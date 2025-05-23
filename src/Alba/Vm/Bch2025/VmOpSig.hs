@@ -3,13 +3,11 @@
 
 module Alba.Vm.Bch2025.VmOpSig (evalOpSig) where
 
-import Alba.Tx.Bch2025.Hash (sha256)
 import Alba.Vm.Bch2025.SigCheckUtils (checkSig, verifySignature)
 import Alba.Vm.Bch2025.SigEncoding
   ( checkDataSignatureEncoding,
     checkPubKeyEncoding,
   )
-import Alba.Vm.Bch2025.TxContext (TxContext)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement
@@ -18,6 +16,8 @@ import Alba.Vm.Common.StackElement
     stackElementToBool,
     stackElementToBytes,
   )
+import Alba.Vm.Common.Tx (sha256)
+import Alba.Vm.Common.TxContext (TxContext)
 import Alba.Vm.Common.VmLimits (addBytesPushed, addHashIterations, addSigCheck)
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.ByteString qualified as B

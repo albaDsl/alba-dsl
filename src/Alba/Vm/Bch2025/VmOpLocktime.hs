@@ -2,12 +2,11 @@
 
 module Alba.Vm.Bch2025.VmOpLocktime (evalOpLocktime) where
 
-import Alba.Tx.Bch2025.Tx (Tx (..))
-import Alba.Tx.Bch2025.TxIn (TxIn (..))
-import Alba.Vm.Bch2025.TxContext (TxContext, txContextInputIndex, txContextTx)
 import Alba.Vm.Bch2025.Utils (ia1p, op1vk)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
+import Alba.Vm.Common.Tx (Tx (..), TxIn (..))
+import Alba.Vm.Common.TxContext (TxContext, txContextInputIndex, txContextTx)
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)

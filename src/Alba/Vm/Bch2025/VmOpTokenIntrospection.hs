@@ -2,7 +2,12 @@
 
 module Alba.Vm.Bch2025.VmOpTokenIntrospection (evalOpTokenIntrospection) where
 
-import Alba.Tx.Bch2025
+import Alba.Vm.Bch2025.Utils (indexCheck, op1)
+import Alba.Vm.Bch2025.Utils qualified as VU
+import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
+import Alba.Vm.Common.ScriptError (ScriptError (..))
+import Alba.Vm.Common.StackElement (Bytes, StackElement)
+import Alba.Vm.Common.Tx
   ( Hash256 (..),
     Nft (..),
     NftCapability (..),
@@ -11,12 +16,7 @@ import Alba.Tx.Bch2025
     TxId (..),
     TxOut (..),
   )
-import Alba.Vm.Bch2025.TxContext (TxContext, txContextCoins, txContextTx)
-import Alba.Vm.Bch2025.Utils (indexCheck, op1)
-import Alba.Vm.Bch2025.Utils qualified as VU
-import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
-import Alba.Vm.Common.ScriptError (ScriptError (..))
-import Alba.Vm.Common.StackElement (Bytes, StackElement)
+import Alba.Vm.Common.TxContext (TxContext, txContextCoins, txContextTx)
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as B

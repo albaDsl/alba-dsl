@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Bch2025.TxContext
+module Alba.Vm.Common.TxContext
   ( TxContext,
     mkTxContext,
     txContextTx,
@@ -9,8 +9,7 @@ module Alba.Vm.Bch2025.TxContext
   )
 where
 
-import Alba.Tx.Bch2025.Tx (Tx (..))
-import Alba.Tx.Bch2025.TxOut (TxOut (..))
+import Alba.Vm.Common.Tx (Tx (..), TxOut (..))
 
 data TxContext = TxContext
   { tx :: Tx,

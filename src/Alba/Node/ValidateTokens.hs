@@ -12,7 +12,7 @@ import Alba.Tx.Bch2025
     TxOut (..),
   )
 import Alba.Tx.Bch2025.TxIn (OutPoint (..), TxIn (..))
-import Alba.Vm.Bch2025.TxContext (TxContext, txContextCoins, txContextTx)
+import Alba.Vm.Common.TxContext (TxContext, txContextCoins, txContextTx)
 import Control.Applicative ((<|>))
 import Control.Monad (unless, void)
 import Data.ByteString qualified as B

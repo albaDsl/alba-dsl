@@ -2,18 +2,18 @@
 
 module Alba.Vm.Bch2025.VmOpIntrospection (evalOpIntrospection) where
 
-import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
-import Alba.Vm.Bch2025.TxContext
-  ( TxContext,
-    txContextCoins,
-    txContextInputIndex,
-    txContextTx,
-  )
 import Alba.Vm.Bch2025.Utils (indexCheck, nc0, op0, op1)
 import Alba.Vm.Bch2025.Utils qualified as VU
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (StackElement)
+import Alba.Vm.Common.Tx (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
+import Alba.Vm.Common.TxContext
+  ( TxContext,
+    txContextCoins,
+    txContextInputIndex,
+    txContextTx,
+  )
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.Binary (encode)
 import Data.ByteString.Lazy (toStrict)

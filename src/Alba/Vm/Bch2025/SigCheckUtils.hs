@@ -3,8 +3,6 @@
 
 module Alba.Vm.Bch2025.SigCheckUtils (checkSig, verifySignature) where
 
-import Alba.Tx.Bch2025 (Hash256 (..))
-import Alba.Vm.Bch2025.TxContext (TxContext)
 import Alba.Vm.Bch2025.VmSigHash (signatureHash)
 import Alba.Vm.Common.Crypto
   ( ecdsaVerify,
@@ -15,6 +13,8 @@ import Alba.Vm.Common.Crypto
 import Alba.Vm.Common.Crypto qualified as CR
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.StackElement (Bytes)
+import Alba.Vm.Common.Tx (Hash256 (..))
+import Alba.Vm.Common.TxContext (TxContext)
 import Data.ByteString qualified as B
 import System.IO.Unsafe (unsafePerformIO)
 import Prelude hiding (seq)

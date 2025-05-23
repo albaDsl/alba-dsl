@@ -11,22 +11,14 @@ import Alba.Misc.Haskoin
     isSigHashSingle,
     putVarInt,
   )
-import Alba.Tx.Bch2025
-  ( Hash256 (..),
-    Tx (..),
-    TxIn (..),
-    TxOut (..),
-    hash256',
-    hash256zero,
-  )
-import Alba.Tx.Bch2025.Constants (prefixToken)
-import Alba.Vm.Bch2025.TxContext
+import Alba.Vm.Common (CodeL1)
+import Alba.Vm.Common.Tx (Hash256 (..), Tx (..), TxIn (..), TxOut (..), hash256', hash256zero, prefixToken)
+import Alba.Vm.Common.TxContext
   ( TxContext,
     txContextCoins,
     txContextInputIndex,
     txContextTx,
   )
-import Alba.Vm.Common (CodeL1)
 import Data.Binary (Binary (..))
 import Data.Binary.Put (putByteString, putWord32le, putWord64le, runPut)
 import Data.ByteString qualified as B

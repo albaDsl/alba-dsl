@@ -10,7 +10,6 @@ import Alba.Vm.Bch2025.SigEncoding
     checkRawEcdsaSignatureEncoding,
     checkTransactionSchnorrSignatureEncoding,
   )
-import Alba.Vm.Bch2025.TxContext (TxContext)
 import Alba.Vm.Bch2025.Utils (verifyMinStackSize)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
@@ -23,6 +22,7 @@ import Alba.Vm.Common.StackElement
     stackElementToBytes,
     stackElementToInteger,
   )
+import Alba.Vm.Common.TxContext (TxContext)
 import Alba.Vm.Common.VmLimits (addBytesPushed, addHashIterations, addSigCheck)
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless, when)

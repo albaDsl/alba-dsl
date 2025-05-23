@@ -10,7 +10,7 @@ where
 
 import Alba.Misc.Haskoin (marshal, wrapPubKey)
 import Alba.Misc.Utils (encodeHex)
-import Alba.Tx.Bch2025 (hash160)
+import Alba.Vm.Common.Tx (hash160)
 import Crypto.Secp256k1 (Ctx, PubKey)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as B
