@@ -4,7 +4,7 @@
 module TestEval (testEval) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Vm.Bch2025 (i2SeUnsafe)
+import Alba.Vm.Bch2025 (i2SeUnsafe, stackElementToBytes)
 import Alba.Vm.Bch2026
   ( evaluateScript,
     mkTxContext,
@@ -13,43 +13,48 @@ import Alba.Vm.Bch2026
   )
 import Alba.Vm.Common (ScriptError, VmStack)
 import Alba.Vm.Common.VmState (VmState (..))
+import Data.ByteString qualified as B
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
+import MergeSort (sort)
+import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.QuickCheck (Property, testProperty, (==>))
 
 testEval :: TestTree
 testEval =
   testGroup
     "Eval"
     [ testCase
-        "Basics 1"
+        "Eval basics 1"
         $ let res = evaluateProg progBasics1
            in case res of
                 Right (s, alt) ->
                   (s, alt) @?= (S.fromList [i2SeUnsafe 6], S.empty)
                 Left err -> error ("err: " <> show err),
       testCase
-        "Basics 2"
+        "Eval basics 2"
         $ let res = evaluateProg progBasics2
            in case res of
                 Right (s, alt) ->
                   (s, alt) @?= (S.fromList [i2SeUnsafe 15], S.empty)
                 Left err -> error ("err: " <> show err),
       testCase
-        "Nested"
+        "Nested eval"
         $ let res = evaluateProg progNested
            in case res of
                 Right (s, alt) ->
                   (s, alt) @?= (S.fromList [i2SeUnsafe 9], S.empty)
                 Left err -> error ("err: " <> show err),
       testCase
-        "Recursion"
-        $ let res = evaluateProg progRecursion
+        "Recursion — factorial"
+        $ let res = evaluateProg progFactorial
            in case res of
                 Right (s, alt) ->
                   (s, alt) @?= (S.fromList [i2SeUnsafe 720], S.empty)
-                Left err -> error ("err: " <> show err)
+                Left err -> error ("err: " <> show err),
+      testProperty "Recursion — merge sort" propSort
     ]
 
 progBasics1 :: FN s (s > TNat)
@@ -80,9 +85,8 @@ progNested =
     # lambda (op1 # op2 # lambda (opAdd # opDup # opMul) # opEval)
     # opEval
 
--- Factorial.
-progRecursion :: FN s (s > TInt)
-progRecursion = int 6 # lambda' fac # recur fac
+progFactorial :: FN s (s > TInt)
+progFactorial = int 6 # lambda' fac # recur fac
   where
     fac = unname @2 fac'
 
@@ -97,6 +101,14 @@ progRecursion = int 6 # lambda' fac # recur fac
               # ((argRoll @"n" # op1Sub) # argRoll @"rec" # recur fac)
               # opMul
           )
+
+propSort :: AsciiString -> Property
+propSort (AsciiString xs) =
+  (B.length xs <= 20) ==>
+    let res = evaluateProg (bytes xs # sort)
+     in case res of
+          Right (_ S.:|> x, _alt) -> stackElementToBytes x == B.sort xs
+          _ -> False
 
 evaluateProg :: FNA s '[] s' alt' -> Either ScriptError (VmStack, VmStack)
 evaluateProg prog =

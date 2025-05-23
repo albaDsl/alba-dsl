@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Common.Lang
   ( (#),
     begin,
     natToInt,
+    cast,
     branch1,
     branch2,
     branch3,
@@ -28,6 +29,9 @@ begin = id
 
 natToInt :: FN (s > TNat) (s > TInt)
 natToInt (S c) = let state' = S c in state'
+
+cast :: FN (s > t1) (s > t2)
+cast (S c) = let state' = S c in state'
 
 branch1 :: forall s. FN s (Branch1 s)
 branch1 (S c) = S c

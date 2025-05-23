@@ -3,6 +3,7 @@
 
 module QuickCheckSupport where
 
+import Alba.Misc.Utils (encodeHex)
 import Alba.Vm.Bch2025 (vmParamsStandard)
 import Alba.Vm.Common
   ( Bytes,
@@ -10,6 +11,7 @@ import Alba.Vm.Common
     VmParams (integerMax, integerMin, maxScriptElementSize),
   )
 import Data.ByteString qualified as B
+import Data.Text qualified as T
 import Data.Word (Word8)
 import Test.Tasty.QuickCheck
   ( Arbitrary (arbitrary),
@@ -73,3 +75,19 @@ genByteStringOfSize :: Int -> Gen B.ByteString
 genByteStringOfSize n = do
   x <- vectorOf n (choose (0, 255) :: Gen Word8)
   pure $ B.pack x
+
+-- Short ASCII string.
+newtype AsciiString = AsciiString Bytes
+
+instance Show AsciiString where
+  show (AsciiString xs) = T.unpack $ encodeHex xs
+
+instance Arbitrary AsciiString where
+  arbitrary = do
+    x <- resize 50 (listOf asciiChar)
+    pure $ AsciiString (B.pack x)
+
+asciiChar :: Gen Word8
+asciiChar = do
+  x <- chooseInteger (0, 127)
+  pure $ fromIntegral x

@@ -211,7 +211,7 @@ executable test
       test
   other-modules:
       LibauthSupport,
-      QuickCheckSupport,
+      MergeSort,
       TestArguments,
       TestCheckSig,
       TestCheckMultiSig,
@@ -237,6 +237,7 @@ executable test
       TestOptimizer,
       TestStackBranches,
       TestUtils,
+      QuickCheckSupport,
   build-depends: alba, scientific
 
 executable benchmark
