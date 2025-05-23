@@ -12,8 +12,8 @@ module Alba.Dsl.V1.Bch2025.Lang
   )
 where
 
-import Alba.Dsl.V1.Bch2025.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackInt, StackNat)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (FN, S (S), TBytes, TInt, TNat, TPubKey, TSig)
 import Alba.Vm.Common.BasicTypes (Bytes)

@@ -10,5 +10,5 @@ where
 
 import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Bch2026.Lang
-import Alba.Dsl.V1.Bch2026.Stack
 import Alba.Dsl.V1.Bch2026.Ops
+import Alba.Dsl.V1.Bch2026.Stack

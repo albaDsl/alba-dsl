@@ -2,9 +2,9 @@
 
 module Alba.Dsl.V1.Bch2026.Lang (lambda, lambda', recur) where
 
-import Alba.Dsl.V1.Bch2025.Compile (Optimize (None), compile)
-import Alba.Dsl.V1.Bch2025.CompilerUtils (aop, aops)
 import Alba.Dsl.V1.Bch2026.Stack (TLambda, TLambdaUntyped)
+import Alba.Dsl.V1.Common.Compile (Optimize (None), compile)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aops)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..), bytesToDataOp)

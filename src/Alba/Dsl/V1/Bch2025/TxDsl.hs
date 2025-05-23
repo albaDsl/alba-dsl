@@ -11,11 +11,11 @@ module Alba.Dsl.V1.Bch2025.TxDsl
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Compile (Optimize (None), compile)
 import Alba.Dsl.V1.Bch2025.Contract.Prelude
   ( p2pkhScriptPubKey,
     p2shScriptPubKey,
   )
+import Alba.Dsl.V1.Common.Compile (Optimize (None), compile)
 import Alba.Misc.Haskoin
   ( Address (..),
     TxSignature (..),

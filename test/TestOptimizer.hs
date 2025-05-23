@@ -5,7 +5,7 @@
 module TestOptimizer (testOptimizer) where
 
 import Alba.Dsl.V1.Bch2025 (optimize)
-import Alba.Dsl.V1.Bch2025.CompilerUtils (pushIntegerCode)
+import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerCode)
 import Alba.Tx.Bch2025 (Tx (..))
 import Alba.Vm.Bch2025
   ( CodeL2,

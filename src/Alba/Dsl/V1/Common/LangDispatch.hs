@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
-module Alba.Dsl.V1.Bch2025.LangDispatch
+module Alba.Dsl.V1.Common.LangDispatch
   ( entry2,
     entry3,
     entry4,

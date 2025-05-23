@@ -2,7 +2,6 @@
 
 module Alba.Dsl.V1.Bch2025.Ops where
 
-import Alba.Dsl.V1.Bch2025.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Bch2025.Stack
   ( StackBool,
     StackBytes,
@@ -16,6 +15,7 @@ import Alba.Dsl.V1.Bch2025.Stack
     TSha1,
     TSha256,
   )
+import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack
   ( FN,

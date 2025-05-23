@@ -10,9 +10,9 @@ module Alba.Dsl.V1.Bch2025.LangArgs
   )
 where
 
-import Alba.Dsl.V1.Bch2025.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Bch2025.Ops (opDrop)
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.LangArgs

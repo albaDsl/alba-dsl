@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2025.Compile
+module Alba.Dsl.V1.Common.Compile
   ( Optimize (..),
     compile,
     compileL2,
@@ -8,7 +8,7 @@ module Alba.Dsl.V1.Bch2025.Compile
   )
 where
 
-import Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules qualified as OR
+import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
 import Alba.Dsl.V1.Common.Stack (S (..))
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, codeL2ToCodeL1)

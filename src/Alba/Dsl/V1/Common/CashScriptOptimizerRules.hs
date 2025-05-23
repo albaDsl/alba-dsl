@@ -25,7 +25,7 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# OPTIONS_GHC -Wno-missing-pattern-synonym-signatures #-}
 
-module Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules (optimize) where
+module Alba.Dsl.V1.Common.CashScriptOptimizerRules (optimize) where
 
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..))
 import Data.Sequence (Seq ((:|>)))

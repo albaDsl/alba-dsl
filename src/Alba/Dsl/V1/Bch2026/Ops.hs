@@ -2,8 +2,8 @@
 
 module Alba.Dsl.V1.Bch2026.Ops where
 
-import Alba.Dsl.V1.Bch2025.CompilerUtils (aop)
 import Alba.Dsl.V1.Bch2026.Stack (TLambda)
+import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (S (S))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
