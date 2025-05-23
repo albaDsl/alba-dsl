@@ -4,18 +4,26 @@
 module TestEval (testEval) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Vm.Bch2025 (i2SeUnsafe, stackElementToBytes)
 import Alba.Vm.Bch2026
   ( evaluateScript,
     mkTxContext,
     startState,
     vmParamsStandard,
   )
-import Alba.Vm.Common (ScriptError, VmStack)
+import Alba.Vm.Common
+  ( ScriptError,
+    VmStack,
+    i2SeUnsafe,
+    stackElementToBytes,
+    stackElementToInteger,
+  )
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.ByteString qualified as B
+import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
+import Data.Word (Word8)
+import Exponentiation (pow)
 import MergeSort (sort)
 import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
@@ -54,6 +62,7 @@ testEval =
                 Right (s, alt) ->
                   (s, alt) @?= (S.fromList [i2SeUnsafe 720], S.empty)
                 Left err -> error ("err: " <> show err),
+      testProperty "Recursion — pow" propPow,
       testProperty "Recursion — merge sort" propSort
     ]
 
@@ -101,6 +110,19 @@ progFactorial = int 6 # lambda' fac # recur fac
               # ((argRoll @"n" # op1Sub) # argRoll @"rec" # recur fac)
               # opMul
           )
+
+propPow :: Int -> Word8 -> Bool
+propPow b n =
+  let res = evaluateProg (int (fromIntegral b) # nat (fromIntegral n) # pow)
+   in case res of
+        Right (_ S.:|> x, _alt) ->
+          let y =
+                fromRight
+                  (error "propPow")
+                  (stackElementToInteger vmParamsStandard x)
+              y' = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
+           in y == y'
+        _ -> False
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
