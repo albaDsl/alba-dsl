@@ -9,7 +9,7 @@ module Alba.Dsl.V1.Bch2025.Compile
 where
 
 import Alba.Dsl.V1.Bch2025.CashScriptOptimizerRules qualified as OR
-import Alba.Dsl.V1.Common.Stack (Base, S (..))
+import Alba.Dsl.V1.Common.Stack (S (..))
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, codeL2ToCodeL1)
 import Data.Function (fix)
@@ -18,12 +18,12 @@ import Data.Sequence qualified as S
 
 data Optimize = None | O1
 
-compile :: forall s s' alt'. Optimize -> (S s Base -> S s' alt') -> CodeL1
+compile :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL1
 compile opt prog = fromMaybe err (codeL2ToCodeL1 (compileL2 opt prog))
   where
     err = error "compile: internal error."
 
-compileL2 :: forall s s' alt'. Optimize -> (S s Base -> S s' alt') -> CodeL2
+compileL2 :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL2
 compileL2 opt =
   case opt of
     None -> compileL2'

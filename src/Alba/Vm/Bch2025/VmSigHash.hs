@@ -12,7 +12,15 @@ import Alba.Misc.Haskoin
     putVarInt,
   )
 import Alba.Vm.Common (CodeL1)
-import Alba.Vm.Common.Tx (Hash256 (..), Tx (..), TxIn (..), TxOut (..), hash256', hash256zero, prefixToken)
+import Alba.Vm.Common.Tx
+  ( Hash256 (..),
+    Tx (..),
+    TxIn (..),
+    TxOut (..),
+    hash256',
+    hash256zero,
+    prefixToken,
+  )
 import Alba.Vm.Common.TxContext
   ( TxContext,
     txContextCoins,

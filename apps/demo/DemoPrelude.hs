@@ -1,8 +1,8 @@
 -- Copyright (c) 2025 albaDsl
 
 module DemoPrelude
-  ( module Alba.Dsl.V1.Bch2025,
-    module Alba.Vm.Bch2025,
+  ( module Alba.Dsl.V1.Bch2026,
+    module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
     c,
@@ -13,10 +13,10 @@ module DemoPrelude
   )
 where
 
-import Alba.Dsl.V1.Bch2025
-import Alba.Dsl.V1.Bch2025 qualified as Dsl
+import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Misc.Utils
-import Alba.Vm.Bch2025
+import Alba.Vm.Bch2026
 import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S

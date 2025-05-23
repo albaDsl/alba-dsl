@@ -2,7 +2,7 @@
 
 module Alba.Dsl.V1.Bch2025.Contract.Prelude where
 
-import Alba.Dsl.V1.Bch2025.Lang (bytes', nat)
+import Alba.Dsl.V1.Bch2025.Lang (bytes', int, nat)
 import Alba.Dsl.V1.Bch2025.Ops
   ( opCheckSig,
     opDup,
@@ -10,13 +10,14 @@ import Alba.Dsl.V1.Bch2025.Ops
     opEqualVerify,
     opGreaterThanOrEqual,
     opHash160,
+    opIf,
     opSubUnsafe,
     opVerify,
   )
 import Alba.Dsl.V1.Bch2025.Stack (THash160)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.Stack (FN, TBool, TNat, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Stack (FN, FNA, TBool, TInt, TNat, TPubKey, TSig)
 import Alba.Vm.Common.BasicTypes (Bytes)
 
 p2shScriptPubKey :: Bytes -> FN (s > THash160) (s > TBool)
@@ -41,3 +42,10 @@ natSub =
     # opSubUnsafe
     # opDup
     # (nat 0 # opGreaterThanOrEqual # opVerify)
+
+ifZero ::
+  -- (StackNum x1) => -- FIXME
+  FNA s alt s' alt' ->
+  FNA s alt s' alt' ->
+  FNA (s > TInt) alt s' alt'
+ifZero ifOps elseOps = int 0 # opEqual # opIf ifOps elseOps

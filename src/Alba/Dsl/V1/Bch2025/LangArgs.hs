@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2025.LangArgs
   ( argPick,
     argPickN,
     argRoll,
+    argRollN,
     argDrop,
     argsDrop,
   )
@@ -53,9 +54,7 @@ argRoll ::
     Remove s idx ~ s'
   ) =>
   FN s (s' > UnName arg)
-argRoll =
-  let idx = natVal (Proxy :: Proxy idx) :: Integer
-   in roll idx
+argRoll = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll idx
 
 roll :: Integer -> S s alt -> S s' alt
 roll idx (S c) =
@@ -64,6 +63,16 @@ roll idx (S c) =
     1 -> S (aop c OP_SWAP)
     2 -> S (aop c OP_ROT)
     _ -> S (aop (c <> pushIntegerCode idx) OP_ROLL)
+
+argRollN ::
+  forall argName arg idx s s'.
+  ( KnownNat idx,
+    FindName argName s 0 ~ 'Just idx,
+    Ref s idx ~ 'Just arg,
+    Remove s idx ~ s'
+  ) =>
+  FN s (s' > arg)
+argRollN = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll idx
 
 argDrop ::
   forall argName arg idx s s'.
