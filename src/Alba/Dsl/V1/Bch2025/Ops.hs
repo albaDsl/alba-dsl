@@ -215,7 +215,7 @@ opSplit ::
     (s > TBytes > TBytes)
 opSplit (S c) = S (aop c OP_SPLIT)
 
-opNum2Bin :: FN (s > TInt > TInt) (s > TBytes)
+opNum2Bin :: FN (s > TInt > TNat) (s > TBytes)
 opNum2Bin (S c) = S (aop c OP_NUM2BIN)
 
 opBin2Num :: FN (s > TBytes) (s > TInt)
