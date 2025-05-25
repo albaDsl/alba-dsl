@@ -1,4 +1,4 @@
-module MergeSort where
+module RecursionExamples.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
 

@@ -1,4 +1,4 @@
-module Exponentiation (pow, pow') where
+module RecursionExamples.Exponentiation (pow, pow') where
 
 import Alba.Dsl.V1.Bch2026
 

@@ -200,7 +200,11 @@ executable demo
   import: shared-properties
   main-is: main.hs
   hs-source-dirs: apps/demo, test
-  other-modules: Demo, DemoPrelude, Exponentiation, MergeSort
+  other-modules:
+    Demo,
+    DemoPrelude,
+    RecursionExamples.Exponentiation,
+    RecursionExamples.MergeSort,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, asciichart
 
@@ -210,9 +214,9 @@ executable test
   hs-source-dirs:
       test
   other-modules:
-      Exponentiation,
       LibauthSupport,
-      MergeSort,
+      RecursionExamples.Exponentiation,
+      RecursionExamples.MergeSort,
       TestArguments,
       TestCheckSig,
       TestCheckMultiSig,

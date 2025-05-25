@@ -23,8 +23,8 @@ import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text.Chart (height, options, plotWith)
-import Exponentiation (pow)
-import MergeSort (sort)
+import RecursionExamples.Exponentiation (pow)
+import RecursionExamples.MergeSort (sort)
 import Test.QuickCheck
 
 c :: (S s Base -> S s' alt') -> CodeL1
