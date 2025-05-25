@@ -1,16 +1,24 @@
-module Exponentiation (pow) where
+module Exponentiation (pow, pow') where
 
 import Alba.Dsl.V1.Bch2026
 
 pow :: FN (s > TInt > TNat) (s > TInt)
-pow = lambda' powHelper # recur powHelper
+pow = lambda' (powHelper opMul) # recur (powHelper opMul)
 
-powHelper :: FN (s > TInt > TNat > TLambdaUntyped) (s > TInt)
-powHelper = unname @3 powHelper'
+pow' ::
+  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
+  FN (s > TInt > TNat) (s > TInt)
+pow' mul = lambda' (powHelper mul) # recur (powHelper mul)
+
+powHelper ::
+  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
+  FN (s > TInt > TNat > TLambdaUntyped) (s > TInt)
+powHelper mul = unname @3 (powHelper' mul)
 
 powHelper' ::
+  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
   FN (s > N "b" TInt > N "n" TNat > N "rec" TLambdaUntyped) (s > TInt)
-powHelper' =
+powHelper' mul =
   begin
     # argPick @"n"
     # ifZero
@@ -23,9 +31,9 @@ powHelper' =
                       # argPick @"b"
                       # (argPick @"n" # nat 2 # opDiv)
                       # argPick @"rec"
-                      # recur powHelper
+                      # recur (powHelper mul)
                   )
-                # square
+                # square mul
                 # argsDrop @3
             )
             ( begin
@@ -34,15 +42,17 @@ powHelper' =
                       # argPick @"b"
                       # (argPick @"n" # nat 1 # opSubUnsafe)
                       # argPick @"rec"
-                      # recur powHelper
+                      # recur (powHelper mul)
                   )
-                # opMul
+                # mul
                 # argsDrop @3
             )
       )
+  where
+    isEven :: FN (s > TNat) (s > TBool)
+    isEven = natToInt # int 2 # opMod # int 0 # opNumEqual
 
-isEven :: FN (s > TNat) (s > TBool)
-isEven = natToInt # int 2 # opMod # int 0 # opEqual
-
-square :: FN (s > TInt) (s > TInt)
-square = opDup # opMul
+    square ::
+      (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
+      FN (s > TInt) (s > TInt)
+    square mul' = opDup # mul'
