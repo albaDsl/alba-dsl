@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2025.Ops
     opGreaterThanOrEqual,
     opHash160,
     opIf,
+    opNumEqual,
     opSubUnsafe,
     opVerify,
   )
@@ -49,4 +50,4 @@ ifZero ::
   FNA s alt s' alt' ->
   FNA s alt s' alt' ->
   FNA (s > x1) alt s' alt'
-ifZero ifOps elseOps = op0 # opEqual # opIf ifOps elseOps
+ifZero ifOps elseOps = op0 # opNumEqual # opIf ifOps elseOps
