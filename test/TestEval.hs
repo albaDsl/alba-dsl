@@ -144,7 +144,8 @@ propSort (AsciiString xs) =
           _ -> False
 
 -- Test vectors from:
--- https://crypto.stackexchange.com/questions/784/are-there-any-secp256k1-ecdsa-test-examples-available
+-- https://crypto.stackexchange.com/questions/784/
+-- are-there-any-secp256k1-ecdsa-test-examples-available
 progEllipticCurve :: FN s (s > TBool)
 progEllipticCurve =
   begin

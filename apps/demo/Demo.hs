@@ -76,7 +76,8 @@ f5 = int 2 # argRoll @"x" # pow
 -- Secp256k1 point multiplication. Calculates n * G and returns the
 -- x-coordinate.
 -- Try with e.g. test vectors from:
--- https://crypto.stackexchange.com/questions/784/are-there-any-secp256k1-ecdsa-test-examples-available
+-- https://crypto.stackexchange.com/questions/784/
+-- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f5) 0xAA5E28D6A97A2479A65527F7290311A3624D4CC0FA1578598EE3C2613BF99522
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
 f6 = g # ecMul # getX
