@@ -19,4 +19,5 @@ test: build
 	cabal run transferWithTimeout -- test
 
 benchmark:
-	cabal run benchmark -- --output benchmark-results.html
+	cabal run benchmark1 -- --output benchmark1.html
+	cabal run benchmark2 -- --output benchmark2.html

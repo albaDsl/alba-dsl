@@ -257,10 +257,25 @@ executable test
       TestUtils,
   build-depends: alba, scientific
 
-executable benchmark
+executable benchmark1
   import: shared-properties
-  main-is: benchmark.hs
-  other-modules: BenchmarkOpcodeDispatch
-  hs-source-dirs: benchmark/
+  hs-source-dirs: benchmark
+  main-is: benchmark1.hs
+  other-modules: BenchmarkOpcodeDispatch,
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba, criterion, deepseq
+
+executable benchmark2
+  import: shared-properties
+  hs-source-dirs: benchmark, test
+  main-is: benchmark2.hs
+  other-modules:
+      RecursionExamples.EllipticCurve,
+      RecursionExamples.EllipticCurvePacked,
+      RecursionExamples.EllipticCurveUnpacked,
+      RecursionExamples.EllipticCurveConstants,
+      RecursionExamples.EllipticCurveField,
+      RecursionExamples.EllipticCurvePoint,
+      RecursionExamples.Exponentiation,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, criterion, deepseq
