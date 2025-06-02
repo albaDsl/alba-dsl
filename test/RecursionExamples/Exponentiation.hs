@@ -28,24 +28,22 @@ powHelper' mul =
           # opIf
             ( begin
                 # ( begin
-                      # argPick @"b"
-                      # (argPick @"n" # nat 2 # opDiv)
-                      # argPick @"rec"
+                      # argRoll @"b"
+                      # (argRoll @"n" # nat 2 # opDiv)
+                      # argRoll @"rec"
                       # recur (powHelper mul)
                   )
                 # square mul
-                # argsDrop @3
             )
             ( begin
                 # argPick @"b"
                 # ( begin
-                      # argPick @"b"
-                      # (argPick @"n" # nat 1 # opSubUnsafe)
-                      # argPick @"rec"
+                      # argRoll @"b"
+                      # (argRoll @"n" # nat 1 # opSubUnsafe)
+                      # argRoll @"rec"
                       # recur (powHelper mul)
                   )
                 # mul
-                # argsDrop @3
             )
       )
   where

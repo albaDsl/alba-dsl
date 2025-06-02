@@ -19,9 +19,9 @@ msort' =
     # ifZero
       (argRoll @"xs" # argsDrop @3)
       ( begin
-          # (argPick @"size" # nat 1 # opEqual)
+          # (argRoll @"size" # nat 1 # opEqual)
           # opIf
-            (argRoll @"xs" # argsDrop @3)
+            (argRoll @"xs" # argsDrop @2)
             ( begin
                 # name2 @"fst" @"snd" (argRoll @"xs" # halve)
                 # ( argRoll @"fst"
@@ -35,7 +35,6 @@ msort' =
                       # recur msort
                   )
                 # (argRoll @"merge")
-                # argsDrop @1
                 # recur merge
             )
       )
@@ -72,23 +71,23 @@ merge' =
                   )
                 # opIf
                   ( begin
-                      # argPick @"x"
+                      # argRoll @"x"
                       # ( argRoll @"xRest"
                             # argRoll @"ys"
                             # argRoll @"rec"
                             # recur merge
                         )
-                      # argsDrop @4
+                      # argsDrop @3
                       # opCat
                   )
                   ( begin
-                      # argPick @"y"
+                      # argRoll @"y"
                       # ( argRoll @"xs"
                             # argRoll @"yRest"
                             # argRoll @"rec"
                             # recur merge
                         )
-                      # argsDrop @4
+                      # argsDrop @3
                       # opCat
                   )
             )

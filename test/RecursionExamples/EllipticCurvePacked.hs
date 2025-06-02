@@ -88,28 +88,27 @@ ecAdd' =
     doAdd =
       begin
         # name @"px" (argPick @"p" # getX)
-        # name @"py" (argPick @"p" # getY)
+        # name @"py" (argRoll @"p" # getY)
         # name @"qx" (argPick @"q" # getX)
-        # name @"qy" (argPick @"q" # getY)
+        # name @"qy" (argRoll @"q" # getY)
         # name @"xdiff" (argPick @"px" # argPick @"qx" # feSub)
-        # name @"ydiff" (argPick @"py" # argPick @"qy" # feSub)
-        # name @"l" (argPick @"ydiff" # argPick @"xdiff" # feInv # feMul)
+        # name @"ydiff" (argPick @"py" # argRoll @"qy" # feSub)
+        # name @"l" (argRoll @"ydiff" # argRoll @"xdiff" # feInv # feMul)
         # name @"rx"
           ( begin
               # (argPick @"l" # feSquare)
-              # (argPick @"px" # argPick @"qx" # feAdd)
+              # (argPick @"px" # argRoll @"qx" # feAdd)
               # feSub
           )
         # name @"ry"
           ( begin
-              # (argPick @"l")
-              # (argPick @"px" # argPick @"rx" # feSub)
+              # (argRoll @"l")
+              # (argRoll @"px" # argPick @"rx" # feSub)
               # feMul
-              # argPick @"py"
+              # argRoll @"py"
               # feSub
           )
-        # (argPick @"rx" # argPick @"ry" # makePoint)
-        # argsDrop @11
+        # (argRoll @"rx" # argRoll @"ry" # makePoint)
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
 ecMul = lambda' mul # recur mul

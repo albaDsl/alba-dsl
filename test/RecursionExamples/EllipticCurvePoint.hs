@@ -98,13 +98,12 @@ isEqual = unname @2 isEqual'
               # name @"equalX"
                 (argPick @"p" # getX # argPick @"q" # getX # opNumEqual)
               # name @"equalY"
-                (argPick @"p" # getY # argPick @"q" # getY # opNumEqual)
+                (argRoll @"p" # getY # argRoll @"q" # getY # opNumEqual)
               # argRoll @"equalTag"
               # argRoll @"equalX"
               # argRoll @"equalY"
               # opBoolAnd
               # opBoolAnd
-              # argsDrop @2
           )
 
 isIdentityTag :: FN (s > TInt) (s > TBool)

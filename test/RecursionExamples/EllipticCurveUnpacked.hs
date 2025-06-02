@@ -38,16 +38,15 @@ ecDouble' =
       )
     # name @"ry"
       ( begin
-          # (argPick @"l")
-          # (argPick @"px" # argPick @"rx" # feSub)
+          # argRoll @"l"
+          # (argRoll @"px" # argPick @"rx" # feSub)
           # feMul
-          # argPick @"py"
+          # argRoll @"py"
           # feSub
       )
-    # argPick @"ptag"
-    # argPick @"rx"
-    # argPick @"ry"
-    # argsDrop @6
+    # argRoll @"ptag"
+    # argRoll @"rx"
+    # argRoll @"ry"
 
 ecAdd :: FN (Append s TTwoPointsUnpacked) (Append s TPointUnpacked)
 ecAdd = unname @6 ecAdd'
@@ -96,24 +95,24 @@ ecAdd' =
     doAdd =
       begin
         # name @"xdiff" (argPick @"px" # argPick @"qx" # feSub)
-        # name @"ydiff" (argPick @"py" # argPick @"qy" # feSub)
-        # name @"l" (argPick @"ydiff" # argPick @"xdiff" # feInv # feMul)
+        # name @"ydiff" (argPick @"py" # argRoll @"qy" # feSub)
+        # name @"l" (argRoll @"ydiff" # argRoll @"xdiff" # feInv # feMul)
         # name @"rx"
           ( begin
               # (argPick @"l" # feSquare)
-              # (argPick @"px" # argPick @"qx" # feAdd)
+              # (argPick @"px" # argRoll @"qx" # feAdd)
               # feSub
           )
         # name @"ry"
           ( begin
-              # (argPick @"l")
-              # (argPick @"px" # argPick @"rx" # feSub)
+              # (argRoll @"l")
+              # (argRoll @"px" # argPick @"rx" # feSub)
               # feMul
-              # argPick @"py"
+              # argRoll @"py"
               # feSub
           )
-        # (argPick @"ptag" # argPick @"rx" # argPick @"ry")
-        # argsDrop @11
+        # (argRoll @"ptag" # argRoll @"rx" # argRoll @"ry")
+        # argDrop @"qtag"
 
 ecMul :: FN (Append (s > TNat) TPointUnpacked) (Append s TPointUnpacked)
 ecMul = lambda' mul # recur mul
