@@ -8,6 +8,7 @@ module Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     name,
     name2,
+    name3,
     unname,
   )
 where
@@ -38,6 +39,12 @@ name2 ::
   FNA s alt (s' > t1 > t2) alt' ->
   FNA s alt (s' > N n1 t1 > N n2 t2) alt'
 name2 prog state = let (S c') = prog state in S c'
+
+name3 ::
+  forall n1 n2 n3 t1 t2 t3 s s' alt alt'.
+  FNA s alt (s' > t1 > t2 > t3) alt' ->
+  FNA s alt (s' > N n1 t1 > N n2 t2 > N n3 t3) alt'
+name3 prog state = let (S c') = prog state in S c'
 
 unname ::
   forall count s s' s'' alt alt'.
