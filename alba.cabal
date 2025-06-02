@@ -279,3 +279,18 @@ executable benchmark2
       RecursionExamples.Exponentiation,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, criterion, deepseq
+
+executable ecmul
+  import: shared-properties
+  hs-source-dirs: apps/ecmul, test
+  main-is: main.hs
+  other-modules:
+      RecursionExamples.EllipticCurve,
+      RecursionExamples.EllipticCurvePacked,
+      RecursionExamples.EllipticCurveUnpacked,
+      RecursionExamples.EllipticCurveConstants,
+      RecursionExamples.EllipticCurveField,
+      RecursionExamples.EllipticCurvePoint,
+      RecursionExamples.Exponentiation,
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba

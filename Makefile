@@ -21,3 +21,7 @@ test: build
 benchmark:
 	cabal run benchmark1 -- --output benchmark1.html
 	cabal run benchmark2 -- --output benchmark2.html
+
+# VM profiling.
+ecmul:
+	cabal run --enable-profiling ecmul -- +RTS -p
