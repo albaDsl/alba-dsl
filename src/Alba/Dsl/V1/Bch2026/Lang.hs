@@ -3,7 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Lang (lambda, lambda', recur) where
 
 import Alba.Dsl.V1.Bch2026.Stack (TLambda, TLambdaUntyped)
-import Alba.Dsl.V1.Common.Compile (Optimize (None), compile)
+import Alba.Dsl.V1.Common.Compile (Optimize (O1), compile)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S))
@@ -12,10 +12,10 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..), bytesToDataOp)
 lambda ::
   FNA s alt s' alt' ->
   FN s'' (s'' > TLambda (S s alt -> S s' alt'))
-lambda p (S c) = S (aop c (bytesToDataOp (compile None p)))
+lambda p (S c) = S (aop c (bytesToDataOp (compile O1 p)))
 
 lambda' :: FNA s alt s' alt' -> FN s'' (s'' > TLambdaUntyped)
-lambda' p (S c) = S (aop c (bytesToDataOp (compile None p)))
+lambda' p (S c) = S (aop c (bytesToDataOp (compile O1 p)))
 
 recur ::
   FNA (s > TLambdaUntyped) alt s' alt' ->
