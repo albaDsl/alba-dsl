@@ -260,6 +260,9 @@ op1Add (S c) = S (aop c OP_1ADD)
 op1Sub :: (StackInt x1) => FN (s > x1) (s > x1)
 op1Sub (S c) = S (aop c OP_1SUB)
 
+op1SubUnsafe :: (StackNat x1) => FN (s > x1) (s > x1)
+op1SubUnsafe (S c) = S (aop c OP_1SUB)
+
 opNegate :: (StackInt x1) => FN (s > x1) (s > x1)
 opNegate (S c) = S (aop c OP_NEGATE)
 
