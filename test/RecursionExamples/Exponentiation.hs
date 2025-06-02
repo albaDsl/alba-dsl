@@ -1,5 +1,6 @@
 module RecursionExamples.Exponentiation (pow, pow') where
 
+import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
 
 pow :: FN (s > TInt > TNat) (s > TInt)
@@ -47,9 +48,6 @@ powHelper' mul =
             )
       )
   where
-    isEven :: FN (s > TNat) (s > TBool)
-    isEven = natToInt # int 2 # opMod # int 0 # opNumEqual
-
     square ::
       (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
       FN (s > TInt) (s > TInt)

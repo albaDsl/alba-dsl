@@ -2,6 +2,7 @@
 
 module RecursionExamples.EllipticCurveUnpacked (ecDouble, ecAdd, ecMul) where
 
+import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
 import RecursionExamples.EllipticCurveField
   ( feAdd,
@@ -161,6 +162,3 @@ ecMul = lambda' mul # recur mul
                     # ecAdd
                 )
           )
-
-    isEven :: FN (s > TNat) (s > TBool)
-    isEven = natToInt # int 2 # opMod # int 0 # opNumEqual
