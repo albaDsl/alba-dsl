@@ -69,6 +69,7 @@ library
   import: shared-properties
   exposed-modules:
       Alba.Dsl.V1.Bch2025,
+      Alba.Dsl.V1.Bch2025.Contract.Math,
       Alba.Dsl.V1.Bch2025.Contract.Prelude,
       Alba.Dsl.V1.Bch2025.Infix,
       Alba.Dsl.V1.Bch2025.Lang,
@@ -78,6 +79,8 @@ library
       Alba.Dsl.V1.Bch2025.TxDsl,
       Alba.Dsl.V1.Bch2025.Version,
       Alba.Dsl.V1.Bch2026,
+      Alba.Dsl.V1.Bch2026.Contract.Math,
+      Alba.Dsl.V1.Bch2026.Contract.Prelude,
       Alba.Dsl.V1.Bch2026.Lang,
       Alba.Dsl.V1.Bch2026.Ops,
       Alba.Dsl.V1.Bch2026.Stack,

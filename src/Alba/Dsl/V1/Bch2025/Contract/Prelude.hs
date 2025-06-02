@@ -1,6 +1,13 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2025.Contract.Prelude where
+module Alba.Dsl.V1.Bch2025.Contract.Prelude
+  ( p2shScriptPubKey,
+    p2pkhScriptPubKey,
+    natSub,
+    ifZero,
+    isZero,
+  )
+where
 
 import Alba.Dsl.V1.Bch2025.Lang (bytes', nat)
 import Alba.Dsl.V1.Bch2025.Ops
@@ -50,4 +57,7 @@ ifZero ::
   FNA s alt s' alt' ->
   FNA s alt s' alt' ->
   FNA (s > x1) alt s' alt'
-ifZero ifOps elseOps = op0 # opNumEqual # opIf ifOps elseOps
+ifZero ifOps elseOps = isZero # opIf ifOps elseOps
+
+isZero :: (StackNum x1) => FN (s > x1) (s > TBool)
+isZero = op0 # opNumEqual
