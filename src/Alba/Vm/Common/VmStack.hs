@@ -6,6 +6,13 @@ module Alba.Vm.Common.VmStack
     CondStackElement (..),
     stackTop,
     stackInit,
+    condStackEmpty,
+    condStackNull,
+    condStackSize,
+    condStackPush,
+    condStackUncons,
+    condStackToggle,
+    condStackDrop,
     condStackExecuteP,
   )
 where
@@ -35,6 +42,34 @@ stackTop _ = Nothing
 stackInit :: VmStack -> Maybe VmStack
 stackInit (xs S.:|> _) = Just xs
 stackInit _ = Nothing
+
+condStackEmpty :: CondStack
+condStackEmpty = S.empty
+
+condStackNull :: CondStack -> Bool
+condStackNull = S.null
+
+condStackSize :: CondStack -> Int
+condStackSize = S.length
+
+condStackPush :: CondStack -> CondStackElement -> CondStack
+condStackPush s element = s S.|> element
+
+condStackUncons :: CondStack -> (Maybe CondStackElement, CondStack)
+condStackUncons (rest S.:|> x) = (Just x, rest)
+condStackUncons rest = (Nothing, rest)
+
+condStackToggle :: CondStack -> Maybe CondStack
+condStackToggle s =
+  case s of
+    (rest S.:|> Exec top) -> Just $ rest S.|> Exec (not top)
+    _ -> Nothing
+
+condStackDrop :: CondStack -> Maybe CondStack
+condStackDrop s =
+  case s of
+    (rest S.:|> Exec _top) -> Just rest
+    _ -> Nothing
 
 condStackExecuteP :: CondStack -> Bool
 condStackExecuteP = all execVal . takeWhile isExec . toList . S.reverse

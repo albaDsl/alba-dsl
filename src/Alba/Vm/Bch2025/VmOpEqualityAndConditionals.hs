@@ -2,14 +2,21 @@
 
 module Alba.Vm.Bch2025.VmOpEqualityAndConditionals (evalOpConditionals) where
 
+import Alba.Misc.Utils (maybeToEither)
 import Alba.Vm.Bch2025.Utils (boa1, op1v)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool')
-import Alba.Vm.Common.VmStack (CondStackElement (..), condStackExecuteP)
+import Alba.Vm.Common.VmStack
+  ( CondStackElement (..),
+    condStackDrop,
+    condStackExecuteP,
+    condStackPush,
+    condStackToggle,
+  )
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
-import Data.Sequence (Seq ((:|>)), (|>))
+import Data.Sequence (Seq ((:|>)))
 
 {- ORMOLU_DISABLE -}
 evalOpConditionals ::
@@ -22,15 +29,16 @@ evalOpConditionals op st@(VmState {s, exec, params}) =
       if condStackExecuteP exec
         then do
           (s' :|> x1) <- pure s
-          Right $ st {s = s', exec = exec |> Exec (stackElementToBool' x1)}
-        else Right $ st {exec = exec |> Exec False}
+          let entry = Exec (stackElementToBool' x1)
+          Right $ st {s = s', exec = condStackPush exec entry }
+        else Right $ st {exec = condStackPush exec (Exec False)}
     OP_NOTIF -> Just $ do
       if condStackExecuteP exec
         then do
           (s' :|> x1) <- pure s
-          Right $
-            st {s = s', exec = exec |> Exec ((not . stackElementToBool') x1)}
-        else Right $ st {exec = exec |> Exec False}
+          let entry = Exec ((not . stackElementToBool') x1)
+          Right $ st {s = s', exec = condStackPush exec entry}
+        else Right $ st {exec = condStackPush exec (Exec False)}
     OP_ELSE   -> Just $ toggleTop >>= \exec' -> Right $ st {exec = exec'}
     OP_ENDIF  -> Just $ dropTop >>= \exec' -> Right $ st {exec = exec'}
     OP_NOP    -> Just $ Right st
@@ -38,11 +46,7 @@ evalOpConditionals op st@(VmState {s, exec, params}) =
     OP_VERIFY -> op1v st (boa1 params (`unless` Left SeVerify))
     _ -> Nothing
   where
-    toggleTop = case exec of
-      (rest :|> Exec top) -> Right $ rest |> Exec (not top)
-      _ -> Left SeUnbalancedConditional
+    toggleTop = maybeToEither SeUnbalancedConditional (condStackToggle exec)
 
-    dropTop = case exec of
-      (rest :|> Exec _top) -> Right rest
-      _ -> Left SeUnbalancedConditional
+    dropTop = maybeToEither SeUnbalancedConditional (condStackDrop exec)
 {- ORMOLU_ENABLE -}

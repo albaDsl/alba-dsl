@@ -18,6 +18,7 @@ where
 
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.VmParams (SigLimit (..), VmParams (..))
+import Alba.Vm.Common.VmStack (condStackSize)
 import Alba.Vm.Common.VmState (CodeL1, VmMetrics (..), VmState (..))
 import Data.ByteString qualified as B
 import Data.Sequence qualified as S
@@ -120,7 +121,7 @@ verifyStackSize st = Left (SeStackSize, st)
 
 verifyCondStack :: VmState -> Either (ScriptError, VmState) ()
 verifyCondStack st@VmState {exec}
-  | S.length exec <= st.params.maxExecStackSize = Right ()
+  | condStackSize exec <= st.params.maxExecStackSize = Right ()
 verifyCondStack st = Left (SeCondStackDepth, st)
 
 verifyMetrics :: VmState -> Either (ScriptError, VmState) ()

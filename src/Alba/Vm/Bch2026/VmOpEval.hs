@@ -5,9 +5,9 @@ module Alba.Vm.Bch2026.VmOpEval (evalOpEval) where
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBytes)
-import Alba.Vm.Common.VmStack (CondStackElement (..))
+import Alba.Vm.Common.VmStack (CondStackElement (..), condStackPush)
 import Alba.Vm.Common.VmState (VmState (..))
-import Data.Sequence (Seq ((:|>)), (|>))
+import Data.Sequence (Seq ((:|>)))
 
 evalOpEval ::
   OpcodeL2 ->
@@ -18,6 +18,7 @@ evalOpEval op st@(VmState {code, signedCode, s, exec}) =
     OP_EVAL -> Just $ do
       (s' :|> lambda) <- pure s
       let lambda' = stackElementToBytes lambda
-          exec' = exec |> Eval {cseCode = code, cseSignedCode = signedCode}
+          entry = Eval {cseCode = code, cseSignedCode = signedCode}
+          exec' = condStackPush exec entry
       pure st {code = lambda', signedCode = lambda', s = s', exec = exec'}
     _ -> Nothing

@@ -26,7 +26,10 @@ import Alba.Vm.Common.VmLimits
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack
   ( CondStackElement (..),
+    condStackEmpty,
     condStackExecuteP,
+    condStackNull,
+    condStackUncons,
     stackInit,
     stackTop,
   )
@@ -41,7 +44,6 @@ import Control.Monad (unless, when)
 import Data.Bifunctor (second)
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
-import Data.Sequence (Seq ((:|>)))
 import Data.Sequence qualified as S
 
 type EvalVmOpFun =
@@ -57,7 +59,7 @@ evaluateScript ::
   Either (ScriptError, Maybe VmState) VmState
 evaluateScript evalVmOp txContext state@VmState {code} = do
   verifyScriptSize
-  let state' = state {exec = S.empty, signedCode = code}
+  let state' = state {exec = condStackEmpty, signedCode = code}
   mapLeft
     (second Just)
     (evaluateScript' evalVmOp txContext (logOp Nothing False state'))
@@ -74,11 +76,11 @@ evaluateScript' ::
   VmState ->
   Either (ScriptError, VmState) VmState
 evaluateScript' _evalVmOp _txContext state@(VmState {code, exec})
-  | B.null code && S.null exec = Right state
+  | B.null code && condStackNull exec = Right state
 evaluateScript' evalVmOp txContext state@(VmState {code, exec})
-  | B.null code && not (S.null exec) =
-      case exec of
-        (exec' :|> (Eval {..})) ->
+  | B.null code && not (condStackNull exec) =
+      case condStackUncons exec of
+        (Just (Eval {..}), exec') ->
           evaluateScript'
             evalVmOp
             txContext
@@ -120,7 +122,7 @@ startState params =
       signedCode = B.empty,
       s = S.empty,
       alt = S.empty,
-      exec = S.empty,
+      exec = condStackEmpty,
       pushOnly = False,
       metrics = zeroedMetrics,
       limits = maxedMetrics,
