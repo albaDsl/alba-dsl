@@ -249,6 +249,7 @@ executable test
       TestLibauthVectors2026,
       TestLibauthVectorsExclusions2025,
       TestLibauthVectorsExclusions2026,
+      TestLoops,
       TestOpcodes,
       TestOpsArithmetic,
       TestOpsBytes,
