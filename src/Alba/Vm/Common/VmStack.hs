@@ -11,8 +11,8 @@ module Alba.Vm.Common.VmStack
     condStackSize,
     condStackPush,
     condStackUncons,
-    condStackToggle,
-    condStackDrop,
+    condStackExecToggle,
+    condStackExecDrop,
     condStackExecuteP,
   )
 where
@@ -29,9 +29,12 @@ data CondStack = CondStack ![CondStackElement] !Int
 
 data CondStackElement
   = Exec Bool
+  | Loop
+      { loopStart :: !CodeL1
+      }
   | Eval
-      { cseCode :: !CodeL1,
-        cseSignedCode :: !CodeL1
+      { callerCode :: !CodeL1,
+        callerSignedCode :: !CodeL1
       }
   deriving (Eq, Show)
 
@@ -60,26 +63,29 @@ condStackUncons :: CondStack -> (Maybe CondStackElement, CondStack)
 condStackUncons (CondStack (x : s) count) = (Just x, CondStack s (pred count))
 condStackUncons _ = (Nothing, condStackEmpty)
 
-condStackToggle :: CondStack -> Maybe CondStack
-condStackToggle s =
+condStackExecToggle :: CondStack -> Maybe CondStack
+condStackExecToggle s =
   case s of
-    (CondStack (Exec top : s') count) -> Just (CondStack (Exec (not top) : s') count)
+    (CondStack (Exec top : s') count) ->
+      Just (CondStack (Exec (not top) : s') count)
     _ -> Nothing
 
-condStackDrop :: CondStack -> Maybe CondStack
-condStackDrop s =
+condStackExecDrop :: CondStack -> Maybe CondStack
+condStackExecDrop s =
   case s of
     (CondStack (Exec _top : s') count) -> Just (CondStack s' (pred count))
     _ -> Nothing
 
 {-# INLINE condStackExecuteP #-}
 condStackExecuteP :: CondStack -> Bool
-condStackExecuteP (CondStack s _) = all execVal . takeWhile isExec $ s
+condStackExecuteP (CondStack s _) = all doExec . takeWhile notEval $ s
   where
-    execVal :: CondStackElement -> Bool
-    execVal (Exec x) = x
-    execVal (Eval _ _) = canNotHappen
+    doExec :: CondStackElement -> Bool
+    doExec (Exec x) = x
+    doExec (Loop _) = True
+    doExec (Eval _ _) = canNotHappen
 
-    isExec :: CondStackElement -> Bool
-    isExec (Exec _) = True
-    isExec (Eval _ _) = False
+    notEval :: CondStackElement -> Bool
+    notEval (Exec _) = True
+    notEval (Loop _) = True
+    notEval (Eval _ _) = False

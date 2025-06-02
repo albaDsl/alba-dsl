@@ -1,6 +1,12 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Common.Vm (evaluateScript, startState, verifyScript) where
+module Alba.Vm.Common.Vm
+  ( Deps (..),
+    evaluateScript,
+    startState,
+    verifyScript,
+  )
+where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
 import Alba.Vm.Common.Logging (logOp)
@@ -46,23 +52,25 @@ import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
 
-type EvalVmOpFun =
-  OpcodeL2 ->
-  TxContext ->
-  VmState ->
-  Maybe (Either ScriptError VmState)
+newtype Deps = Deps
+  { evalVmOp ::
+      OpcodeL2 ->
+      TxContext ->
+      VmState ->
+      Maybe (Either ScriptError VmState)
+  }
 
 evaluateScript ::
-  EvalVmOpFun ->
+  Deps ->
   TxContext ->
   VmState ->
   Either (ScriptError, Maybe VmState) VmState
-evaluateScript evalVmOp txContext state@VmState {code} = do
+evaluateScript deps txContext state@VmState {code} = do
   verifyScriptSize
   let state' = state {exec = condStackEmpty, signedCode = code}
   mapLeft
     (second Just)
-    (evaluateScript' evalVmOp txContext (logOp Nothing False state'))
+    (evaluateScript' deps txContext (logOp Nothing False state'))
   where
     verifyScriptSize :: Either (ScriptError, Maybe VmState) ()
     verifyScriptSize =
@@ -71,27 +79,27 @@ evaluateScript evalVmOp txContext state@VmState {code} = do
         else Left (SeScriptSize, Nothing)
 
 evaluateScript' ::
-  EvalVmOpFun ->
+  Deps ->
   TxContext ->
   VmState ->
   Either (ScriptError, VmState) VmState
-evaluateScript' _evalVmOp _txContext state@(VmState {code, exec})
+evaluateScript' _deps _txContext state@(VmState {code, exec})
   | B.null code && condStackNull exec = Right state
-evaluateScript' evalVmOp txContext state@(VmState {code, exec})
+evaluateScript' deps txContext state@(VmState {code, exec})
   | B.null code && not (condStackNull exec) =
       case condStackUncons exec of
         (Just (Eval {..}), exec') ->
           evaluateScript'
-            evalVmOp
+            deps
             txContext
             ( state
-                { code = cseCode,
-                  signedCode = cseSignedCode,
+                { code = callerCode,
+                  signedCode = callerSignedCode,
                   exec = exec'
                 }
             )
         _ -> Left (SeUnbalancedConditional, state)
-evaluateScript' evalVmOp txContext state@(VmState {code, exec}) = do
+evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
   (op, rest) <- case getOp code of
     Just x -> Right x
     Nothing -> Left (SeBadOpcode "", state)
@@ -100,7 +108,7 @@ evaluateScript' evalVmOp txContext state@(VmState {code, exec}) = do
   let execP = condStackExecuteP exec || isConditionalOp op
   let state' = (addOperationCost state) {code = rest}
   if not execP
-    then evaluateScript' evalVmOp txContext (logOp (Just op) execP state')
+    then evaluateScript' deps txContext (logOp (Just op) execP state')
     else do
       when (isPushOp op && not (isMinimal op)) $ Left (SeMinimalData, state)
       state'' <-
@@ -113,7 +121,7 @@ evaluateScript' evalVmOp txContext state@(VmState {code, exec}) = do
       verifyStackSize state''
       verifyMetrics state''
       verifyCondStack state''
-      evaluateScript' evalVmOp txContext state''
+      evaluateScript' deps txContext state''
 
 startState :: VmParams -> VmState
 startState params =
@@ -131,12 +139,12 @@ startState params =
     }
 
 verifyScript ::
-  EvalVmOpFun ->
+  Deps ->
   CodeL1 ->
   TxContext ->
   VmParams ->
   Either (ScriptError, VerifyScriptResult) VerifyScriptResult
-verifyScript evalVmOp scriptPubKey txContext vmParams = do
+verifyScript deps scriptPubKey txContext vmParams = do
   let tx = txContextTx txContext
       inputIndex = txContextInputIndex txContext
       scriptSig = (tx.inputs !! inputIndex).scriptSig
@@ -146,12 +154,12 @@ verifyScript evalVmOp scriptPubKey txContext vmParams = do
             pushOnly = True
           }
   st1@VmState {s, metrics = m1} <-
-    case evaluateScript evalVmOp txContext st0 of
+    case evaluateScript deps txContext st0 of
       Left (err, st) -> Left (err, VerifyScriptResult st Nothing Nothing)
       Right x -> Right x
   st2@VmState {metrics = m2} <-
     let st0' = st0 {code = scriptPubKey, s, metrics = m1, pushOnly = False}
-     in case evaluateScript evalVmOp txContext st0' of
+     in case evaluateScript deps txContext st0' of
           Left (err, st) -> Left (err, VerifyScriptResult (Just st1) st Nothing)
           Right x -> Right x
   checkResult st2 (VerifyScriptResult (Just st1) (Just st2) Nothing)
@@ -167,7 +175,7 @@ verifyScript evalVmOp scriptPubKey txContext vmParams = do
                 pushOnly = False
               }
       st3 <-
-        case evaluateScript evalVmOp txContext st0' of
+        case evaluateScript deps txContext st0' of
           Left (err, st) ->
             Left (err, VerifyScriptResult (Just st1) (Just st2) st)
           Right x -> Right x

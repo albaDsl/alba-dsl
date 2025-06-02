@@ -4,6 +4,7 @@ module Alba.Vm.Bch2026.VmOps (evalVmOp) where
 
 import Alba.Vm.Bch2025.VmOps qualified as Bch2025
 import Alba.Vm.Bch2026.VmOpEval (evalOpEval)
+import Alba.Vm.Bch2026.VmOpLoops (evalOpLoops)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2)
 import Alba.Vm.Common.ScriptError (ScriptError)
 import Alba.Vm.Common.TxContext (TxContext)
@@ -17,4 +18,5 @@ evalVmOp ::
   Maybe (Either ScriptError VmState)
 evalVmOp op txContext state =
   Bch2025.evalVmOp op txContext state
+    <|> evalOpLoops op state
     <|> evalOpEval op state

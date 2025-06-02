@@ -50,6 +50,8 @@ data OpcodeL2
   | OP_EVAL
   | OP_IF
   | OP_NOTIF
+  | OP_BEGIN
+  | OP_UNTIL
   | OP_ELSE
   | OP_ENDIF
   | OP_VERIFY
@@ -203,6 +205,8 @@ opcodeL2ToCodeL1 OP_NOP = Just $ toCodeL1 L1.OP_NOP
 opcodeL2ToCodeL1 OP_EVAL = Just $ toCodeL1 L1.OP_VER_OP_EVAL
 opcodeL2ToCodeL1 OP_IF = Just $ toCodeL1 L1.OP_IF
 opcodeL2ToCodeL1 OP_NOTIF = Just $ toCodeL1 L1.OP_NOTIF
+opcodeL2ToCodeL1 OP_BEGIN = Just $ toCodeL1 L1.OP_VERIF_OP_BEGIN
+opcodeL2ToCodeL1 OP_UNTIL = Just $ toCodeL1 L1.OP_VERNOTIF_OP_UNTIL
 opcodeL2ToCodeL1 OP_ELSE = Just $ toCodeL1 L1.OP_ELSE
 opcodeL2ToCodeL1 OP_ENDIF = Just $ toCodeL1 L1.OP_ENDIF
 opcodeL2ToCodeL1 OP_VERIFY = Just $ toCodeL1 L1.OP_VERIFY
@@ -357,8 +361,8 @@ getOp' L1.OP_NOP code = Just (OP_NOP, code)
 getOp' L1.OP_VER_OP_EVAL code = Just (OP_EVAL, code)
 getOp' L1.OP_IF code = Just (OP_IF, code)
 getOp' L1.OP_NOTIF code = Just (OP_NOTIF, code)
-getOp' op@L1.OP_VERIF code = Just (OP_UNUSED op, code)
-getOp' op@L1.OP_VERNOTIF code = Just (OP_UNUSED op, code)
+getOp' L1.OP_VERIF_OP_BEGIN code = Just (OP_BEGIN, code)
+getOp' L1.OP_VERNOTIF_OP_UNTIL code = Just (OP_UNTIL, code)
 getOp' L1.OP_ELSE code = Just (OP_ELSE, code)
 getOp' L1.OP_ENDIF code = Just (OP_ENDIF, code)
 getOp' L1.OP_VERIFY code = Just (OP_VERIFY, code)

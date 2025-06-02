@@ -9,10 +9,10 @@ import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool')
 import Alba.Vm.Common.VmStack
   ( CondStackElement (..),
-    condStackDrop,
+    condStackExecDrop,
+    condStackExecToggle,
     condStackExecuteP,
     condStackPush,
-    condStackToggle,
   )
 import Alba.Vm.Common.VmState (VmState (..))
 import Control.Monad (unless)
@@ -46,7 +46,7 @@ evalOpConditionals op st@(VmState {s, exec, params}) =
     OP_VERIFY -> op1v st (boa1 params (`unless` Left SeVerify))
     _ -> Nothing
   where
-    toggleTop = maybeToEither SeUnbalancedConditional (condStackToggle exec)
+    toggleTop = maybeToEither SeUnbalancedConditional (condStackExecToggle exec)
 
-    dropTop = maybeToEither SeUnbalancedConditional (condStackDrop exec)
+    dropTop = maybeToEither SeUnbalancedConditional (condStackExecDrop exec)
 {- ORMOLU_ENABLE -}

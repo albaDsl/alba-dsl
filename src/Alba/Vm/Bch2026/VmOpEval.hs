@@ -18,7 +18,7 @@ evalOpEval op st@(VmState {code, signedCode, s, exec}) =
     OP_EVAL -> Just $ do
       (s' :|> lambda) <- pure s
       let lambda' = stackElementToBytes lambda
-          entry = Eval {cseCode = code, cseSignedCode = signedCode}
+          entry = Eval {callerCode = code, callerSignedCode = signedCode}
           exec' = condStackPush exec entry
       pure st {code = lambda', signedCode = lambda', s = s', exec = exec'}
     _ -> Nothing

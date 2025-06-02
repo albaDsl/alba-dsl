@@ -8,8 +8,8 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 isConditionalOp :: OpcodeL2 -> Bool
 isConditionalOp OP_IF = True
 isConditionalOp OP_NOTIF = True
-isConditionalOp (OP_UNUSED L1.OP_VERIF) = True
-isConditionalOp (OP_UNUSED L1.OP_VERNOTIF) = True
+isConditionalOp OP_BEGIN = True
+isConditionalOp OP_UNTIL = True
 isConditionalOp OP_ELSE = True
 isConditionalOp OP_ENDIF = True
 isConditionalOp _ = False

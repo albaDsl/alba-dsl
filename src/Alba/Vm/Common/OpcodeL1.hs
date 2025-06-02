@@ -118,8 +118,8 @@ data OpcodeL1
   | OP_VER_OP_EVAL -- Repurposed in BCH2026.
   | OP_IF
   | OP_NOTIF
-  | OP_VERIF
-  | OP_VERNOTIF
+  | OP_VERIF_OP_BEGIN -- Repurposed in BCH2026.
+  | OP_VERNOTIF_OP_UNTIL -- Repurposed in BCH2026.
   | OP_ELSE
   | OP_ENDIF
   | OP_VERIFY
