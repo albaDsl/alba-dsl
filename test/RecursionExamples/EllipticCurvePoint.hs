@@ -1,40 +1,68 @@
 module RecursionExamples.EllipticCurvePoint
   ( TPoint,
+    TPointUnpacked,
+    TPointUnpackedN,
+    TTwoPointsUnpacked,
     makePoint,
+    packPoint,
+    unpackPoint,
     pushPoint,
     makeIdentity,
+    makeIdentityUnpacked,
+    isEqual,
+    isIdentity,
+    isIdentityTag,
     getTag,
     getX,
     getY,
-    isEqual,
-    isIdentity,
   )
 where
 
 import Alba.Dsl.V1.Bch2026
+import GHC.TypeLits (AppendSymbol)
 import Numeric.Natural (Natural)
 
 data TPoint
 
 instance StackEntry TPoint
 
-instance StackBytes TPoint
+type TPointUnpacked = Base > TInt > TInt > TInt
 
--- Byte layout for the Point record:
--- <tag:1><x:33><y:33>
+type TPointUnpackedN prefix =
+  Base
+    > N (AppendSymbol prefix "tag") TInt
+    > N (AppendSymbol prefix "x") TInt
+    > N (AppendSymbol prefix "y") TInt
+
+type TTwoPointsUnpacked = Base > TInt > TInt > TInt > TInt > TInt > TInt
 
 makePoint :: FN (s > TInt > TInt) (s > TPoint)
 makePoint = unname @2 makePoint'
   where
     makePoint' :: FN (s > N "x" TInt > N "y" TInt) (s > TPoint)
-    makePoint' =
+    makePoint' = int tagNonIdentity # argRoll @"x" # argRoll @"y" # packPoint
+
+-- Byte layout for the Point record:
+-- <tag:1><x:33><y:33>
+packPoint :: FN (Append s TPointUnpacked) (s > TPoint)
+packPoint = unname @3 packPoint'
+  where
+    packPoint' :: FN (Append s (TPointUnpackedN "")) (s > TPoint)
+    packPoint' =
       begin
-        # (int tagNonIdentity # nat tagSize # opNum2Bin)
+        # (argRoll @"tag" # nat tagSize # opNum2Bin)
         # (argRoll @"x" # nat coordSize # opNum2Bin)
         # (argRoll @"y" # nat coordSize # opNum2Bin)
-        # opCat
-        # opCat
-        # cast
+        # (opCat # opCat # cast)
+
+unpackPoint :: FN (s > TPoint) (Append s TPointUnpacked)
+unpackPoint =
+  begin
+    # name3 @"tag" @"x" @"y"
+      (pointToBytes # (nat tagSize # opSplit) # (nat coordSize # opSplit))
+    # (argRoll @"tag" # opBin2Num)
+    # (argRoll @"x" # opBin2Num)
+    # (argRoll @"y" # opBin2Num)
 
 pushPoint :: Integer -> Integer -> FN s (s > TPoint)
 pushPoint x y =
@@ -49,22 +77,8 @@ makeIdentity =
 box :: Natural -> Integer -> FN s (s > TBytes)
 box size i = int i # nat size # opNum2Bin
 
-getTag :: FN (s > TPoint) (s > TInt)
-getTag = nat tagSize # opSplit # opDrop # opBin2Num
-
-getX :: FN (s > TPoint) (s > TInt)
-getX =
-  begin
-    # nat tagSize
-    # opSplit
-    # opNip
-    # nat coordSize
-    # opSplit
-    # opDrop
-    # opBin2Num
-
-getY :: FN (s > TPoint) (s > TInt)
-getY = nat (tagSize + coordSize) # opSplit # opNip # opBin2Num
+makeIdentityUnpacked :: FN s (Append s TPointUnpacked)
+makeIdentityUnpacked = int tagIdentity # int 0 # int 0
 
 isIdentity :: FN (s > TPoint) (s > TBool)
 isIdentity = getTag # int tagIdentity # opNumEqual
@@ -92,6 +106,30 @@ isEqual = unname @2 isEqual'
               # opBoolAnd
               # argsDrop @2
           )
+
+isIdentityTag :: FN (s > TInt) (s > TBool)
+isIdentityTag = int tagIdentity # opNumEqual
+
+getTag :: FN (s > TPoint) (s > TInt)
+getTag = pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num
+
+getX :: FN (s > TPoint) (s > TInt)
+getX =
+  begin
+    # pointToBytes
+    # nat tagSize
+    # opSplit
+    # opNip
+    # nat coordSize
+    # opSplit
+    # opDrop
+    # opBin2Num
+
+getY :: FN (s > TPoint) (s > TInt)
+getY = pointToBytes # nat (tagSize + coordSize) # opSplit # opNip # opBin2Num
+
+pointToBytes :: FN (s > TPoint) (s > TBytes)
+pointToBytes = cast
 
 tagIdentity :: Integer
 tagIdentity = 1

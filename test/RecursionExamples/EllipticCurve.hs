@@ -1,155 +1,34 @@
 {-# OPTIONS_GHC -w #-}
 
-module RecursionExamples.EllipticCurve (ecDouble, ecAdd, ecMul) where
+module RecursionExamples.EllipticCurve
+  ( ecDouble,
+    ecAdd,
+    ecMul,
+    ecDoubleP,
+    ecAddP,
+    ecMulP,
+  )
+where
 
 import Alba.Dsl.V1.Bch2026
-import RecursionExamples.EllipticCurveField
-  ( feAdd,
-    feInv,
-    feMul,
-    feSquare,
-    feSub,
-  )
-import RecursionExamples.EllipticCurvePoint
-  ( TPoint,
-    getX,
-    getY,
-    isEqual,
-    isIdentity,
-    makeIdentity,
-    makePoint,
-  )
+import RecursionExamples.EllipticCurvePacked qualified as EP
+import RecursionExamples.EllipticCurvePoint (TPoint, packPoint, unpackPoint)
+import RecursionExamples.EllipticCurveUnpacked qualified as EUP
 
 ecDouble :: FN (s > TPoint) (s > TPoint)
-ecDouble = unname @1 ecDouble'
-  where
-    ecDouble' :: FN (s > N "p" TPoint) (s > TPoint)
-    ecDouble' =
-      begin
-        # name @"px" (argPick @"p" # getX)
-        # name @"py" (argPick @"p" # getY)
-        # name @"l"
-          ( begin
-              # (int 3 # argPick @"px" # feSquare # feMul)
-              # (int 2 # argPick @"py" # feMul # feInv)
-              # feMul
-          )
-        # name @"rx"
-          ( begin
-              # (argPick @"l" # feSquare)
-              # (argPick @"px" # opDup # feAdd)
-              # feSub
-          )
-        # name @"ry"
-          ( begin
-              # (argPick @"l")
-              # (argPick @"px" # argPick @"rx" # feSub)
-              # feMul
-              # argPick @"py"
-              # feSub
-          )
-        # argPick @"rx"
-        # argPick @"ry"
-        # makePoint
-        # argsDrop @6
+ecDouble = unpackPoint # EUP.ecDouble # packPoint
 
 ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
-ecAdd = unname @2 ecAdd'
-
-ecAdd' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
-ecAdd' =
-  begin
-    # (argPick @"p" # isIdentity)
-    # opIf
-      (argRoll @"q" # argsDrop @1)
-      ( (argPick @"q" # isIdentity)
-          # opIf
-            (argRoll @"p" # argsDrop @1)
-            ( pointsAreEqual
-                # opIf
-                  (argRoll @"p" # ecDouble # argsDrop @1)
-                  ( xCoordsEqual
-                      # opIf
-                        (makeIdentity # argsDrop @2)
-                        ( begin
-                            # argRoll @"p"
-                            # argRoll @"q"
-                            # unname @2 doAdd
-                        )
-                  )
-            )
-      )
-  where
-    pointsAreEqual = argPick @"p" # argPick @"q" # isEqual
-
-    xCoordsEqual = (argPick @"p" # getX) # (argPick @"q" # getX) # opNumEqual
-
-    doAdd :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
-    doAdd =
-      begin
-        # name @"px" (argPick @"p" # getX)
-        # name @"py" (argPick @"p" # getY)
-        # name @"qx" (argPick @"q" # getX)
-        # name @"qy" (argPick @"q" # getY)
-        # name @"xdiff" (argPick @"px" # argPick @"qx" # feSub)
-        # name @"ydiff" (argPick @"py" # argPick @"qy" # feSub)
-        # name @"l" (argPick @"ydiff" # argPick @"xdiff" # feInv # feMul)
-        # name @"rx"
-          ( begin
-              # (argPick @"l" # feSquare)
-              # (argPick @"px" # argPick @"qx" # feAdd)
-              # feSub
-          )
-        # name @"ry"
-          ( begin
-              # (argPick @"l")
-              # (argPick @"px" # argPick @"rx" # feSub)
-              # feMul
-              # argPick @"py"
-              # feSub
-          )
-        # (argPick @"rx" # argPick @"ry" # makePoint)
-        # argsDrop @11
+ecAdd = opSwap # unpackPoint # opRoll @3 # unpackPoint # EUP.ecAdd # packPoint
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul = lambda' mul # recur mul
-  where
-    mul :: FN (s > TNat > TPoint > TLambdaUntyped) (s > TPoint)
-    mul = unname @3 mul'
+ecMul = unpackPoint # EUP.ecMul # packPoint
 
-    mul' ::
-      FN
-        (s > N "n" TNat > N "p" TPoint > N "mul" TLambdaUntyped)
-        (s > TPoint)
-    mul' =
-      begin
-        # argPick @"n"
-        # (nat 1 # opNumEqual)
-        # opIf
-          (argPick @"p" # argsDrop @3)
-          ( begin
-              # argPick @"n"
-              # isEven
-              # opIf
-                ( begin
-                    # (argPick @"n" # nat 2 # opDiv)
-                    # (argPick @"p" # ecDouble)
-                    # argPick @"mul"
-                    # recur mul
-                    # argsDrop @3
-                )
-                ( begin
-                    # argPick @"p"
-                    # ( begin
-                          # (argPick @"n" # nat 1 # opSubUnsafe)
-                          # argPick @"p"
-                          # argPick @"mul"
-                          # recur mul
-                      )
-                    # ecAdd
-                    # argsDrop @3
-                )
-          )
+ecDoubleP :: FN (s > TPoint) (s > TPoint)
+ecDoubleP = EP.ecDouble
 
-    isEven :: FN (s > TNat) (s > TBool)
-    isEven = natToInt # int 2 # opMod # int 0 # opNumEqual
+ecAddP :: FN (s > TPoint > TPoint) (s > TPoint)
+ecAddP = EP.ecAdd
+
+ecMulP :: FN (s > TNat > TPoint) (s > TPoint)
+ecMulP = EP.ecMul
