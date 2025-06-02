@@ -1,7 +1,19 @@
 -- Copyright (c) 2025 albaDsl
 {-# OPTIONS_GHC -w -Wdefault #-}
 
-module Demo where
+module Demo
+  ( module DemoPrelude,
+    f1,
+    f2,
+    f3,
+    f4,
+    f5,
+    f6,
+    prop1,
+    prop2,
+    prop3,
+  )
+where
 
 import DemoPrelude
 
@@ -53,14 +65,18 @@ f3 =
 prop3 :: Integer -> Property
 prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
 
--- Example 4. Quick demo of pow function.
+-- Example 4. Demo of the recursive pow function.
 f4 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f4 = int 2 # argRoll @"x" # pow
+f4 = int 2 # argRoll @"x" # recPow
+
+-- Example 5. Demo of the loops based pow function.
+f5 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
+f5 = int 2 # argRoll @"x" # pow
 
 -- Secp256k1 point multiplication. Calculates n * G and returns the
 -- x-coordinate.
 -- Try with e.g. test vectors from:
 -- https://crypto.stackexchange.com/questions/784/are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f5) 0xAA5E28D6A97A2479A65527F7290311A3624D4CC0FA1578598EE3C2613BF99522
-f5 :: S (s > TNat) alt -> S (s > TInt) alt
-f5 = g # ecMul # getX
+f6 :: S (s > TNat) alt -> S (s > TInt) alt
+f6 = g # ecMul # getX
