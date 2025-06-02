@@ -108,6 +108,12 @@ opIf ifOps elseOps (S c) =
       (S c'') = elseOps (S (aop c' OP_ELSE))
    in S (aop c'' OP_ENDIF)
 
+-- Version of opIf without the else clause.
+opWhen :: FNA s alt s alt -> FNA (s > TBool) alt s alt
+opWhen body (S c) =
+  let (S c') = body (S (aop c OP_IF))
+   in S (aop c' OP_ENDIF)
+
 opNotIf ::
   FNA s alt s' alt' ->
   FNA s alt s' alt' ->
@@ -116,6 +122,12 @@ opNotIf ifOps elseOps (S c) =
   let (S c') = ifOps (S (aop c OP_NOTIF))
       (S c'') = elseOps (S (aop c' OP_ELSE))
    in S (aop c'' OP_ENDIF)
+
+-- Version of opNotIf without the else clause.
+opUnless :: FNA s alt s alt -> FNA (s > TBool) alt s alt
+opUnless body (S c) =
+  let (S c') = body (S (aop c OP_NOTIF))
+   in S (aop c' OP_ENDIF)
 
 opVerify :: FN (s > TBool) s
 opVerify (S c) = S (aop c OP_VERIFY)
