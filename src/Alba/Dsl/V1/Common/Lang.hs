@@ -3,6 +3,9 @@
 module Alba.Dsl.V1.Common.Lang
   ( (#),
     begin,
+    ex0,
+    ex1,
+    ex2,
     natToInt,
     cast,
     branch1,
@@ -17,7 +20,7 @@ module Alba.Dsl.V1.Common.Lang
 where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (FN, S (S), TInt, TNat, type (:|))
+import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), TInt, TNat, type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Data.Kind (Type)
 
@@ -26,6 +29,17 @@ import Data.Kind (Type)
 
 begin :: a -> a
 begin = id
+
+-- An expression that does not modify the stack.
+ex0 :: FNA s alt s alt -> FNA s alt s alt
+ex0 prog state = let (S c') = prog state in S c'
+
+-- An expression that adds one element to the stack.
+ex1 :: FNA s alt (s > t1) alt -> FNA s alt (s > t1) alt
+ex1 prog state = let (S c') = prog state in S c'
+
+ex2 :: FNA s alt (s > t1 > t2) alt -> FNA s alt (s > t1 > t2) alt
+ex2 prog state = let (S c') = prog state in S c'
 
 natToInt :: FN (s > TNat) (s > TInt)
 natToInt (S c) = let state' = S c in state'
