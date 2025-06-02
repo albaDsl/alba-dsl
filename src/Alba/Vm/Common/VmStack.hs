@@ -20,12 +20,12 @@ where
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.StackElement (StackElement)
-import Data.Foldable (toList)
 import Data.Sequence qualified as S
 
 type VmStack = S.Seq StackElement
 
-type CondStack = S.Seq CondStackElement
+data CondStack = CondStack ![CondStackElement] !Int
+  deriving (Eq, Show)
 
 data CondStackElement
   = Exec Bool
@@ -44,35 +44,37 @@ stackInit (xs S.:|> _) = Just xs
 stackInit _ = Nothing
 
 condStackEmpty :: CondStack
-condStackEmpty = S.empty
+condStackEmpty = CondStack [] 0
 
 condStackNull :: CondStack -> Bool
-condStackNull = S.null
+condStackNull (CondStack _ 0) = True
+condStackNull (CondStack _ _) = False
 
 condStackSize :: CondStack -> Int
-condStackSize = S.length
+condStackSize (CondStack _ count) = count
 
 condStackPush :: CondStack -> CondStackElement -> CondStack
-condStackPush s element = s S.|> element
+condStackPush (CondStack s count) element = CondStack (element : s) (succ count)
 
 condStackUncons :: CondStack -> (Maybe CondStackElement, CondStack)
-condStackUncons (rest S.:|> x) = (Just x, rest)
-condStackUncons rest = (Nothing, rest)
+condStackUncons (CondStack (x : s) count) = (Just x, CondStack s (pred count))
+condStackUncons _ = (Nothing, condStackEmpty)
 
 condStackToggle :: CondStack -> Maybe CondStack
 condStackToggle s =
   case s of
-    (rest S.:|> Exec top) -> Just $ rest S.|> Exec (not top)
+    (CondStack (Exec top : s') count) -> Just (CondStack (Exec (not top) : s') count)
     _ -> Nothing
 
 condStackDrop :: CondStack -> Maybe CondStack
 condStackDrop s =
   case s of
-    (rest S.:|> Exec _top) -> Just rest
+    (CondStack (Exec _top : s') count) -> Just (CondStack s' (pred count))
     _ -> Nothing
 
+{-# INLINE condStackExecuteP #-}
 condStackExecuteP :: CondStack -> Bool
-condStackExecuteP = all execVal . takeWhile isExec . toList . S.reverse
+condStackExecuteP (CondStack s _) = all execVal . takeWhile isExec $ s
   where
     execVal :: CondStackElement -> Bool
     execVal (Exec x) = x
