@@ -1,4 +1,4 @@
-module RecursionExamples.Exponentiation (pow, pow') where
+module DslDemo.Exponentiation (pow, pow') where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026

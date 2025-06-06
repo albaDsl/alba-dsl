@@ -167,6 +167,18 @@ library
       Alba.Vm.Common.VmParams,
       Alba.Vm.Common.VmStack,
       Alba.Vm.Common.VmState,
+      DslDemo.EllipticCurve.EllipticCurve,
+      DslDemo.EllipticCurve.EllipticCurvePacked,
+      DslDemo.EllipticCurve.EllipticCurvePackedCommon,
+      DslDemo.EllipticCurve.EllipticCurvePackedNonRecursive,
+      DslDemo.EllipticCurve.EllipticCurveUnpacked,
+      DslDemo.EllipticCurve.EllipticCurveUnpackedCommon,
+      DslDemo.EllipticCurve.EllipticCurveUnpackedNonRecursive,
+      DslDemo.EllipticCurve.EllipticCurveConstants,
+      DslDemo.EllipticCurve.EllipticCurveField,
+      DslDemo.EllipticCurve.EllipticCurvePoint,
+      DslDemo.Exponentiation,
+      DslDemo.MergeSort
   hs-source-dirs: src
 
 executable alba
@@ -207,14 +219,6 @@ executable demo
   other-modules:
     Demo,
     DemoPrelude,
-    RecursionExamples.EllipticCurve,
-    RecursionExamples.EllipticCurvePacked,
-    RecursionExamples.EllipticCurveUnpacked,
-    RecursionExamples.EllipticCurveConstants,
-    RecursionExamples.EllipticCurveField,
-    RecursionExamples.EllipticCurvePoint,
-    RecursionExamples.Exponentiation,
-    RecursionExamples.MergeSort,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, asciichart
 
@@ -226,14 +230,6 @@ executable test
   other-modules:
       LibauthSupport,
       QuickCheckSupport,
-      RecursionExamples.EllipticCurve,
-      RecursionExamples.EllipticCurvePacked,
-      RecursionExamples.EllipticCurveUnpacked,
-      RecursionExamples.EllipticCurveConstants,
-      RecursionExamples.EllipticCurveField,
-      RecursionExamples.EllipticCurvePoint,
-      RecursionExamples.Exponentiation,
-      RecursionExamples.MergeSort,
       TestArguments,
       TestCheckMultiSig,
       TestCheckSig,
@@ -275,13 +271,6 @@ executable benchmark2
   hs-source-dirs: benchmark, test
   main-is: benchmark2.hs
   other-modules:
-      RecursionExamples.EllipticCurve,
-      RecursionExamples.EllipticCurvePacked,
-      RecursionExamples.EllipticCurveUnpacked,
-      RecursionExamples.EllipticCurveConstants,
-      RecursionExamples.EllipticCurveField,
-      RecursionExamples.EllipticCurvePoint,
-      RecursionExamples.Exponentiation,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba, criterion, deepseq
 
@@ -289,13 +278,5 @@ executable ecmul
   import: shared-properties
   hs-source-dirs: apps/ecmul, test
   main-is: main.hs
-  other-modules:
-      RecursionExamples.EllipticCurve,
-      RecursionExamples.EllipticCurvePacked,
-      RecursionExamples.EllipticCurveUnpacked,
-      RecursionExamples.EllipticCurveConstants,
-      RecursionExamples.EllipticCurveField,
-      RecursionExamples.EllipticCurvePoint,
-      RecursionExamples.Exponentiation,
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba

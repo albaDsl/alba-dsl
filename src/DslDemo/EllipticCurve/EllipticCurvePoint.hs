@@ -1,4 +1,4 @@
-module RecursionExamples.EllipticCurvePoint
+module DslDemo.EllipticCurve.EllipticCurvePoint
   ( TPoint,
     TPointUnpacked,
     TPointUnpackedN,
@@ -15,6 +15,7 @@ module RecursionExamples.EllipticCurvePoint
     getTag,
     getX,
     getY,
+    namePoint,
   )
 where
 
@@ -142,3 +143,9 @@ tagSize = 1
 -- Due to the sign bit, we need one more byte than usual.
 coordSize :: Natural
 coordSize = 33
+
+namePoint ::
+  forall prefix s s' alt alt'.
+  FNA s alt (Append s' TPointUnpacked) alt' ->
+  FNA s alt (Append s' (TPointUnpackedN prefix)) alt'
+namePoint = name3

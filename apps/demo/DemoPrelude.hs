@@ -6,11 +6,11 @@ module DemoPrelude
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
-    module RecursionExamples.EllipticCurve,
-    module RecursionExamples.EllipticCurveConstants,
-    module RecursionExamples.EllipticCurveField,
-    module RecursionExamples.EllipticCurvePoint,
-    module RecursionExamples.MergeSort,
+    module DslDemo.EllipticCurve.EllipticCurve,
+    module DslDemo.EllipticCurve.EllipticCurveConstants,
+    module DslDemo.EllipticCurve.EllipticCurveField,
+    module DslDemo.EllipticCurve.EllipticCurvePoint,
+    module DslDemo.MergeSort,
     Natural,
     c,
     ev,
@@ -32,13 +32,13 @@ import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text.Chart (height, options, plotWith)
+import DslDemo.EllipticCurve.EllipticCurve
+import DslDemo.EllipticCurve.EllipticCurveConstants
+import DslDemo.EllipticCurve.EllipticCurveField
+import DslDemo.EllipticCurve.EllipticCurvePoint
+import DslDemo.Exponentiation qualified as RE
+import DslDemo.MergeSort
 import Numeric.Natural (Natural)
-import RecursionExamples.EllipticCurve
-import RecursionExamples.EllipticCurveConstants
-import RecursionExamples.EllipticCurveField
-import RecursionExamples.EllipticCurvePoint
-import RecursionExamples.Exponentiation qualified as RE
-import RecursionExamples.MergeSort
 import Test.QuickCheck
 
 c :: (S s Base -> S s' alt') -> CodeL1

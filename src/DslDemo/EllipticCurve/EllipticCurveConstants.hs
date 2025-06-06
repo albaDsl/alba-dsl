@@ -1,8 +1,8 @@
-module RecursionExamples.EllipticCurveConstants (g, a, b, p, n) where
+module DslDemo.EllipticCurve.EllipticCurveConstants (g, a, b, p, n) where
 
 import Alba.Dsl.V1.Bch2026
+import DslDemo.EllipticCurve.EllipticCurvePoint (TPoint, pushPoint)
 import Numeric.Natural (Natural)
-import RecursionExamples.EllipticCurvePoint (TPoint, pushPoint)
 
 g :: FN s (s > TPoint)
 g = pushPoint x y

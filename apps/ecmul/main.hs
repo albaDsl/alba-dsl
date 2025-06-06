@@ -1,10 +1,10 @@
 import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Data.Maybe (fromJust)
+import DslDemo.EllipticCurve.EllipticCurve (ecMul)
+import DslDemo.EllipticCurve.EllipticCurveConstants (g)
+import DslDemo.EllipticCurve.EllipticCurvePoint (getX)
 import Numeric.Natural (Natural)
-import RecursionExamples.EllipticCurve (ecMul)
-import RecursionExamples.EllipticCurveConstants (g)
-import RecursionExamples.EllipticCurvePoint (getX)
 
 -- For profiling the VM using the EC multiply example.
 main :: IO ()

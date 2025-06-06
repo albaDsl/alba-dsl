@@ -7,10 +7,10 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Criterion.Main (bench, bgroup, defaultMain, nf)
 import Data.Maybe (fromJust)
+import DslDemo.EllipticCurve.EllipticCurve (ecMul)
+import DslDemo.EllipticCurve.EllipticCurveConstants (g)
+import DslDemo.EllipticCurve.EllipticCurvePoint (getX)
 import Numeric.Natural (Natural)
-import RecursionExamples.EllipticCurve (ecMul)
-import RecursionExamples.EllipticCurveConstants (g)
-import RecursionExamples.EllipticCurvePoint (getX)
 
 main :: IO ()
 main = do
