@@ -15,6 +15,7 @@ import Data.Bits (clearBit, complement, shift, shiftR, testBit, (.&.), (.|.))
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Word (Word8)
+import GHC.Num (integerLog2)
 import Prelude hiding (init, iterate, sum)
 
 signBit :: Int
@@ -53,15 +54,16 @@ integerToBytes n =
     f 0 = Nothing
     f x = Just (fromIntegral x, x `shiftR` bitsPerByte)
 
+{-# INLINE integerByteSize #-}
 integerByteSize :: Integer -> Int
 integerByteSize 0 = 0
 integerByteSize n =
-  let (count, highBit) = iterate (abs n) 0
-   in if highBit then count + 1 else count
-  where
-    iterate 0 count = (count, False)
-    iterate n' count | n' <= 255 = (count + 1, testBit n' signBit)
-    iterate n' count = iterate (n' `shiftR` bitsPerByte) (succ count)
+  let n' = abs n
+      numBits = integerLog2 n'
+      (q, r) = numBits `quotRem` 8
+      topBitSet = r == 7
+      extraByte = if topBitSet then 1 else 0
+   in fromIntegral $ q + 1 + extraByte
 
 extendToByteSize :: Bytes -> Int -> Maybe Bytes
 extendToByteSize bytes byteSize =
