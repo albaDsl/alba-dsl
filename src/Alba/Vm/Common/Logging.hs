@@ -15,7 +15,7 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError)
 import Alba.Vm.Common.StackElement (Labels, showStackElement)
 import Alba.Vm.Common.Utils (formatBytesWithLabels)
-import Alba.Vm.Common.VmLimits (dumpLimits, dumpMetrics)
+import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Alba.Vm.Common.VmStack (VmStack)
 import Alba.Vm.Common.VmState
   ( LogEntry (..),
@@ -135,17 +135,15 @@ dumpVerifyScriptResult'
         printf "scriptPubKey:\n"
         dumpLog displayOpts res
         when (showMetrics && isNothing scriptRedeemResult) $
-          dumpMetricsAndLimits res
+          dumpMetrics res
       Nothing -> pure ()
 
     case scriptRedeemResult of
       Just res -> do
         printf "redeemScript:\n"
         dumpLog displayOpts res
-        when showMetrics $ dumpMetricsAndLimits res
+        when showMetrics $ dumpMetrics res
       Nothing -> pure ()
-    where
-      dumpMetricsAndLimits res' = dumpMetrics res' >> dumpLimits res'
 
 showLabels :: Maybe Labels -> IO ()
 showLabels (Just labels) = do

@@ -129,12 +129,40 @@ verifyMetrics VmState {metrics, limits} | metrics <= limits = Right ()
 verifyMetrics st = Left (SeOpVmLimit, st)
 
 dumpMetrics :: VmState -> IO ()
-dumpMetrics VmState {..} = print metrics
+dumpMetrics VmState {metrics = VmMetrics {..}, limits = lim} = do
+  printf s1 instructions
+  printf s2 pushedBytes
+  printf s3 arithmeticBytes
+  printf
+    s4
+    hashIterations
+    lim.hashIterations
+    ( fromIntegral hashIterations
+        / (fromIntegral lim.hashIterations :: Double)
+        * 100
+    )
+  printf
+    s5
+    sigChecks
+    lim.sigChecks
+    (fromIntegral sigChecks / (fromIntegral lim.sigChecks :: Double) * 100)
+  printf
+    s6
+    cost
+    lim.cost
+    (fromIntegral cost / (fromIntegral lim.cost :: Double) * 100)
+  where
+    s1 = "Instructions:     %d\n"
+    s2 = "Pushed bytes:     %d\n"
+    s3 = "Arithmetic bytes: %d\n"
+    s4 = "Hash iterations:  %d / %d (%0.1f%%)\n"
+    s5 = "Sig checks:       %d / %d (%0.1f%%)\n"
+    s6 = "Cost:             %d / %d (%0.1f%%)\n"
 
 dumpLimits :: VmState -> IO ()
 dumpLimits VmState {limits} =
   printf
-    "Cost limit = %d. Hash iters limit = %d. Sig limit = %d.\n"
+    "Cost limit = %d. Hash iterations limit = %d. Sig checks limit = %d.\n"
     limits.cost
     limits.hashIterations
     limits.sigChecks
