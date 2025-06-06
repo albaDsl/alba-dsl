@@ -78,6 +78,6 @@ f5 = int 2 # argRoll @"x" # pow
 -- Try with e.g. test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
--- ev (c f5) 0xAA5E28D6A97A2479A65527F7290311A3624D4CC0FA1578598EE3C2613BF99522
+-- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
 f6 = g # ecMul # getX

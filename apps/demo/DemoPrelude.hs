@@ -15,6 +15,7 @@ module DemoPrelude
     c,
     ev,
     evl,
+    evm,
     listProg,
     listProg',
     plot,
@@ -28,6 +29,8 @@ import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Math
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026
+import Alba.Vm.Common.VmLimits (dumpMetrics)
+import Data.ByteString qualified as B
 import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
@@ -40,6 +43,7 @@ import DslDemo.Exponentiation qualified as RE
 import DslDemo.MergeSort
 import Numeric.Natural (Natural)
 import Test.QuickCheck
+import Text.Printf (printf)
 
 c :: (S s Base -> S s' alt') -> CodeL1
 c = compile Dsl.O1
@@ -85,6 +89,38 @@ evl code x = dump $ evaluateScript txCtx startState'
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
     dump res = dumpLog defaultDisplayOpts (fromRight (error "") res)
+
+-- Prints VM metrics for the run.
+evm :: CodeL1 -> Integer -> IO ()
+evm code x = dump $ evaluateScript txCtx startState'
+  where
+    txCtx = fromJust $ mkTxContext undefined 0 undefined
+    startState' =
+      (startState vmParamsStandard)
+        { code,
+          s = [i2SeUnsafe x],
+          logData = Nothing
+        }
+
+    dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
+    dump res = do
+      let state = fromRight (error "") res
+      dumpLog defaultDisplayOpts state
+      dumpMetrics state
+      printf "\nVM Limits are maxed out, so ignore the percentages above.\n"
+      printf
+        "Based on the code size, our cost budget would have been: %d.\n"
+        budget
+      printf
+        "So: %d / %d (%0.1f%%)\n"
+        state.metrics.cost
+        budget
+        ( fromIntegral state.metrics.cost
+            / (fromIntegral budget :: Double)
+            * 100
+        )
+      where
+        budget = B.length code * vmParamsStandard.costBudgetPerInputByte
 
 listProg :: (S s Base -> S s' alt') -> IO ()
 listProg prog = list (compileL2 Dsl.O1 prog)
