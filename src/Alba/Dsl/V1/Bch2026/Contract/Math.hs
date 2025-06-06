@@ -1,6 +1,7 @@
 module Alba.Dsl.V1.Bch2026.Contract.Math
   ( module Alba.Dsl.V1.Bch2025.Contract.Math,
     pow,
+    pow',
     factorial,
   )
 where
@@ -36,7 +37,13 @@ import Alba.Dsl.V1.Common.Lang (begin, (#))
 
 -- 35 opcodes, 35 bytes.
 pow :: FN (s > TInt > TNat) (s > TInt)
-pow =
+pow = pow' opMul
+
+-- The multiplication operator to use is provided as an argument.
+pow' ::
+  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
+  FN (s > TInt > TNat) (s > TInt)
+pow' mul =
   begin
     # opDup
     # ifZero
@@ -50,12 +57,14 @@ pow =
     fn =
       begin -- b n res
         # ex1 (argPick @"n" # isOdd) -- b n res odd?
-        # opWhen (argPick @"b" # opMul) -- b n res
-        # (argRoll @"b" # square) -- n res b
+        # opWhen (argPick @"b" # mul) -- b n res
+        # (argRoll @"b" # square') -- n res b
         # (argRoll @"n" # half) -- res b n
         # ex1 (opDup # isZero) -- res b n zero?
         # opRoll @3 -- b n zero? res
         # opSwap -- b n res zero?
+    square' :: FN (s > TInt) (s > TInt)
+    square' = opDup # mul
 
 factorial :: FN (s > TNat) (s > TNat)
 factorial =
