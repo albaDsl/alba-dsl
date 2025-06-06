@@ -16,6 +16,7 @@ module DemoPrelude
     ev,
     evl,
     listProg,
+    listProg',
     plot,
     cube,
     recPow,
@@ -87,6 +88,9 @@ evl code x = dump $ evaluateScript txCtx startState'
 
 listProg :: (S s Base -> S s' alt') -> IO ()
 listProg prog = list (compileL2 Dsl.O1 prog)
+
+listProg' :: (S s Base -> S s' alt') -> IO ()
+listProg' prog = list (compileL2 Dsl.None prog)
 
 plot :: [Integer] -> IO ()
 plot = plotWith (options {height = 10})
