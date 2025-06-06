@@ -1,0 +1,107 @@
+# Copyright (c) 2025 albaDsl
+
+- fixity: infixr 9 ~#~
+
+- warn: {lhs: "opDrop # opDrop", rhs: "op2Drop"}
+- warn: {lhs: "a # opDrop # opDrop", rhs: "a # op2Drop"}
+
+# op1Add
+- warn: {lhs: "op1 # opAdd", rhs: "op1Add"}
+- warn: {lhs: "a # op1 # opAdd", rhs: "a # op1Add"}
+
+- warn: {lhs: "int 1 # opAdd", rhs: "op1Add"}
+- warn: {lhs: "a # int 1 # opAdd", rhs: "a # op1Add"}
+
+- warn: {lhs: "nat 1 # opAdd", rhs: "op1Add"}
+- warn: {lhs: "a # nat 1 # opAdd", rhs: "a # op1Add"}
+
+# op1Sub
+- warn: {lhs: "op1 # opSub", rhs: "op1Sub"}
+- warn: {lhs: "a # op1 # opSub", rhs: "a # op1Sub"}
+
+- warn: {lhs: "int 1 # opSub", rhs: "op1Sub"}
+- warn: {lhs: "a # int 1 # opSub", rhs: "a # op1Sub"}
+
+- warn: {lhs: "nat 1 # opSub", rhs: "op1Sub"}
+- warn: {lhs: "a # nat 1 # opSub", rhs: "a # op1Sub"}
+
+# op1Negate
+- warn: {lhs: "op1 # opNegate", rhs: "op1Negate"}
+- warn: {lhs: "a # op1 # opNegate", rhs: "a # op1Negate"}
+
+- warn: {lhs: "int 1 # opNegate", rhs: "op1Negate"}
+- warn: {lhs: "a # int 1 # opNegate", rhs: "a # op1Negate"}
+
+- warn: {lhs: "nat 1 # opNegate", rhs: "op1Negate"}
+- warn: {lhs: "a # nat 1 # opNegate", rhs: "a # op1Negate"}
+
+# op0NotEqual
+- warn: {lhs: "op0 # opNumEqual # opNot", rhs: "op0NotEqual"}
+- warn: {lhs: "a # op0 # opNumEqual # opNot", rhs: "a # op0NotEqual"}
+
+- warn: {lhs: "int 0 # opNumEqual # opNot", rhs: "op0NotEqual"}
+- warn: {lhs: "a # int 0 # opNumEqual # opNot", rhs: "a # op0NotEqual"}
+
+- warn: {lhs: "nat 0 # opNumEqual # opNot", rhs: "op0NotEqual"}
+- warn: {lhs: "a # nat 0 # opNumEqual # opNot", rhs: "a # op0NotEqual"}
+
+# opNumNotEqual
+- warn: {lhs: "opNumEqual # opNot", rhs: "opNumNotEqual"}
+- warn: {lhs: "a # opNumEqual # opNot", rhs: "a # opNumNotEqual"}
+
+# opPick / opRoll
+- warn: {lhs: "opPick @0", rhs: "opDup"}
+- warn: {lhs: "opPick @1", rhs: "opOver"}
+- warn: {lhs: "opRoll @1", rhs: "opSwap"}
+- warn: {lhs: "opRoll @2", rhs: "opRot"}
+- warn: {lhs: "opPick @2 # opPick @1 # opPick @3", rhs: "op3Dup # opSwap"}
+
+- warn: {lhs: "opPick @2 # opPick @2 # opPick @2", rhs: "op3Dup"}
+- warn: {lhs: "a # opPick @2 # opPick @2 # opPick @2", rhs: "a # op3Dup"}
+
+- warn: {lhs: "opPick @0 # opPick @2", rhs: "op2Dup # opSwap"}
+- warn: {lhs: "a # opPick @0 # opPick @2", rhs: "a # op2Dup # opSwap"}
+
+- warn: {lhs: "opPick @2 # opPick @4", rhs: "op2Over # opSwap"}
+- warn: {lhs: "a # opPick @2 # opPick @4", rhs: "a # op2Over # opSwap"}
+
+- warn: {lhs: "opPick @3 # opPick @3", rhs: "op2Over"}
+- warn: {lhs: "a # opPick @3 # opPick @3", rhs: "a # op2Over"}
+
+- warn: {lhs: "opRoll @2 # opRoll @3", rhs: "op2Swap # opSwap"}
+- warn: {lhs: "a # opRoll @2 # opRoll @3", rhs: "a # op2Swap # opSwap"}
+
+- warn: {lhs: "opRoll @3 # opRoll @3", rhs: "op2Swap"}
+- warn: {lhs: "a # opRoll @3 # opRoll @3", rhs: "a # op2Swap"}
+
+- warn: {lhs: "opRoll @4 # opRoll @5", rhs: "op2Rot # opSwap"}
+- warn: {lhs: "a # opRoll @4 # opRoll @5", rhs: "a # op2Rot # opSwap"}
+
+- warn: {lhs: "opRoll @5 # opRoll @5", rhs: "op2Rot"}
+- warn: {lhs: "a # opRoll @5 # opRoll @5", rhs: "a # op2Rot"}
+
+# Misc stack ops.
+- warn: {lhs: "opDrop # opDrop", rhs: "op2Drop"}
+- warn: {lhs: "a # opDrop # opDrop", rhs: "a # op2Drop"}
+
+- warn: {lhs: "opDup # opSwap", rhs: "opDup"}
+- warn: {lhs: "a # opDup # opSwap", rhs: "a # opDup"}
+
+- warn: {lhs: "opOver # opOver", rhs: "op2Dup"}
+- warn: {lhs: "a # opOver # opOver", rhs: "a # op2Dup"}
+
+- warn: {lhs: "opDup # opOver", rhs: "opDup # opDup"}
+- warn: {lhs: "a # opDup # opOver", rhs: "a # opDup # opDup"}
+
+# Equality.
+- warn: {lhs: "opEqual # opVerify", rhs: "opEqualVerify"}
+- warn: {lhs: "a # opEqual # opVerify", rhs: "a # opEqualVerify"}
+
+- warn: {lhs: "opNumEqual # opVerify", rhs: "opNumEqualVerify"}
+- warn: {lhs: "a # opNumEqual # opVerify", rhs: "a # opNumEqualVerify"}
+
+- warn: {lhs: "opCheckSig # opVerify", rhs: "opCheckSigVerify"}
+- warn: {lhs: "a # opCheckSig # opVerify", rhs: "a # opCheckSigVerify"}
+
+- warn: {lhs: "opCheckDataSig # opVerify", rhs: "opCheckDataSigVerify"}
+- warn: {lhs: "a # opCheckDataSig # opVerify", rhs: "a # opCheckDataSigVerify"}
