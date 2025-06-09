@@ -85,6 +85,8 @@ data OpcodeL2
   | OP_XOR
   | OP_EQUAL
   | OP_EQUALVERIFY
+  | OP_DEFINE
+  | OP_INVOKE
   | OP_1ADD
   | OP_1SUB
   | OP_NEGATE
@@ -240,6 +242,8 @@ opcodeL2ToCodeL1 OP_OR = Just $ toCodeL1 L1.OP_OR
 opcodeL2ToCodeL1 OP_XOR = Just $ toCodeL1 L1.OP_XOR
 opcodeL2ToCodeL1 OP_EQUAL = Just $ toCodeL1 L1.OP_EQUAL
 opcodeL2ToCodeL1 OP_EQUALVERIFY = Just $ toCodeL1 L1.OP_EQUALVERIFY
+opcodeL2ToCodeL1 OP_DEFINE = Just $ toCodeL1 L1.OP_RESERVED1_OP_DEFINE
+opcodeL2ToCodeL1 OP_INVOKE = Just $ toCodeL1 L1.OP_RESERVED2_OP_INVOKE
 opcodeL2ToCodeL1 OP_1ADD = Just $ toCodeL1 L1.OP_1ADD
 opcodeL2ToCodeL1 OP_1SUB = Just $ toCodeL1 L1.OP_1SUB
 opcodeL2ToCodeL1 OP_NEGATE = Just $ toCodeL1 L1.OP_NEGATE
@@ -397,8 +401,8 @@ getOp' L1.OP_OR code = Just (OP_OR, code)
 getOp' L1.OP_XOR code = Just (OP_XOR, code)
 getOp' L1.OP_EQUAL code = Just (OP_EQUAL, code)
 getOp' L1.OP_EQUALVERIFY code = Just (OP_EQUALVERIFY, code)
-getOp' op@L1.OP_RESERVED1 code = Just (OP_UNUSED op, code)
-getOp' op@L1.OP_RESERVED2 code = Just (OP_UNUSED op, code)
+getOp' L1.OP_RESERVED1_OP_DEFINE code = Just (OP_DEFINE, code)
+getOp' L1.OP_RESERVED2_OP_INVOKE code = Just (OP_INVOKE, code)
 getOp' L1.OP_1ADD code = Just (OP_1ADD, code)
 getOp' L1.OP_1SUB code = Just (OP_1SUB, code)
 getOp' op@L1.OP_2MUL code = Just (OP_UNUSED op, code)

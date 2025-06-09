@@ -14,15 +14,18 @@ data ScriptError
   | SeDivideByZero
   | SeEqualVerify
   | SeEvalFalse
+  | SeFunctionOverwriteDisallowed
   | SeImpossibleEncoding
   | SeInvalidBitfieldSize
   | SeInvalidBitCount
   | SeInvalidBitRange
+  | SeInvalidFunctionIdentifier
   | SeInvalidNumberRange
   | SeInvalidOperandSize
   | SeInvalidSplitRange
   | SeInvalidStackOperation
   | SeInvalidTxInputIndex
+  | SeInvokedUndefinedFunction
   | SeMinimalData
   | SeMinimalNum
   | SeModByZero

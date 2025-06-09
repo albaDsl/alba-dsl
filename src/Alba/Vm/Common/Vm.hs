@@ -17,11 +17,7 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2, getOp, isMinimal)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (stackElementToBool', stackElementToBytes)
 import Alba.Vm.Common.Tx (Tx (..), TxIn (..))
-import Alba.Vm.Common.TxContext
-  ( TxContext,
-    txContextInputIndex,
-    txContextTx,
-  )
+import Alba.Vm.Common.TxContext (TxContext, txContextInputIndex, txContextTx)
 import Alba.Vm.Common.VmLimits
   ( addOperationCost,
     setLimits,
@@ -49,6 +45,7 @@ import Alba.Vm.Common.VmState
 import Control.Monad (unless, when)
 import Data.Bifunctor (second)
 import Data.ByteString qualified as B
+import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
 
@@ -132,6 +129,7 @@ startState params =
       alt = S.empty,
       exec = condStackEmpty,
       pushOnly = False,
+      functions = M.empty,
       metrics = zeroedMetrics,
       limits = maxedMetrics,
       logData = Just S.empty,

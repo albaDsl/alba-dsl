@@ -18,6 +18,7 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack (CondStack, VmStack)
 import Data.Sequence qualified as S
+import Data.Map qualified as M
 
 data VmState = VmState
   { code :: !CodeL1,
@@ -26,6 +27,7 @@ data VmState = VmState
     alt :: !VmStack,
     exec :: !CondStack,
     pushOnly :: !Bool,
+    functions :: !(M.Map Int CodeL1),
     metrics :: !VmMetrics,
     limits :: !VmMetrics,
     params :: !VmParams,

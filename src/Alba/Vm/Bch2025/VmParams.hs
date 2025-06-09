@@ -21,6 +21,7 @@ vmParamsStandard =
           maxScriptElementSize = maxScriptElementSize,
           maxStackSize = 1000,
           maxExecStackSize = 100,
+          maxFunctionIdentifier = 0,
           lockTimeThreshold = 500_000_000,
           opCodeCost = 100,
           costBudgetPerInputByte = 800,

@@ -17,6 +17,7 @@ data VmParams = VmParams
     maxScriptElementSize :: Int,
     maxStackSize :: Int,
     maxExecStackSize :: Int,
+    maxFunctionIdentifier :: Int,
     lockTimeThreshold :: Word32,
     opCodeCost :: Int,
     costBudgetPerInputByte :: Int,

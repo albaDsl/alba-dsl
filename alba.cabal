@@ -144,6 +144,7 @@ library
       Alba.Vm.Bch2025.VmSigHash,
       Alba.Vm.Bch2026,
       Alba.Vm.Bch2026.Vm,
+      Alba.Vm.Bch2026.VmOpDefineInvoke,
       Alba.Vm.Bch2026.VmOpEval,
       Alba.Vm.Bch2026.VmOpLoops,
       Alba.Vm.Bch2026.VmOps,
