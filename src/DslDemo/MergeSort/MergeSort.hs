@@ -1,41 +1,35 @@
-module DslDemo.MergeSort.MergeSortEval where
+module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
 
+setup :: FNC
+setup =
+  begin
+    # function "msort" msort
+    # function "merge" merge
+
 sort :: FN (s > TBytes) (s > TBytes)
-sort = lambda' merge # lambda' msort # recur msort
+sort = invoke "msort" msort
 
-msort :: FN (s > TBytes > TLambdaUntyped > TLambdaUntyped) (s > TBytes)
-msort = unname @3 msort'
+msort :: FN (s > TBytes) (s > TBytes)
+msort = unname @1 msort'
 
-msort' ::
-  FN
-    (s > N "xs" TBytes > N "merge" TLambdaUntyped > N "rec" TLambdaUntyped)
-    (s > TBytes)
+msort' :: FN (s > N "xs" TBytes) (s > TBytes)
 msort' =
   begin
     # name @"size" (argPick @"xs" # opSize # opNip)
     # argPick @"size"
     # ifZero
-      (argRoll @"xs" # argsDrop @3)
+      (argRoll @"xs" # argsDrop @1)
       ( begin
           # (argRoll @"size" # nat 1 # opEqual)
           # opIf
-            (argRoll @"xs" # argsDrop @2)
+            (argRoll @"xs")
             ( begin
                 # name2 @"fst" @"snd" (argRoll @"xs" # halve)
-                # ( argRoll @"fst"
-                      # argPick @"merge"
-                      # argPick @"rec"
-                      # recur msort
-                  )
-                # ( argRoll @"snd"
-                      # argPick @"merge"
-                      # argRoll @"rec"
-                      # recur msort
-                  )
-                # (argRoll @"merge")
-                # recur merge
+                # (argRoll @"fst" # invoke "msort" msort)
+                # (argRoll @"snd" # invoke "msort" msort)
+                # invoke "merge" merge
             )
       )
 
@@ -45,22 +39,19 @@ halve = opSize # op2 # opDiv # opSplit
 uncons :: FN (s > TBytes) (s > TBytes > TBytes)
 uncons = nat 1 # opSplit
 
-merge :: FN (s > TBytes > TBytes > TLambdaUntyped) (s > TBytes)
-merge = unname @3 merge'
+merge :: FN (s > TBytes > TBytes) (s > TBytes)
+merge = unname @2 merge'
 
-merge' ::
-  FN
-    (s > N "xs" TBytes > N "ys" TBytes > N "rec" TLambdaUntyped)
-    (s > TBytes)
+merge' :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes)
 merge' =
   begin
     # (argPick @"xs" # opSize # opNip)
     # ifZero
-      (argRoll @"ys" # argsDrop @2)
+      (argRoll @"ys" # argsDrop @1)
       ( begin
           # (argPick @"ys" # opSize # opNip)
           # ifZero
-            (argRoll @"xs" # argsDrop @2)
+            (argRoll @"xs" # argsDrop @1)
             ( begin
                 # name2 @"x" @"xRest" (argPick @"xs" # uncons)
                 # name2 @"y" @"yRest" (argPick @"ys" # uncons)
@@ -72,20 +63,20 @@ merge' =
                 # opIf
                   ( begin
                       # argRoll @"x"
-                      # ( argRoll @"xRest"
+                      # ( begin
+                            # argRoll @"xRest"
                             # argRoll @"ys"
-                            # argRoll @"rec"
-                            # recur merge
+                            # invoke "merge" merge
                         )
                       # argsDrop @3
                       # opCat
                   )
                   ( begin
                       # argRoll @"y"
-                      # ( argRoll @"xs"
+                      # ( begin
+                            # argRoll @"xs"
                             # argRoll @"yRest"
-                            # argRoll @"rec"
-                            # recur merge
+                            # invoke "merge" merge
                         )
                       # argsDrop @3
                       # opCat

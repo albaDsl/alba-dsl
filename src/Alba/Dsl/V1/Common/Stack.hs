@@ -37,7 +37,10 @@ data TSig
 data TPubKey
 {- ORMOLU_ENABLE -}
 
-newtype S (s :: [Type]) (alt :: [Type]) = S CodeL2
+data S (s :: [Type]) (alt :: [Type]) = S
+  { c :: CodeL2,
+    slot :: Int
+  }
   deriving (Show)
 
 -- A stack with nothing on it.

@@ -8,6 +8,7 @@ module Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     name,
     name2,
+    name2',
     name3,
     unname,
   )
@@ -32,26 +33,31 @@ name ::
   forall name t s s' alt alt'.
   FNA s alt (s' > t) alt' ->
   FNA s alt (s' > N name t) alt'
-name prog state = let (S c') = prog state in S c'
+name prog state = let (S c fs) = prog state in S c fs
 
 name2 ::
   forall n1 n2 t1 t2 s s' alt alt'.
   FNA s alt (s' > t1 > t2) alt' ->
   FNA s alt (s' > N n1 t1 > N n2 t2) alt'
-name2 prog state = let (S c') = prog state in S c'
+name2 prog state = let (S c fs) = prog state in S c fs
+
+name2' ::
+  forall n1 n2 t1 t2 s alt.
+  FNA (s > t1 > t2) alt (s > N n1 t1 > N n2 t2) alt
+name2' state = let (S c fs) = state in S c fs
 
 name3 ::
   forall n1 n2 n3 t1 t2 t3 s s' alt alt'.
   FNA s alt (s' > t1 > t2 > t3) alt' ->
   FNA s alt (s' > N n1 t1 > N n2 t2 > N n3 t3) alt'
-name3 prog state = let (S c') = prog state in S c'
+name3 prog state = let (S c fs) = prog state in S c fs
 
 unname ::
   forall count s s' s'' alt alt'.
   (UnNameSeveral count s ~ s'') =>
   FNA s alt s' alt' ->
   FNA s'' alt s' alt'
-unname prog (S c) = let state' = S c in prog state'
+unname prog (S c fs) = let state' = S c fs in prog state'
 
 type family
   FindName

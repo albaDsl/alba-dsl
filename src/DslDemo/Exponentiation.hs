@@ -1,29 +1,27 @@
-module DslDemo.Exponentiation (pow, pow') where
+module DslDemo.Exponentiation (pow) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
 
 pow :: FN (s > TInt > TNat) (s > TInt)
-pow = lambda' (powHelper opMul) # recur (powHelper opMul)
-
-pow' ::
-  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-  FN (s > TInt > TNat) (s > TInt)
-pow' mul = lambda' (powHelper mul) # recur (powHelper mul)
+pow =
+  begin
+    # function "pow" (powHelper opMul)
+    # invoke "pow" (powHelper opMul)
 
 powHelper ::
   (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-  FN (s > TInt > TNat > TLambdaUntyped) (s > TInt)
-powHelper mul = unname @3 (powHelper' mul)
+  FN (s > TInt > TNat) (s > TInt)
+powHelper mul = unname @2 (powHelper' mul)
 
 powHelper' ::
   (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-  FN (s > N "b" TInt > N "n" TNat > N "rec" TLambdaUntyped) (s > TInt)
+  FN (s > N "b" TInt > N "n" TNat) (s > TInt)
 powHelper' mul =
   begin
     # argPick @"n"
     # ifZero
-      (int 1 # argsDrop @3)
+      (int 1 # argsDrop @2)
       ( begin
           # (argPick @"n" # isEven)
           # opIf
@@ -31,8 +29,7 @@ powHelper' mul =
                 # ( begin
                       # argRoll @"b"
                       # (argRoll @"n" # nat 2 # opDiv)
-                      # argRoll @"rec"
-                      # recur (powHelper mul)
+                      # invoke "pow" (powHelper mul)
                   )
                 # square mul
             )
@@ -41,8 +38,7 @@ powHelper' mul =
                 # ( begin
                       # argRoll @"b"
                       # (argRoll @"n" # nat 1 # opSubUnsafe)
-                      # argRoll @"rec"
-                      # recur (powHelper mul)
+                      # invoke "pow" (powHelper mul)
                   )
                 # mul
             )

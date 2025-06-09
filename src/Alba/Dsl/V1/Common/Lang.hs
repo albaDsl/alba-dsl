@@ -32,44 +32,44 @@ begin = id
 
 -- An expression that does not modify the stack.
 ex0 :: FNA s alt s alt -> FNA s alt s alt
-ex0 prog state = let (S c') = prog state in S c'
+ex0 prog state = let (S c fs) = prog state in S c fs
 
 -- An expression that adds one element to the stack.
 ex1 :: FNA s alt (s > t1) alt -> FNA s alt (s > t1) alt
-ex1 prog state = let (S c') = prog state in S c'
+ex1 prog state = let (S c fs) = prog state in S c fs
 
 ex2 :: FNA s alt (s > t1 > t2) alt -> FNA s alt (s > t1 > t2) alt
-ex2 prog state = let (S c') = prog state in S c'
+ex2 prog state = let (S c fs) = prog state in S c fs
 
 natToInt :: FN (s > TNat) (s > TInt)
-natToInt (S c) = let state' = S c in state'
+natToInt (S c fs) = let state = S c fs in state
 
 cast :: FN (s > t1) (s > t2)
-cast (S c) = let state' = S c in state'
+cast (S c fs) = let state = S c fs in state
 
 branch1 :: forall s. FN s (Branch1 s)
-branch1 (S c) = S c
+branch1 (S c fs) = S c fs
 
 branch2 :: forall s. FN s (Branch2 s)
-branch2 (S c) = S c
+branch2 (S c fs) = S c fs
 
 branch3 :: forall s. FN s (Branch3 s)
-branch3 (S c) = S c
+branch3 (S c fs) = S c fs
 
 branch4 :: forall s. FN s (Branch4 s)
-branch4 (S c) = S c
+branch4 (S c fs) = S c fs
 
 branch5 :: forall s. FN s (Branch5 s)
-branch5 (S c) = S c
+branch5 (S c fs) = S c fs
 
 branch6 :: forall s. FN s (Branch6 s)
-branch6 (S c) = S c
+branch6 (S c fs) = S c fs
 
 branch7 :: forall s. FN s (Branch7 s)
-branch7 (S c) = S c
+branch7 (S c fs) = S c fs
 
 branch8 :: forall s. FN s (Branch8 s)
-branch8 (S c) = S c
+branch8 (S c fs) = S c fs
 
 type family Branch1 (xs :: [Type]) :: [Type] where
   Branch1 (xs > (x1 :| _)) = Append xs x1

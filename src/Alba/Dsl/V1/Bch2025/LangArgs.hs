@@ -34,11 +34,11 @@ argPick ::
 argPick = let idx = natVal (Proxy :: Proxy idx) :: Integer in pick idx
 
 pick :: Integer -> S s alt -> S s' alt
-pick idx (S c) =
+pick idx (S c fs) =
   case idx of
-    0 -> S (aop c OP_DUP)
-    1 -> S (aop c OP_OVER)
-    _ -> S (aops c [pushIntegerOp idx, OP_PICK])
+    0 -> S (aop c OP_DUP) fs
+    1 -> S (aop c OP_OVER) fs
+    _ -> S (aops c [pushIntegerOp idx, OP_PICK]) fs
 
 argPickN ::
   forall argName arg idx s.
@@ -57,12 +57,12 @@ argRoll ::
 argRoll = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll idx
 
 roll :: Integer -> S s alt -> S s' alt
-roll idx (S c) =
+roll idx (S c fs) =
   case idx of
-    0 -> S c
-    1 -> S (aop c OP_SWAP)
-    2 -> S (aop c OP_ROT)
-    _ -> S (aops c [pushIntegerOp idx, OP_ROLL])
+    0 -> S c fs
+    1 -> S (aop c OP_SWAP) fs
+    2 -> S (aop c OP_ROT) fs
+    _ -> S (aops c [pushIntegerOp idx, OP_ROLL]) fs
 
 argRollN ::
   forall argName arg idx s s'.
@@ -92,18 +92,18 @@ argsDrop ::
     RemoveNamedArgs s argCount ~ s'
   ) =>
   FN s s'
-argsDrop (S c) =
+argsDrop (S c fs) =
   let idxs = term @idxs :: [Integer]
       idxs' = fixIndices idxs
-   in foldl (flip remove) (S c) idxs'
+   in foldl (flip remove) (S c fs) idxs'
   where
     fixIndices :: [Integer] -> [Integer]
     fixIndices xs = zipWith (-) xs [0 ..]
 
 remove :: Integer -> S s alt -> S s' alt
-remove idx (S c) =
+remove idx (S c fs) =
   case idx of
-    0 -> S (aop c OP_DROP)
-    1 -> S (aop c OP_NIP)
-    2 -> S (aop (aop c OP_ROT) OP_DROP)
-    _ -> S (aops c [pushIntegerOp idx, OP_ROLL, OP_DROP])
+    0 -> S (aop c OP_DROP) fs
+    1 -> S (aop c OP_NIP) fs
+    2 -> S (aop (aop c OP_ROT) OP_DROP) fs
+    _ -> S (aops c [pushIntegerOp idx, OP_ROLL, OP_DROP]) fs

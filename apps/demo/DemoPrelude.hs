@@ -10,7 +10,7 @@ module DemoPrelude
     module DslDemo.EllipticCurve.EllipticCurveConstants,
     module DslDemo.EllipticCurve.EllipticCurveField,
     module DslDemo.EllipticCurve.EllipticCurvePoint,
-    module DslDemo.MergeSort.MergeSortEval,
+    module DslDemo.MergeSort.MergeSort,
     Natural,
     c,
     ev,
@@ -40,9 +40,9 @@ import DslDemo.EllipticCurve.EllipticCurveConstants
 import DslDemo.EllipticCurve.EllipticCurveField
 import DslDemo.EllipticCurve.EllipticCurvePoint
 import DslDemo.Exponentiation qualified as RE
-import DslDemo.MergeSort.MergeSortEval
+import DslDemo.MergeSort.MergeSort
 import Numeric.Natural (Natural)
-import Test.QuickCheck
+import Test.QuickCheck hiding (function)
 import Text.Printf (printf)
 
 c :: (S s Base -> S s' alt') -> CodeL1

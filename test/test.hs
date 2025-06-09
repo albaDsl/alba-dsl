@@ -7,11 +7,12 @@ import TestCheckSig (testCheckSig)
 import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
-import TestEval (testEval)
+import TestFunctions (testFunctions)
 import TestIntPushing (testIntPushing)
 import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
+import TestLambdas (testLambdas)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
 import TestLoops (testLoops)
@@ -38,11 +39,12 @@ tests =
       testCustomTypes,
       testDataPushing,
       testDataSig,
-      testEval,
+      testFunctions,
       testIntPushing,
       testInteger,
       testIntrospection,
       testInvalidStack,
+      testLambdas,
       testLibauthVectors2025,
       testLibauthVectors2026,
       testLoops,
