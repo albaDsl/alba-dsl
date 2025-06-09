@@ -10,16 +10,9 @@ import Alba.Vm.Bch2026
     startState,
     vmParamsStandard,
   )
-import Alba.Vm.Common
-  ( ScriptError,
-    VmStack,
-    i2SeUnsafe,
-    stackElementToBytes,
-    stackElementToInteger,
-  )
+import Alba.Vm.Common (i2SeUnsafe)
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.ByteString qualified as B
-import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
@@ -34,52 +27,32 @@ testEval :: TestTree
 testEval =
   testGroup
     "Eval"
-    [ testCase
-        "Eval basics 1"
-        $ let res = evaluateProg progBasics1
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 6], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Eval basics 2"
-        $ let res = evaluateProg progBasics2
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 15], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Nested eval"
-        $ let res = evaluateProg progNested
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 9], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Recursion — factorial"
-        $ let res = evaluateProg progFactorial
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 720], S.empty)
-                Left err -> error ("err: " <> show err),
+    [ testCase "Eval basics 1" $ evaluateProg progBasics1 @?= True,
+      testCase "Eval basics 2" $ evaluateProg progBasics2 @?= True,
+      testCase "Nested eval" $ evaluateProg progNested @?= True,
+      testCase "Recursion — factorial" $ evaluateProg progFactorial @?= True,
       testProperty "Recursion — pow" propPow,
       testProperty "Recursion — merge sort" propSort
     ]
 
-progBasics1 :: FN s (s > TNat)
+progBasics1 :: FN s (s > TBool)
 progBasics1 =
   begin
     # lambda (op1 # op2 # op3)
     # opEval
     # opAdd
     # opAdd
+    # nat 6
+    # opNumEqual
 
-progBasics2 :: FN s (s > TInt)
+progBasics2 :: FN s (s > TBool)
 progBasics2 =
   begin
     # int 5
     # lambda f
     # opEval
+    # int 15
+    # opNumEqual
   where
     -- A function that calculates x^2 - 2*x
     f :: S (s > TInt) alt -> S (s > TInt) alt
@@ -88,14 +61,22 @@ progBasics2 =
         square = opDup # opMul
         coeff c = int c # opMul
 
-progNested :: FN s (s > TNat)
+progNested :: FN s (s > TBool)
 progNested =
   begin
     # lambda (op1 # op2 # lambda (opAdd # opDup # opMul) # opEval)
     # opEval
+    # int 9
+    # opNumEqual
 
-progFactorial :: FN s (s > TInt)
-progFactorial = int 6 # lambda' fac # recur fac
+progFactorial :: FN s (s > TBool)
+progFactorial =
+  begin
+    # (int 0 # lambda' fac # recur fac # int 1 # opNumEqual)
+    # (int 1 # lambda' fac # recur fac # int 1 # opNumEqual)
+    # (int 6 # lambda' fac # recur fac # int 720 # opNumEqual)
+    # (int 10 # lambda' fac # recur fac # int 3_628_800 # opNumEqual)
+    # (opBoolAnd # opBoolAnd # opBoolAnd)
   where
     fac = unname @2 fac'
 
@@ -113,30 +94,27 @@ progFactorial = int 6 # lambda' fac # recur fac
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =
-  let res = evaluateProg (int (fromIntegral b) # nat (fromIntegral n) # pow)
-   in case res of
-        Right (_ S.:|> x, _alt) ->
-          let y =
-                fromRight
-                  (error "propPow")
-                  (stackElementToInteger vmParamsStandard x)
-              y' = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
-           in y == y'
-        _ -> False
+  let expected = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
+      prog =
+        begin
+          # int (fromIntegral b)
+          # nat (fromIntegral n)
+          # pow
+          # int expected
+          # opNumEqual
+   in evaluateProg prog
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
   (B.length xs <= 20) ==>
-    let res = evaluateProg (bytes xs # sort)
-     in case res of
-          Right (_ S.:|> x, _alt) -> stackElementToBytes x == B.sort xs
-          _ -> False
+    evaluateProg (bytes xs # sort # bytes (B.sort xs) # opEqual)
 
-evaluateProg :: FNA s '[] s' alt' -> Either ScriptError (VmStack, VmStack)
+evaluateProg :: FNA s '[] s' alt' -> Bool
 evaluateProg prog =
   let state = (startState vmParamsStandard) {code = compile None prog}
    in case evaluateScript context state of
-        Left (err, _) -> Left err
-        Right VmState {s, alt} -> Right (s, alt)
+        Right VmState {s, alt} ->
+          s == S.fromList [i2SeUnsafe 1] && alt == S.empty
+        Left (err, _) -> error ("err: " <> show err)
   where
     context = fromJust $ mkTxContext undefined 0 undefined

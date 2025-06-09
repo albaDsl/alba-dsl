@@ -12,15 +12,8 @@ import Alba.Vm.Bch2026
     startState,
     vmParamsStandard,
   )
-import Alba.Vm.Common
-  ( ScriptError,
-    VmParams (..),
-    VmStack,
-    i2SeUnsafe,
-    stackElementToInteger,
-  )
+import Alba.Vm.Common (VmParams (..), i2SeUnsafe)
 import Alba.Vm.Common.VmState (VmState (..))
-import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
@@ -37,34 +30,11 @@ testLoops :: TestTree
 testLoops =
   testGroup
     "Loops"
-    [ testCase
-        "Loops — factorial 1"
-        $ let res = evaluateProg progFactorial1
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Loops — factorial 2"
-        $ let res = evaluateProg progFactorial2
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Loops — factorial 3"
-        $ let res = evaluateProg progFactorial3
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-                Left err -> error ("err: " <> show err),
-      testCase
-        "Loops — elliptic curve — point multiply"
-        $ let res = evaluateProg progEllipticCurve
-           in case res of
-                Right (s, alt) ->
-                  (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-                Left err -> error ("err: " <> show err),
+    [ testCase "Loops — factorial 1" $ evaluateProg progFactorial1 @?= True,
+      testCase "Loops — factorial 2" $ evaluateProg progFactorial2 @?= True,
+      testCase "Loops — factorial 3" $ evaluateProg progFactorial3 @?= True,
+      testCase "Loops — elliptic curve — point multiply" $
+        evaluateProg progEllipticCurve @?= True,
       testProperty "Loops — pow" propPow
     ]
 
@@ -161,29 +131,28 @@ progEllipticCurve =
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =
-  let res = evaluateProg (int (fromIntegral b) # nat (fromIntegral n) # pow)
-   in case res of
-        Right (_ S.:|> x, _alt) ->
-          let y =
-                fromRight
-                  (error "propPow")
-                  (stackElementToInteger vmParamsStandard x)
-              y' = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
-           in y == y'
-        _ -> False
+  let expected = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
+      prog =
+        begin
+          # int (fromIntegral b)
+          # nat (fromIntegral n)
+          # pow
+          # int expected
+          # opNumEqual
+   in evaluateProg prog
 
-evaluateProg :: FNA s '[] s' alt' -> Either ScriptError (VmStack, VmStack)
+evaluateProg :: FNA s '[] s' alt' -> Bool
 evaluateProg prog =
   let state =
         (startState (largerLimits vmParamsStandard))
           { code = compile None prog
           }
    in case evaluateScript context state of
-        Left (err, _) -> Left err
-        Right VmState {s, alt} -> Right (s, alt)
+        Right VmState {s, alt} ->
+          s == S.fromList [i2SeUnsafe 1] && alt == S.empty
+        Left (err, _) -> error ("err: " <> show err)
   where
-    largerLimits :: VmParams -> VmParams
-    largerLimits params =
-      params {maxScriptSize = 16_000}
-
     context = fromJust $ mkTxContext undefined 0 undefined
+
+    largerLimits :: VmParams -> VmParams
+    largerLimits params = params {maxScriptSize = 16_000}
