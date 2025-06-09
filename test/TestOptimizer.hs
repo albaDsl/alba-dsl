@@ -5,7 +5,7 @@
 module TestOptimizer (testOptimizer) where
 
 import Alba.Dsl.V1.Bch2025 (optimize)
-import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerCode)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, pushIntegerOp)
 import Alba.Tx.Bch2025 (Tx (..))
 import Alba.Vm.Bch2025
   ( CodeL2,
@@ -46,7 +46,7 @@ instance Arbitrary SetupStackCode where
         SetupStackCode res <- go (pred n)
         let maxVal = 2 ^ (128 :: Int) :: Integer
         x <- choose (-maxVal, maxVal) :: Gen Integer
-        pure $ SetupStackCode (res <> pushIntegerCode x)
+        pure $ SetupStackCode (aop res (pushIntegerOp x))
 
 instance {-# OVERLAPS #-} Arbitrary CodeL2 where
   arbitrary = resize numInstructions $ sized go
@@ -68,22 +68,22 @@ instance {-# OVERLAPS #-} Arbitrary CodeL2 where
             (S.|>) <$> go' <*> pure OP_DUP,
             (S.|>) <$> go' <*> pure OP_NIP,
             (S.|>) <$> go' <*> pure OP_OVER,
-            (<>) <$> go' <*> pure (pushInt idx <> S.singleton OP_PICK),
-            (<>) <$> go' <*> pure (pushInt idx <> S.singleton OP_ROLL),
+            (<>) <$> go' <*> pure (aops [] [pushInt idx, OP_PICK]),
+            (<>) <$> go' <*> pure (aops [] [pushInt idx, OP_ROLL]),
             (S.|>) <$> go' <*> pure OP_ROT,
             (S.|>) <$> go' <*> pure OP_SWAP,
             (S.|>) <$> go' <*> pure OP_TUCK,
-            (<>) <$> go' <*> pure (pushInt x <> S.singleton OP_ADD),
-            (<>) <$> go' <*> pure (pushInt x <> S.singleton OP_SUB),
-            (<>) <$> go' <*> pure (pushInt x <> S.singleton OP_1NEGATE),
+            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_ADD]),
+            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_SUB]),
+            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_1NEGATE]),
             (<>)
               <$> go'
-              <*> pure (pushInt x <> S.fromList [OP_NUMEQUAL, OP_NOT])
+              <*> pure (aops [] [pushInt x, OP_NUMEQUAL, OP_NOT])
           ]
         where
           go' = go (n - 1)
 
-          pushInt = pushIntegerCode
+          pushInt = pushIntegerOp
 
 testOptimizer :: TestTree
 testOptimizer =

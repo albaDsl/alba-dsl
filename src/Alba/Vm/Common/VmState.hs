@@ -17,8 +17,8 @@ import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack (CondStack, VmStack)
-import Data.Sequence qualified as S
 import Data.Map qualified as M
+import Data.Sequence qualified as S
 
 data VmState = VmState
   { code :: !CodeL1,

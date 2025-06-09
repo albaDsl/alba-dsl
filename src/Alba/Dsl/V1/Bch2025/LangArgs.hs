@@ -12,7 +12,7 @@ where
 
 import Alba.Dsl.V1.Bch2025.Ops (opDrop)
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerCode)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, pushIntegerOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.LangArgs
@@ -38,7 +38,7 @@ pick idx (S c) =
   case idx of
     0 -> S (aop c OP_DUP)
     1 -> S (aop c OP_OVER)
-    _ -> S (aop (c <> pushIntegerCode idx) OP_PICK)
+    _ -> S (aops c [pushIntegerOp idx, OP_PICK])
 
 argPickN ::
   forall argName arg idx s.
@@ -62,7 +62,7 @@ roll idx (S c) =
     0 -> S c
     1 -> S (aop c OP_SWAP)
     2 -> S (aop c OP_ROT)
-    _ -> S (aop (c <> pushIntegerCode idx) OP_ROLL)
+    _ -> S (aops c [pushIntegerOp idx, OP_ROLL])
 
 argRollN ::
   forall argName arg idx s s'.
@@ -106,4 +106,4 @@ remove idx (S c) =
     0 -> S (aop c OP_DROP)
     1 -> S (aop c OP_NIP)
     2 -> S (aop (aop c OP_ROT) OP_DROP)
-    _ -> S (aop (aop (c <> pushIntegerCode idx) OP_ROLL) OP_DROP)
+    _ -> S (aops c [pushIntegerOp idx, OP_ROLL, OP_DROP])
