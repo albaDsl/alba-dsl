@@ -10,7 +10,7 @@ module DemoPrelude
     module DslDemo.EllipticCurve.EllipticCurveConstants,
     module DslDemo.EllipticCurve.EllipticCurveField,
     module DslDemo.EllipticCurve.EllipticCurvePoint,
-    module DslDemo.MergeSort,
+    module DslDemo.MergeSort.MergeSortEval,
     Natural,
     c,
     ev,
@@ -40,7 +40,7 @@ import DslDemo.EllipticCurve.EllipticCurveConstants
 import DslDemo.EllipticCurve.EllipticCurveField
 import DslDemo.EllipticCurve.EllipticCurvePoint
 import DslDemo.Exponentiation qualified as RE
-import DslDemo.MergeSort
+import DslDemo.MergeSort.MergeSortEval
 import Numeric.Natural (Natural)
 import Test.QuickCheck
 import Text.Printf (printf)

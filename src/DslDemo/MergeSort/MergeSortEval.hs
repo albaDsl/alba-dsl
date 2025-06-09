@@ -1,4 +1,4 @@
-module DslDemo.MergeSort where
+module DslDemo.MergeSort.MergeSortEval where
 
 import Alba.Dsl.V1.Bch2026
 

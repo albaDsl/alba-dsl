@@ -179,7 +179,7 @@ library
       DslDemo.EllipticCurve.EllipticCurveField,
       DslDemo.EllipticCurve.EllipticCurvePoint,
       DslDemo.Exponentiation,
-      DslDemo.MergeSort
+      DslDemo.MergeSort.MergeSortEval
   hs-source-dirs: src
 
 executable alba

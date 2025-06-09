@@ -24,7 +24,7 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
 import DslDemo.Exponentiation (pow)
-import DslDemo.MergeSort (sort)
+import DslDemo.MergeSort.MergeSortEval (sort)
 import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
