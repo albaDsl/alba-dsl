@@ -88,7 +88,8 @@ evl code x = dump $ evaluateScript txCtx startState'
         }
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
-    dump res = dumpLog defaultDisplayOpts (fromRight (error "") res)
+    dump (Right res) = dumpLog defaultDisplayOpts res
+    dump (Left (res, _)) = error (show res)
 
 -- Prints VM metrics for the run.
 evm :: CodeL1 -> Integer -> IO ()
