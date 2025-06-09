@@ -38,8 +38,8 @@ import Data.ByteString qualified as B
 import Data.Text qualified as T
 
 data StackElement = StackElement
-  { value :: StackElementValue,
-    byteSize :: Int
+  { value :: !StackElementValue,
+    byteSize :: !Int
   }
   deriving (Show)
 

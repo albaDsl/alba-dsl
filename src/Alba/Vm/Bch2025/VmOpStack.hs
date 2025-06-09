@@ -53,7 +53,7 @@ evalOpStack op st@VmState {s, alt} =
     _ -> Nothing
   where
     ra s' alt' count = Right $ addBytesPushed count (st {s = s', alt = alt'})
-    r s' count = Right $ addBytesPushed count (st {s = s'})
+    r !s' !count = Right $ addBytesPushed count (st {s = s'})
     fst3 (x, _, _) = x
     ir0 = VU.ir0 st.params
 {- ORMOLU_ENABLE -}
