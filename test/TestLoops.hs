@@ -18,12 +18,12 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Constants (g)
-import DslDemo.EllipticCurve.Jacobian (ecMul, setup)
+import DslDemo.EllipticCurve.Jacobian (ecAdd, ecMul, setup)
 import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
-import Test.Tasty.QuickCheck (testProperty)
+import Test.Tasty.QuickCheck (NonNegative (..), testProperty)
 import Prelude hiding (iterate)
 
 testLoops :: TestTree
@@ -33,8 +33,11 @@ testLoops =
     [ testCase "Loops — factorial 1" $ evaluateProg progFactorial1 @?= True,
       testCase "Loops — factorial 2" $ evaluateProg progFactorial2 @?= True,
       testCase "Loops — factorial 3" $ evaluateProg progFactorial3 @?= True,
-      testCase "Loops — elliptic curve — point multiply" $
+      testCase "Loops — elliptic curve — scalar multiply" $
         evaluateProg progEllipticCurve @?= True,
+      testProperty
+        "Loops — elliptic curve scalar multiply additivity"
+        propEllipticCurve,
       testProperty "Loops — pow" propPow
     ]
 
@@ -129,6 +132,18 @@ progEllipticCurve =
       0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
     # (isEqual # opVerify)
     # opTrue
+
+propEllipticCurve :: NonNegative Int -> NonNegative Int -> Bool
+propEllipticCurve (NonNegative a) (NonNegative b) =
+  let prog =
+        begin
+          # setup
+          # (nat (fromIntegral a) # g # ecMul)
+          # (nat (fromIntegral b) # g # ecMul)
+          # ecAdd
+          # (nat (fromIntegral (a + b)) # g # ecMul)
+          # opEqual
+   in evaluateProg prog
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =
