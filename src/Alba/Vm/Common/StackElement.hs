@@ -18,6 +18,7 @@ module Alba.Vm.Common.StackElement
     verifyIntegerInRange,
     i2SeUnsafe,
     b2SeUnsafe,
+    se2iUnsafe,
   )
 where
 
@@ -146,6 +147,10 @@ i2SeUnsafe x = StackElement (SevInteger x) (integerByteSize x)
 
 b2SeUnsafe :: Bytes -> StackElement
 b2SeUnsafe x = StackElement (SevBytes x) (B.length x)
+
+se2iUnsafe :: StackElement -> Integer
+se2iUnsafe (StackElement (SevInteger val) _) = val
+se2iUnsafe _ = error "se2iUnsafe"
 
 isMinimallyEncoded :: VmParams -> Bytes -> Bool
 isMinimallyEncoded _ bytes | B.null bytes = True
