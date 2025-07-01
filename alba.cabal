@@ -24,7 +24,7 @@ common shared-properties
       RecordWildCards
       TypeFamilies
       UndecidableInstances
-  other-extensions: Strict TemplateHaskell
+  other-extensions: Strict TemplateHaskell MagicHash
   ghc-options: -fno-ignore-asserts -Wall -Werror
                -- Disable some warnings during development.
                -- -Wno-partial-type-signatures

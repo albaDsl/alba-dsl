@@ -1,4 +1,5 @@
 -- Copyright (c) 2025 albaDsl
+{-# LANGUAGE MagicHash #-}
 
 module Alba.Vm.Common.VmInteger
   ( bytesToInteger,
@@ -11,11 +12,17 @@ where
 
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.BasicTypes (Bytes)
-import Data.Bits (clearBit, complement, shift, shiftR, testBit, (.&.), (.|.))
+import Data.Bits (clearBit, complement, shiftR, testBit, (.&.), (.|.))
 import Data.ByteString qualified as B
+import Data.ByteString.Internal qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Word (Word8)
+import Foreign.ForeignPtr (withForeignPtr)
+import GHC.Exts (Ptr (..), Word#)
 import GHC.Num (integerLog2)
+import GHC.Num.Integer (integerFromAddr)
+import GHC.Word (Word (..))
+import System.IO.Unsafe (unsafePerformIO)
 import Prelude hiding (init, iterate, sum)
 
 signBit :: Int
@@ -34,11 +41,19 @@ bytesToInteger :: Bytes -> Integer
 bytesToInteger bytes | B.length bytes == 0 = 0
 bytesToInteger bytes =
   let msb = B.last bytes
-      n = B.foldr f 0 (B.init bytes <> B.singleton (clearBit msb signBit))
+      bytes' = B.init bytes <> B.singleton (clearBit msb signBit)
+      n = unsignedByteStringToInteger bytes'
    in if testBit msb signBit then -n else n
   where
-    f :: Word8 -> Integer -> Integer
-    f byte n = n `shift` bitsPerByte .|. fromIntegral byte
+    unsignedByteStringToInteger :: B.ByteString -> Integer
+    unsignedByteStringToInteger bs =
+      let (ptr, _offset, len) = B.toForeignPtr bs
+          len' = wordToWord# (fromIntegral len)
+       in unsafePerformIO
+            (withForeignPtr ptr (\(Ptr addr) -> integerFromAddr len' addr 0#))
+
+    wordToWord# :: Word -> Word#
+    wordToWord# (W# w#) = w#
 
 integerToBytes :: Integer -> Bytes
 integerToBytes 0 = B.empty
