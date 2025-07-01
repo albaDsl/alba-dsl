@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.PackedCommon
+module DslDemo.EllipticCurve.AffineAdd
   ( setup,
     ecDouble,
     ecDouble',

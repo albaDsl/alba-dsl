@@ -16,9 +16,9 @@ module Demo
 where
 
 import DemoPrelude
+import DslDemo.EllipticCurve.Affine qualified as EC
 import DslDemo.EllipticCurve.Constants qualified as EC
 import DslDemo.EllipticCurve.Field qualified as EC
-import DslDemo.EllipticCurve.Packed qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
 

@@ -12,11 +12,11 @@ import Data.ByteString qualified as B
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence (Seq ((:|>)))
 import Data.Word (Word8)
+import DslDemo.EllipticCurve.Affine qualified as EC
 import DslDemo.EllipticCurve.Constants (g)
-import DslDemo.EllipticCurve.Packed qualified as EP
-import DslDemo.EllipticCurve.Point (getX, getY)
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
+import DslDemo.EllipticCurve.Point (getX, getY)
 import Numeric.Natural (Natural)
 
 expectedX :: Integer
@@ -63,7 +63,7 @@ ecMultiply code =
 
 progMul :: Natural -> FN s (s > TInt > TInt)
 progMul scalar =
-  EP.setup # nat scalar # g # EP.ecMul # opDup # getX # opSwap # getY
+  EC.setup # nat scalar # g # EC.ecMul # opDup # getX # opSwap # getY
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =
