@@ -2,8 +2,8 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Data.Maybe (fromJust)
-import DslDemo.EllipticCurve.Affine (ecMul, setup)
 import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.Jacobian (ecMul, setup)
 import DslDemo.EllipticCurve.Point (getX)
 import Numeric.Natural (Natural)
 

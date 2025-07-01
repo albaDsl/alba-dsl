@@ -24,4 +24,4 @@ benchmark:
 
 # VM profiling.
 ecmul:
-	cabal run --enable-profiling ecmul -- +RTS -p
+	cabal run --enable-profiling ecmul -- +RTS -p -s
