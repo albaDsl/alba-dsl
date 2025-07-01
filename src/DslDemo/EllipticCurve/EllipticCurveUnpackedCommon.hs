@@ -1,5 +1,8 @@
+-- Copyright (c) 2025 albaDsl
+
 module DslDemo.EllipticCurve.EllipticCurveUnpackedCommon
-  ( ecDouble,
+  ( setup,
+    ecDouble,
     ecAdd,
   )
 where
@@ -21,11 +24,17 @@ import DslDemo.EllipticCurve.EllipticCurvePoint
     makeIdentityUnpacked,
   )
 
+setup :: FNC
+setup =
+  begin
+    # function "ecDouble" (unname @2 ecDouble')
+    # function "ecAdd" (unname @3 ecAdd')
+
 ecDouble ::
   FN
     (Append s TPointUnpacked > TPrimeModulus)
     (Append s TPointUnpacked)
-ecDouble = unname @4 ecDouble'
+ecDouble = invoke "ecDouble" (unname @4 ecDouble')
 
 ecDouble' ::
   FN
@@ -79,7 +88,7 @@ ecAdd ::
   FN
     (Append s TTwoPointsUnpacked > TPrimeModulus)
     (Append s TPointUnpacked)
-ecAdd = unname @7 ecAdd'
+ecAdd = invoke "ecAdd" (unname @7 ecAdd')
 
 ecAdd' ::
   FN

@@ -6,11 +6,6 @@ module DemoPrelude
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
-    module DslDemo.EllipticCurve.EllipticCurve,
-    module DslDemo.EllipticCurve.EllipticCurveConstants,
-    module DslDemo.EllipticCurve.EllipticCurveField,
-    module DslDemo.EllipticCurve.EllipticCurvePoint,
-    module DslDemo.MergeSort.MergeSort,
     Natural,
     c,
     ev,
@@ -20,7 +15,6 @@ module DemoPrelude
     listProg',
     plot,
     cube,
-    recPow,
   )
 where
 
@@ -35,12 +29,6 @@ import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text.Chart (height, options, plotWith)
-import DslDemo.EllipticCurve.EllipticCurve
-import DslDemo.EllipticCurve.EllipticCurveConstants
-import DslDemo.EllipticCurve.EllipticCurveField
-import DslDemo.EllipticCurve.EllipticCurvePoint
-import DslDemo.Exponentiation qualified as RE
-import DslDemo.MergeSort.MergeSort
 import Numeric.Natural (Natural)
 import Test.QuickCheck hiding (function)
 import Text.Printf (printf)
@@ -134,6 +122,3 @@ plot = plotWith (options {height = 10})
 
 cube :: FN (s > TInt) (s > TInt)
 cube = opDup # opDup # opMul # opMul
-
-recPow :: FN (s > TInt > TNat) (s > TInt)
-recPow = RE.pow

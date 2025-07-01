@@ -7,9 +7,10 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Criterion.Main (bench, bgroup, defaultMain, nf)
 import Data.Maybe (fromJust)
-import DslDemo.EllipticCurve.EllipticCurve (ecMul, ecMulP)
 import DslDemo.EllipticCurve.EllipticCurveConstants (g)
+import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EP
 import DslDemo.EllipticCurve.EllipticCurvePoint (getX)
+import DslDemo.EllipticCurve.EllipticCurveUnpacked qualified as EU
 import Numeric.Natural (Natural)
 
 main :: IO ()
@@ -21,7 +22,7 @@ main = do
             [ bench "EC multiply — unpacked" $
                 nf ecMultiply (compile O1 (progMul n)),
               bench "EC multiply — packed" $
-                nf ecMultiply (compile O1 (progMulP n))
+                nf ecMultiply (compile O1 (progMulPacked n))
             ]
         ]
 
@@ -32,10 +33,10 @@ ecMultiply code =
     Left err -> error ("err: " <> show err)
 
 progMul :: Natural -> FN s (s > TInt)
-progMul scalar = nat scalar # g # ecMul # getX
+progMul scalar = EU.setup # nat scalar # g # EU.ecMul # getX
 
-progMulP :: Natural -> FN s (s > TInt)
-progMulP scalar = nat scalar # g # ecMulP # getX
+progMulPacked :: Natural -> FN s (s > TInt)
+progMulPacked scalar = EP.setup # nat scalar # g # EP.ecMul # getX
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =

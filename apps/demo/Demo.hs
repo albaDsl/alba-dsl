@@ -16,6 +16,11 @@ module Demo
 where
 
 import DemoPrelude
+import DslDemo.EllipticCurve.EllipticCurveConstants qualified as EC
+import DslDemo.EllipticCurve.EllipticCurveField qualified as EC
+import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EC
+import DslDemo.EllipticCurve.EllipticCurvePoint qualified as EC
+import DslDemo.Exponentiation qualified as Exp
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -67,7 +72,7 @@ prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 4. Demo of the recursive pow function.
 f4 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f4 = int 2 # argRoll @"x" # recPow
+f4 = int 2 # argRoll @"x" # Exp.pow
 
 -- Example 5. Demo of the loops based pow function.
 f5 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
@@ -80,4 +85,4 @@ f5 = int 2 # argRoll @"x" # pow
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
-f6 = g # ecMul # getX
+f6 = EC.setup # EC.g # EC.ecMul # EC.getX

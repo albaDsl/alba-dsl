@@ -2,8 +2,8 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Data.Maybe (fromJust)
-import DslDemo.EllipticCurve.EllipticCurve (ecMul)
 import DslDemo.EllipticCurve.EllipticCurveConstants (g)
+import DslDemo.EllipticCurve.EllipticCurvePacked (ecMul, setup)
 import DslDemo.EllipticCurve.EllipticCurvePoint (getX)
 import Numeric.Natural (Natural)
 
@@ -23,7 +23,7 @@ ecMultiply code =
     Left err -> error ("err: " <> show err)
 
 progMul :: Natural -> FN s (s > TInt)
-progMul scalar = nat scalar # g # ecMul # getX
+progMul scalar = setup # nat scalar # g # ecMul # getX
 
 vmEval :: CodeL1 -> Either ScriptError VmState
 vmEval code =

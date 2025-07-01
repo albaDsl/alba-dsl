@@ -17,8 +17,8 @@ import Alba.Vm.Common.VmState (VmState (..))
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
-import DslDemo.EllipticCurve.EllipticCurve (ecMulP)
 import DslDemo.EllipticCurve.EllipticCurveConstants (g)
+import DslDemo.EllipticCurve.EllipticCurvePacked (ecMul, setup)
 import DslDemo.EllipticCurve.EllipticCurvePoint (isEqual, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
@@ -83,29 +83,30 @@ progFactorial3 = progFacTest fac
 progEllipticCurve :: FN s (s > TBool)
 progEllipticCurve =
   begin
-    # (nat 1 # g # ecMulP)
+    # setup
+    # (nat 1 # g # ecMul)
     # pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
       0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
     # (isEqual # opVerify)
-    # (nat 2 # g # ecMulP)
+    # (nat 2 # g # ecMul)
     # pushPoint
       0xC6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5
       0x1AE168FEA63DC339A3C58419466CEAEEF7F632653266D0E1236431A950CFE52A
     # (isEqual # opVerify)
-    # (nat 3 # g # ecMulP)
+    # (nat 3 # g # ecMul)
     # pushPoint
       0xF9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9
       0x388F7B0F632DE8140FE337E62A37F3566500A99934C2231B6CB9FD7584B8E672
     # (isEqual # opVerify)
-    # (nat 4 # g # ecMulP)
+    # (nat 4 # g # ecMul)
     # pushPoint
       0xE493DBF1C10D80F3581E4904930B1404CC6C13900EE0758474FA94ABE8C4CD13
       0x51ED993EA0D455B75642E2098EA51448D967AE33BFBDFE40CFE97BDC47739922
     # (isEqual # opVerify)
     # ( nat 115792089237316195423570985008687907852837564279074904382605163141518161494317
           # g
-          # ecMulP
+          # ecMul
       )
     # pushPoint
       0x4CE119C96E2FA357200B559B2F7DD5A5F02D5290AFF74B03F3E471B273211C97
@@ -113,7 +114,7 @@ progEllipticCurve =
     # (isEqual # opVerify)
     # ( nat 115792089237316195423570985008687907852837564279074904382605163141518161494318
           # g
-          # ecMulP
+          # ecMul
       )
     # pushPoint
       0x2B4EA0A797A443D293EF5CFF444F4979F06ACFEBD7E86D277475656138385B6C
@@ -121,7 +122,7 @@ progEllipticCurve =
     # (isEqual # opVerify)
     # ( nat 115792089237316195423570985008687907852837564279074904382605163141518161494336
           # g
-          # ecMulP
+          # ecMul
       )
     # pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798

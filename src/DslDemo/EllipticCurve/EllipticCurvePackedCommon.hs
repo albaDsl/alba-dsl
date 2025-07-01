@@ -1,6 +1,11 @@
+-- Copyright (c) 2025 albaDsl
+
 module DslDemo.EllipticCurve.EllipticCurvePackedCommon
-  ( ecDouble,
+  ( setup,
+    ecDouble,
+    ecDouble',
     ecAdd,
+    ecAdd',
   )
 where
 
@@ -23,58 +28,64 @@ import DslDemo.EllipticCurve.EllipticCurvePoint
     makePoint,
   )
 
+setup :: FNC
+setup =
+  begin
+    # function "ecDouble" (unname @2 ecDouble')
+    # function "ecAdd" (unname @3 ecAdd')
+
 ecDouble :: FN (s > TPoint > TPrimeModulus) (s > TPoint)
-ecDouble = unname @2 ecDouble'
-  where
-    ecDouble' :: FN (s > N "p" TPoint > N "pmod" TPrimeModulus) (s > TPoint)
-    ecDouble' =
-      begin
-        # name @"px" (argPick @"p" # getX)
-        # name @"py" (argRoll @"p" # getY)
-        # name @"l"
-          ( begin
-              # ( begin
-                    # int 3
-                    # argPick @"px"
-                    # argPick @"pmod"
-                    # feSquare'
-                    # argPick @"pmod"
-                    # feMul'
-                )
-              # ( begin
-                    # int 2
-                    # argPick @"py"
-                    # argPick @"pmod"
-                    # feMul'
-                    # argPick @"pmod"
-                    # feInv'
-                )
-              # argPick @"pmod"
-              # feMul'
-          )
-        # name @"rx"
-          ( begin
-              # (argPick @"l" # argPick @"pmod" # feSquare')
-              # (argPick @"px" # opDup # argPick @"pmod" # feAdd')
-              # argPick @"pmod"
-              # feSub'
-          )
-        # name @"ry"
-          ( begin
-              # (argRoll @"l")
-              # (argRoll @"px" # argPick @"rx" # argPick @"pmod" # feSub')
-              # argPick @"pmod"
-              # feMul'
-              # argRoll @"py"
-              # argRoll @"pmod"
-              # feSub'
-          )
-        # argRoll @"rx"
-        # argRoll @"ry"
-        # makePoint
+ecDouble = invoke "ecDouble" (unname @2 ecDouble')
+
+ecDouble' :: FN (s > N "p" TPoint > N "pmod" TPrimeModulus) (s > TPoint)
+ecDouble' =
+  begin
+    # name @"px" (argPick @"p" # getX)
+    # name @"py" (argRoll @"p" # getY)
+    # name @"l"
+      ( begin
+          # ( begin
+                # int 3
+                # argPick @"px"
+                # argPick @"pmod"
+                # feSquare'
+                # argPick @"pmod"
+                # feMul'
+            )
+          # ( begin
+                # int 2
+                # argPick @"py"
+                # argPick @"pmod"
+                # feMul'
+                # argPick @"pmod"
+                # feInv'
+            )
+          # argPick @"pmod"
+          # feMul'
+      )
+    # name @"rx"
+      ( begin
+          # (argPick @"l" # argPick @"pmod" # feSquare')
+          # (argPick @"px" # opDup # argPick @"pmod" # feAdd')
+          # argPick @"pmod"
+          # feSub'
+      )
+    # name @"ry"
+      ( begin
+          # (argRoll @"l")
+          # (argRoll @"px" # argPick @"rx" # argPick @"pmod" # feSub')
+          # argPick @"pmod"
+          # feMul'
+          # argRoll @"py"
+          # argRoll @"pmod"
+          # feSub'
+      )
+    # argRoll @"rx"
+    # argRoll @"ry"
+    # makePoint
 
 ecAdd :: FN (s > TPoint > TPoint > TPrimeModulus) (s > TPoint)
-ecAdd = unname @3 ecAdd'
+ecAdd = invoke "ecAdd" (unname @3 ecAdd')
 
 ecAdd' ::
   FN
