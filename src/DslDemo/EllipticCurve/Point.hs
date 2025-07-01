@@ -2,70 +2,37 @@
 
 module DslDemo.EllipticCurve.Point
   ( TPoint,
-    TPointUnpacked,
-    TPointUnpackedN,
-    TTwoPointsUnpacked,
     makePoint,
-    packPoint,
-    unpackPoint,
     pushPoint,
     makeIdentity,
-    makeIdentityUnpacked,
     isEqual,
     isIdentity,
-    isIdentityTag,
-    getTag,
     getX,
     getY,
-    namePoint,
   )
 where
 
 import Alba.Dsl.V1.Bch2026
-import GHC.TypeLits (AppendSymbol)
 import Numeric.Natural (Natural)
 
 data TPoint
 
 instance StackEntry TPoint
 
-type TPointUnpacked = Base > TInt > TInt > TInt
-
-type TPointUnpackedN prefix =
-  Base
-    > N (AppendSymbol prefix "tag") TInt
-    > N (AppendSymbol prefix "x") TInt
-    > N (AppendSymbol prefix "y") TInt
-
-type TTwoPointsUnpacked = Base > TInt > TInt > TInt > TInt > TInt > TInt
-
+-- Byte layout for the Point record:
+-- <tag:1><x:33><y:33>
 makePoint :: FN (s > TInt > TInt) (s > TPoint)
 makePoint = unname @2 makePoint'
   where
     makePoint' :: FN (s > N "x" TInt > N "y" TInt) (s > TPoint)
-    makePoint' = int tagNonIdentity # argRoll @"x" # argRoll @"y" # packPoint
-
--- Byte layout for the Point record:
--- <tag:1><x:33><y:33>
-packPoint :: FN (Append s TPointUnpacked) (s > TPoint)
-packPoint = unname @3 packPoint'
-  where
-    packPoint' :: FN (Append s (TPointUnpackedN "")) (s > TPoint)
-    packPoint' =
+    makePoint' =
       begin
-        # (argRoll @"tag" # nat tagSize # opNum2Bin)
+        # (int tagNonIdentity # nat tagSize # opNum2Bin)
         # (argRoll @"x" # nat coordSize # opNum2Bin)
         # (argRoll @"y" # nat coordSize # opNum2Bin)
-        # (opCat # opCat # cast)
-
-unpackPoint :: FN (s > TPoint) (Append s TPointUnpacked)
-unpackPoint =
-  begin
-    # name3 @"tag" @"x" @"y"
-      (pointToBytes # (nat tagSize # opSplit) # (nat coordSize # opSplit))
-    # (argRoll @"tag" # opBin2Num)
-    # (argRoll @"x" # opBin2Num)
-    # (argRoll @"y" # opBin2Num)
+        # opCat
+        # opCat
+        # cast
 
 pushPoint :: Integer -> Integer -> FN s (s > TPoint)
 pushPoint x y =
@@ -79,9 +46,6 @@ makeIdentity =
 
 box :: Natural -> Integer -> FN s (s > TBytes)
 box size i = int i # nat size # opNum2Bin
-
-makeIdentityUnpacked :: FN s (Append s TPointUnpacked)
-makeIdentityUnpacked = int tagIdentity # int 0 # int 0
 
 isIdentity :: FN (s > TPoint) (s > TBool)
 isIdentity = getTag # int tagIdentity # opNumEqual
@@ -108,9 +72,6 @@ isEqual = unname @2 isEqual'
               # opBoolAnd
               # opBoolAnd
           )
-
-isIdentityTag :: FN (s > TInt) (s > TBool)
-isIdentityTag = int tagIdentity # opNumEqual
 
 getTag :: FN (s > TPoint) (s > TInt)
 getTag = pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num
@@ -145,9 +106,3 @@ tagSize = 1
 -- Due to the sign bit, we need one more byte than usual.
 coordSize :: Natural
 coordSize = 33
-
-namePoint ::
-  forall prefix s s' alt alt'.
-  FNA s alt (Append s' TPointUnpacked) alt' ->
-  FNA s alt (Append s' (TPointUnpackedN prefix)) alt'
-namePoint = name3

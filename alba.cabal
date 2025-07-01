@@ -171,8 +171,6 @@ library
       Alba.Vm.Common.VmState,
       DslDemo.EllipticCurve.PackedCommon,
       DslDemo.EllipticCurve.Packed,
-      DslDemo.EllipticCurve.UnpackedCommon,
-      DslDemo.EllipticCurve.Unpacked,
       DslDemo.EllipticCurve.Constants,
       DslDemo.EllipticCurve.Field,
       DslDemo.EllipticCurve.Point,

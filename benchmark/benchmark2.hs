@@ -15,7 +15,6 @@ import Data.Word (Word8)
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Packed qualified as EP
 import DslDemo.EllipticCurve.Point (getX, getY)
-import DslDemo.EllipticCurve.Unpacked qualified as EU
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
 import Numeric.Natural (Natural)
@@ -33,19 +32,13 @@ main = do
   defaultMain
     [ bgroup
         "EC multiply (Affine)"
-        [ bench "Haskell native" $
-            nf ecMultiplyNative n,
-          bench "albaVM (unpacked impl.)" $
-            nf ecMultiply (compile O1 (progMul n)),
-          bench "albaVM (packed impl.)" $
-            nf ecMultiply (compile O1 (progMulPacked n))
+        [ bench "Haskell native" $ nf ecMultiplyNative n,
+          bench "albaVM" $ nf ecMultiply (compile O1 (progMul n))
         ],
       bgroup
         "EC multiply (Jacobian)"
-        [ bench "libsecp256k1" $
-            nf (ecMultiplyLib ctx) n,
-          bench "Haskell native" $
-            nf ecMultiplyNativeJacobi n
+        [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) n,
+          bench "Haskell native" $ nf ecMultiplyNativeJacobi n
         ]
     ]
 
@@ -70,10 +63,6 @@ ecMultiply code =
 
 progMul :: Natural -> FN s (s > TInt > TInt)
 progMul scalar =
-  EU.setup # nat scalar # g # EU.ecMul # opDup # getX # opSwap # getY
-
-progMulPacked :: Natural -> FN s (s > TInt > TInt)
-progMulPacked scalar =
   EP.setup # nat scalar # g # EP.ecMul # opDup # getX # opSwap # getY
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
