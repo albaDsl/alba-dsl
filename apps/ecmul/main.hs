@@ -10,7 +10,7 @@ import Numeric.Natural (Natural)
 -- For profiling the VM using the EC multiply example.
 main :: IO ()
 main = do
-  let n = 115792089237316195423570985008687907852837564279074904382605163141518161494336
+  let n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
       c = compile O1 (progMul n)
   ecMultiply c
 
