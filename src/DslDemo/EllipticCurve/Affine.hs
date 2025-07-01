@@ -42,9 +42,9 @@ ecMul' :: FN (s > N "n" TNat > N "p" TPoint) (s > TPoint)
 ecMul' =
   begin
     # argPick @"n"
-    # (nat 1 # opNumEqual)
+    # (nat 0 # opNumEqual)
     # opIf
-      (argRoll @"p" # argsDrop @1)
+      (argDrop @"n" # argDrop @"p" # makeIdentity)
       ( begin
           # argRoll @"n"
           # argRoll @"p"
