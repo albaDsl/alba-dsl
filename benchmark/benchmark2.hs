@@ -6,8 +6,12 @@ module Main where
 import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Criterion.Main (bench, bgroup, defaultMain, nf)
-import Data.Maybe (fromJust)
-import Data.Sequence
+import Crypto.Secp256k1 qualified as CS
+import Data.Bits (shiftR)
+import Data.ByteString qualified as B
+import Data.Maybe (fromJust, fromMaybe)
+import Data.Sequence (Seq ((:|>)))
+import Data.Word (Word8)
 import DslDemo.EllipticCurve.EllipticCurveConstants (g)
 import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EP
 import DslDemo.EllipticCurve.EllipticCurvePoint (getX, getY)
@@ -16,25 +20,31 @@ import DslDemo.EllipticCurve.Native qualified as N
 import Numeric.Natural (Natural)
 
 expectedX :: Integer
-expectedX = 55066263022277343669578718895168534326250603453777594175500187360389116729240
+expectedX = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
 
 expectedY :: Integer
-expectedY = 83121579216557378445487899878180864668798711284981320763518679672151497189239
+expectedY = 0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
 
 main :: IO ()
 main = do
-  let n = 115792089237316195423570985008687907852837564279074904382605163141518161494336
-   in defaultMain
-        [ bgroup
-            "EC multiply"
-            [ bench "Haskell native" $
-                nf ecMultiplyNative n,
-              bench "albaVM (unpacked impl.)" $
-                nf ecMultiply (compile O1 (progMul n)),
-              bench "albaVM (packed impl.)" $
-                nf ecMultiply (compile O1 (progMulPacked n))
-            ]
+  let n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+  ctx <- CS.createContext
+  defaultMain
+    [ bgroup
+        "EC multiply (Affine)"
+        [ bench "Haskell native" $
+            nf ecMultiplyNative n,
+          bench "albaVM (unpacked impl.)" $
+            nf ecMultiply (compile O1 (progMul n)),
+          bench "albaVM (packed impl.)" $
+            nf ecMultiply (compile O1 (progMulPacked n))
+        ],
+      bgroup
+        "EC multiply (Jacobian)"
+        [ bench "libsecp256k1" $
+            nf (ecMultiplyLib ctx) n
         ]
+    ]
 
 ecMultiplyNative :: Natural -> ()
 ecMultiplyNative n =
@@ -79,3 +89,25 @@ vmEval code =
         }
 
     context = fromJust $ mkTxContext undefined 0 undefined
+
+ecMultiplyLib :: CS.Ctx -> Natural -> ()
+ecMultiplyLib ctx n =
+  let secKey =
+        fromMaybe
+          (error "ecMultiplyLib")
+          (CS.secKey (B.reverse $ naturalToBytes n))
+      pubKey = CS.derivePubKey ctx secKey
+      (x, y) = B.splitAt 32 pubKey.get
+   in if naturalToBytes (fromIntegral expectedX) == x
+        && naturalToBytes (fromIntegral expectedY) == y
+        then ()
+        else error "ecMultiplyLib"
+
+-- Little endian.
+naturalToBytes :: Natural -> B.ByteString
+naturalToBytes 0 = B.empty
+naturalToBytes n = B.unfoldr f (fromIntegral n)
+  where
+    f :: Integer -> Maybe (Word8, Integer)
+    f 0 = Nothing
+    f x = Just (fromIntegral x, x `shiftR` 8)
