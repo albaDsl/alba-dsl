@@ -1,9 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.EllipticCurveConstants (g, a, b, p, n) where
+module DslDemo.EllipticCurve.Constants (g, a, b, p, n) where
 
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.EllipticCurvePoint (TPoint, pushPoint)
+import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import Numeric.Natural (Natural)
 
 g :: FN s (s > TPoint)

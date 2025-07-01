@@ -16,10 +16,10 @@ module Demo
 where
 
 import DemoPrelude
-import DslDemo.EllipticCurve.EllipticCurveConstants qualified as EC
-import DslDemo.EllipticCurve.EllipticCurveField qualified as EC
-import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EC
-import DslDemo.EllipticCurve.EllipticCurvePoint qualified as EC
+import DslDemo.EllipticCurve.Constants qualified as EC
+import DslDemo.EllipticCurve.Field qualified as EC
+import DslDemo.EllipticCurve.Packed qualified as EC
+import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
 
 -- Example 1. Write code to multiply 3 by 7.

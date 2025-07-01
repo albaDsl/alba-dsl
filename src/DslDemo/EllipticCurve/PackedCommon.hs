@@ -1,14 +1,16 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.EllipticCurveUnpackedCommon
+module DslDemo.EllipticCurve.PackedCommon
   ( setup,
     ecDouble,
+    ecDouble',
     ecAdd,
+    ecAdd',
   )
 where
 
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.EllipticCurveField
+import DslDemo.EllipticCurve.Field
   ( TPrimeModulus,
     feAdd',
     feInv',
@@ -16,12 +18,14 @@ import DslDemo.EllipticCurve.EllipticCurveField
     feSquare',
     feSub',
   )
-import DslDemo.EllipticCurve.EllipticCurvePoint
-  ( TPointUnpacked,
-    TPointUnpackedN,
-    TTwoPointsUnpacked,
-    isIdentityTag,
-    makeIdentityUnpacked,
+import DslDemo.EllipticCurve.Point
+  ( TPoint,
+    getX,
+    getY,
+    isEqual,
+    isIdentity,
+    makeIdentity,
+    makePoint,
   )
 
 setup :: FNC
@@ -30,18 +34,14 @@ setup =
     # function "ecDouble" (unname @2 ecDouble')
     # function "ecAdd" (unname @3 ecAdd')
 
-ecDouble ::
-  FN
-    (Append s TPointUnpacked > TPrimeModulus)
-    (Append s TPointUnpacked)
-ecDouble = invoke "ecDouble" (unname @4 ecDouble')
+ecDouble :: FN (s > TPoint > TPrimeModulus) (s > TPoint)
+ecDouble = invoke "ecDouble" (unname @2 ecDouble')
 
-ecDouble' ::
-  FN
-    (Append s (TPointUnpackedN "p") > N "pmod" TPrimeModulus)
-    (Append s TPointUnpacked)
+ecDouble' :: FN (s > N "p" TPoint > N "pmod" TPrimeModulus) (s > TPoint)
 ecDouble' =
   begin
+    # name @"px" (argPick @"p" # getX)
+    # name @"py" (argRoll @"p" # getY)
     # name @"l"
       ( begin
           # ( begin
@@ -72,7 +72,7 @@ ecDouble' =
       )
     # name @"ry"
       ( begin
-          # argRoll @"l"
+          # (argRoll @"l")
           # (argRoll @"px" # argPick @"rx" # argPick @"pmod" # feSub')
           # argPick @"pmod"
           # feMul'
@@ -80,64 +80,50 @@ ecDouble' =
           # argRoll @"pmod"
           # feSub'
       )
-    # argRoll @"ptag"
     # argRoll @"rx"
     # argRoll @"ry"
+    # makePoint
 
-ecAdd ::
-  FN
-    (Append s TTwoPointsUnpacked > TPrimeModulus)
-    (Append s TPointUnpacked)
-ecAdd = invoke "ecAdd" (unname @7 ecAdd')
+ecAdd :: FN (s > TPoint > TPoint > TPrimeModulus) (s > TPoint)
+ecAdd = invoke "ecAdd" (unname @3 ecAdd')
 
 ecAdd' ::
   FN
-    ( Append s (Append (TPointUnpackedN "p") (TPointUnpackedN "q"))
-        > N "pmod" TPrimeModulus
-    )
-    (Append s TPointUnpacked)
+    (s > N "p" TPoint > N "q" TPoint > N "pmod" TPrimeModulus)
+    (s > TPoint)
 ecAdd' =
   begin
-    # (argPick @"ptag" # isIdentityTag)
+    # (argPick @"p" # isIdentity)
     # opIf
-      (argRoll @"qtag" # argRoll @"qx" # argRoll @"qy" # argsDrop @4)
-      ( (argPick @"qtag" # isIdentityTag)
+      (argRoll @"q" # argsDrop @2)
+      ( (argPick @"q" # isIdentity)
           # opIf
-            (argRoll @"ptag" # argRoll @"px" # argRoll @"py" # argsDrop @4)
-            ( nonIdentityPointsAreEqual
+            (argRoll @"p" # argsDrop @2)
+            ( pointsAreEqual
                 # opIf
-                  ( begin
-                      # argRoll @"qtag"
-                      # argRoll @"qx"
-                      # argRoll @"qy"
-                      # argRoll @"pmod"
-                      # ecDouble
-                      # argsDrop @3
-                  )
+                  (argRoll @"p" # argRoll @"pmod" # ecDouble # argsDrop @1)
                   ( xCoordsEqual
                       # opIf
-                        (makeIdentityUnpacked # argsDrop @7)
+                        (makeIdentity # argsDrop @3)
                         doAdd
                   )
             )
       )
   where
-    nonIdentityPointsAreEqual =
-      begin
-        # (argPick @"px" # argPick @"qx" # opNumEqual)
-        # (argPick @"py" # argPick @"qy" # opNumEqual)
-        # opBoolAnd
+    pointsAreEqual = argPick @"p" # argPick @"q" # isEqual
 
-    xCoordsEqual = argPick @"px" # argPick @"qx" # opNumEqual
+    xCoordsEqual = (argPick @"p" # getX) # (argPick @"q" # getX) # opNumEqual
 
     doAdd ::
       FN
-        ( Append s (Append (TPointUnpackedN "p") (TPointUnpackedN "q"))
-            > N "pmod" TPrimeModulus
-        )
-        (Append s TPointUnpacked)
+        (s > N "p" TPoint > N "q" TPoint > N "pmod" TPrimeModulus)
+        (s > TPoint)
     doAdd =
       begin
+        # name @"px" (argPick @"p" # getX)
+        # name @"py" (argRoll @"p" # getY)
+        # name @"qx" (argPick @"q" # getX)
+        # name @"qy" (argRoll @"q" # getY)
         # name @"xdiff"
           ( begin
               # argPick @"px"
@@ -178,5 +164,4 @@ ecAdd' =
               # argRoll @"pmod"
               # feSub'
           )
-        # (argRoll @"ptag" # argRoll @"rx" # argRoll @"ry")
-        # argDrop @"qtag"
+        # (argRoll @"rx" # argRoll @"ry" # makePoint)

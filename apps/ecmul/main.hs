@@ -2,9 +2,9 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2026
 import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Data.Maybe (fromJust)
-import DslDemo.EllipticCurve.EllipticCurveConstants (g)
-import DslDemo.EllipticCurve.EllipticCurvePacked (ecMul, setup)
-import DslDemo.EllipticCurve.EllipticCurvePoint (getX)
+import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.Packed (ecMul, setup)
+import DslDemo.EllipticCurve.Point (getX)
 import Numeric.Natural (Natural)
 
 -- For profiling the VM using the EC multiply example.

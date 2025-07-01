@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.EllipticCurveUnpacked
+module DslDemo.EllipticCurve.Unpacked
   ( setup,
     ecDouble,
     ecAdd,
@@ -10,8 +10,8 @@ where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.EllipticCurveField (TPrimeModulus, primeModulus)
-import DslDemo.EllipticCurve.EllipticCurvePoint
+import DslDemo.EllipticCurve.Field (TPrimeModulus, primeModulus)
+import DslDemo.EllipticCurve.Point
   ( TPoint,
     TPointUnpacked,
     TPointUnpackedN,
@@ -20,7 +20,7 @@ import DslDemo.EllipticCurve.EllipticCurvePoint
     packPoint,
     unpackPoint,
   )
-import DslDemo.EllipticCurve.EllipticCurveUnpackedCommon qualified as EU
+import DslDemo.EllipticCurve.UnpackedCommon qualified as EU
 
 type LoopTypeN s =
   ( Append

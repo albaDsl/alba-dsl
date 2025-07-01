@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.EllipticCurveField
+module DslDemo.EllipticCurve.Field
   ( TPrimeModulus,
     feAdd,
     feSub,
@@ -19,7 +19,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Math (pow', pow'')
-import DslDemo.EllipticCurve.EllipticCurveConstants (p)
+import DslDemo.EllipticCurve.Constants (p)
 
 data TPrimeModulus
 

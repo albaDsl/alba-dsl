@@ -12,10 +12,10 @@ import Data.ByteString qualified as B
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence (Seq ((:|>)))
 import Data.Word (Word8)
-import DslDemo.EllipticCurve.EllipticCurveConstants (g)
-import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EP
-import DslDemo.EllipticCurve.EllipticCurvePoint (getX, getY)
-import DslDemo.EllipticCurve.EllipticCurveUnpacked qualified as EU
+import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.Packed qualified as EP
+import DslDemo.EllipticCurve.Point (getX, getY)
+import DslDemo.EllipticCurve.Unpacked qualified as EU
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
 import Numeric.Natural (Natural)

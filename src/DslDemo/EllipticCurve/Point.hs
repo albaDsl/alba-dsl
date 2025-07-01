@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.EllipticCurvePoint
+module DslDemo.EllipticCurve.Point
   ( TPoint,
     TPointUnpacked,
     TPointUnpackedN,
