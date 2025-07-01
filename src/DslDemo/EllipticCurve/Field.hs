@@ -11,6 +11,8 @@ module DslDemo.EllipticCurve.Field
     feSub',
     feMul',
     feSquare',
+    feCube',
+    feQuadruple',
     feInv',
     primeModulus,
     primeModulusToInt,
@@ -69,6 +71,12 @@ feMul' = opRot # opRot # opMul # opSwap # primeModulusToInt # opMod
 
 feSquare' :: FN (s > TInt > TPrimeModulus) (s > TInt)
 feSquare' = opOver # opSwap # feMul'
+
+feCube' :: FN (s > TInt > TPrimeModulus) (s > TInt)
+feCube' = op2Dup # feSquare' # opSwap # feMul'
+
+feQuadruple' :: FN (s > TInt > TPrimeModulus) (s > TInt)
+feQuadruple' = opDup # opRot # opSwap # feSquare' # opSwap # feSquare'
 
 feInv' :: FN (s > TInt > TPrimeModulus) (s > TInt)
 feInv' =

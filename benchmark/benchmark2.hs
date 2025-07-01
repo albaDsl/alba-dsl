@@ -12,11 +12,12 @@ import Data.ByteString qualified as B
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence (Seq ((:|>)))
 import Data.Word (Word8)
-import DslDemo.EllipticCurve.Affine qualified as EC
+import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
-import DslDemo.EllipticCurve.Point (getX, getY)
+import DslDemo.EllipticCurve.Point qualified as EA
 import Numeric.Natural (Natural)
 
 expectedX :: Integer
@@ -38,7 +39,8 @@ main = do
       bgroup
         "EC multiply (Jacobian)"
         [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) n,
-          bench "Haskell native" $ nf ecMultiplyNativeJacobi n
+          bench "Haskell native" $ nf ecMultiplyNativeJacobi n,
+          bench "albaVM" $ nf ecMultiply (compile O1 (progMulJacobian n))
         ]
     ]
 
@@ -63,7 +65,11 @@ ecMultiply code =
 
 progMul :: Natural -> FN s (s > TInt > TInt)
 progMul scalar =
-  EC.setup # nat scalar # g # EC.ecMul # opDup # getX # opSwap # getY
+  EA.setup # nat scalar # g # EA.ecMul # opDup # EA.getX # opSwap # EA.getY
+
+progMulJacobian :: Natural -> FN s (s > TInt > TInt)
+progMulJacobian scalar =
+  EJ.setup # nat scalar # g # EJ.ecMul # opDup # EA.getX # opSwap # EA.getY
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =
