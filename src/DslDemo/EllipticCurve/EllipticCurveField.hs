@@ -1,3 +1,5 @@
+-- Copyright (c) 2025 albaDsl
+
 module DslDemo.EllipticCurve.EllipticCurveField
   ( TPrimeModulus,
     feAdd,

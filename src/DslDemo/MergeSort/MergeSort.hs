@@ -1,3 +1,5 @@
+-- Copyright (c) 2025 albaDsl
+
 module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
