@@ -16,7 +16,8 @@ import DslDemo.EllipticCurve.EllipticCurveConstants (g)
 import DslDemo.EllipticCurve.EllipticCurvePacked qualified as EP
 import DslDemo.EllipticCurve.EllipticCurvePoint (getX, getY)
 import DslDemo.EllipticCurve.EllipticCurveUnpacked qualified as EU
-import DslDemo.EllipticCurve.Native qualified as N
+import DslDemo.EllipticCurve.Native.Affine qualified as NA
+import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
 import Numeric.Natural (Natural)
 
 expectedX :: Integer
@@ -42,13 +43,18 @@ main = do
       bgroup
         "EC multiply (Jacobian)"
         [ bench "libsecp256k1" $
-            nf (ecMultiplyLib ctx) n
+            nf (ecMultiplyLib ctx) n,
+          bench "Haskell native" $
+            nf ecMultiplyNativeJacobi n
         ]
     ]
 
 ecMultiplyNative :: Natural -> ()
 ecMultiplyNative n =
-  if N.mul n N.g == N.P (N.FieldElement expectedX) (N.FieldElement expectedY)
+  if NA.mul n NA.g
+    == NA.P
+      (NA.FieldElement expectedX)
+      (NA.FieldElement expectedY)
     then ()
     else error "ecMultiplyNative"
 
@@ -89,6 +95,15 @@ vmEval code =
         }
 
     context = fromJust $ mkTxContext undefined 0 undefined
+
+ecMultiplyNativeJacobi :: Natural -> ()
+ecMultiplyNativeJacobi n =
+  if NJ.toAffine (NJ.mul n NJ.g)
+    == NJ.P
+      (NJ.FieldElement expectedX)
+      (NJ.FieldElement expectedY)
+    then ()
+    else error "ecMultiplyNativeJacobi"
 
 ecMultiplyLib :: CS.Ctx -> Natural -> ()
 ecMultiplyLib ctx n =

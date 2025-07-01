@@ -176,7 +176,10 @@ library
       DslDemo.EllipticCurve.EllipticCurveConstants,
       DslDemo.EllipticCurve.EllipticCurveField,
       DslDemo.EllipticCurve.EllipticCurvePoint,
-      DslDemo.EllipticCurve.Native,
+      DslDemo.EllipticCurve.Native.Affine,
+      DslDemo.EllipticCurve.Native.Constants,
+      DslDemo.EllipticCurve.Native.FieldElement,
+      DslDemo.EllipticCurve.Native.Jacobian,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,
   hs-source-dirs: src
