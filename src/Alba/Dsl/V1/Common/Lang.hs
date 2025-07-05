@@ -30,11 +30,11 @@ import Data.Kind (Type)
 begin :: a -> a
 begin = id
 
--- An expression that does not modify the stack.
+-- An expression that does not modify the stack type.
 ex0 :: FNA s alt s alt -> FNA s alt s alt
 ex0 prog state = let (S c fs) = prog state in S c fs
 
--- An expression that adds one element to the stack.
+-- An expression that adds one element to the stack type.
 ex1 :: FNA s alt (s > t1) alt -> FNA s alt (s > t1) alt
 ex1 prog state = let (S c fs) = prog state in S c fs
 
@@ -42,7 +42,7 @@ ex2 :: FNA s alt (s > t1 > t2) alt -> FNA s alt (s > t1 > t2) alt
 ex2 prog state = let (S c fs) = prog state in S c fs
 
 natToInt :: FN (s > TNat) (s > TInt)
-natToInt (S c fs) = let state = S c fs in state
+natToInt = cast
 
 cast :: FN (s > t1) (s > t2)
 cast (S c fs) = let state = S c fs in state
