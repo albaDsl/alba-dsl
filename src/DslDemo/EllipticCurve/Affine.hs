@@ -1,32 +1,15 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.Affine
-  ( ecDouble,
-    ecAdd,
-    ecMul,
-  )
-where
+module DslDemo.EllipticCurve.Affine (ecDouble, ecAdd, ecMul) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.AffineAdd qualified as EP
-import DslDemo.EllipticCurve.Field (TPrimeModulus, primeModulus)
+import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
 
-type LoopTypeN s =
-  s
-    > N "n" TNat
-    > N "p" TPoint
-    > N "r" TPoint
-    > N "pmod" TPrimeModulus
+type LoopTypeN s = s > N "n" TNat > N "p" TPoint > N "r" TPoint
 
-type LoopType s = s > TNat > TPoint > TPoint > TPrimeModulus
-
-ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
-ecAdd = primeModulus # EP.ecAdd
-
-ecDouble :: FN (s > TPoint) (s > TPoint)
-ecDouble = primeModulus # EP.ecDouble
+type LoopType s = s > TNat > TPoint > TPoint
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
 ecMul = function (unname @2 ecMul')
@@ -42,9 +25,7 @@ ecMul' =
           # argRoll @"n"
           # argRoll @"p"
           # makeIdentity
-          # primeModulus
-          # opUntil (unname @4 loop)
-          # opDrop
+          # opUntil (unname @3 loop)
           # opNip
           # opNip
       )
@@ -56,10 +37,9 @@ ecMul' =
           ( begin
               # argRoll @"r"
               # ex1 (argPick @"n" # isOdd)
-              # opWhen (argPick @"p" # argPick @"pmod" # EP.ecAdd)
+              # opWhen (argPick @"p" # ecAdd)
           )
         # (argPick @"n" # half)
-        # (argRoll @"p" # argPick @"pmod" # EP.ecDouble)
+        # (argRoll @"p" # ecDouble)
         # (argRoll @"r2")
-        # argRoll @"pmod"
         # (argRoll @"n" # half # isZero)

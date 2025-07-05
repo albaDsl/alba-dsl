@@ -11,14 +11,7 @@ where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.Field
-  ( TPrimeModulus,
-    feCube',
-    feInv',
-    feMul',
-    feSquare',
-    primeModulus,
-  )
+import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
@@ -30,48 +23,18 @@ import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
 
-type LoopTypeN s =
-  s
-    > N "n" TNat
-    > N "p" TPointJ
-    > N "r" TPointJ
-    > N "pmod" TPrimeModulus
+type LoopTypeN s = s > N "n" TNat > N "p" TPointJ > N "r" TPointJ
 
-type LoopType s = s > TNat > TPointJ > TPointJ > TPrimeModulus
+type LoopType s = s > TNat > TPointJ > TPointJ
 
 ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
-ecAdd =
-  function
-    ( begin
-        # toJacobian
-        # opSwap
-        # toJacobian
-        # primeModulus
-        # EC.ecAdd
-        # primeModulus
-        # fromJacobian
-    )
+ecAdd = function (toJacobian # opSwap # toJacobian # EC.ecAddJ # fromJacobian)
 
 ecDouble :: FN (s > TPoint) (s > TPoint)
-ecDouble =
-  function
-    ( begin
-        # toJacobian
-        # primeModulus
-        # EC.ecDouble
-        # primeModulus
-        # fromJacobian
-    )
+ecDouble = function (toJacobian # EC.ecDoubleJ # fromJacobian)
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul =
-  function
-    ( begin
-        # toJacobian
-        # ecMulJ
-        # primeModulus
-        # fromJacobian
-    )
+ecMul = function (toJacobian # ecMulJ # fromJacobian)
 
 ecMulJ :: FN (s > TNat > TPointJ) (s > TPointJ)
 ecMulJ = function (unname @2 ecMulJ')
@@ -87,9 +50,7 @@ ecMulJ = function (unname @2 ecMulJ')
               # argRoll @"n"
               # argRoll @"p"
               # makeIdentity
-              # primeModulus
-              # opUntil (unname @4 loop)
-              # opDrop
+              # opUntil (unname @3 loop)
               # opNip
               # opNip
           )
@@ -101,12 +62,11 @@ ecMulJ = function (unname @2 ecMulJ')
           ( begin
               # argRoll @"r"
               # ex1 (argPick @"n" # isOdd)
-              # opWhen (argPick @"p" # argPick @"pmod" # EC.ecAdd)
+              # opWhen (argPick @"p" # EC.ecAddJ)
           )
         # (argPick @"n" # half)
-        # (argRoll @"p" # argPick @"pmod" # EC.ecDouble)
+        # (argRoll @"p" # EC.ecDoubleJ)
         # (argRoll @"r2")
-        # argRoll @"pmod"
         # (argRoll @"n" # half # isZero)
 
 toJacobian :: FN (s > TPoint) (s > TPointJ)
@@ -125,43 +85,28 @@ toJacobian = function (unname @1 toJacobian')
               # makePoint
           )
 
-fromJacobian :: FN (s > TPointJ > TPrimeModulus) (s > TPoint)
-fromJacobian = function (unname @2 fromJacobian')
+fromJacobian :: FN (s > TPointJ) (s > TPoint)
+fromJacobian = function (unname @1 fromJacobian')
   where
-    fromJacobian' ::
-      FN
-        (s > N "p" TPointJ > N "pmod" TPrimeModulus)
-        (s > TPoint)
+    fromJacobian' :: FN (s > N "p" TPointJ) (s > TPoint)
     fromJacobian' =
       begin
         # (argPick @"p" # isIdentity)
         # opIf
-          (argDrop @"pmod" # argDrop @"p" # AP.makeIdentity)
+          (argDrop @"p" # AP.makeIdentity)
           ( begin
               # name @"z" (argPick @"p" # JP.getZ)
               # name @"x'"
                 ( begin
                     # (argPick @"p" # JP.getX)
-                    # argPick @"z"
-                    # argPick @"pmod"
-                    # feSquare'
-                    # argPick @"pmod"
-                    # feInv'
-                    # argPick @"pmod"
-                    # feMul'
+                    # (argPick @"z" # feSquare # feInv)
+                    # feMul
                 )
               # name @"y'"
                 ( begin
                     # (argRoll @"p" # JP.getY)
-                    # argRoll @"z"
-                    # argPick @"pmod"
-                    # feCube'
-                    # argPick @"pmod"
-                    # feInv'
-                    # argRoll @"pmod"
-                    # feMul'
+                    # (argRoll @"z" # feCube # feInv)
+                    # feMul
                 )
-              # argRoll @"x'"
-              # argRoll @"y'"
-              # AP.makePoint
+              # (argRoll @"x'" # argRoll @"y'" # AP.makePoint)
           )

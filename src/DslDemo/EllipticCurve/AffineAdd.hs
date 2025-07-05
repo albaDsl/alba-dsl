@@ -1,22 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.AffineAdd
-  ( ecDouble,
-    ecDouble',
-    ecAdd,
-    ecAdd',
-  )
-where
+module DslDemo.EllipticCurve.AffineAdd (ecDouble, ecAdd) where
 
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.Field
-  ( TPrimeModulus,
-    feAdd',
-    feInv',
-    feMul',
-    feSquare',
-    feSub',
-  )
+import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
 import DslDemo.EllipticCurve.Point
   ( TPoint,
     getX,
@@ -27,77 +14,56 @@ import DslDemo.EllipticCurve.Point
     makePoint,
   )
 
-ecDouble :: FN (s > TPoint > TPrimeModulus) (s > TPoint)
-ecDouble = function (unname @2 ecDouble')
+ecDouble :: FN (s > TPoint) (s > TPoint)
+ecDouble = function (unname @1 ecDouble')
 
-ecDouble' :: FN (s > N "p" TPoint > N "pmod" TPrimeModulus) (s > TPoint)
+ecDouble' :: FN (s > N "p" TPoint) (s > TPoint)
 ecDouble' =
   begin
     # name @"px" (argPick @"p" # getX)
     # name @"py" (argRoll @"p" # getY)
     # name @"l"
       ( begin
-          # ( begin
-                # int 3
-                # argPick @"px"
-                # argPick @"pmod"
-                # feSquare'
-                # argPick @"pmod"
-                # feMul'
-            )
-          # ( begin
-                # int 2
-                # argPick @"py"
-                # argPick @"pmod"
-                # feMul'
-                # argPick @"pmod"
-                # feInv'
-            )
-          # argPick @"pmod"
-          # feMul'
+          # ex1 (int 3 # argPick @"px" # feSquare # feMul)
+          # ex1 (int 2 # argPick @"py" # feMul # feInv)
+          # feMul
       )
     # name @"rx"
       ( begin
-          # (argPick @"l" # argPick @"pmod" # feSquare')
-          # (argPick @"px" # opDup # argPick @"pmod" # feAdd')
-          # argPick @"pmod"
-          # feSub'
+          # ex1 (argPick @"l" # feSquare)
+          # ex1 (argPick @"px" # opDup # feAdd)
+          # feSub
       )
     # name @"ry"
       ( begin
           # (argRoll @"l")
-          # (argRoll @"px" # argPick @"rx" # argPick @"pmod" # feSub')
-          # argPick @"pmod"
-          # feMul'
+          # (argRoll @"px" # argPick @"rx" # feSub)
+          # feMul
           # argRoll @"py"
-          # argRoll @"pmod"
-          # feSub'
+          # feSub
       )
     # argRoll @"rx"
     # argRoll @"ry"
     # makePoint
 
-ecAdd :: FN (s > TPoint > TPoint > TPrimeModulus) (s > TPoint)
-ecAdd = invoke "ecAdd" (unname @3 ecAdd')
+ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
+ecAdd = function (unname @2 ecAdd')
 
-ecAdd' ::
-  FN
-    (s > N "p" TPoint > N "q" TPoint > N "pmod" TPrimeModulus)
-    (s > TPoint)
+ecAdd' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
 ecAdd' =
   begin
     # (argPick @"p" # isIdentity)
     # opIf
-      (argRoll @"q" # argsDrop @2)
+      (argRoll @"q" # argsDrop @1)
       ( (argPick @"q" # isIdentity)
           # opIf
-            (argRoll @"p" # argsDrop @2)
+            (argRoll @"p" # argDrop @"q")
             ( pointsAreEqual
                 # opIf
-                  (argRoll @"p" # argRoll @"pmod" # ecDouble # argsDrop @1)
+                  (argRoll @"p" # ecDouble # argDrop @"q")
                   ( xCoordsEqual
                       # opIf
-                        (makeIdentity # argsDrop @3)
+                        (makeIdentity # argsDrop @2)
                         doAdd
                   )
             )
@@ -105,56 +71,30 @@ ecAdd' =
   where
     pointsAreEqual = argPick @"p" # argPick @"q" # isEqual
 
-    xCoordsEqual = (argPick @"p" # getX) # (argPick @"q" # getX) # opNumEqual
+    xCoordsEqual = argPick @"p" # getX # argPick @"q" # getX # opNumEqual
 
-    doAdd ::
-      FN
-        (s > N "p" TPoint > N "q" TPoint > N "pmod" TPrimeModulus)
-        (s > TPoint)
+    doAdd :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
     doAdd =
       begin
         # name @"px" (argPick @"p" # getX)
         # name @"py" (argRoll @"p" # getY)
         # name @"qx" (argPick @"q" # getX)
         # name @"qy" (argRoll @"q" # getY)
-        # name @"xdiff"
-          ( begin
-              # argPick @"px"
-              # argPick @"qx"
-              # argPick @"pmod"
-              # feSub'
-          )
-        # name @"ydiff"
-          ( begin
-              # argPick @"py"
-              # argRoll @"qy"
-              # argPick @"pmod"
-              # feSub'
-          )
-        # name @"l"
-          ( begin
-              # argRoll @"ydiff"
-              # argRoll @"xdiff"
-              # argPick @"pmod"
-              # feInv'
-              # argPick @"pmod"
-              # feMul'
-          )
+        # name @"xdiff" (argPick @"px" # argPick @"qx" # feSub)
+        # name @"ydiff" (argPick @"py" # argRoll @"qy" # feSub)
+        # name @"l" (argRoll @"ydiff" # argRoll @"xdiff" # feInv # feMul)
         # name @"rx"
           ( begin
-              # (argPick @"l" # argPick @"pmod" # feSquare')
-              # (argPick @"px" # argRoll @"qx" # argPick @"pmod" # feAdd')
-              # argPick @"pmod"
-              # feSub'
+              # (argPick @"l" # feSquare)
+              # (argPick @"px" # argRoll @"qx" # feAdd)
+              # feSub
           )
         # name @"ry"
           ( begin
               # (argRoll @"l")
-              # (argRoll @"px" # argPick @"rx" # argPick @"pmod" # feSub')
-              # argPick @"pmod"
-              # feMul'
+              # (argRoll @"px" # argPick @"rx" # feSub)
+              # feMul
               # argRoll @"py"
-              # argRoll @"pmod"
-              # feSub'
+              # feSub
           )
         # (argRoll @"rx" # argRoll @"ry" # makePoint)
