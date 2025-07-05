@@ -151,8 +151,8 @@ data OpcodeL2
   deriving (Eq, Show)
 
 data CompilerData
-  = FunctionIndex {name :: String, slot :: Int}
-  | FunctionIndexRef {name :: String}
+  = FunctionIndex {fId :: (String, Int, String)}
+  | FunctionIndexRef {fId :: (String, Int, String)}
   | FunctionBody {code :: CodeL2}
   deriving (Eq, Show)
 

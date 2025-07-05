@@ -1,8 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module DslDemo.EllipticCurve.Jacobian
-  ( setup,
-    ecDouble,
+  ( ecDouble,
     ecAdd,
     ecMul,
     toJacobian,
@@ -40,67 +39,61 @@ type LoopTypeN s =
 
 type LoopType s = s > TNat > TPointJ > TPointJ > TPrimeModulus
 
-setup :: FNC
-setup =
-  begin
-    # EC.setup
-    # function "ecMulJ" ecMulJ'
-    # function "ecMul" ecMul'
-    # function "toJacobian" toJacobian'
-    # function "fromJacobian" fromJacobian'
-
 ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
 ecAdd =
-  begin
-    # toJacobian
-    # opSwap
-    # toJacobian
-    # primeModulus
-    # EC.ecAdd
-    # primeModulus
-    # fromJacobian
+  function
+    ( begin
+        # toJacobian
+        # opSwap
+        # toJacobian
+        # primeModulus
+        # EC.ecAdd
+        # primeModulus
+        # fromJacobian
+    )
 
 ecDouble :: FN (s > TPoint) (s > TPoint)
 ecDouble =
-  begin
-    # toJacobian
-    # primeModulus
-    # EC.ecDouble
-    # primeModulus
-    # fromJacobian
+  function
+    ( begin
+        # toJacobian
+        # primeModulus
+        # EC.ecDouble
+        # primeModulus
+        # fromJacobian
+    )
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul = invoke "ecMul" ecMul'
-
-ecMul' :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul' =
-  begin
-    # toJacobian
-    # ecMulJ
-    # primeModulus
-    # fromJacobian
+ecMul =
+  function
+    ( begin
+        # toJacobian
+        # ecMulJ
+        # primeModulus
+        # fromJacobian
+    )
 
 ecMulJ :: FN (s > TNat > TPointJ) (s > TPointJ)
-ecMulJ = invoke "ecMulJ" (unname @2 ecMulJ')
-
-ecMulJ' :: FN (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
-ecMulJ' =
-  begin
-    # argPick @"n"
-    # (nat 0 # opNumEqual)
-    # opIf
-      (argDrop @"n" # argDrop @"p" # makeIdentity)
-      ( begin
-          # argRoll @"n"
-          # argRoll @"p"
-          # makeIdentity
-          # primeModulus
-          # opUntil (unname @4 loop)
-          # opDrop
-          # opNip
-          # opNip
-      )
+ecMulJ = function (unname @2 ecMulJ')
   where
+    ecMulJ' :: FN (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
+    ecMulJ' =
+      begin
+        # argPick @"n"
+        # (nat 0 # opNumEqual)
+        # opIf
+          (argDrop @"n" # argDrop @"p" # makeIdentity)
+          ( begin
+              # argRoll @"n"
+              # argRoll @"p"
+              # makeIdentity
+              # primeModulus
+              # opUntil (unname @4 loop)
+              # opDrop
+              # opNip
+              # opNip
+          )
+
     loop :: FN (LoopTypeN s) (LoopType s > TBool)
     loop =
       begin
@@ -117,55 +110,58 @@ ecMulJ' =
         # (argRoll @"n" # half # isZero)
 
 toJacobian :: FN (s > TPoint) (s > TPointJ)
-toJacobian = invoke "toJacobian" (unname @1 toJacobian')
-
-toJacobian' :: FN (s > N "p" TPoint) (s > TPointJ)
-toJacobian' =
-  begin
-    # ex1 (argPick @"p" # AP.isIdentity)
-    # opIf
-      (argDrop @"p" # makeIdentity)
-      ( begin
-          # ex1 (argPick @"p" # AP.getX)
-          # (argRoll @"p" # AP.getY)
-          # int 1
-          # makePoint
-      )
+toJacobian = function (unname @1 toJacobian')
+  where
+    toJacobian' :: FN (s > N "p" TPoint) (s > TPointJ)
+    toJacobian' =
+      begin
+        # ex1 (argPick @"p" # AP.isIdentity)
+        # opIf
+          (argDrop @"p" # makeIdentity)
+          ( begin
+              # ex1 (argPick @"p" # AP.getX)
+              # (argRoll @"p" # AP.getY)
+              # int 1
+              # makePoint
+          )
 
 fromJacobian :: FN (s > TPointJ > TPrimeModulus) (s > TPoint)
-fromJacobian = invoke "fromJacobian" (unname @2 fromJacobian')
-
-fromJacobian' :: FN (s > N "p" TPointJ > N "pmod" TPrimeModulus) (s > TPoint)
-fromJacobian' =
-  begin
-    # (argPick @"p" # isIdentity)
-    # opIf
-      (argDrop @"pmod" # argDrop @"p" # AP.makeIdentity)
-      ( begin
-          # name @"z" (argPick @"p" # JP.getZ)
-          # name @"x'"
-            ( begin
-                # (argPick @"p" # JP.getX)
-                # argPick @"z"
-                # argPick @"pmod"
-                # feSquare'
-                # argPick @"pmod"
-                # feInv'
-                # argPick @"pmod"
-                # feMul'
-            )
-          # name @"y'"
-            ( begin
-                # (argRoll @"p" # JP.getY)
-                # argRoll @"z"
-                # argPick @"pmod"
-                # feCube'
-                # argPick @"pmod"
-                # feInv'
-                # argRoll @"pmod"
-                # feMul'
-            )
-          # argRoll @"x'"
-          # argRoll @"y'"
-          # AP.makePoint
-      )
+fromJacobian = function (unname @2 fromJacobian')
+  where
+    fromJacobian' ::
+      FN
+        (s > N "p" TPointJ > N "pmod" TPrimeModulus)
+        (s > TPoint)
+    fromJacobian' =
+      begin
+        # (argPick @"p" # isIdentity)
+        # opIf
+          (argDrop @"pmod" # argDrop @"p" # AP.makeIdentity)
+          ( begin
+              # name @"z" (argPick @"p" # JP.getZ)
+              # name @"x'"
+                ( begin
+                    # (argPick @"p" # JP.getX)
+                    # argPick @"z"
+                    # argPick @"pmod"
+                    # feSquare'
+                    # argPick @"pmod"
+                    # feInv'
+                    # argPick @"pmod"
+                    # feMul'
+                )
+              # name @"y'"
+                ( begin
+                    # (argRoll @"p" # JP.getY)
+                    # argRoll @"z"
+                    # argPick @"pmod"
+                    # feCube'
+                    # argPick @"pmod"
+                    # feInv'
+                    # argRoll @"pmod"
+                    # feMul'
+                )
+              # argRoll @"x'"
+              # argRoll @"y'"
+              # AP.makePoint
+          )

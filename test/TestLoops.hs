@@ -18,7 +18,7 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Constants (g)
-import DslDemo.EllipticCurve.Jacobian (ecAdd, ecMul, setup)
+import DslDemo.EllipticCurve.Jacobian (ecAdd, ecMul)
 import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
@@ -86,7 +86,6 @@ progFactorial3 = progFacTest fac
 progEllipticCurve :: FN s (s > TBool)
 progEllipticCurve =
   begin
-    # setup
     # (nat 1 # g # ecMul)
     # pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
@@ -137,7 +136,6 @@ propEllipticCurve :: NonNegative Int -> NonNegative Int -> Bool
 propEllipticCurve (NonNegative a) (NonNegative b) =
   let prog =
         begin
-          # setup
           # (nat (fromIntegral a) # g # ecMul)
           # (nat (fromIntegral b) # g # ecMul)
           # ecAdd

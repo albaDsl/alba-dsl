@@ -1,8 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module DslDemo.EllipticCurve.AffineAdd
-  ( setup,
-    ecDouble,
+  ( ecDouble,
     ecDouble',
     ecAdd,
     ecAdd',
@@ -28,14 +27,8 @@ import DslDemo.EllipticCurve.Point
     makePoint,
   )
 
-setup :: FNC
-setup =
-  begin
-    # function "ecDouble" (unname @2 ecDouble')
-    # function "ecAdd" (unname @3 ecAdd')
-
 ecDouble :: FN (s > TPoint > TPrimeModulus) (s > TPoint)
-ecDouble = invoke "ecDouble" (unname @2 ecDouble')
+ecDouble = function (unname @2 ecDouble')
 
 ecDouble' :: FN (s > N "p" TPoint > N "pmod" TPrimeModulus) (s > TPoint)
 ecDouble' =

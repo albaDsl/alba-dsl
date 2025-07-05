@@ -6,10 +6,7 @@ import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
 
 pow :: FN (s > TInt > TNat) (s > TInt)
-pow =
-  begin
-    # function "pow" (powHelper opMul)
-    # invoke "pow" (powHelper opMul)
+pow = function (powHelper opMul)
 
 powHelper ::
   (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
@@ -31,7 +28,7 @@ powHelper' mul =
                 # ( begin
                       # argRoll @"b"
                       # (argRoll @"n" # nat 2 # opDiv)
-                      # invoke "pow" (powHelper mul)
+                      # pow
                   )
                 # square mul
             )
@@ -40,7 +37,7 @@ powHelper' mul =
                 # ( begin
                       # argRoll @"b"
                       # (argRoll @"n" # nat 1 # opSubUnsafe)
-                      # invoke "pow" (powHelper mul)
+                      # pow
                   )
                 # mul
             )

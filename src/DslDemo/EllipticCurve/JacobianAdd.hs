@@ -1,13 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.JacobianAdd
-  ( setup,
-    ecDouble,
-    ecDouble',
-    ecAdd,
-    ecAdd',
-  )
-where
+module DslDemo.EllipticCurve.JacobianAdd (ecDouble, ecAdd) where
 
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.Field
@@ -28,14 +21,8 @@ import DslDemo.EllipticCurve.JacobianPoint
     makePoint,
   )
 
-setup :: FNC
-setup =
-  begin
-    # function "ecDouble" (unname @2 ecDouble')
-    # function "ecAdd" (unname @3 ecAdd')
-
 ecDouble :: FN (s > TPointJ > TPrimeModulus) (s > TPointJ)
-ecDouble = invoke "ecDouble" (unname @2 ecDouble')
+ecDouble = function (unname @2 ecDouble')
 
 ecDouble' :: FN (s > N "p" TPointJ > N "pmod" TPrimeModulus) (s > TPointJ)
 ecDouble' =
@@ -95,7 +82,7 @@ ecDouble' =
     # makePoint
 
 ecAdd :: FN (s > TPointJ > TPointJ > TPrimeModulus) (s > TPointJ)
-ecAdd = invoke "ecAdd" (unname @3 ecAdd')
+ecAdd = function (unname @3 ecAdd')
 
 ecAdd' ::
   FN

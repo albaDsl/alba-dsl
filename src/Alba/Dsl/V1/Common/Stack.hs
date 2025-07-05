@@ -3,6 +3,7 @@
 module Alba.Dsl.V1.Common.Stack
   ( S (..),
     Base,
+    F,
     FNA,
     FN,
     FNC,
@@ -23,8 +24,10 @@ module Alba.Dsl.V1.Common.Stack
 where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
+import Alba.Dsl.V1.Common.FunctionState (FunctionState)
 import Alba.Vm.Common.OpcodeL2 (CodeL2)
 import Data.Kind (Type)
+import GHC.Stack (HasCallStack)
 import GHC.TypeLits (ErrorMessage (Text), Nat, TypeError, type (+), type (-))
 
 {- ORMOLU_DISABLE -}
@@ -39,29 +42,32 @@ data TPubKey
 
 data S (s :: [Type]) (alt :: [Type]) = S
   { c :: CodeL2,
-    slot :: Int
+    fs :: FunctionState
   }
   deriving (Show)
 
 -- A stack with nothing on it.
 type Base = '[]
 
+-- Applies HasCallStack so the type can be used for a VM function.
+type F a = (HasCallStack) => a
+
 -- Function with main and alt stack types.
 type FNA (s :: [Type]) (alt :: [Type]) (s' :: [Type]) (alt' :: [Type]) =
-  S s alt -> S s' alt'
+  F (S s alt -> S s' alt')
 
 -- Function with alt stack constant.
 type FN (s :: [Type]) (s' :: [Type]) =
-  forall alt. S s alt -> S s' alt
+  forall alt. F (S s alt -> S s' alt)
 
 -- Function with both stacks constant.
-type FNC = forall s alt. S s alt -> S s alt
+type FNC = forall s alt. F (S s alt -> S s alt)
 
 -- Contract function with alt stack constant.
-type CFN s = S s Base -> S (Base > TBool) Base
+type CFN s = F (S s Base -> S (Base > TBool) Base)
 
 -- Contract function with main and alt stack types.
-type CFNA s a = S s Base -> S (Base > TBool) a
+type CFNA s a = F (S s Base -> S (Base > TBool) a)
 
 data (a :: [Type]) :| b :: Type
 

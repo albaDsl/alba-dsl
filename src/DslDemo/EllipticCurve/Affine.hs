@@ -1,8 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module DslDemo.EllipticCurve.Affine
-  ( setup,
-    ecDouble,
+  ( ecDouble,
     ecAdd,
     ecMul,
   )
@@ -23,12 +22,6 @@ type LoopTypeN s =
 
 type LoopType s = s > TNat > TPoint > TPoint > TPrimeModulus
 
-setup :: FNC
-setup =
-  begin
-    # EP.setup
-    # function "ecMul" ecMul'
-
 ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
 ecAdd = primeModulus # EP.ecAdd
 
@@ -36,7 +29,7 @@ ecDouble :: FN (s > TPoint) (s > TPoint)
 ecDouble = primeModulus # EP.ecDouble
 
 ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul = invoke "ecMul" (unname @2 ecMul')
+ecMul = function (unname @2 ecMul')
 
 ecMul' :: FN (s > N "n" TNat > N "p" TPoint) (s > TPoint)
 ecMul' =

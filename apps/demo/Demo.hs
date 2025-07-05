@@ -85,4 +85,4 @@ f5 = int 2 # argRoll @"x" # pow
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
-f6 = EC.setup # EC.g # EC.ecMul # EC.getX
+f6 = EC.g # EC.ecMul # EC.getX

@@ -93,6 +93,7 @@ library
       Alba.Dsl.V1.Common.ContractCashScriptArtifact,
       Alba.Dsl.V1.Common.ContractDoc,
       Alba.Dsl.V1.Common.FlippedCons,
+      Alba.Dsl.V1.Common.FunctionState,
       Alba.Dsl.V1.Common.Lang,
       Alba.Dsl.V1.Common.LangArgs,
       Alba.Dsl.V1.Common.LangDispatch,

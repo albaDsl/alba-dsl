@@ -1,4 +1,5 @@
 -- Copyright (c) 2025 albaDsl
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Alba.Dsl.V1.Common.Compile
   ( Optimize (..),
@@ -11,7 +12,17 @@ where
 
 import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
 import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerOp)
+import Alba.Dsl.V1.Common.FunctionState
+  ( Function (..),
+    FunctionId,
+    FunctionState (..),
+    functionsSorted,
+    functionsSummary,
+    getSlot,
+    startState,
+  )
 import Alba.Dsl.V1.Common.Stack (S (..))
+import Alba.Misc.Debug (trace)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2
   ( CodeL2,
@@ -20,16 +31,16 @@ import Alba.Vm.Common.OpcodeL2
     bytesToDataOp,
     codeL2ToCodeL1,
   )
+import Control.Arrow ((>>>))
 import Control.Monad.State.Lazy (State, get, put, runState)
-import Data.Function (fix)
+import Data.Function (fix, on)
+import Data.List (sortBy)
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isJust)
 import Data.Sequence qualified as S
 import Text.Printf (printf)
 
 data Optimize = None | O1
-
-type FunctionTable = M.Map String Int
 
 compile :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL1
 compile opt prog = fromMaybe err (codeL2ToCodeL1 (compileL2 opt prog))
@@ -43,57 +54,79 @@ compileL2 opt =
     O1 -> optimize . compileL2'
   where
     compileL2' prog = do
-      let (code, _) = pass1 S.empty 0 prog
-          (code', functionTable) = pass2 M.empty code
-       in pass3 opt functionTable code'
+      let (code, fs) = pass1 S.empty startState prog
+          fs' = assignSlots fs
+          -- defs = trace (functionsSummary fs') $ functionDefinitions fs'
+          defs = functionDefinitions fs'
+          code' = pass2 opt fs' (defs S.>< code)
+       in code'
 
 pass1 ::
   forall s s' alt alt'.
   CodeL2 ->
-  Int ->
+  FunctionState ->
   (S s alt -> S s' alt') ->
-  (CodeL2, Int)
-pass1 code slot prog = let S c fs = prog (S code slot) in (c, fs)
+  (CodeL2, FunctionState)
+pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
-pass2 :: FunctionTable -> CodeL2 -> (CodeL2, FunctionTable)
-pass2 functionTable code = runState (mapM f code) functionTable
+assignSlots :: FunctionState -> FunctionState
+assignSlots fs@FunctionState {functions} =
+  let functions' = functionsSorted functions
+      (functions'', _) = runState (mapM f functions') 0
+   in fs {functions = M.fromList functions''}
   where
-    f :: OpcodeL2 -> State FunctionTable OpcodeL2
-    f (OP_COMPILER_DATA (FunctionIndex name slot)) = do
-      functionTable' <- get
-      case M.lookup name functionTable' of
-        Nothing -> put $ M.insert name slot functionTable'
-        Just _ -> error $ printf "Compile: function already defined: %s." name
+    f :: (FunctionId, Function) -> State Int (FunctionId, Function)
+    f (fId, fun) = do
+      slot <- get
+      put (succ slot)
+      pure (fId, (fun {slot = Just slot}))
+
+functionDefinitions :: FunctionState -> CodeL2
+functionDefinitions FunctionState {functions} =
+  ( M.toList
+      >>> sortBy (flip compare `on` ((fromMaybe err1 . (.slot)) . snd))
+      >>> filter (\(_, Function {code}) -> isJust code)
+      >>> map def
+      >>> foldl (S.><) S.empty
+  )
+    functions
+  where
+    def :: (FunctionId, Function) -> CodeL2
+    def (fId, Function {..}) =
+      let code' = fromMaybe (err2 fId) code
+       in S.fromList
+            [ OP_COMPILER_DATA (FunctionBody code'),
+              OP_COMPILER_DATA (FunctionIndex {fId}),
+              OP_DEFINE
+            ]
+
+    err1 = error "functionDefinitions: internal error."
+
+    err2 fId =
+      error (printf "functionDefinitions: internal error: %s" (show fId))
+
+pass2 :: Optimize -> FunctionState -> CodeL2 -> CodeL2
+pass2 opt fs code =
+  let (code', _) = runState (mapM f code) fs
+   in code'
+  where
+    f :: OpcodeL2 -> State FunctionState OpcodeL2
+    f (OP_COMPILER_DATA (FunctionIndex fId)) = do
+      fs' <- get
+      let slot = fromMaybe err (getSlot fId fs')
+      pure $ pushIntegerOp (fromIntegral slot)
+    f (OP_COMPILER_DATA (FunctionIndexRef fId)) = do
+      fs' <- get
+      let slot = fromMaybe err (getSlot fId fs')
       pure $ pushIntegerOp (fromIntegral slot)
     f (OP_COMPILER_DATA (FunctionBody body)) = do
-      functionTable' <- get
-      let (body', functionTable'') = pass2 functionTable' body
-      put functionTable''
-      pure $ OP_COMPILER_DATA (FunctionBody body')
-    f op = pure op
-
--- FIXME: optimization of functions
-pass3 :: Optimize -> FunctionTable -> CodeL2 -> CodeL2
-pass3 opt functionTable = fmap f
-  where
-    f :: OpcodeL2 -> OpcodeL2
-    f (OP_COMPILER_DATA (FunctionIndexRef name)) = do
-      case M.lookup name functionTable of
-        Just index -> pushIntegerOp (fromIntegral index)
-        Nothing ->
-          error
-            ( printf
-                "Compile: Reference to undefined function: %s %s."
-                name
-                (show functionTable)
-            )
-    f (OP_COMPILER_DATA (FunctionBody body)) = do
-      let body' = pass3 opt functionTable body
+      fs' <- get
+      let body' = pass2 opt fs' body
           body'' = case opt of
             None -> body'
             O1 -> optimize body'
-      bytesToDataOp (fromMaybe err (codeL2ToCodeL1 body''))
-    f op = op
+      pure $ bytesToDataOp (fromMaybe err (codeL2ToCodeL1 body''))
+    f op = pure op
 
     err = error "compile: internal error."
 

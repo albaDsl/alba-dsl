@@ -23,7 +23,8 @@ testLambdas =
   testGroup
     "Lambdas"
     [ testCase "Basic lambda ops" $ evaluateProg progBasic @?= True,
-      testCase "Mapping a lambda" $ evaluateProg progMapLambda @?= True
+      testCase "Mapping a lambda" $ evaluateProg progMapLambda @?= True,
+      testCase "Nested lambdas" $ evaluateProg progNested @?= True
     ]
 
 progBasic :: FN s (s > TBool)
@@ -109,6 +110,21 @@ progMapLambda =
         # opSwap
         # (nat elemSize # opMul)
         # opSplit
+
+progNested :: FN s (s > TBool)
+progNested =
+  begin
+    # int 5
+    # lambda polynomial
+    # opInvoke polynomial
+    # int 132
+    # opNumEqual
+  where
+    polynomial :: FN (s > TInt) (s > TInt)
+    polynomial = lambda cube # opInvoke cube # int 7 # opAdd
+
+    cube :: FN (s > TInt) (s > TInt)
+    cube = opDup # opDup # opMul # opMul
 
 evaluateProg :: FNA s '[] s' alt' -> Bool
 evaluateProg prog =

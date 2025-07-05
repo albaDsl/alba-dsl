@@ -65,11 +65,11 @@ ecMultiply code =
 
 progMul :: Natural -> FN s (s > TInt > TInt)
 progMul scalar =
-  EA.setup # nat scalar # g # EA.ecMul # opDup # EA.getX # opSwap # EA.getY
+  nat scalar # g # EA.ecMul # opDup # EA.getX # opSwap # EA.getY
 
 progMulJacobian :: Natural -> FN s (s > TInt > TInt)
 progMulJacobian scalar =
-  EJ.setup # nat scalar # g # EJ.ecMul # opDup # EA.getX # opSwap # EA.getY
+  nat scalar # g # EJ.ecMul # opDup # EA.getX # opSwap # EA.getY
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =
