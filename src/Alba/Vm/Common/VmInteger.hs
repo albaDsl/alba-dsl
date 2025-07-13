@@ -18,6 +18,7 @@ import Data.ByteString.Internal qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Word (Word8)
 import Foreign.ForeignPtr (withForeignPtr)
+import Foreign.Ptr (plusPtr)
 import GHC.Exts (Ptr (..), Word#)
 import GHC.Num (integerLog2)
 import GHC.Num.Integer (integerFromAddr)
@@ -47,10 +48,16 @@ bytesToInteger bytes =
   where
     unsignedByteStringToInteger :: B.ByteString -> Integer
     unsignedByteStringToInteger bs =
-      let (ptr, _offset, len) = B.toForeignPtr bs
+      let (ptr, offset, len) = B.toForeignPtr bs
           len' = wordToWord# (fromIntegral len)
        in unsafePerformIO
-            (withForeignPtr ptr (\(Ptr addr) -> integerFromAddr len' addr 0#))
+            ( withForeignPtr
+                ptr
+                ( \ptr' ->
+                    let !(Ptr addr) = ptr' `plusPtr` offset
+                     in integerFromAddr len' addr 0#
+                )
+            )
 
     wordToWord# :: Word -> Word#
     wordToWord# (W# w#) = w#
