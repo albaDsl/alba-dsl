@@ -9,13 +9,25 @@ module Alba.Dsl.V1.Bch2025.Lang
     bytes',
     sigBytes,
     pubKeyBytes,
+    cond,
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackInt, StackNat)
+import Alba.Dsl.V1.Bch2025.Ops (opDup, opIf)
+import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackEntry, StackInt, StackNat)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (FN, S (S), TBytes, TInt, TNat, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Lang ((#))
+import Alba.Dsl.V1.Common.Stack
+  ( FN,
+    S (S),
+    TBool,
+    TBytes,
+    TInt,
+    TNat,
+    TPubKey,
+    TSig,
+  )
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL2 (bytesToDataOp)
 import Numeric.Natural (Natural)
@@ -49,3 +61,13 @@ sigBytes x (S c fs) = bytes' x (S c fs)
 
 pubKeyBytes :: Bytes -> FN s (s > TPubKey)
 pubKeyBytes x (S c fs) = bytes' x (S c fs)
+
+cond ::
+  forall s t alt s' alt'.
+  (StackEntry t) =>
+  [(S (s > t > t) alt -> S (s > t > TBool) alt, S (s > t) alt -> S s' alt')] ->
+  (S (s > t) alt -> S s' alt') ->
+  (S (s > t) alt -> S s' alt')
+cond [] def st = def st
+cond ((test, result) : rest) def st =
+  (opDup # test # opIf result (cond rest def)) st

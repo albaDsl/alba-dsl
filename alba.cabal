@@ -238,6 +238,7 @@ executable test
       TestArguments,
       TestCheckMultiSig,
       TestCheckSig,
+      TestCond,
       TestCustomTypes,
       TestDataPushing,
       TestDataSig,

@@ -4,6 +4,7 @@ import Test.Tasty (TestTree, defaultMain, testGroup)
 import TestArguments (testArguments)
 import TestCheckMultiSig (testCheckMultiSig)
 import TestCheckSig (testCheckSig)
+import TestCond (testCond)
 import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
@@ -36,6 +37,7 @@ tests =
     [ testArguments,
       testCheckMultiSig,
       testCheckSig,
+      testCond,
       testCustomTypes,
       testDataPushing,
       testDataSig,
