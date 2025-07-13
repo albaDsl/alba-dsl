@@ -17,7 +17,7 @@ opUntil loopBody (S c fs) =
 
 opDefine :: String -> FN (s > TBytes) s
 opDefine name (S c fs) =
-  let fId = ("", 0, name)
+  let fId = ("", 0, 0, name)
       fs' = fromJust err (addLambda fId fs)
    in S
         (aops c [OP_COMPILER_DATA (FunctionIndex {fId}), OP_DEFINE])

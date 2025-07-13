@@ -32,11 +32,13 @@ data FunctionState = FunctionState
   }
   deriving (Show)
 
-type FunctionId = (ModuleName, LineNumber, FunctionName)
+type FunctionId = (ModuleName, LineNumber, ColumnNumber, FunctionName)
 
 type ModuleName = String
 
 type LineNumber = Int
+
+type ColumnNumber = Int
 
 type FunctionName = String
 
@@ -107,7 +109,7 @@ getCallerFunctionId =
   let s = getCallStack callStack
    in case s of
         (_, loc) : (fun, _) : _ ->
-          Just (srcLocModule loc, srcLocStartLine loc, fun)
+          Just (srcLocModule loc, srcLocStartLine loc, loc.srcLocStartCol, fun)
         _ -> Nothing
 
 functionsSorted :: M.Map FunctionId Function -> [(FunctionId, Function)]
@@ -119,15 +121,18 @@ functionsSummary FunctionState {functions} =
    in line "Module" "Line" "Function" "Ops" "Slot" "Sites"
         <> hline
         <> foldr
-          ( \((moduleName, lineNumber, functionName), Function {..}) a ->
-              line
-                (trunc widthModule moduleName)
-                (trunc widthLine (show lineNumber))
-                (trunc widthFunction functionName)
-                (trunc widthOps (maybe "-" (show . S.length) code))
-                (trunc widthSlot (maybe "?" show slot))
-                (trunc widthSites (show callSites))
-                <> a
+          ( \( (moduleName, lineNumber, _columnNumber, functionName),
+               Function {..}
+               )
+             a ->
+                line
+                  (trunc widthModule moduleName)
+                  (trunc widthLine (show lineNumber))
+                  (trunc widthFunction functionName)
+                  (trunc widthOps (maybe "-" (show . S.length) code))
+                  (trunc widthSlot (maybe "?" show slot))
+                  (trunc widthSites (show callSites))
+                  <> a
           )
           ""
           (functionsSorted functions)

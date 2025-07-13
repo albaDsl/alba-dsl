@@ -44,7 +44,7 @@ function prog (S c fs) =
 
 invoke :: String -> FNA s alt s' alt' -> FNA s alt s' alt'
 invoke name prog (S st fs) =
-  let fId = ("", 0, name)
+  let fId = ("", 0, 0, name)
    in opInvoke
         prog
         ( S
@@ -57,7 +57,7 @@ invoke name prog (S st fs) =
 lambda :: FNA s alt s' alt' -> FN s'' (s'' > TLambda)
 lambda prog (S c fs) =
   let (c', fs'@FunctionState {lambdaIdx}) = pass1 S.empty fs prog
-      fId = ("", 0, printf "__lambda_%d" lambdaIdx)
+      fId = ("", 0, 0, printf "__lambda_%d" lambdaIdx)
       fs'' = fromMaybe (err fId) (addLambda fId fs')
    in S
         ( aops
