@@ -24,13 +24,13 @@ ecDoubleJ' =
     # name @"x" (pick @"p" # getX)
     # name @"y" (pick @"p" # getY)
     # name @"z" (roll @"p" # getZ)
-    # name @"s" (int 4 # pick @"x" # feMul # pick @"y" # feSquare # feMul)
-    # name @"m" (int 3 # roll @"x" # feSquare # feMul)
+    # name @"s" (int 4 # pick @"x" # feMul # pick @"y" # term2)
+    # name @"m" (int 3 # roll @"x" # term2)
     # name @"x'" (pick @"m" # feSquare # pick @"s" # int 2 # feMul # feSub)
     # name @"y'"
       ( begin
           # (roll @"m" # roll @"s" # pick @"x'" # feSub # feMul)
-          # ex1 (int 8 # pick @"y" # feQuadruple # feMul)
+          # ex1 (int 8 # pick @"y" # term4)
           # feSub
       )
     # name @"z'" (int 2 # roll @"y" # roll @"z" # feMul # feMul)
@@ -45,11 +45,7 @@ ecAddJ' =
     # (pick @"p1" # isIdentity)
     # opIf
       (roll @"p2" # drop @"p1")
-      ( (pick @"p2" # isIdentity)
-          # opIf
-            (roll @"p1" # drop @"p2")
-            doAdd
-      )
+      (pick @"p2" # isIdentity # opIf (roll @"p1" # drop @"p2") doAdd)
 
 doAdd :: FN (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
 doAdd =
@@ -60,17 +56,14 @@ doAdd =
     # name @"x2" (pick @"p2" # getX)
     # name @"y2" (pick @"p2" # getY)
     # name @"z2" (roll @"p2" # getZ)
-    # name @"u1" (roll @"x1" # (pick @"z2" # feSquare) # feMul)
-    # name @"u2" (roll @"x2" # (pick @"z1" # feSquare) # feMul)
-    # name @"s1" (roll @"y1" # (pick @"z2" # feCube) # feMul)
-    # name @"s2" (roll @"y2" # (pick @"z1" # feCube) # feMul)
+    # name @"u1" (roll @"x1" # pick @"z2" # term2)
+    # name @"u2" (roll @"x2" # pick @"z1" # term2)
+    # name @"s1" (roll @"y1" # pick @"z2" # term3)
+    # name @"s2" (roll @"y2" # pick @"z1" # term3)
     # ex1 (pick @"u1" # pick @"u2" # opNumEqual)
     # opIf
       ( begin
-          # drop @"z1"
-          # drop @"z2"
-          # drop @"u1"
-          # drop @"u2"
+          # (drop @"z1" # drop @"z2" # drop @"u1" # drop @"u2")
           # (roll @"s1" # roll @"s2" # opNumNotEqual)
           # opIf
             (drop @"p1" # makeIdentity)
@@ -84,36 +77,27 @@ doAdd =
                 # ex1 (pick @"r" # feSquare)
                 # ex1 (pick @"h" # feCube)
                 # feSub
-                # ex1
-                  ( begin
-                      # int 2
-                      # ex1
-                        ( begin
-                            # pick @"u1"
-                            # ex1 (pick @"h" # feSquare)
-                            # feMul
-                        )
-                      # feMul
-                  )
+                # ex1 (int 2 # pick @"u1" # pick @"h" # term2 # feMul)
                 # feSub
             )
           # name @"y3"
             ( begin
                 # roll @"r"
-                # ( begin
-                      # roll @"u1"
-                      # pick @"h"
-                      # feSquare
-                      # feMul
-                      # pick @"x3"
-                      # feSub
-                  )
+                # (roll @"u1" # pick @"h" # term2 # pick @"x3" # feSub)
                 # feMul
-                # (roll @"s1" # pick @"h" # feCube # feMul)
+                # (roll @"s1" # pick @"h" # term3)
                 # feSub
             )
-          # name @"z3"
-            (roll @"h" # roll @"z1" # feMul # roll @"z2" # feMul)
-          # drop @"p1"
+          # name @"z3" (roll @"h" # roll @"z1" # feMul # roll @"z2" # feMul)
           # (roll @"x3" # roll @"y3" # roll @"z3" # makePoint)
+          # drop @"p1"
       )
+
+term2 :: FN (s > TInt > TInt) (s > TInt)
+term2 = feSquare # feMul
+
+term3 :: FN (s > TInt > TInt) (s > TInt)
+term3 = feCube # feMul
+
+term4 :: FN (s > TInt > TInt) (s > TInt)
+term4 = feQuadruple # feMul

@@ -60,14 +60,10 @@ ecMulJ = function (unname @2 ecMulJ')
     loop =
       begin
         # name @"r2"
-          ( begin
-              # roll @"r"
-              # ex1 (pick @"n" # isOdd)
-              # opWhen (pick @"p" # EC.ecAddJ)
-          )
+          (roll @"r" # pick @"n" # isOdd # opWhen (pick @"p" # EC.ecAddJ))
         # (pick @"n" # half)
         # (roll @"p" # EC.ecDoubleJ)
-        # (roll @"r2")
+        # roll @"r2"
         # (roll @"n" # half # isZero)
 
 toJacobian :: FN (s > TPoint) (s > TPointJ)
@@ -79,12 +75,7 @@ toJacobian = function (unname @1 toJacobian')
         # ex1 (pick @"p" # AP.isIdentity)
         # opIf
           (drop @"p" # makeIdentity)
-          ( begin
-              # ex1 (pick @"p" # AP.getX)
-              # (roll @"p" # AP.getY)
-              # int 1
-              # makePoint
-          )
+          (pick @"p" # AP.getX # roll @"p" # AP.getY # int 1 # makePoint)
 
 fromJacobian :: FN (s > TPointJ) (s > TPoint)
 fromJacobian = function (unname @1 fromJacobian')
@@ -98,16 +89,8 @@ fromJacobian = function (unname @1 fromJacobian')
           ( begin
               # name @"z" (pick @"p" # JP.getZ)
               # name @"x'"
-                ( begin
-                    # (pick @"p" # JP.getX)
-                    # (pick @"z" # feSquare # feInv)
-                    # feMul
-                )
+                (pick @"p" # JP.getX # pick @"z" # feSquare # feInv # feMul)
               # name @"y'"
-                ( begin
-                    # (roll @"p" # JP.getY)
-                    # (roll @"z" # feCube # feInv)
-                    # feMul
-                )
+                (roll @"p" # JP.getY # roll @"z" # feCube # feInv # feMul)
               # (roll @"x'" # roll @"y'" # AP.makePoint)
           )
