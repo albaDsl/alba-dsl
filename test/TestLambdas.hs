@@ -17,6 +17,7 @@ import Data.Sequence qualified as S
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
+import Prelude hiding (drop)
 
 testLambdas :: TestTree
 testLambdas =
@@ -63,39 +64,39 @@ progMapLambda =
         # name @"size"
           ( ex1
               ( begin
-                  # argPick @"vec"
+                  # pick @"vec"
                   # opSize
                   # opNip
                   # nat elemSize
                   # opDiv
               )
           )
-        # argPick @"size"
+        # pick @"size"
         # ifZero
-          (argDrop @"size" # argDrop @"f" # argRoll @"vec")
+          (drop @"size" # drop @"f" # roll @"vec")
           ( begin
-              # (nat 0 # argRoll @"vec")
+              # (nat 0 # roll @"vec")
               # opUntil
                 ( begin
                     # name2' @"i" @"v"
                     # ( begin
-                          # argPick @"i"
-                          # argRoll @"v"
+                          # pick @"i"
+                          # roll @"v"
                           # split elemSize
                       )
                     # uncons elemSize
                     # opSwap
-                    # (argPick @"f" # opInvoke f)
+                    # (pick @"f" # opInvoke f)
                     # opSwap
                     # opCat
                     # opCat
-                    # (argRoll @"i" # op1Add)
-                    # ex1 (opDup # argPick @"size" # opNumEqual)
+                    # (roll @"i" # op1Add)
+                    # ex1 (opDup # pick @"size" # opNumEqual)
                     # (opRot # opSwap)
                 )
               # opNip
-              # argDrop @"size"
-              # argDrop @"f"
+              # drop @"size"
+              # drop @"f"
           )
 
     f :: FN (s > TBytes) (s > TBytes)

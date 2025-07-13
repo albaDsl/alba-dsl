@@ -92,11 +92,11 @@ progRange ::
     (s > TBool)
 progRange comp1 comp2 =
   begin
-    # (argPick @"x" # argPick @"min" # comp1)
+    # (pick @"x" # pick @"min" # comp1)
     # opIf
-      (argPick @"x" # argPick @"max" # comp2)
+      (pick @"x" # pick @"max" # comp2)
       opFalse
-    # argsDrop @3
+    # dropCount @3
 
 propWithin :: Integer -> Integer -> Integer -> Bool
 propWithin x min max =

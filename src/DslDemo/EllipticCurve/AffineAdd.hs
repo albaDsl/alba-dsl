@@ -13,6 +13,7 @@ import DslDemo.EllipticCurve.Point
     makeIdentity,
     makePoint,
   )
+import Prelude hiding (drop)
 
 ecDouble :: FN (s > TPoint) (s > TPoint)
 ecDouble = function (unname @1 ecDouble')
@@ -20,30 +21,30 @@ ecDouble = function (unname @1 ecDouble')
 ecDouble' :: FN (s > N "p" TPoint) (s > TPoint)
 ecDouble' =
   begin
-    # name @"px" (argPick @"p" # getX)
-    # name @"py" (argRoll @"p" # getY)
+    # name @"px" (pick @"p" # getX)
+    # name @"py" (roll @"p" # getY)
     # name @"l"
       ( begin
-          # ex1 (int 3 # argPick @"px" # feSquare # feMul)
-          # ex1 (int 2 # argPick @"py" # feMul # feInv)
+          # ex1 (int 3 # pick @"px" # feSquare # feMul)
+          # ex1 (int 2 # pick @"py" # feMul # feInv)
           # feMul
       )
     # name @"rx"
       ( begin
-          # ex1 (argPick @"l" # feSquare)
-          # ex1 (argPick @"px" # opDup # feAdd)
+          # ex1 (pick @"l" # feSquare)
+          # ex1 (pick @"px" # opDup # feAdd)
           # feSub
       )
     # name @"ry"
       ( begin
-          # (argRoll @"l")
-          # (argRoll @"px" # argPick @"rx" # feSub)
+          # (roll @"l")
+          # (roll @"px" # pick @"rx" # feSub)
           # feMul
-          # argRoll @"py"
+          # roll @"py"
           # feSub
       )
-    # argRoll @"rx"
-    # argRoll @"ry"
+    # roll @"rx"
+    # roll @"ry"
     # makePoint
 
 ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
@@ -52,49 +53,49 @@ ecAdd = function (unname @2 ecAdd')
 ecAdd' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
 ecAdd' =
   begin
-    # (argPick @"p" # isIdentity)
+    # (pick @"p" # isIdentity)
     # opIf
-      (argRoll @"q" # argsDrop @1)
-      ( (argPick @"q" # isIdentity)
+      (roll @"q" # drop @"p")
+      ( (pick @"q" # isIdentity)
           # opIf
-            (argRoll @"p" # argDrop @"q")
+            (roll @"p" # drop @"q")
             ( pointsAreEqual
                 # opIf
-                  (argRoll @"p" # ecDouble # argDrop @"q")
+                  (roll @"p" # ecDouble # drop @"q")
                   ( xCoordsEqual
                       # opIf
-                        (makeIdentity # argsDrop @2)
+                        (makeIdentity # drop @"q" # drop @"p")
                         doAdd
                   )
             )
       )
   where
-    pointsAreEqual = argPick @"p" # argPick @"q" # isEqual
+    pointsAreEqual = pick @"p" # pick @"q" # isEqual
 
-    xCoordsEqual = argPick @"p" # getX # argPick @"q" # getX # opNumEqual
+    xCoordsEqual = pick @"p" # getX # pick @"q" # getX # opNumEqual
 
     doAdd :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
     doAdd =
       begin
-        # name @"px" (argPick @"p" # getX)
-        # name @"py" (argRoll @"p" # getY)
-        # name @"qx" (argPick @"q" # getX)
-        # name @"qy" (argRoll @"q" # getY)
-        # name @"xdiff" (argPick @"px" # argPick @"qx" # feSub)
-        # name @"ydiff" (argPick @"py" # argRoll @"qy" # feSub)
-        # name @"l" (argRoll @"ydiff" # argRoll @"xdiff" # feInv # feMul)
+        # name @"px" (pick @"p" # getX)
+        # name @"py" (roll @"p" # getY)
+        # name @"qx" (pick @"q" # getX)
+        # name @"qy" (roll @"q" # getY)
+        # name @"xdiff" (pick @"px" # pick @"qx" # feSub)
+        # name @"ydiff" (pick @"py" # roll @"qy" # feSub)
+        # name @"l" (roll @"ydiff" # roll @"xdiff" # feInv # feMul)
         # name @"rx"
           ( begin
-              # (argPick @"l" # feSquare)
-              # (argPick @"px" # argRoll @"qx" # feAdd)
+              # (pick @"l" # feSquare)
+              # (pick @"px" # roll @"qx" # feAdd)
               # feSub
           )
         # name @"ry"
           ( begin
-              # (argRoll @"l")
-              # (argRoll @"px" # argPick @"rx" # feSub)
+              # (roll @"l")
+              # (roll @"px" # pick @"rx" # feSub)
               # feMul
-              # argRoll @"py"
+              # roll @"py"
               # feSub
           )
-        # (argRoll @"rx" # argRoll @"ry" # makePoint)
+        # (roll @"rx" # roll @"ry" # makePoint)

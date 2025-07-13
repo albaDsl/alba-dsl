@@ -22,6 +22,7 @@ import DslDemo.EllipticCurve.JacobianPoint
 import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
+import Prelude hiding (drop)
 
 type LoopTypeN s = s > N "n" TNat > N "p" TPointJ > N "r" TPointJ
 
@@ -42,13 +43,13 @@ ecMulJ = function (unname @2 ecMulJ')
     ecMulJ' :: FN (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
     ecMulJ' =
       begin
-        # argPick @"n"
+        # pick @"n"
         # (nat 0 # opNumEqual)
         # opIf
-          (argDrop @"n" # argDrop @"p" # makeIdentity)
+          (drop @"n" # drop @"p" # makeIdentity)
           ( begin
-              # argRoll @"n"
-              # argRoll @"p"
+              # roll @"n"
+              # roll @"p"
               # makeIdentity
               # opUntil (unname @3 loop)
               # opNip
@@ -60,14 +61,14 @@ ecMulJ = function (unname @2 ecMulJ')
       begin
         # name @"r2"
           ( begin
-              # argRoll @"r"
-              # ex1 (argPick @"n" # isOdd)
-              # opWhen (argPick @"p" # EC.ecAddJ)
+              # roll @"r"
+              # ex1 (pick @"n" # isOdd)
+              # opWhen (pick @"p" # EC.ecAddJ)
           )
-        # (argPick @"n" # half)
-        # (argRoll @"p" # EC.ecDoubleJ)
-        # (argRoll @"r2")
-        # (argRoll @"n" # half # isZero)
+        # (pick @"n" # half)
+        # (roll @"p" # EC.ecDoubleJ)
+        # (roll @"r2")
+        # (roll @"n" # half # isZero)
 
 toJacobian :: FN (s > TPoint) (s > TPointJ)
 toJacobian = function (unname @1 toJacobian')
@@ -75,12 +76,12 @@ toJacobian = function (unname @1 toJacobian')
     toJacobian' :: FN (s > N "p" TPoint) (s > TPointJ)
     toJacobian' =
       begin
-        # ex1 (argPick @"p" # AP.isIdentity)
+        # ex1 (pick @"p" # AP.isIdentity)
         # opIf
-          (argDrop @"p" # makeIdentity)
+          (drop @"p" # makeIdentity)
           ( begin
-              # ex1 (argPick @"p" # AP.getX)
-              # (argRoll @"p" # AP.getY)
+              # ex1 (pick @"p" # AP.getX)
+              # (roll @"p" # AP.getY)
               # int 1
               # makePoint
           )
@@ -91,22 +92,22 @@ fromJacobian = function (unname @1 fromJacobian')
     fromJacobian' :: FN (s > N "p" TPointJ) (s > TPoint)
     fromJacobian' =
       begin
-        # (argPick @"p" # isIdentity)
+        # (pick @"p" # isIdentity)
         # opIf
-          (argDrop @"p" # AP.makeIdentity)
+          (drop @"p" # AP.makeIdentity)
           ( begin
-              # name @"z" (argPick @"p" # JP.getZ)
+              # name @"z" (pick @"p" # JP.getZ)
               # name @"x'"
                 ( begin
-                    # (argPick @"p" # JP.getX)
-                    # (argPick @"z" # feSquare # feInv)
+                    # (pick @"p" # JP.getX)
+                    # (pick @"z" # feSquare # feInv)
                     # feMul
                 )
               # name @"y'"
                 ( begin
-                    # (argRoll @"p" # JP.getY)
-                    # (argRoll @"z" # feCube # feInv)
+                    # (roll @"p" # JP.getY)
+                    # (roll @"z" # feCube # feInv)
                     # feMul
                 )
-              # (argRoll @"x'" # argRoll @"y'" # AP.makePoint)
+              # (roll @"x'" # roll @"y'" # AP.makePoint)
           )

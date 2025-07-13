@@ -9,6 +9,7 @@ import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import TestUtils (evaluateProg)
+import Prelude hiding (drop)
 
 testArguments :: TestTree
 testArguments =
@@ -29,11 +30,11 @@ testArguments =
                       S.empty
                     ),
       testCase
-        "argPick inside if"
+        "pick inside if"
         $ let Right (s, alt) = evaluateProg progIfArgPick
            in (s, alt) @?= (S.fromList [i2SeUnsafe 10], S.empty),
       testCase
-        "argRoll / argDrop"
+        "roll / drop"
         $ let Right (s, alt) = evaluateProg progArgRollDrop
            in (s, alt) @?= (S.fromList [i2SeUnsafe 10], S.empty),
       testCase
@@ -64,7 +65,7 @@ progNamedArgsAtCallSite =
     # name @"w" (nat 1 # nat 1 # opAdd)
     # name @"h" (nat 3)
     # calculateProperties
-    # argDrop @"does-not-interfere"
+    # drop @"does-not-interfere"
 
 -- Function that expects named arguments. Also calls other functions that may or
 -- may not expect named arguments.
@@ -74,11 +75,11 @@ calculateProperties ::
     (s > TNat > TNat)
 calculateProperties =
   begin
-    # (argPickN @"w" # argPickN @"h")
+    # (pickN @"w" # pickN @"h")
     # perimeter
-    # (argPick @"w" # argPick @"h")
+    # (pick @"w" # pick @"h")
     # area
-    # argsDrop @2
+    # (drop @"h" # drop @"w")
   where
     area :: FN (s > TNat > TNat) (s > TNat)
     area = opMul
@@ -86,14 +87,14 @@ calculateProperties =
     perimeter :: FN (s > N "w" TNat > N "h" TNat) (s > TNat)
     perimeter =
       begin
-        # (argPick @"w" # argRoll @"w" # opAdd)
-        # (argPick @"h" # argRoll @"h" # opAdd)
+        # (pick @"w" # roll @"w" # opAdd)
+        # (pick @"h" # roll @"h" # opAdd)
         # opAdd
 
 type MiscArgs s =
   s > N "x1" TNat > N "x2" TNat > N "x3" TBool > N "x4" TBool > N "x5" TNat
 
--- Exercising argPick inside if statement.
+-- Exercising pick inside if statement.
 progIfArgPick :: FN s (s > TNat)
 progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
   where
@@ -102,20 +103,20 @@ progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
       begin
         # opTrue
         # opIf
-          (argPick @"x2" # argPick @"x5")
-          (argPick @"x1" # argPick @"x2")
+          (pick @"x2" # pick @"x5")
+          (pick @"x1" # pick @"x2")
         # opAdd
-        # argsDrop @5
+        # dropCount @5
 
--- Exercising argDrop / argRoll with various types on the stack.
+-- Exercising drop / roll with various types on the stack.
 progArgRollDrop :: FN s (s > TNat)
 progArgRollDrop = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
   where
     f :: FN (MiscArgs s) (s > TNat)
     f =
       begin
-        # (argDrop @"x3" # argDrop @"x4" # argDrop @"x1")
-        # (argRoll @"x2" # argRoll @"x5")
+        # (drop @"x3" # drop @"x4" # drop @"x1")
+        # (roll @"x2" # roll @"x5")
         # opAdd
 
 -- Using name as a form of let-expression. Also returning a named stack item.
@@ -123,17 +124,17 @@ namingStackItems :: FN s (s > TInt)
 namingStackItems =
   begin
     # momentum
-    # argPick @"momentum"
-    # argDrop @"momentum"
+    # pick @"momentum"
+    # drop @"momentum"
   where
     momentum :: FN s (s > N "momentum" TInt)
     momentum =
       begin
         # name @"mass" (int 100)
         # name @"v" (int 5)
-        # name @"v^2" (argPick @"v" # argRoll @"v" # opMul)
+        # name @"v^2" (pick @"v" # roll @"v" # opMul)
         # name @"momentum"
-          (argRoll @"mass" # argRoll @"v^2" # opMul # int 2 # opDiv)
+          (roll @"mass" # roll @"v^2" # opMul # int 2 # opDiv)
 
 -- Currently possible to have the same name in scope for more than one stack
 -- item. Avoid.
@@ -150,8 +151,8 @@ duplicateName =
         (s > TNat)
     divide =
       begin
-        # (argRoll @"n1")
-        # (argRoll @"n1")
+        # (roll @"n1")
+        # (roll @"n1")
         # opSwap
         # opDiv
 
@@ -164,5 +165,5 @@ duplicateName =
 --   begin
 --     # opRoll @0
 --     # opRoll @1
---     # argsDrop @2
+--     # (drop @"x2" # drop @"x1")
 --     # op1

@@ -6,6 +6,7 @@ import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
+import Prelude hiding (drop)
 
 type LoopTypeN s = s > N "n" TNat > N "p" TPoint > N "r" TPoint
 
@@ -17,13 +18,13 @@ ecMul = function (unname @2 ecMul')
 ecMul' :: FN (s > N "n" TNat > N "p" TPoint) (s > TPoint)
 ecMul' =
   begin
-    # argPick @"n"
+    # pick @"n"
     # (nat 0 # opNumEqual)
     # opIf
-      (argDrop @"n" # argDrop @"p" # makeIdentity)
+      (drop @"n" # drop @"p" # makeIdentity)
       ( begin
-          # argRoll @"n"
-          # argRoll @"p"
+          # roll @"n"
+          # roll @"p"
           # makeIdentity
           # opUntil (unname @3 loop)
           # opNip
@@ -35,11 +36,11 @@ ecMul' =
       begin
         # name @"r2"
           ( begin
-              # argRoll @"r"
-              # ex1 (argPick @"n" # isOdd)
-              # opWhen (argPick @"p" # ecAdd)
+              # roll @"r"
+              # ex1 (pick @"n" # isOdd)
+              # opWhen (pick @"p" # ecAdd)
           )
-        # (argPick @"n" # half)
-        # (argRoll @"p" # ecDouble)
-        # (argRoll @"r2")
-        # (argRoll @"n" # half # isZero)
+        # (pick @"n" # half)
+        # (roll @"p" # ecDouble)
+        # (roll @"r2")
+        # (roll @"n" # half # isZero)

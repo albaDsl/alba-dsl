@@ -3,6 +3,7 @@
 module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
+import Prelude hiding (drop)
 
 sort :: FN (s > TBytes) (s > TBytes)
 sort = function (unname @1 sort')
@@ -10,19 +11,17 @@ sort = function (unname @1 sort')
     sort' :: FN (s > N "xs" TBytes) (s > TBytes)
     sort' =
       begin
-        # name @"size" (argPick @"xs" # opSize # opNip)
-        # argPick @"size"
+        # name @"size" (pick @"xs" # opSize # opNip)
+        # pick @"size"
         # ifZero
-          (argRoll @"xs" # argsDrop @1)
+          (drop @"size" # roll @"xs")
           ( begin
-              # (argRoll @"size" # nat 1 # opEqual)
+              # (roll @"size" # nat 1 # opEqual)
               # opIf
-                (argRoll @"xs")
+                (roll @"xs")
                 ( begin
-                    # name2 @"fst" @"snd" (argRoll @"xs" # halve)
-                    # (argRoll @"fst" # sort)
-                    # (argRoll @"snd" # sort)
-                    # merge
+                    # name2 @"fst" @"snd" (roll @"xs" # halve)
+                    # (roll @"fst" # sort # roll @"snd" # sort # merge)
                 )
           )
 
@@ -38,41 +37,29 @@ merge = function (unname @2 merge')
 merge' :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes)
 merge' =
   begin
-    # (argPick @"xs" # opSize # opNip)
+    # (pick @"xs" # opSize # opNip)
     # ifZero
-      (argRoll @"ys" # argsDrop @1)
+      (roll @"ys" # drop @"xs")
       ( begin
-          # (argPick @"ys" # opSize # opNip)
+          # (pick @"ys" # opSize # opNip)
           # ifZero
-            (argRoll @"xs" # argsDrop @1)
+            (drop @"ys" # roll @"xs")
             ( begin
-                # name2 @"x" @"xRest" (argPick @"xs" # uncons)
-                # name2 @"y" @"yRest" (argPick @"ys" # uncons)
+                # name2 @"x" @"xRest" (pick @"xs" # uncons)
+                # name2 @"y" @"yRest" (pick @"ys" # uncons)
                 # ( begin
-                      # (argPick @"x" # opBin2Num)
-                      # (argPick @"y" # opBin2Num)
+                      # (pick @"x" # opBin2Num)
+                      # (pick @"y" # opBin2Num)
                       # opLessThanOrEqual
                   )
                 # opIf
                   ( begin
-                      # argRoll @"x"
-                      # ( begin
-                            # argRoll @"xRest"
-                            # argRoll @"ys"
-                            # merge
-                        )
-                      # argsDrop @3
-                      # opCat
+                      # (roll @"x" # roll @"xRest" # roll @"ys" # merge # opCat)
+                      # (drop @"yRest" # drop @"y" # drop @"xs")
                   )
                   ( begin
-                      # argRoll @"y"
-                      # ( begin
-                            # argRoll @"xs"
-                            # argRoll @"yRest"
-                            # merge
-                        )
-                      # argsDrop @3
-                      # opCat
+                      # (roll @"y" # roll @"xs" # roll @"yRest" # merge # opCat)
+                      # (drop @"ys" # drop @"xRest" # drop @"x")
                   )
             )
       )

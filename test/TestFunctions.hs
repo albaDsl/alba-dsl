@@ -20,6 +20,7 @@ import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.QuickCheck (Property, testProperty, (==>))
+import Prelude hiding (drop)
 
 testFunctions :: TestTree
 testFunctions =
@@ -72,14 +73,10 @@ progFactorial =
     fac' :: FN (s > N "n" TNat) (s > TNat)
     fac' =
       begin
-        # argPick @"n"
+        # pick @"n"
         # ifZero
-          (nat 1 # argsDrop @1)
-          ( begin
-              # argPick @"n"
-              # (argRoll @"n" # op1SubUnsafe # fac)
-              # opMul
-          )
+          (nat 1 # drop @"n")
+          (pick @"n" # roll @"n" # op1SubUnsafe # fac # opMul)
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =

@@ -14,7 +14,7 @@ module Alba.Dsl.V1.Common.LangDispatch
 where
 
 import Alba.Dsl.V1.Bch2025.Lang (int)
-import Alba.Dsl.V1.Bch2025.LangArgs (argPick, argRoll)
+import Alba.Dsl.V1.Bch2025.LangArgs (pick, roll)
 import Alba.Dsl.V1.Bch2025.Ops (opDrop, opIf, opNumEqual, opNumEqualVerify)
 import Alba.Dsl.V1.Common.Lang
   ( begin,
@@ -108,11 +108,11 @@ entry8 f1 f2 f3 f4 f5 f6 f7 f8 =
 
 fIdxCase num f stack continuation =
   begin
-    # (argPick @"_fIdx" # int num # opNumEqual)
-    # opIf (argRoll @"_fIdx" # opDrop # stack # f) continuation
+    # (pick @"_fIdx" # int num # opNumEqual)
+    # opIf (roll @"_fIdx" # opDrop # stack # f) continuation
 
 fIdxLast num f stack =
   begin
-    # (argRoll @"_fIdx" # int num # opNumEqualVerify)
+    # (roll @"_fIdx" # int num # opNumEqualVerify)
     # stack
     # f

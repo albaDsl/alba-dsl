@@ -14,8 +14,6 @@ import Alba.Dsl.V1.Bch2025
     TBool,
     TInt,
     TNat,
-    argPick,
-    argRoll,
     ex1,
     int,
     nat,
@@ -29,6 +27,8 @@ import Alba.Dsl.V1.Bch2025
     opRot,
     opSwap,
     opWhen,
+    pick,
+    roll,
     unname,
   )
 import Alba.Dsl.V1.Bch2025.Contract.Math
@@ -59,12 +59,12 @@ pow' mul =
         (s > TInt > TNat > TInt > TBool)
     fn =
       begin
-        # argRoll @"res" -- <args> res
-        # ex1 (argPick @"n" # isOdd) -- <args> res odd?
-        # opWhen (argPick @"b" # mul) -- <args> res'
-        # (argRoll @"b" # square') -- <args> res' b
+        # roll @"res" -- <args> res
+        # ex1 (pick @"n" # isOdd) -- <args> res odd?
+        # opWhen (pick @"b" # mul) -- <args> res'
+        # (roll @"b" # square') -- <args> res' b
         # opSwap -- <args> b res'
-        # (argRoll @"n" # half) -- <args> b res' n
+        # (roll @"n" # half) -- <args> b res' n
         # ex1 (opDup # isZero) -- b res' n zero?
         # opRot -- b n zero? res'
         # opSwap -- b n res' zero?
@@ -101,15 +101,15 @@ pow'' mul =
         (s > TInt > TNat > TInt > t > TBool)
     fn =
       begin
-        # argRoll @"res" -- <args> res
-        # ex1 (argPick @"n" # isOdd) -- <args> res odd?
-        # opWhen (argPick @"b" # argPick @"data" # mul) -- <args> res'
-        # (argRoll @"b" # argPick @"data" # square') -- <args> res' b'
+        # roll @"res" -- <args> res
+        # ex1 (pick @"n" # isOdd) -- <args> res odd?
+        # opWhen (pick @"b" # pick @"data" # mul) -- <args> res'
+        # (roll @"b" # pick @"data" # square') -- <args> res' b'
         # opSwap -- <args> b' res'
-        # (argRoll @"n" # half) -- <args> b' res' n'
+        # (roll @"n" # half) -- <args> b' res' n'
         # ex1 (opDup # isZero) -- <args> b' res' n' zero?
         # opRot -- <args> b' n' zero? res'
-        # argRoll @"data" -- b' n' zero? res' data
+        # roll @"data" -- b' n' zero? res' data
         # opRot -- <args> b' n' res' data zero?
     square' :: forall s'. FN (s' > TInt > t) (s' > TInt)
     square' = opOver # opSwap # mul
@@ -125,6 +125,6 @@ factorial =
     fn :: FN (s > N "product" TNat > N "n" TNat) (s > TNat > TNat > TBool)
     fn =
       begin
-        # (argRoll @"product" # argPick @"n" # opMul)
-        # (argRoll @"n" # op1SubUnsafe)
+        # (roll @"product" # pick @"n" # opMul)
+        # (roll @"n" # op1SubUnsafe)
         # (opDup # isZero)

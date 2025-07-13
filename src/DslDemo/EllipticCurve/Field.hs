@@ -15,6 +15,7 @@ where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Math (pow')
 import DslDemo.EllipticCurve.Constants (p)
+import Prelude hiding (drop)
 
 feAdd :: FN (s > TInt > TInt) (s > TInt)
 feAdd = opAdd # primeModulus # opMod
@@ -49,12 +50,10 @@ modulo = function (unname @2 modulo')
     modulo' :: FN (s > N "x1" TInt > N "x2" TInt) (s > TInt)
     modulo' =
       begin
-        # argPick @"x1"
-        # argPick @"x2"
-        # name @"res" opMod
-        # argPick @"res"
+        # name @"res" (pick @"x1" # pick @"x2" # opMod)
+        # pick @"res"
         # int 0
         # opLessThan
         # opIf
-          (argPick @"res" # argPick @"x2" # opAdd # argsDrop @3)
-          (argPick @"res" # argsDrop @3)
+          (roll @"res" # roll @"x2" # opAdd # drop @"x1")
+          (roll @"res" # drop @"x2" # drop @"x1")

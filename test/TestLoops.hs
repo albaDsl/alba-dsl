@@ -65,8 +65,8 @@ progFactorial2 = progFacTest fac
     fn :: FN (s > N "product" TNat > N "n" TNat) (s > TNat > TNat)
     fn =
       begin
-        # (argPick @"n" # argRoll @"product" # opMul)
-        # (argRoll @"n" # op1SubUnsafe)
+        # (pick @"n" # roll @"product" # opMul)
+        # (roll @"n" # op1SubUnsafe)
 
 progFactorial3 :: FN s (s > TBool)
 progFactorial3 = progFacTest fac
@@ -78,7 +78,7 @@ progFactorial3 = progFacTest fac
     fn =
       begin
         # (opFromAltStack # opDup # opToAltStack)
-        # (argRoll @"product" # opMul)
+        # (roll @"product" # opMul)
 
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/

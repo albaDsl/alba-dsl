@@ -28,9 +28,9 @@ makePoint = unname @3 makePoint'
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
-        # (argRoll @"x" # nat coordSize # opNum2Bin)
-        # (argRoll @"y" # nat coordSize # opNum2Bin)
-        # (argRoll @"z" # nat coordSize # opNum2Bin)
+        # (roll @"x" # nat coordSize # opNum2Bin)
+        # (roll @"y" # nat coordSize # opNum2Bin)
+        # (roll @"z" # nat coordSize # opNum2Bin)
         # opCat
         # opCat
         # opCat
@@ -104,11 +104,11 @@ getField = unname @3 getField'
         (s > TBytes)
     getField' =
       begin
-        # argRoll @"bytes"
-        # argRoll @"offset"
+        # roll @"bytes"
+        # roll @"offset"
         # opSplit
         # opNip
-        # argRoll @"size"
+        # roll @"size"
         # opSplit
         # opDrop
 

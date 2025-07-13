@@ -4,6 +4,7 @@ module DslDemo.Exponentiation (pow) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
+import Prelude hiding (drop)
 
 pow :: FN (s > TInt > TNat) (s > TInt)
 pow = function (powHelper opMul)
@@ -18,29 +19,14 @@ powHelper' ::
   FN (s > N "b" TInt > N "n" TNat) (s > TInt)
 powHelper' mul =
   begin
-    # argPick @"n"
+    # pick @"n"
     # ifZero
-      (int 1 # argsDrop @2)
+      (int 1 # drop @"n" # drop @"b")
       ( begin
-          # (argPick @"n" # isEven)
+          # (pick @"n" # isEven)
           # opIf
-            ( begin
-                # ( begin
-                      # argRoll @"b"
-                      # (argRoll @"n" # nat 2 # opDiv)
-                      # pow
-                  )
-                # square mul
-            )
-            ( begin
-                # argPick @"b"
-                # ( begin
-                      # argRoll @"b"
-                      # (argRoll @"n" # nat 1 # opSubUnsafe)
-                      # pow
-                  )
-                # mul
-            )
+            (roll @"b" # roll @"n" # nat 2 # opDiv # pow # square mul)
+            (pick @"b" # roll @"b" # roll @"n" # op1 # opSubUnsafe # pow # mul)
       )
   where
     square ::

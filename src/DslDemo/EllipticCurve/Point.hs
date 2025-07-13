@@ -14,6 +14,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
 import Numeric.Natural (Natural)
+import Prelude hiding (drop)
 
 data TPoint
 
@@ -28,8 +29,8 @@ makePoint = unname @2 makePoint'
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
-        # (argRoll @"x" # nat coordSize # opNum2Bin)
-        # (argRoll @"y" # nat coordSize # opNum2Bin)
+        # (roll @"x" # nat coordSize # opNum2Bin)
+        # (roll @"y" # nat coordSize # opNum2Bin)
         # opCat
         # opCat
         # cast
@@ -56,19 +57,19 @@ isEqual = unname @2 isEqual'
     isEqual' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TBool)
     isEqual' =
       begin
-        # (argPick @"p" # isIdentity # argPick @"q" # isIdentity # opBoolAnd)
+        # (pick @"p" # isIdentity # pick @"q" # isIdentity # opBoolAnd)
         # opIf
-          (opTrue # argsDrop @2)
+          (opTrue # drop @"q" # drop @"p")
           ( begin
               # name @"equalTag"
-                (argPick @"p" # getTag # argPick @"q" # getTag # opNumEqual)
+                (pick @"p" # getTag # pick @"q" # getTag # opNumEqual)
               # name @"equalX"
-                (argPick @"p" # getX # argPick @"q" # getX # opNumEqual)
+                (pick @"p" # getX # pick @"q" # getX # opNumEqual)
               # name @"equalY"
-                (argRoll @"p" # getY # argRoll @"q" # getY # opNumEqual)
-              # argRoll @"equalTag"
-              # argRoll @"equalX"
-              # argRoll @"equalY"
+                (roll @"p" # getY # roll @"q" # getY # opNumEqual)
+              # roll @"equalTag"
+              # roll @"equalX"
+              # roll @"equalY"
               # opBoolAnd
               # opBoolAnd
           )
