@@ -28,12 +28,7 @@ evaluateProgWithStack ::
   (VmStack, VmStack) ->
   Either ScriptError (VmStack, VmStack)
 evaluateProgWithStack prog (s, alt) =
-  evaluateProgWithParams prog (s, alt) context
-  where
-    context = fromJust $ mkTxContext barboneTx 0 undefined
-
-    barboneTx =
-      Tx {version = 2, inputs = undefined, outputs = undefined, lockTime = 0}
+  evaluateProgWithParams prog (s, alt) minimalContext
 
 evaluateProgWithParams ::
   FNA s '[] s' alt' ->
@@ -73,6 +68,13 @@ evaluateScript code (s, alt) context = do
     stateEqual :: VmState -> VmState -> Bool
     stateEqual st st' =
       (st.s, st.alt, st.metrics) == (st'.s, st'.alt, st'.metrics)
+
+minimalContext :: TxContext
+minimalContext = fromJust $ mkTxContext barboneTx 0 undefined
+
+barboneTx :: Tx
+barboneTx =
+  Tx {version = 2, inputs = undefined, outputs = undefined, lockTime = 0}
 
 txContext :: TxOut -> TxContext
 txContext utxo = fromJust $ mkTxContext tx 0 [utxo]

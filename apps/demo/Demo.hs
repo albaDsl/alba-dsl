@@ -9,18 +9,24 @@ module Demo
     f4,
     f5,
     f6,
+    f7,
     prop1,
     prop2,
     prop3,
+    prop4,
+    turtleVm,
+    toTyped,
   )
 where
 
+import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DemoPrelude
 import DslDemo.EllipticCurve.Constants qualified as EC
 import DslDemo.EllipticCurve.Field qualified as EC
 import DslDemo.EllipticCurve.Jacobian qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
+import DslDemo.TurtleVm.TurtleVm (turtleVm)
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -78,11 +84,18 @@ f4 = int 2 # roll @"x" # Exp.pow
 f5 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
 f5 = int 2 # roll @"x" # pow
 
--- Secp256k1 point multiplication. Calculates n * G and returns the
--- x-coordinate.
--- Try with e.g. test vectors from:
+-- Example 6. Secp256k1 point multiplication. Calculates n * G and returns the
+-- x-coordinate. Try with e.g. test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
 f6 = EC.g # EC.ecMul # EC.getX
+
+-- Example 7. Evaluating =f3= using turtleVm.
+-- evl (c f7)
+f7 :: FN (s > TInt) (s > TInt)
+f7 = bytes (c f3) # toTyped (turtleVm 20 5)
+
+prop4 :: Integer -> Property
+prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x

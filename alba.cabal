@@ -74,8 +74,8 @@ library
       Alba.Dsl.V1.Bch2025.Contract.Prelude,
       Alba.Dsl.V1.Bch2025.Infix,
       Alba.Dsl.V1.Bch2025.Lang,
-      Alba.Dsl.V1.Bch2025.LangUntyped,
       Alba.Dsl.V1.Bch2025.LangArgs,
+      Alba.Dsl.V1.Bch2025.LangUntyped,
       Alba.Dsl.V1.Bch2025.Ops,
       Alba.Dsl.V1.Bch2025.OpsUntyped,
       Alba.Dsl.V1.Bch2025.Stack,
@@ -177,7 +177,6 @@ library
       DslDemo.EllipticCurve.AffineAdd,
       DslDemo.EllipticCurve.Constants,
       DslDemo.EllipticCurve.Field,
-      DslDemo.EllipticCurve.Point,
       DslDemo.EllipticCurve.Jacobian,
       DslDemo.EllipticCurve.JacobianAdd,
       DslDemo.EllipticCurve.JacobianPoint,
@@ -185,8 +184,26 @@ library
       DslDemo.EllipticCurve.Native.Constants,
       DslDemo.EllipticCurve.Native.FieldElement,
       DslDemo.EllipticCurve.Native.Jacobian,
+      DslDemo.EllipticCurve.Point,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,
+      DslDemo.TurtleVm.Maybe,
+      DslDemo.TurtleVm.MiniTurtleVm101,
+      DslDemo.TurtleVm.Tuple,
+      DslDemo.TurtleVm.TurtleOpArithmetic,
+      DslDemo.TurtleVm.TurtleOpBitwiseLogic,
+      DslDemo.TurtleVm.TurtleOpBytes,
+      DslDemo.TurtleVm.TurtleOpConditionals,
+      DslDemo.TurtleVm.TurtleOpConstants,
+      DslDemo.TurtleVm.TurtleOpCryptography,
+      DslDemo.TurtleVm.TurtleOpIntrospection,
+      DslDemo.TurtleVm.TurtleOpStack,
+      DslDemo.TurtleVm.TurtleVm,
+      DslDemo.TurtleVm.TurtleVmCondStack,
+      DslDemo.TurtleVm.TurtleVmState,
+      DslDemo.TurtleVm.TurtleVmStateSimple,
+      DslDemo.TurtleVm.TurtleVmUtils,
+      DslDemo.TurtleVm.TurtleVmUtilsUntyped
   hs-source-dirs: src
 
 executable alba
@@ -265,6 +282,7 @@ executable test
       TestOpsStack,
       TestOptimizer,
       TestStackBranches,
+      TestTurtleVm,
       TestUtils,
   build-depends: alba, scientific
 
