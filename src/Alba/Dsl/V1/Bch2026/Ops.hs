@@ -8,7 +8,7 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState (addLambda)
 import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), TBool, TBytes)
 import Alba.Vm.Common.OpcodeL2 (CompilerData (..), OpcodeL2 (..))
-import Data.Maybe (fromJust)
+import Data.Maybe (fromMaybe)
 
 opUntil :: FNA s alt (s > TBool) alt -> FNA s alt s alt
 opUntil loopBody (S c fs) =
@@ -18,7 +18,7 @@ opUntil loopBody (S c fs) =
 opDefine :: String -> FN (s > TBytes) s
 opDefine name (S c fs) =
   let fId = ("", 0, 0, name)
-      fs' = fromJust err (addLambda fId fs)
+      fs' = fromMaybe err (addLambda fId fs)
    in S
         (aops c [OP_COMPILER_DATA (FunctionIndex {fId}), OP_DEFINE])
         fs'
