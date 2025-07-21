@@ -237,6 +237,14 @@ executable lastWill
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba
 
+executable miniTurtleChallenge
+  import: shared-properties
+  hs-source-dirs: apps/contracts/miniTurtleChallenge
+  main-is: main.hs
+  other-modules: Contract, ContractApi, Opts, Params, Spend, Test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
 executable demo
   import: shared-properties
   main-is: main.hs

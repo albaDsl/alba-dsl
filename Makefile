@@ -17,6 +17,7 @@ test: build
 	cabal run -- test --quickcheck-tests 200 --quickcheck-max-ratio 100
 	cabal run lastWill -- test
 	cabal run transferWithTimeout -- test
+	cabal run miniTurtleChallenge -- test
 
 benchmark:
 	cabal run benchmark1 -- --output benchmark1.html
