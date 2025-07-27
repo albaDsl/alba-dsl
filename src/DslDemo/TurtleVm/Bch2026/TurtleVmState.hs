@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
+    function,
     ifZero,
     name2,
     nat,
@@ -47,9 +48,9 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import DslDemo.TurtleVm.Bch2026.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isOpDataOp, vmError)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
-import DslDemo.TurtleVm.Common.Tuple (TTuple, tuple, untuple)
 
 data TurtleVmState
 
@@ -100,34 +101,39 @@ getCondStack = getState # opDup # untuple # opNip # opSwap # putState
 putCondStack ::
   Int -> FNA (s > TBool) (alt > TurtleVmState) s (alt > TurtleVmState)
 putCondStack maxCsDepth =
-  begin
-    # (getState # untuple # opSize # maxCsDepth' # opLessThanOrEqual)
-    # opIf
-      ( begin
-          # (opRot # opIf (bytes [1]) (bytes [0]))
-          # (opSwap # opCat # tuple # putState)
-      )
-      (op2Drop # opDrop # vmError "E2") -- CondStack overflow
+  function
+    ( begin
+        # (getStateUnpackedWithSize # maxCsDepth' # opLessThanOrEqual)
+        # opIf
+          ( begin
+              # (opRot # opIf (bytes [1]) (bytes [0]))
+              # (opSwap # opCat # tuple # putState)
+          )
+          (op2Drop # opDrop # vmError "E2") -- CondStack overflow
+    )
   where
     maxCsDepth' = nat (fromIntegral maxCsDepth)
+
+getStateUnpackedWithSize ::
+  FNA s (alt > TurtleVmState) (s > TBytes > TBytes > TNat) alt
+getStateUnpackedWithSize = function (getState # untuple # opSize)
 
 toggleCondStack :: FNA s (alt > TurtleVmState) s (alt > TurtleVmState)
 toggleCondStack =
   begin
-    # (getState # untuple # opSize # nat 1 # opGreaterThanOrEqual)
+    # (getStateUnpackedWithSize # nat 1 # opGreaterThanOrEqual)
     # opIf
       ( begin
           # (nat 1 # opSplit # opSwap # bytes [1] # opEqual)
           # opIf (bytes [0]) (bytes [1])
-          # (opSwap # opCat)
-          # (tuple # putState)
+          # (opSwap # opCat # tuple # putState)
       )
       (vmError "E3") -- CondStack underflow
 
 dropCondStack :: FNA s (alt > TurtleVmState) s (alt > TurtleVmState)
 dropCondStack =
   begin
-    # (getState # untuple # opSize # nat 1 # opGreaterThanOrEqual)
+    # (getStateUnpackedWithSize # nat 1 # opGreaterThanOrEqual)
     # opIf
       (nat 1 # opSplit # opNip # tuple # putState)
       (vmError "E4") -- CondStack underflow

@@ -19,7 +19,7 @@ testCodeMetrics =
           @?= "1462 opcodes, 1762 bytes.",
       testCase "turtleVm 2026" $
         compileForSize (toTyped (T2026.turtleVm 1))
-          @?= "627 opcodes, 1329 bytes."
+          @?= "554 opcodes, 1099 bytes."
     ]
 
 compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String

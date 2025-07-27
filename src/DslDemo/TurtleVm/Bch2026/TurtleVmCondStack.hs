@@ -14,6 +14,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     drop,
+    function,
     nat,
     opBoolOr,
     opDrop,
@@ -57,7 +58,7 @@ executeP =
       (drop @"condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
-condStackExecuteP = opTrue # opSwap # opUntil loop # opDrop
+condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)
   where
     loop :: FN (s > TBool > TBytes) (s > TBool > TBytes > TBool)
     loop =
