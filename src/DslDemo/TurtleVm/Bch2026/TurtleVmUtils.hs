@@ -5,6 +5,10 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmUtils
     toSigned,
     unsupportedOp,
     unsupportedOpBytes,
+    inRange,
+    isSingleByteOp,
+    isConditionalOp,
+    isOpDataOp,
   )
 where
 
@@ -13,14 +17,20 @@ import Alba.Dsl.V1.Bch2026
     FN,
     FNA,
     S (S),
+    TBool,
     TBytes,
     TInt,
     bytes,
     function,
+    int,
+    nat,
     opBin2Num,
     opCat,
     opFalse,
+    opNumEqual,
+    opSize,
     opVerify,
+    opWithin,
     progBytes,
     (#),
     type (>),
@@ -40,3 +50,15 @@ unsupportedOp = function (vmError "E1")
 
 unsupportedOpBytes :: FN s (s > TBytes)
 unsupportedOpBytes = progBytes unsupportedOp
+
+inRange :: Integer -> Integer -> FN (s > TInt) (s > TBool)
+inRange x y = int x # int y # opWithin
+
+isSingleByteOp :: FN (s > TBytes) (s > TBytes > TBool)
+isSingleByteOp = opSize # nat 1 # opNumEqual
+
+isConditionalOp :: FN (s > TBytes) (s > TBool)
+isConditionalOp = toSigned # int 0x63 # int 0x69 # opWithin
+
+isOpDataOp :: FN (s > TBytes) (s > TBool)
+isOpDataOp = toSigned # inRange 0x01 0x4c

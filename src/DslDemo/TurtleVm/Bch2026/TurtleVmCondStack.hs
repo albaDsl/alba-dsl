@@ -11,11 +11,9 @@ import Alba.Dsl.V1.Bch2026
     N,
     TBool,
     TBytes,
-    TInt,
     begin,
     bytes,
     drop,
-    int,
     nat,
     opBoolOr,
     opDrop,
@@ -30,33 +28,33 @@ import Alba.Dsl.V1.Bch2026
     opSwap,
     opTrue,
     opUntil,
-    opWithin,
     roll,
     (#),
     type (>),
   )
-import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (toSigned)
+import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
 import Prelude hiding (and, drop)
 
 executeP ::
   FN
     (s > N "op" (TMaybe TBytes) > N "condStack" TBytes)
-    (s > TInt > TBool)
+    (s > TBytes > TBool)
 executeP =
   begin
     # (roll @"op")
     # ifJust
       ( begin
-          # toSigned
-          # (opDup # isConditionalOp)
-          # (roll @"condStack" # condStackExecuteP)
-          # opBoolOr
+          # isSingleByteOp
+          # opIf
+            ( begin
+                # (opDup # isConditionalOp)
+                # (roll @"condStack" # condStackExecuteP)
+                # opBoolOr
+            )
+            (roll @"condStack" # condStackExecuteP)
       )
-      (drop @"condStack" # int 0 # opFalse)
-
-isConditionalOp :: FN (s > TInt) (s > TBool)
-isConditionalOp = int 0x63 # int 0x69 # opWithin
+      (drop @"condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
 condStackExecuteP = opTrue # opSwap # opUntil loop # opDrop
