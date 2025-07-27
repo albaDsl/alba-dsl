@@ -8,6 +8,8 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmState
     putCondStack,
     toggleCondStack,
     dropCondStack,
+    getState,
+    putState,
     isEndOfProgram,
   )
 where

@@ -207,6 +207,7 @@ library
       DslDemo.TurtleVm.Bch2025.TurtleVmUtils,
       DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped,
       DslDemo.TurtleVm.Bch2026.Tuple,
+      DslDemo.TurtleVm.Bch2026.TurtleOpAltStack,
       DslDemo.TurtleVm.Bch2026.TurtleOpIf,
       DslDemo.TurtleVm.Bch2026.TurtleVm,
       DslDemo.TurtleVm.Bch2026.TurtleVmCondStack,

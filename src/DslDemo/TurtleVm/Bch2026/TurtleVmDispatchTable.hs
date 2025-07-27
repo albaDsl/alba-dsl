@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2026
     (#),
   )
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
+import DslDemo.TurtleVm.Bch2026.TurtleOpAltStack (fromAltStack, toAltStack)
 import DslDemo.TurtleVm.Bch2026.TurtleOpIf (ifOp)
 import DslDemo.TurtleVm.Bch2026.TurtleVmState (dropCondStack, toggleCondStack)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (unsupportedOpBytes)
@@ -53,8 +54,8 @@ initOpDispatch maxCsDepth =
     # (progBytes dropCondStack # opDefineIdx 0x68) -- OP_ENDIF
     # (bytes [0x69] # opDefineIdx 0x69) -- OP_VERIFY
     # (bytes [0x6a] # opDefineIdx 0x6a) -- OP_RETURN
-    # (unsup # opDefineIdx 0x6b) -- OP_TOALTSTACK not implemented
-    # (unsup # opDefineIdx 0x6c) -- OP_FROMALTSTACK not implemented
+    # (progBytes (toTyped toAltStack) # opDefineIdx 0x6b) -- OP_TOALTSTACK
+    # (progBytes (toTyped fromAltStack) # opDefineIdx 0x6c) -- OP_FROMALTSTACK
     # (bytes [0x6d] # opDefineIdx 0x6d) -- OP_2DROP
     # (bytes [0x6e] # opDefineIdx 0x6e) -- OP_2DUP
     # (bytes [0x6f] # opDefineIdx 0x6f) -- OP_3DUP

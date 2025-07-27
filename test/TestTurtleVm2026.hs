@@ -1,8 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# OPTIONS_GHC -Wno-unused-local-binds #-}
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module TestTurtleVm2026 (testTurtleVm2026) where
 
@@ -41,6 +37,8 @@ testTurtleVm2026 =
         expectTrueResult (evaluateOnTurtleVm progStack1),
       testCase "Stack — 2" $
         expectTrueResult (evaluateOnTurtleVm progStack2),
+      testCase "Alt Stack" $
+        expectTrueResult (evaluateOnTurtleVm progAltStack),
       testCase "Bytes" $
         expectTrueResult (evaluateOnTurtleVm progBytes),
       testCase "Bitwise" $
@@ -133,6 +131,23 @@ progStack2 =
     # (pick @"x4" # roll @"x3" # opMul # int 12 # opNumEqual)
     # (drop @"x0" # drop @"x1" # drop @"x2" # drop @"x4")
 
+progAltStack :: FN s (s > TBool)
+progAltStack =
+  begin
+    # int 5
+    # int 3
+    # int 7
+    # opToAltStack
+    # opToAltStack
+    # opToAltStack
+    # opFromAltStack
+    # opFromAltStack
+    # opSub
+    # opFromAltStack
+    # opMul
+    # int 14
+    # opNumEqual
+
 progBytes :: FN s (s > TBool)
 progBytes =
   begin
@@ -223,7 +238,3 @@ expectVmError result =
       assertFailure "Exepected a TurtleVm vmError."
     Left (err, _state) -> do
       err @?= SeVerify
-  where
-    -- dumpLog defaultDisplayOpts (fromMaybe (error "") state)
-
-    emptyTuple = b2SeUnsafe [0, 0]
