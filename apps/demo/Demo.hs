@@ -10,11 +10,14 @@ module Demo
     f5,
     f6,
     f7,
+    f8,
+    f9,
     prop1,
     prop2,
     prop3,
     prop4,
-    turtleVm,
+    prop5,
+    T26.turtleVm,
     toTyped,
   )
 where
@@ -26,7 +29,9 @@ import DslDemo.EllipticCurve.Field qualified as EC
 import DslDemo.EllipticCurve.Jacobian qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
-import DslDemo.TurtleVm.Bch2026.TurtleVm (turtleVm)
+import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
+import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T25
+import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T26
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -92,10 +97,31 @@ f5 = int 2 # roll @"x" # pow
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
 f6 = EC.g # EC.ecMul # EC.getX
 
--- Example 7. Evaluating =f3= using turtleVm.
+-- Example 7. Evaluating =f3= using turtleVm (Bch2025).
 -- evl (c f7)
 f7 :: FN (s > TInt) (s > TInt)
-f7 = bytes (c f3) # toTyped (turtleVm 5)
+f7 = bytes (c f3) # toTyped (T25.turtleVm 20 5)
 
 prop4 :: Integer -> Property
 prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x
+
+-- Example 8. Evaluating =f3= using turtleVm (Bch2026).
+-- evl (c f8)
+f8 :: FN (s > TInt) (s > TInt)
+f8 = bytes (c f3) # toTyped (T26.turtleVm 5)
+
+prop5 :: Integer -> Property
+prop5 x = ev (c f8) x === x ^ 3 - x ^ 2 + 2 * x
+
+-- Example 9. Evaluate one solution to the miniTurtleVm101 challenge on
+-- miniTurtleVm101 running on top of turtleVm Bch2026.
+-- ev (c f9) 0
+f9 :: FN (s > TInt) (s > TInt)
+f9 =
+  begin
+    # bytes solution
+    # bytes (c (toTyped miniTurtleVm101))
+    # toTyped (T26.turtleVm 30)
+  where
+    solution :: Bytes
+    solution = [0x02, 0x8b, 0x95, 0x89, 0x51, 0x8b, 0x51, 0x8a, 0x8b]
