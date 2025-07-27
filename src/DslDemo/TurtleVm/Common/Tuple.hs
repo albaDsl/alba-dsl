@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Tuple (TTuple, tuple, untuple, fst, snd) where
+module DslDemo.TurtleVm.Common.Tuple (TTuple, tuple, untuple, fst, snd) where
 
 import Alba.Dsl.V1.Bch2025
 import Prelude hiding (fst, snd)

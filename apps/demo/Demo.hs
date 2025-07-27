@@ -26,7 +26,7 @@ import DslDemo.EllipticCurve.Field qualified as EC
 import DslDemo.EllipticCurve.Jacobian qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
-import DslDemo.TurtleVm.TurtleVm (turtleVm)
+import DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm)
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =

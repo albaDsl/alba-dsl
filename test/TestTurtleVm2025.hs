@@ -1,7 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
-module TestTurtleVm (testTurtleVm) where
+module TestTurtleVm2025 (testTurtleVm2025) where
 
 import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Common.StackUntyped (FNU, toTyped)
@@ -17,21 +17,21 @@ import Alba.Vm.Common.Logging (defaultDisplayOpts, dumpLog)
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
-import DslDemo.TurtleVm.MiniTurtleVm101
+import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101
   ( miniTurtleVm101,
     turtleOpDefine,
     turtleOpInvoke,
   )
-import DslDemo.TurtleVm.TurtleVm (turtleVm)
+import DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertFailure, testCase, (@?=))
 import TestUtils (txContext, utxoWithPubkey)
 import Prelude hiding (drop)
 
-testTurtleVm :: TestTree
-testTurtleVm =
+testTurtleVm2025 :: TestTree
+testTurtleVm2025 =
   testGroup
-    "turtleVm"
+    "turtleVm 2025"
     [ testCase "Data pushing" $
         expectTrueResult (evaluateOnTurtleVm progDataPush),
       testCase "Conditionals" $

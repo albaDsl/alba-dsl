@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleOpBitwiseLogic (turtleOpBitwiseLogic) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic (turtleOpBitwiseLogic) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opAnd,
@@ -10,7 +10,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opXor,
   )
 import Alba.Dsl.V1.Common.StackUntyped (FNU)
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
 turtleOpBitwiseLogic :: FNU
 turtleOpBitwiseLogic =

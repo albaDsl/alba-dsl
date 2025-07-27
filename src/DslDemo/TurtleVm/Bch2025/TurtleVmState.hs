@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleVmState
+module DslDemo.TurtleVm.Bch2025.TurtleVmState
   ( initState,
     getOp,
     getOpAndCondStack,
@@ -43,9 +43,9 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
-import DslDemo.TurtleVm.Maybe (TMaybe, just, nothing)
-import DslDemo.TurtleVm.Tuple (TTuple, tuple, untuple)
-import DslDemo.TurtleVm.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
+import DslDemo.TurtleVm.Common.Tuple (TTuple, tuple, untuple)
 
 data TurtleVmState
 

@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleVmCondStack (executeP, condStackExecuteP) where
+module DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (executeP, condStackExecuteP) where
 
 import Alba.Dsl.V1.Bch2025
   ( FN,
@@ -31,8 +31,8 @@ import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped)
-import DslDemo.TurtleVm.Maybe (TMaybe, ifJust)
-import DslDemo.TurtleVm.TurtleVmUtils (toSigned)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (toSigned)
+import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
 import Prelude hiding (and, drop)
 
 executeP ::

@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleVm (turtleVm) where
+module DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm) where
 
 import Alba.Dsl.V1.Bch2025 qualified as TY
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
@@ -16,18 +16,18 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
   )
 import Alba.Dsl.V1.Common.Lang (begin, (#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
-import DslDemo.TurtleVm.TurtleOpArithmetic (turtleOpArithmetic)
-import DslDemo.TurtleVm.TurtleOpBitwiseLogic (turtleOpBitwiseLogic)
-import DslDemo.TurtleVm.TurtleOpBytes (turtleOpBytes)
-import DslDemo.TurtleVm.TurtleOpConditionals (turtleOpConditionals)
-import DslDemo.TurtleVm.TurtleOpConstants (turtleOpConstants)
-import DslDemo.TurtleVm.TurtleOpCryptography (turtleOpCryptography)
-import DslDemo.TurtleVm.TurtleOpIntrospection (turtleOpIntrospection)
-import DslDemo.TurtleVm.TurtleOpStack (turtleOpStack)
-import DslDemo.TurtleVm.TurtleVmCondStack (executeP)
-import DslDemo.TurtleVm.TurtleVmState (getOpAndCondStack, getOpBytes, initState)
-import DslDemo.TurtleVm.TurtleVmUtils (vmError)
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOp, inRange, is)
+import DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic (turtleOpArithmetic)
+import DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic (turtleOpBitwiseLogic)
+import DslDemo.TurtleVm.Bch2025.TurtleOpBytes (turtleOpBytes)
+import DslDemo.TurtleVm.Bch2025.TurtleOpConditionals (turtleOpConditionals)
+import DslDemo.TurtleVm.Bch2025.TurtleOpConstants (turtleOpConstants)
+import DslDemo.TurtleVm.Bch2025.TurtleOpCryptography (turtleOpCryptography)
+import DslDemo.TurtleVm.Bch2025.TurtleOpIntrospection (turtleOpIntrospection)
+import DslDemo.TurtleVm.Bch2025.TurtleOpStack (turtleOpStack)
+import DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (executeP)
+import DslDemo.TurtleVm.Bch2025.TurtleVmState (getOpAndCondStack, getOpBytes, initState)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOp, inRange, is)
 
 turtleVm :: Int -> Int -> FNU
 turtleVm maxOps maxCsDepth =

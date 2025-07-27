@@ -25,7 +25,7 @@ import ContractApi (withdraw)
 import Crypto.Secp256k1 (Ctx)
 import Data.ByteString qualified as B
 import Data.Word (Word64)
-import DslDemo.TurtleVm.MiniTurtleVm101 (turtleOpDefine, turtleOpInvoke)
+import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (turtleOpDefine, turtleOpInvoke)
 import Numeric.Natural (Natural)
 import Params (fee)
 import Prelude hiding (seq)

@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.MiniTurtleVm101
+module DslDemo.TurtleVm.Bch2025.MiniTurtleVm101
   ( miniTurtleVm101,
     turtleOpDefine,
     turtleOpInvoke,
@@ -15,15 +15,15 @@ import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.Lang (begin, (#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (OP_DEFINE, OP_INVOKE))
-import DslDemo.TurtleVm.Maybe (ifJust)
-import DslDemo.TurtleVm.TurtleVmStateSimple
+import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
   ( getOp,
     getOpBytes,
     initStateWithDefaultOpDefine,
     invokeFunction,
     putFunction,
   )
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Common.Maybe (ifJust)
 
 miniTurtleVm101 :: FNU
 miniTurtleVm101 = ft initStateWithDefaultOpDefine # repeatProg 12 handleOp

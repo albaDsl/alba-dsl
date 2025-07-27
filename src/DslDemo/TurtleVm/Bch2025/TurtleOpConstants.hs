@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleOpConstants (turtleOpConstants) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpConstants (turtleOpConstants) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( op1,
@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     op9,
   )
 import Alba.Dsl.V1.Common.StackUntyped (FNU)
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOp, condOpLeaf, inRange, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOp, condOpLeaf, inRange, is)
 
 turtleOpConstants :: FNU
 turtleOpConstants =

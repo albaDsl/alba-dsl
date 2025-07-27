@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleVmUtilsUntyped
+module DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
   ( condOp,
     condOpLeaf,
     inRange,
@@ -12,7 +12,7 @@ import Alba.Dsl.V1.Bch2025.LangUntyped (int)
 import Alba.Dsl.V1.Bch2025.OpsUntyped
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, SU, fromTyped)
-import DslDemo.TurtleVm.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
 
 condOp :: [(SU -> SU, SU -> SU)] -> FNU
 condOp [] st = unsupportedOp st

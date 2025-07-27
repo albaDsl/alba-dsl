@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleOpBytes (turtleOpBytes) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpBytes (turtleOpBytes) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opBin2Num,
@@ -10,7 +10,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSplit,
   )
 import Alba.Dsl.V1.Common.StackUntyped (FNU)
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
 turtleOpBytes :: FNU
 turtleOpBytes =

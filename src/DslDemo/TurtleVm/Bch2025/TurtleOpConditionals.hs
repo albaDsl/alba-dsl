@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleOpConditionals (turtleOpConditionals) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpConditionals (turtleOpConditionals) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opFalse,
@@ -12,14 +12,14 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
   )
 import Alba.Dsl.V1.Common.Lang (begin, (#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
-import DslDemo.TurtleVm.TurtleVmCondStack (condStackExecuteP)
-import DslDemo.TurtleVm.TurtleVmState
+import DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (condStackExecuteP)
+import DslDemo.TurtleVm.Bch2025.TurtleVmState
   ( dropCondStack,
     getCondStack,
     putCondStack,
     toggleCondStack,
   )
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
 turtleOpConditionals :: Int -> FNU
 turtleOpConditionals maxCsDepth =

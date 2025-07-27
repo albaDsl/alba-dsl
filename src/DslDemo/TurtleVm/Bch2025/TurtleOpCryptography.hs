@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.TurtleOpCryptography (turtleOpCryptography) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpCryptography (turtleOpCryptography) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opCheckMultiSig,
@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSha256,
   )
 import Alba.Dsl.V1.Common.StackUntyped (FNU)
-import DslDemo.TurtleVm.TurtleVmUtilsUntyped (condOpLeaf, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
 turtleOpCryptography :: FNU
 turtleOpCryptography =
