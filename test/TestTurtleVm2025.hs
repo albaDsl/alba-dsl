@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestTurtleVm2025 (testTurtleVm2025) where
 
@@ -67,6 +66,9 @@ progDataPush =
     # (bytes (B.pack $ replicate 74 1) # nat 37 # opSplit # opEqual)
     # opBoolAnd
 
+-- Use multi-byte strings inside conditionals. If multi-byte opcodes are not
+-- handled correctly by the VM, then it could start interpreting the data as
+-- opcodes.
 progConditionals :: FN s (s > TBool)
 progConditionals =
   begin
@@ -75,13 +77,25 @@ progConditionals =
       ( begin
           # opTrue
           # opNotIf
-            opFalse
+            someBytes
             ( begin
                 # opFalse
-                # opIf opFalse opTrue
+                # opIf someBytes expectedBytes
             )
       )
-      opFalse
+      someBytes
+    # expectedBytes
+    # opEqual
+  where
+    expectedBytes :: FN s (s > TBytes)
+    expectedBytes = bytes [opEndif, opEndif, opEndif]
+
+    someBytes :: FN s (s > TBytes)
+    someBytes = bytes [opElse, opElse, opElse]
+
+    opElse = 0x67
+
+    opEndif = 0x68
 
 progArithmetic1 :: FN s (s > TBool)
 progArithmetic1 =

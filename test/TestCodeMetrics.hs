@@ -16,7 +16,7 @@ testCodeMetrics =
     "Code metrics"
     [ testCase "turtleVm 2025" $
         compileForSize (toTyped (T2025.turtleVm 1 1))
-          @?= "1440 opcodes, 1734 bytes.",
+          @?= "1462 opcodes, 1762 bytes.",
       testCase "turtleVm 2026" $
         compileForSize (toTyped (T2026.turtleVm 1))
           @?= "627 opcodes, 1329 bytes."

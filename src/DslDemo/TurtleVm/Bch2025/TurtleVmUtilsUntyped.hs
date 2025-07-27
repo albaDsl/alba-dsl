@@ -5,14 +5,15 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
     condOpLeaf,
     inRange,
     is,
+    unsupportedOp,
   )
 where
 
 import Alba.Dsl.V1.Bch2025.LangUntyped (int)
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2025.OpsUntyped (opDrop, opDup, opIf, opNumEqual)
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, SU, fromTyped)
-import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils qualified as UT
 
 condOp :: [(SU -> SU, SU -> SU)] -> FNU
 condOp [] st = unsupportedOp st
@@ -25,10 +26,10 @@ condOpLeaf ((test, result) : rest) st =
   (opDup # test # opIf (opDrop # result) (condOpLeaf rest)) st
 
 unsupportedOp :: FNU
-unsupportedOp = fromTyped (vmError "E1")
+unsupportedOp = fromTyped UT.unsupportedOp
 
 inRange :: Integer -> Integer -> FNU
-inRange x y = int x # int y # opWithin
+inRange x y = fromTyped (UT.inRange x y)
 
 is :: Integer -> FNU
 is x = int x # opNumEqual

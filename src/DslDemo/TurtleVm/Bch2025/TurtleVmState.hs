@@ -4,7 +4,6 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmState
   ( initState,
     getOp,
     getOpAndCondStack,
-    getOpBytes,
     getCondStack,
     putCondStack,
     toggleCondStack,
@@ -23,6 +22,7 @@ import Alba.Dsl.V1.Bch2025
     bytes,
     cast,
     ifZero,
+    name2,
     nat,
     op2Drop,
     opCat,
@@ -40,10 +40,12 @@ import Alba.Dsl.V1.Bch2025
     opSwap,
     opToAltStack,
     opTuck,
+    pick,
+    roll,
     (#),
     type (>),
   )
-import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isOpDataOp, vmError)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
 import DslDemo.TurtleVm.Common.Tuple (TTuple, tuple, untuple)
 
@@ -61,12 +63,22 @@ getOp =
     # (getState # untuple # opSwap # opSize)
     # ifZero
       (opSwap # tuple # putState # nothing)
-      (nat 1 # opSplit # opRot # tuple # putState # just)
+      (getOpBytes # opRot # tuple # putState # just)
 
-getOpBytes ::
-  FNA (s > TNat) (alt > TurtleVmState) (s > TBytes) (alt > TurtleVmState)
+getOpBytes :: FN (s > TBytes) (s > TBytes > TBytes)
 getOpBytes =
-  getState # untuple # opSwap # opRot # opSplit # opRot # tuple # putState
+  begin
+    # name2 @"op" @"rest" (nat 1 # opSplit)
+    # (pick @"op" # isOpDataOp)
+    # opIf
+      ( begin
+          # (roll @"rest" # pick @"op" # bytesToNat # opSplit) -- oprest rest
+          # (roll @"op" # opRot # opCat # opSwap)
+      )
+      (roll @"op" # roll @"rest")
+  where
+    bytesToNat :: FN (s > TBytes) (s > TNat)
+    bytesToNat = cast
 
 getOpAndCondStack ::
   FNA s (alt > TurtleVmState) (s > TMaybe TBytes > TBytes) (alt > TurtleVmState)
@@ -76,7 +88,7 @@ getOpAndCondStack =
     # ifZero
       (opSwap # opTuck # tuple # putState # nothing # opSwap)
       ( begin
-          # (nat 1 # opSplit # opRot # opTuck # tuple # putState)
+          # (getOpBytes # opRot # opTuck # tuple # putState)
           # (opSwap # just # opSwap)
       )
 

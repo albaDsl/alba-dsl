@@ -11,11 +11,11 @@ import Alba.Dsl.V1.Bch2025
     N,
     TBool,
     TBytes,
-    TInt,
     begin,
     bytes,
     drop,
-    int,
+    name,
+    name2,
     nat,
     opBoolOr,
     opDup,
@@ -27,7 +27,6 @@ import Alba.Dsl.V1.Bch2025
     opSplit,
     opSwap,
     opTrue,
-    opWithin,
     roll,
     (#),
     type (>),
@@ -35,7 +34,7 @@ import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped)
-import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (toSigned)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
 import Prelude hiding (and, drop)
 
@@ -43,21 +42,20 @@ executeP ::
   Int ->
   FN
     (s > N "op" (TMaybe TBytes) > N "condStack" TBytes)
-    (s > TInt > TBool)
+    (s > TBytes > TBool)
 executeP maxCsDepth =
   begin
     # (roll @"op")
     # ifJust
       ( begin
-          # toSigned
-          # (opDup # isConditionalOp)
-          # (roll @"condStack" # condStackExecuteP maxCsDepth)
-          # opBoolOr
+          # name2 @"op'" @"singleByte" isSingleByteOp
+          # name @"exec?" (roll @"condStack" # condStackExecuteP maxCsDepth)
+          # roll @"singleByte"
+          # opIf
+            (roll @"op'" # opDup # isConditionalOp # (roll @"exec?") # opBoolOr)
+            (roll @"op'" # roll @"exec?")
       )
-      (drop @"condStack" # int 0 # opFalse)
-
-isConditionalOp :: FN (s > TInt) (s > TBool)
-isConditionalOp = int 0x63 # int 0x69 # opWithin
+      (drop @"condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: Int -> FN (s > TBytes) (s > TBool)
 condStackExecuteP maxCsDepth =
