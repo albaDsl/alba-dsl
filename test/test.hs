@@ -28,6 +28,7 @@ import TestOpsStack (testOpsStack)
 import TestOptimizer (testOptimizer)
 import TestStackBranches (testStackBranches)
 import TestTurtleVm2025 (testTurtleVm2025)
+import TestTurtleVm2026 (testTurtleVm2026)
 
 main :: IO ()
 main = defaultMain tests
@@ -62,5 +63,6 @@ tests =
       testOpsStack,
       testOptimizer,
       testStackBranches,
-      testTurtleVm2025
+      testTurtleVm2025,
+      testTurtleVm2026
     ]

@@ -189,9 +189,7 @@ library
       DslDemo.EllipticCurve.Point,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,
-      DslDemo.TurtleVm.Common.Maybe,
       DslDemo.TurtleVm.Bch2025.MiniTurtleVm101,
-      DslDemo.TurtleVm.Common.Tuple,
       DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic,
       DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic,
       DslDemo.TurtleVm.Bch2025.TurtleOpBytes,
@@ -205,7 +203,23 @@ library
       DslDemo.TurtleVm.Bch2025.TurtleVmState,
       DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple,
       DslDemo.TurtleVm.Bch2025.TurtleVmUtils,
-      DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
+      DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped,
+      DslDemo.TurtleVm.Bch2026.TurtleOpArithmetic,
+      DslDemo.TurtleVm.Bch2026.TurtleOpBitwiseLogic,
+      DslDemo.TurtleVm.Bch2026.TurtleOpBytes,
+      DslDemo.TurtleVm.Bch2026.TurtleOpConditionals,
+      DslDemo.TurtleVm.Bch2026.TurtleOpConstants,
+      DslDemo.TurtleVm.Bch2026.TurtleOpCryptography,
+      DslDemo.TurtleVm.Bch2026.TurtleOpIntrospection,
+      DslDemo.TurtleVm.Bch2026.TurtleOpStack,
+      DslDemo.TurtleVm.Bch2026.TurtleVm,
+      DslDemo.TurtleVm.Bch2026.TurtleVmCondStack,
+      DslDemo.TurtleVm.Bch2026.TurtleVmState,
+      DslDemo.TurtleVm.Bch2026.TurtleVmStateSimple,
+      DslDemo.TurtleVm.Bch2026.TurtleVmUtils,
+      DslDemo.TurtleVm.Bch2026.TurtleVmUtilsUntyped,
+      DslDemo.TurtleVm.Common.Maybe,
+      DslDemo.TurtleVm.Common.Tuple,
   hs-source-dirs: src
 
 executable alba
@@ -293,7 +307,8 @@ executable test
       TestOpsStack,
       TestOptimizer,
       TestStackBranches,
-      TestTurtleVm,
+      TestTurtleVm2025,
+      TestTurtleVm2026,
       TestUtils,
   build-depends: alba, scientific
 
