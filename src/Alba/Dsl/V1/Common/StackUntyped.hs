@@ -10,12 +10,12 @@ module Alba.Dsl.V1.Common.StackUntyped
 where
 
 import Alba.Dsl.V1.Common.FunctionState (FunctionState)
+import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3)
 import Alba.Dsl.V1.Common.Stack (FNA, S (..))
-import Alba.Vm.Common.OpcodeL2 (CodeL2)
 import GHC.Stack (HasCallStack)
 
 data SU = SU
-  { c :: CodeL2,
+  { c :: CodeL3,
     fs :: FunctionState
   }
   deriving (Show)

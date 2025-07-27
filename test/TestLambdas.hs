@@ -34,10 +34,10 @@ progBasic =
     # op3
     # lambda cube
     # (opDup # opToAltStack)
-    # (opInvoke cube # int 27 # opNumEqual)
+    # (invoke cube # int 27 # opNumEqual)
     # op5
     # opFromAltStack
-    # (opInvoke cube # int 125 # opNumEqual)
+    # (invoke cube # int 125 # opNumEqual)
     # opBoolAnd
   where
     cube :: FN (s > TInt) (s > TInt)
@@ -86,7 +86,7 @@ progMapLambda =
                       )
                     # uncons elemSize
                     # opSwap
-                    # (pick @"f" # opInvoke f)
+                    # (pick @"f" # invoke f)
                     # opSwap
                     # opCat
                     # opCat
@@ -117,12 +117,12 @@ progNested =
   begin
     # int 5
     # lambda polynomial
-    # opInvoke polynomial
+    # invoke polynomial
     # int 132
     # opNumEqual
   where
     polynomial :: FN (s > TInt) (s > TInt)
-    polynomial = lambda cube # opInvoke cube # int 7 # opAdd
+    polynomial = lambda cube # invoke cube # int 7 # opAdd
 
     cube :: FN (s > TInt) (s > TInt)
     cube = opDup # opDup # opMul # opMul

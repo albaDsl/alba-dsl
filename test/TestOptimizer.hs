@@ -5,7 +5,7 @@
 module TestOptimizer (testOptimizer) where
 
 import Alba.Dsl.V1.Bch2025 (optimize)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerOp)
 import Alba.Tx.Bch2025 (Tx (..))
 import Alba.Vm.Bch2025
   ( CodeL2,
@@ -46,7 +46,7 @@ instance Arbitrary SetupStackCode where
         SetupStackCode res <- go (pred n)
         let maxVal = 2 ^ (128 :: Int) :: Integer
         x <- choose (-maxVal, maxVal) :: Gen Integer
-        pure $ SetupStackCode (aop res (pushIntegerOp x))
+        pure $ SetupStackCode (aopL2 res (pushIntegerOp x))
 
 instance {-# OVERLAPS #-} Arbitrary CodeL2 where
   arbitrary = resize numInstructions $ sized go
@@ -68,22 +68,28 @@ instance {-# OVERLAPS #-} Arbitrary CodeL2 where
             (S.|>) <$> go' <*> pure OP_DUP,
             (S.|>) <$> go' <*> pure OP_NIP,
             (S.|>) <$> go' <*> pure OP_OVER,
-            (<>) <$> go' <*> pure (aops [] [pushInt idx, OP_PICK]),
-            (<>) <$> go' <*> pure (aops [] [pushInt idx, OP_ROLL]),
+            (<>) <$> go' <*> pure (aopsL2 [] [pushInt idx, OP_PICK]),
+            (<>) <$> go' <*> pure (aopsL2 [] [pushInt idx, OP_ROLL]),
             (S.|>) <$> go' <*> pure OP_ROT,
             (S.|>) <$> go' <*> pure OP_SWAP,
             (S.|>) <$> go' <*> pure OP_TUCK,
-            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_ADD]),
-            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_SUB]),
-            (<>) <$> go' <*> pure (aops [] [pushInt x, OP_1NEGATE]),
+            (<>) <$> go' <*> pure (aopsL2 [] [pushInt x, OP_ADD]),
+            (<>) <$> go' <*> pure (aopsL2 [] [pushInt x, OP_SUB]),
+            (<>) <$> go' <*> pure (aopsL2 [] [pushInt x, OP_1NEGATE]),
             (<>)
               <$> go'
-              <*> pure (aops [] [pushInt x, OP_NUMEQUAL, OP_NOT])
+              <*> pure (aopsL2 [] [pushInt x, OP_NUMEQUAL, OP_NOT])
           ]
         where
           go' = go (n - 1)
 
           pushInt = pushIntegerOp
+
+aopL2 :: CodeL2 -> OpcodeL2 -> CodeL2
+aopL2 = (S.:|>)
+
+aopsL2 :: CodeL2 -> [OpcodeL2] -> CodeL2
+aopsL2 code ops = code <> S.fromList ops
 
 testOptimizer :: TestTree
 testOptimizer =

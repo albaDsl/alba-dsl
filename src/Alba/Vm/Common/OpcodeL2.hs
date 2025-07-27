@@ -3,7 +3,6 @@
 module Alba.Vm.Common.OpcodeL2
   ( OpcodeL2 (..),
     CodeL2,
-    CompilerData (..),
     codeL2ToCodeL1,
     bytesToDataOp,
     getOp,
@@ -147,13 +146,6 @@ data OpcodeL2
   | OP_OUTPUTTOKENCOMMITMENT
   | OP_OUTPUTTOKENAMOUNT
   | OP_UNUSED OpcodeL1
-  | OP_COMPILER_DATA CompilerData
-  deriving (Eq, Show)
-
-data CompilerData
-  = FunctionIndex {fId :: (String, Int, Int, String)}
-  | FunctionIndexRef {fId :: (String, Int, Int, String)}
-  | FunctionBody {code :: CodeL2}
   deriving (Eq, Show)
 
 type CodeL2 = S.Seq OpcodeL2
@@ -320,8 +312,6 @@ opcodeL2ToCodeL1 OP_OUTPUTTOKENCOMMITMENT =
   Just $ toCodeL1 L1.OP_OUTPUTTOKENCOMMITMENT
 opcodeL2ToCodeL1 OP_OUTPUTTOKENAMOUNT = Just $ toCodeL1 L1.OP_OUTPUTTOKENAMOUNT
 opcodeL2ToCodeL1 (OP_UNUSED opcodeL1) = Just $ toCodeL1 opcodeL1
-opcodeL2ToCodeL1 (OP_COMPILER_DATA _) =
-  error "opcodeL2ToCodeL1: internal error."
 
 toCodeL1 :: OpcodeL1 -> CodeL1
 toCodeL1 = B.singleton . fromIntegral . fromEnum

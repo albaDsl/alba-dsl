@@ -9,6 +9,7 @@ import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
 import TestFunctions (testFunctions)
+import TestFunctionsLowLevel (testFunctionsLowLevel)
 import TestIntPushing (testIntPushing)
 import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
@@ -43,6 +44,7 @@ tests =
       testDataPushing,
       testDataSig,
       testFunctions,
+      testFunctionsLowLevel,
       testIntPushing,
       testInteger,
       testIntrospection,

@@ -25,7 +25,7 @@ where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState (FunctionState)
-import Alba.Vm.Common.OpcodeL2 (CodeL2)
+import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3)
 import Data.Kind (Type)
 import GHC.Stack (HasCallStack)
 import GHC.TypeLits (ErrorMessage (Text), Nat, TypeError, type (+), type (-))
@@ -41,7 +41,7 @@ data TPubKey
 {- ORMOLU_ENABLE -}
 
 data S (s :: [Type]) (alt :: [Type]) = S
-  { c :: CodeL2,
+  { c :: CodeL3,
     fs :: FunctionState
   }
   deriving (Show)

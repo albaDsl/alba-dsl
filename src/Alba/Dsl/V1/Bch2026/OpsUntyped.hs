@@ -10,3 +10,6 @@ opUntil :: FNU -> FNU
 opUntil loopBody (SU c fs) =
   let (SU c' fs') = loopBody (SU (aop c OP_BEGIN) fs)
    in SU (aop c' OP_UNTIL) fs'
+
+opInvoke :: FNU
+opInvoke (SU c fs) = SU (aop c OP_INVOKE) fs
