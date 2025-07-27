@@ -26,7 +26,7 @@ import DslDemo.EllipticCurve.Field qualified as EC
 import DslDemo.EllipticCurve.Jacobian qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
-import DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm)
+import DslDemo.TurtleVm.Bch2026.TurtleVm (turtleVm)
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -95,7 +95,7 @@ f6 = EC.g # EC.ecMul # EC.getX
 -- Example 7. Evaluating =f3= using turtleVm.
 -- evl (c f7)
 f7 :: FN (s > TInt) (s > TInt)
-f7 = bytes (c f3) # toTyped (turtleVm 20 5)
+f7 = bytes (c f3) # toTyped (turtleVm 5)
 
 prop4 :: Integer -> Property
 prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x

@@ -25,7 +25,11 @@ import DslDemo.TurtleVm.Bch2025.TurtleOpCryptography (turtleOpCryptography)
 import DslDemo.TurtleVm.Bch2025.TurtleOpIntrospection (turtleOpIntrospection)
 import DslDemo.TurtleVm.Bch2025.TurtleOpStack (turtleOpStack)
 import DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (executeP)
-import DslDemo.TurtleVm.Bch2025.TurtleVmState (getOpAndCondStack, getOpBytes, initState)
+import DslDemo.TurtleVm.Bch2025.TurtleVmState
+  ( getOpAndCondStack,
+    getOpBytes,
+    initState,
+  )
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (vmError)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOp, inRange, is)
 

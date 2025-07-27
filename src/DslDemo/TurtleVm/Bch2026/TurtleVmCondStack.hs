@@ -1,6 +1,10 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Bch2026.TurtleVmCondStack (executeP, condStackExecuteP) where
+module DslDemo.TurtleVm.Bch2026.TurtleVmCondStack
+  ( executeP,
+    condStackExecuteP,
+  )
+where
 
 import Alba.Dsl.V1.Bch2026
   ( FN,

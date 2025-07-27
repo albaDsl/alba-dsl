@@ -6,10 +6,11 @@
 
 module TestTurtleVm2026 (testTurtleVm2026) where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026 hiding (progBytes)
+import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.StackUntyped (FNU, toTyped)
 import Alba.Vm.Bch2026
-  ( ScriptError,
+  ( ScriptError (SeVerify),
     VmParams (..),
     VmState (..),
     b2SeUnsafe,
@@ -17,14 +18,11 @@ import Alba.Vm.Bch2026
   )
 import Alba.Vm.Bch2026 qualified as Bch2026
 import Alba.Vm.Common.Logging (defaultDisplayOpts, dumpLog)
+import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (OP_RESERVED))
+import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
--- import DslDemo.TurtleVm.Bch2026.MiniTurtleVm101
---   ( miniTurtleVm101,
---     turtleOpDefine,
---     turtleOpInvoke,
---   )
 import DslDemo.TurtleVm.Bch2026.TurtleVm (turtleVm)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertFailure, testCase, (@?=))
@@ -52,15 +50,11 @@ testTurtleVm2026 =
       testCase "Arithmetic — 2" $
         expectTrueResult (evaluateOnTurtleVm progArithmetic2),
       testCase "Introspection" $
-        expectTrueResult (evaluateOnTurtleVm progIntrospection)
-        -- testCase "MiniTurtle" $
-        --   case evaluateOnMiniTurtleVm progMiniTurtle of
-        --     Right state -> do
-        --       -- dumpLog defaultDisplayOpts state
-        --       state.s @?= S.singleton (i2SeUnsafe 1)
-        --     Left (err, state) -> do
-        --       dumpLog defaultDisplayOpts (fromMaybe (error "") state)
-        --       assertFailure (show err)
+        expectTrueResult (evaluateOnTurtleVm progIntrospection),
+      testCase "OP_RESERVED" $
+        expectVmError (evaluateOnTurtleVm progOpReserved),
+      testCase "OP_ACTIVEBYTECODE" $
+        expectVmError (evaluateOnTurtleVm progOpActiveBytecode)
     ]
 
 progDataPush :: FN s (s > TBool)
@@ -151,15 +145,14 @@ progBitwise =
     toBytes :: FN (s > TInt) (s > TBytes)
     toBytes = cast
 
--- progMiniTurtle :: FN s (s > TInt)
--- progMiniTurtle =
---   begin
---     # bytes (compile None f)
---     # turtleOpDefine
---     # int 1
---     # turtleOpInvoke f
---   where
---     f = int 1 # opMul
+progOpReserved :: FN s s
+progOpReserved = insertOpCode (OP_UNUSED OP_RESERVED)
+
+progOpActiveBytecode :: FN s s
+progOpActiveBytecode = insertOpCode OP_ACTIVEBYTECODE
+
+insertOpCode :: OpcodeL2 -> FN s s
+insertOpCode op (S c fs) = S (aop c op) fs
 
 evaluateOnTurtleVm ::
   FNA s '[] s' alt' ->
@@ -175,11 +168,6 @@ evaluateOnTurtleVm =
         { maxTxInScriptSigSize = Just 40_000,
           maxScriptSize = 40_000
         }
-
--- evaluateOnMiniTurtleVm ::
---   FNA s '[] s' alt' ->
---   Either (ScriptError, Maybe VmState) VmState
--- evaluateOnMiniTurtleVm = evaluate miniTurtleVm101 id
 
 {-# INLINE evaluate #-}
 evaluate ::
@@ -210,4 +198,17 @@ expectTrueResult result =
       dumpLog defaultDisplayOpts (fromMaybe (error "") state)
       assertFailure (show err)
   where
+    emptyTuple = b2SeUnsafe [0, 0]
+
+expectVmError :: Either (ScriptError, Maybe VmState) VmState -> Assertion
+expectVmError result =
+  case result of
+    Right state -> do
+      dumpLog defaultDisplayOpts state
+      assertFailure "Exepected a TurtleVm vmError."
+    Left (err, _state) -> do
+      err @?= SeVerify
+  where
+    -- dumpLog defaultDisplayOpts (fromMaybe (error "") state)
+
     emptyTuple = b2SeUnsafe [0, 0]

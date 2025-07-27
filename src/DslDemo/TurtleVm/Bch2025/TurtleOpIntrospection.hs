@@ -1,6 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Bch2025.TurtleOpIntrospection (turtleOpIntrospection) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpIntrospection
+  ( turtleOpIntrospection,
+  )
+where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opInputBytecode,
@@ -24,7 +27,12 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opUtxoValue,
   )
 import Alba.Dsl.V1.Common.StackUntyped (FNU)
-import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOp, condOpLeaf, inRange, is)
+import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
+  ( condOp,
+    condOpLeaf,
+    inRange,
+    is,
+  )
 
 turtleOpIntrospection :: FNU
 turtleOpIntrospection =

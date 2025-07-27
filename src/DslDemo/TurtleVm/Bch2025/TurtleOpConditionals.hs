@@ -1,6 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Bch2025.TurtleOpConditionals (turtleOpConditionals) where
+module DslDemo.TurtleVm.Bch2025.TurtleOpConditionals
+  ( turtleOpConditionals,
+  )
+where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped
   ( opFalse,
