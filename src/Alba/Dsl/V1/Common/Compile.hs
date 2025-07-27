@@ -97,10 +97,10 @@ assignSlots fs@FunctionState {functions} =
 functionDefinitions :: FunctionState -> CodeL3
 functionDefinitions FunctionState {functions} =
   ( M.toList
-      >>> sortBy (flip compare `on` ((fromMaybe err1 . (.slot)) . snd))
+      >>> sortBy (compare `on` ((fromMaybe err1 . (.slot)) . snd))
       >>> filter (\(_, Function {code}) -> isJust code)
       >>> map def
-      >>> foldl (S.><) S.empty
+      >>> foldr (S.><) S.empty
   )
     functions
   where
