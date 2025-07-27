@@ -1,0 +1,26 @@
+-- Copyright (c) 2025 albaDsl
+{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
+
+module TestCodeMetrics (testCodeMetrics) where
+
+import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Common.StackUntyped (toTyped)
+import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
+import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.HUnit (testCase, (@?=))
+
+testCodeMetrics :: TestTree
+testCodeMetrics =
+  testGroup
+    "Code metrics"
+    [ testCase "turtleVm 2025" $
+        compileForSize (toTyped (T2025.turtleVm 1 1))
+          @?= "1440 opcodes, 1734 bytes.",
+      testCase "turtleVm 2026" $
+        compileForSize (toTyped (T2026.turtleVm 1))
+          @?= "627 opcodes, 1329 bytes."
+    ]
+
+compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
+compileForSize prog = sizeStr (compileL2 O1 prog)

@@ -1,7 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 {-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
-module Alba.Dsl.V1.Common.Listing (list, listStr) where
+module Alba.Dsl.V1.Common.Listing (list, listStr, sizeStr) where
 
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Data.ByteString qualified as B
@@ -13,13 +13,8 @@ import Text.Printf (printf)
 list :: CodeL2 -> IO ()
 list code = do
   list' "" code
-  printf
-    "\n%d opcodes, %d bytes.\n"
-    (S.length code)
-    (B.length $ fromMaybe err (codeL2ToCodeL1 code))
+  printf "\n%s\n" (sizeStr code)
   where
-    err = error "list: internal error."
-
     list' :: String -> CodeL2 -> IO ()
     list' _indent code' | S.null code' = pure ()
     list' indent code' = do
@@ -41,3 +36,12 @@ listStr code | S.null code = ""
 listStr code =
   let (op :<| code') = code
    in show op <> " " <> listStr code'
+
+sizeStr :: CodeL2 -> String
+sizeStr code =
+  printf
+    "%d opcodes, %d bytes."
+    (S.length code)
+    (B.length $ fromMaybe err (codeL2ToCodeL1 code))
+  where
+    err = error "list: internal error."
