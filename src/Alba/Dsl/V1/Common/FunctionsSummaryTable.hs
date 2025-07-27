@@ -14,9 +14,12 @@ import Text.Printf (printf)
 functionsSummary :: FunctionState -> String
 functionsSummary FunctionState {functions} =
   let hline = replicate tableWidth '-' <> "\n"
-   in line "Module" "Line" "Function" "Ops" "Slot" "Sites"
+      functions' = functionsSorted functions
+   in "\n"
+        <> line "Module" "Line" "Function" "Slot" "Ops" "Sites"
         <> hline
-        <> foldr functionLine "" (functionsSorted functions)
+        <> foldr functionLine "" functions'
+        <> printf "Functions total: %d\n" (length functions')
 
 functionLine :: (FunctionId, Function) -> String -> String
 functionLine
@@ -36,8 +39,8 @@ functionLine' moduleName lineNumber functionName (Function {..}) =
     (trunc widthModule moduleName)
     (trunc widthLine lineNumber)
     (trunc widthFunction functionName)
-    (trunc widthOps (maybe "-" (show . S.length) code))
     (trunc widthSlot (maybe "?" show slot))
+    (trunc widthOps (maybe "-" (show . S.length) code))
     (trunc widthSites (show callSites))
 
 trunc :: Int -> String -> String
@@ -75,7 +78,7 @@ tableWidth =
     + 5
 
 line :: String -> String -> String -> String -> String -> String -> String
-line modStr lineStr funStr bytesStr slotStr sitesStr =
+line modStr lineStr funStr slotStr opsStr sitesStr =
   printf
     formattingStr
     widthModule
@@ -84,10 +87,10 @@ line modStr lineStr funStr bytesStr slotStr sitesStr =
     lineStr
     widthFunction
     funStr
-    widthOps
-    bytesStr
     widthSlot
     slotStr
+    widthOps
+    opsStr
     widthSites
     sitesStr
   where
