@@ -150,7 +150,9 @@ b2SeUnsafe x = StackElement (SevBytes x) (B.length x)
 
 se2iUnsafe :: StackElement -> Integer
 se2iUnsafe (StackElement (SevInteger val) _) = val
-se2iUnsafe _ = error "se2iUnsafe"
+se2iUnsafe (StackElement (SevBytes val) _) = bytesToInteger val
+se2iUnsafe (StackElement (SevBool True) _) = 1
+se2iUnsafe (StackElement (SevBool False) _) = 0
 
 isMinimallyEncoded :: VmParams -> Bytes -> Bool
 isMinimallyEncoded _ bytes | B.null bytes = True
