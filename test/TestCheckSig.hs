@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestCheckSig (testCheckSig) where
 
@@ -34,8 +33,12 @@ test prog = do
       utxo = TU.utxoWithPubkey code
       txContext = TU.txContext utxo
   sig <- signTx utxo secKey
-  let Right (s, alt) =
-        TU.evaluateScript code (S.singleton (b2SeUnsafe sig), S.empty) txContext
+  let (s, alt) =
+        TU.getStacks $
+          TU.evaluateScript
+            code
+            (S.singleton (b2SeUnsafe sig), S.empty)
+            txContext
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
 signTx :: TxOut -> SecKey -> IO Bytes

@@ -24,7 +24,7 @@ import Test.Tasty.QuickCheck
     sized,
     testProperty,
   )
-import TestUtils (evaluateProgWithStack)
+import TestUtils (TestResult (..), evaluateProg)
 import Prelude hiding (exp)
 
 testOpsArithmetic :: TestTree
@@ -38,29 +38,30 @@ testOpsArithmetic =
 
 propInt :: IntExp -> Bool
 propInt e =
-  let res = evaluateProgWithStack (intExp e) (S.empty, S.empty)
+  let res = evaluateProg (intExp e)
    in case res of
-        Right (s, _alt) ->
+        Right (TestResult {s}) ->
           s == S.singleton (i2SeUnsafe . fromJust $ evalIntExp e)
-        Left SeDivideByZero -> isNothing $ evalIntExp e
-        Left SeModByZero -> isNothing $ evalIntExp e
+        Left (SeDivideByZero, _) -> isNothing $ evalIntExp e
+        Left (SeModByZero, _) -> isNothing $ evalIntExp e
         Left err -> error ("Unexpected evavaluation failure: " <> show err)
 
 propBool :: BoolExp -> Bool
 propBool e =
-  let res = evaluateProgWithStack (boolExp e) (S.empty, S.empty)
+  let res = evaluateProg (boolExp e)
    in case res of
-        Right (s, _alt) ->
+        Right (TestResult {s}) ->
           s == S.singleton (boolToStackElement $ fromJust $ evalBoolExp e)
-        Left SeDivideByZero -> isNothing $ evalBoolExp e
-        Left SeModByZero -> isNothing $ evalBoolExp e
+        Left (SeDivideByZero, _) -> isNothing $ evalBoolExp e
+        Left (SeModByZero, _) -> isNothing $ evalBoolExp e
         Left err -> error ("Unexpected evavaluation failure: " <> show err)
 
 propBits :: BitExp -> Bool
 propBits e =
-  let res = evaluateProgWithStack (bitExp e) (S.empty, S.empty)
+  let res = evaluateProg (bitExp e)
    in case res of
-        Right (s, _alt) -> s == S.singleton (b2SeUnsafe $ evalBitExp e)
+        Right (TestResult {s}) ->
+          s == S.singleton (b2SeUnsafe $ evalBitExp e)
         Left err -> error ("Unexpected evavaluation failure: " <> show err)
 
 instance Arbitrary IntExp where

@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestOpsHash (testOpsHash) where
 
@@ -10,7 +9,7 @@ import Data.Sequence qualified as S
 import QuickCheckSupport (BytesHalf (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (testProperty)
-import TestUtils (evaluateProgWithStack)
+import TestUtils (evaluateProgWithStack, getStack)
 
 testOpsHash :: TestTree
 testOpsHash =
@@ -31,5 +30,5 @@ propHash ::
   Bool
 propHash op f (BytesHalf x) =
   let stack = (S.singleton $ b2SeUnsafe x, S.empty)
-      Right (s, _) = evaluateProgWithStack op stack
+      s = getStack $ evaluateProgWithStack op stack
    in s == S.singleton (b2SeUnsafe (f x))

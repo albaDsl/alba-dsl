@@ -1,64 +1,43 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestArguments (testArguments) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Vm.Common (i2SeUnsafe)
-import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (evaluateProg)
+import Test.Tasty.HUnit (testCase)
+import TestUtils (evaluateProg, isTrue)
 import Prelude hiding (drop)
 
 testArguments :: TestTree
 testArguments =
   testGroup
     "Arguments"
-    [ testCase
-        "Args — Unnamed at call site"
-        $ let Right (s, alt) = evaluateProg progUnnamedArgsAtCallSite
-           in (s, alt)
-                @?= ( S.fromList [i2SeUnsafe 10, i2SeUnsafe 6],
-                      S.empty
-                    ),
-      testCase
-        "Args — Named at call site"
-        $ let Right (s, alt) = evaluateProg progNamedArgsAtCallSite
-           in (s, alt)
-                @?= ( S.fromList [i2SeUnsafe 10, i2SeUnsafe 6],
-                      S.empty
-                    ),
-      testCase
-        "pick inside if"
-        $ let Right (s, alt) = evaluateProg progIfArgPick
-           in (s, alt) @?= (S.fromList [i2SeUnsafe 10], S.empty),
-      testCase
-        "roll / drop"
-        $ let Right (s, alt) = evaluateProg progArgRollDrop
-           in (s, alt) @?= (S.fromList [i2SeUnsafe 10], S.empty),
-      testCase
-        "Naming stack items"
-        $ let Right (s, alt) = evaluateProg namingStackItems
-           in (s, alt) @?= (S.fromList [i2SeUnsafe 1250], S.empty),
-      testCase
-        "Duplicate name"
-        $ let Right (s, alt) = evaluateProg duplicateName
-           in (s, alt) @?= (S.fromList [i2SeUnsafe 2], S.empty)
+    [ testCase "Args - Unnamed at call site" $
+        isTrue (evaluateProg progUnnamedArgsAtCallSite),
+      testCase "Args - Named at call site" $
+        isTrue (evaluateProg progNamedArgsAtCallSite),
+      testCase "pick inside if" $ isTrue (evaluateProg progIfArgPick),
+      testCase "roll / drop" $ isTrue (evaluateProg progArgRollDrop),
+      testCase "Naming stack items" $ isTrue (evaluateProg namingStackItems),
+      testCase "Duplicate name" $ isTrue (evaluateProg duplicateName)
     ]
 
 -- Calling a function that expects named arguments without naming them at the
 -- call site.
-progUnnamedArgsAtCallSite :: FN s (s > TNat > TNat)
+progUnnamedArgsAtCallSite :: FN s (s > TBool)
 progUnnamedArgsAtCallSite =
   begin
     # nat 2
     # nat 3
     # unname @2 calculateProperties
+    # (nat 6 # opNumEqual)
+    # opSwap
+    # (nat 10 # opNumEqual)
+    # opBoolAnd
 
 -- Calling a function that expects named arguments and also naming them at the
 -- call site.
-progNamedArgsAtCallSite :: FN s (s > TNat > TNat)
+progNamedArgsAtCallSite :: FN s (s > TBool)
 progNamedArgsAtCallSite =
   begin
     # name @"does-not-interfere" (nat 2)
@@ -66,6 +45,10 @@ progNamedArgsAtCallSite =
     # name @"h" (nat 3)
     # calculateProperties
     # drop @"does-not-interfere"
+    # (nat 6 # opNumEqual)
+    # opSwap
+    # (nat 10 # opNumEqual)
+    # opBoolAnd
 
 -- Function that expects named arguments. Also calls other functions that may or
 -- may not expect named arguments.
@@ -95,10 +78,10 @@ type MiscArgs s =
   s > N "x1" TNat > N "x2" TNat > N "x3" TBool > N "x4" TBool > N "x5" TNat
 
 -- Exercising pick inside if statement.
-progIfArgPick :: FN s (s > TNat)
+progIfArgPick :: FN s (s > TBool)
 progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
   where
-    f :: FN (MiscArgs s) (s > TNat)
+    f :: FN (MiscArgs s) (s > TBool)
     f =
       begin
         # opTrue
@@ -107,25 +90,31 @@ progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
           (pick @"x1" # pick @"x2")
         # opAdd
         # dropCount @5
+        # nat 10
+        # opNumEqual
 
 -- Exercising drop / roll with various types on the stack.
-progArgRollDrop :: FN s (s > TNat)
+progArgRollDrop :: FN s (s > TBool)
 progArgRollDrop = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
   where
-    f :: FN (MiscArgs s) (s > TNat)
+    f :: FN (MiscArgs s) (s > TBool)
     f =
       begin
         # (drop @"x3" # drop @"x4" # drop @"x1")
         # (roll @"x2" # roll @"x5")
         # opAdd
+        # nat 10
+        # opNumEqual
 
 -- Using name as a form of let-expression. Also returning a named stack item.
-namingStackItems :: FN s (s > TInt)
+namingStackItems :: FN s (s > TBool)
 namingStackItems =
   begin
     # momentum
     # pick @"momentum"
     # drop @"momentum"
+    # int 1250
+    # opNumEqual
   where
     momentum :: FN s (s > N "momentum" TInt)
     momentum =
@@ -138,12 +127,14 @@ namingStackItems =
 
 -- Currently possible to have the same name in scope for more than one stack
 -- item. Avoid.
-duplicateName :: FN s (s > TNat)
+duplicateName :: FN s (s > TBool)
 duplicateName =
   begin
     # nat 10
     # nat 5
     # unname @2 divide
+    # nat 2
+    # opNumEqual
   where
     divide ::
       FN

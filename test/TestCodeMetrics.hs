@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestCodeMetrics (testCodeMetrics) where
 

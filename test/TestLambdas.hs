@@ -1,31 +1,21 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestLambdas (testLambdas) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Vm.Bch2026
-  ( evaluateScript,
-    mkTxContext,
-    startState,
-    vmParamsStandard,
-  )
-import Alba.Vm.Common (i2SeUnsafe)
-import Alba.Vm.Common.VmState (VmState (..))
-import Data.Maybe (fromJust)
-import Data.Sequence qualified as S
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.HUnit (testCase)
+import TestUtils2026 (evaluateProg, isTrue)
 import Prelude hiding (drop)
 
 testLambdas :: TestTree
 testLambdas =
   testGroup
     "Lambdas"
-    [ testCase "Basic lambda ops" $ evaluateProg progBasic @?= True,
-      testCase "Mapping a lambda" $ evaluateProg progMapLambda @?= True,
-      testCase "Nested lambdas" $ evaluateProg progNested @?= True
+    [ testCase "Basic lambda ops" $ isTrue (evaluateProg progBasic),
+      testCase "Mapping a lambda" $ isTrue (evaluateProg progMapLambda),
+      testCase "Nested lambdas" $ isTrue (evaluateProg progNested)
     ]
 
 progBasic :: FN s (s > TBool)
@@ -126,13 +116,3 @@ progNested =
 
     cube :: FN (s > TInt) (s > TInt)
     cube = opDup # opDup # opMul # opMul
-
-evaluateProg :: FNA s '[] s' alt' -> Bool
-evaluateProg prog =
-  let state = (startState vmParamsStandard) {code = compile None prog}
-   in case evaluateScript context state of
-        Right VmState {s, alt} ->
-          s == S.fromList [i2SeUnsafe 1] && alt == S.empty
-        Left (err, _) -> error ("err: " <> show err)
-  where
-    context = fromJust $ mkTxContext undefined 0 undefined

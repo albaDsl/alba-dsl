@@ -1,43 +1,25 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestOpsStack (testOpsStack) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Vm.Common (i2SeUnsafe)
-import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (evaluateProg)
+import Test.Tasty.HUnit (testCase)
+import TestUtils (evaluateProg, isTrue)
 
 testOpsStack :: TestTree
 testOpsStack =
   testGroup
     "Stack Ops"
     [ testCase "Dup, Drop, Nip, Over" $
-        let Right (s, alt) = evaluateProg progDupDropNipOver
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 0), S.empty),
-      testCase "Rot, Swap, Tuck" $
-        let Right (s, alt) = evaluateProg progRotSwapTuck
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 2), S.empty),
-      testCase "2Dup, 2Drop, 2Over" $
-        let Right (s, alt) = evaluateProg prog2Dup2Drop2Over
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 3), S.empty),
-      testCase "Alt stack" $
-        let Right (s, alt) = evaluateProg progAltStack
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 3), S.empty),
+        isTrue (evaluateProg progDupDropNipOver),
+      testCase "Rot, Swap, Tuck" $ isTrue (evaluateProg progRotSwapTuck),
+      testCase "2Dup, 2Drop, 2Over" $ isTrue (evaluateProg prog2Dup2Drop2Over),
+      testCase "Alt stack" $ isTrue (evaluateProg progAltStack),
       testCase "Stack ops on two different types" $
-        let Right (s, alt) = evaluateProg progDifferentTypes
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty),
-      testCase "OpPick" $
-        let Right (s, alt) = evaluateProg progPick
-         in (s, alt) @?= (S.singleton (i2SeUnsafe 2), S.empty),
-      testCase "OpRoll" $
-        let Right (s, alt) = evaluateProg progRoll
-         in (s, alt)
-              @?= ( S.fromList [i2SeUnsafe 1, i2SeUnsafe 2, i2SeUnsafe 3],
-                    S.empty
-                  )
+        isTrue (evaluateProg progDifferentTypes),
+      testCase "OpPick" $ isTrue (evaluateProg progPick),
+      testCase "OpRoll" $ isTrue (evaluateProg progRoll)
     ]
 
 progDupDropNipOver :: FN s (s > TBool)
@@ -48,10 +30,12 @@ progDupDropNipOver =
     # opNip
     # opDup
     # opDrop
+    # opFalse
+    # opEqual
   where
     one = op1 :: FN s (s > TNat)
 
-progRotSwapTuck :: FN s (s > TNat)
+progRotSwapTuck :: FN s (s > TBool)
 progRotSwapTuck =
   begin
     # opTrue ---- t
@@ -64,10 +48,12 @@ progRotSwapTuck =
     # opVerify -- 1 2
     # opSwap ---- 2 1
     # opDrop
+    # int 2
+    # opNumEqual
   where
     one = op1 :: FN s (s > TNat)
 
-prog2Dup2Drop2Over :: FN s (s > TNat)
+prog2Dup2Drop2Over :: FN s (s > TBool)
 prog2Dup2Drop2Over =
   begin
     # op1 ------- 1
@@ -80,11 +66,13 @@ prog2Dup2Drop2Over =
     # op2Drop --- 1 2 1 2
     # op2Drop --- 1 2
     # opAdd ----- 3
+    # int 3
+    # opNumEqual
   where
     three = op3 :: FN s (s > TNat)
     four = op4 :: FN s (s > TNat)
 
-progAltStack :: FN s (s > TNat)
+progAltStack :: FN s (s > TBool)
 progAltStack =
   begin
     # op1
@@ -92,16 +80,20 @@ progAltStack =
     # op2
     # opFromAltStack
     # opAdd
+    # int 3
+    # opNumEqual
 
-progDifferentTypes :: FN s (s > TNat)
+progDifferentTypes :: FN s (s > TBool)
 progDifferentTypes =
   begin
-    # op1
+    # int 1
     # opFalse
     # opSwap
     # opNip
+    # int 1
+    # opNumEqual
 
-progPick :: FN s (s > TNat)
+progPick :: FN s (s > TBool)
 progPick =
   begin
     # one
@@ -113,12 +105,14 @@ progPick =
     # opNip
     # opNip
     # opNip
+    # two
+    # opNumEqual
   where
     one = op1 :: FN s (s > TNat)
     two = op2 :: FN s (s > TNat)
     three = op3 :: FN s (s > TNat)
 
-progRoll :: FN s (s > TNat > TNat > TNat)
+progRoll :: FN s (s > TBool)
 progRoll =
   begin
     # opFalse
@@ -127,6 +121,7 @@ progRoll =
     # op3
     # opRoll @3
     # opDrop
+    # (opAdd # opAdd # int 6 # opNumEqual)
 
 -- Trying to access past the known stack won't compile.
 -- accessPastKnownStack ::

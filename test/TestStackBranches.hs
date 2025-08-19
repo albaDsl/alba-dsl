@@ -1,12 +1,10 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestStackBranches (testStackBranches) where
 
 import Alba.Dsl.V1.Bch2025
 import Alba.Vm.Bch2025
-  ( ScriptError,
-    VmStack,
+  ( VmStack,
     b2SeUnsafe,
     boolToStackElement,
     i2SeUnsafe,
@@ -15,58 +13,52 @@ import Data.Sequence ((|>))
 import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (evaluateProgWithStack)
+import TestUtils (evaluateProgWithStack, getStacks)
 import Prelude hiding (drop)
 
 testStackBranches :: TestTree
 testStackBranches =
   testGroup
-    "Stack Alternatives"
+    "Stack Branches"
     [ testCase "Simple Stack Branch" $
-        let Right (s, alt) =
-              evaluateProgWithStack
-                progSimpleStackBranch
-                ( S.fromList
-                    [ boolToStackElement False,
-                      boolToStackElement False,
-                      i2SeUnsafe 30,
-                      i2SeUnsafe 2,
-                      b2SeUnsafe "hello"
-                    ],
-                  S.empty
-                )
+        let (s, alt) =
+              getStacks $
+                evaluateProgWithStack
+                  progSimpleStackBranch
+                  ( S.fromList
+                      [ boolToStackElement False,
+                        boolToStackElement False,
+                        i2SeUnsafe 30,
+                        i2SeUnsafe 2,
+                        b2SeUnsafe "hello"
+                      ],
+                    S.empty
+                  )
          in (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty),
       testCase "entry8 f0" $
-        let Right (s, alt) = evalProgEntry8 0
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 101], S.empty),
+        evalProgEntry8 0 @?= (S.fromList [i2SeUnsafe 101], S.empty),
       testCase "entry8 f1" $
-        let Right (s, alt) = evalProgEntry8 1
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 103], S.empty),
+        evalProgEntry8 1 @?= (S.fromList [i2SeUnsafe 103], S.empty),
       testCase "entry8 f2" $
-        let Right (s, alt) = evalProgEntry8 2
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 106], S.empty),
+        evalProgEntry8 2 @?= (S.fromList [i2SeUnsafe 106], S.empty),
       testCase "entry8 f3" $
-        let Right (s, alt) = evalProgEntry8 3
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 110], S.empty),
+        evalProgEntry8 3 @?= (S.fromList [i2SeUnsafe 110], S.empty),
       testCase "entry8 f4" $
-        let Right (s, alt) = evalProgEntry8 4
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 115], S.empty),
+        evalProgEntry8 4 @?= (S.fromList [i2SeUnsafe 115], S.empty),
       testCase "entry8 f5" $
-        let Right (s, alt) = evalProgEntry8 5
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 121], S.empty),
+        evalProgEntry8 5 @?= (S.fromList [i2SeUnsafe 121], S.empty),
       testCase "entry8 f6" $
-        let Right (s, alt) = evalProgEntry8 6
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 128], S.empty),
+        evalProgEntry8 6 @?= (S.fromList [i2SeUnsafe 128], S.empty),
       testCase "entry8 f7" $
-        let Right (s, alt) = evalProgEntry8 7
-         in (s, alt) @?= (S.fromList [i2SeUnsafe 136], S.empty)
+        evalProgEntry8 7 @?= (S.fromList [i2SeUnsafe 136], S.empty)
     ]
   where
-    evalProgEntry8 :: Integer -> Either ScriptError (VmStack, VmStack)
+    evalProgEntry8 :: Integer -> (VmStack, VmStack)
     evalProgEntry8 fIdx =
-      evaluateProgWithStack
-        progEntry8
-        (startStack (succ fIdx) fIdx, S.empty)
+      getStacks $
+        evaluateProgWithStack
+          progEntry8
+          (startStack (succ fIdx) fIdx, S.empty)
 
     startStack :: Integer -> Integer -> VmStack
     startStack count fIdx =

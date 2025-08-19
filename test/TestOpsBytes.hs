@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestOpsBytes (testOpsBytes) where
 
@@ -16,9 +15,9 @@ import Data.ByteString qualified as B
 import Data.Sequence qualified as S
 import QuickCheckSupport (BytesHalf (..))
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.HUnit (testCase)
 import Test.Tasty.QuickCheck (testProperty)
-import TestUtils (evaluateProg, evaluateProgWithStack)
+import TestUtils (evaluateProg, evaluateProgWithStack, getStack, isErr)
 
 testOpsBytes :: TestTree
 testOpsBytes =
@@ -27,13 +26,13 @@ testOpsBytes =
     [ testProperty "Reverse" propReverse,
       testProperty "Size" propReverseSize,
       testProperty "Cat and split" propCatAndSplit,
-      testCase "SePushSize" $ evaluateProg progPushSize @?= Left SePushSize
+      testCase "SePushSize" $ isErr (evaluateProg progPushSize) SePushSize
     ]
 
 propReverse :: Bytes -> Bool
 propReverse x =
   let stack = (S.singleton $ b2SeUnsafe x, S.empty)
-      Right (s, _) = evaluateProgWithStack prog stack
+      s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (b2SeUnsafe x)
   where
     prog :: FN (s > TBytes) (s > TBytes)
@@ -42,7 +41,7 @@ propReverse x =
 propReverseSize :: Bytes -> Bool
 propReverseSize x =
   let stack = (S.singleton $ b2SeUnsafe x, S.empty)
-      Right (s, _) = evaluateProgWithStack prog stack
+      s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (i2SeUnsafe $ fromIntegral (B.length x))
   where
     prog :: FN (s > TBytes) (s > TNat)
@@ -60,7 +59,7 @@ propReverseSize x =
 propCatAndSplit :: BytesHalf -> Bool
 propCatAndSplit (BytesHalf x) =
   let stack = (S.singleton $ b2SeUnsafe x, S.empty)
-      Right (s, _) = evaluateProgWithStack prog stack
+      s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (boolToStackElement True)
   where
     prog :: FN (s > TBytes) (s > TBool)

@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestCheckMultiSig (testCheckMultiSig) where
 
@@ -46,18 +45,19 @@ test prog = do
       txContext = TU.txContext utxo
   s1 <- signTx utxo sk1
   s2 <- signTx utxo sk2
-  let Right (s, alt) =
-        TU.evaluateScript
-          code
-          ( S.fromList
-              [ i2SeUnsafe 0,
-                b2SeUnsafe s1,
-                b2SeUnsafe s2,
-                i2SeUnsafe 2
-              ],
-            S.empty
-          )
-          txContext
+  let (s, alt) =
+        TU.getStacks $
+          TU.evaluateScript
+            code
+            ( S.fromList
+                [ i2SeUnsafe 0,
+                  b2SeUnsafe s1,
+                  b2SeUnsafe s2,
+                  i2SeUnsafe 2
+                ],
+              S.empty
+            )
+            txContext
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
 signTx :: TxOut -> SecKey -> IO Bytes

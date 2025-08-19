@@ -5,6 +5,7 @@ module Alba.Vm.Common.Logging
     defaultDisplayOpts,
     logOp,
     dumpLog,
+    logDataToText,
     dumpVerifyScriptResult,
   )
 where

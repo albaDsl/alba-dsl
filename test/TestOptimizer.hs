@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 
 module TestOptimizer (testOptimizer) where
@@ -26,7 +25,7 @@ import Test.Tasty.QuickCheck
     sized,
     testProperty,
   )
-import TestUtils (evaluateScript)
+import TestUtils (evaluateScript, getStack)
 
 newtype SetupStackCode = SetupStackCode CodeL2
   deriving (Show)
@@ -99,15 +98,16 @@ propOptimizer :: (SetupStackCode, CodeL2) -> Bool
 propOptimizer (SetupStackCode setup, c) =
   let code = setup <> c
       codeOpt = optimize code
-      Right (s, _) = ev code
-      Right (s', _) = ev codeOpt
+      s = ev code
+      s' = ev codeOpt
    in s == s'
   where
     ev codeToRun =
-      evaluateScript
-        (fromJust $ codeL2ToCodeL1 codeToRun)
-        (S.empty, S.empty)
-        txContext
+      getStack $
+        evaluateScript
+          (fromJust $ codeL2ToCodeL1 codeToRun)
+          (S.empty, S.empty)
+          txContext
 
 txContext :: TxContext
 txContext = fromJust $ mkTxContext tx 0 undefined

@@ -3,29 +3,19 @@
 module TestFunctionsLowLevel (testFunctionsLowLevel) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Vm.Bch2026
-  ( evaluateScript,
-    mkTxContext,
-    startState,
-    vmParamsStandard,
-  )
-import Alba.Vm.Common (i2SeUnsafe)
-import Alba.Vm.Common.Logging (defaultDisplayOpts, dumpLog)
-import Alba.Vm.Common.VmState (VmState (..))
-import Data.Maybe (fromJust, fromMaybe)
-import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (Assertion, testCase, (@?=))
+import Test.Tasty.HUnit (testCase)
+import TestUtils2026 (evaluateProg, isTrue)
 import Prelude hiding (drop)
 
 testFunctionsLowLevel :: TestTree
 testFunctionsLowLevel =
   testGroup
     "Functions Low-level"
-    [ testCase "Absolute" $ evaluateProg progAbsolute,
-      testCase "Named" $ evaluateProg progNamed,
-      testCase "Raw" $ evaluateProg progRaw,
-      testCase "Mixed" $ evaluateProg progMixed
+    [ testCase "Absolute" $ isTrue (evaluateProg progAbsolute),
+      testCase "Named" $ isTrue (evaluateProg progNamed),
+      testCase "Raw" $ isTrue (evaluateProg progRaw),
+      testCase "Mixed" $ isTrue (evaluateProg progMixed)
     ]
 
 progAbsolute :: FN s (s > TBool)
@@ -83,15 +73,3 @@ progMixed =
 
     add1 :: FN (s > TInt) (s > TInt)
     add1 = op1Add
-
-evaluateProg :: FNA s '[] s' alt' -> Assertion
-evaluateProg prog =
-  let state = (startState vmParamsStandard) {code = compile None prog}
-   in case evaluateScript context state of
-        Right (VmState {s, alt}) -> do
-          (s, alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-        Left (err, state') -> do
-          dumpLog defaultDisplayOpts (fromMaybe (error "") state')
-          error ("err: " <> show err)
-  where
-    context = fromJust $ mkTxContext undefined 0 undefined

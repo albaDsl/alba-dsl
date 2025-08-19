@@ -1,40 +1,30 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestLoops (testLoops) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Math (factorial, pow)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (iterate)
-import Alba.Vm.Bch2026
-  ( evaluateScript,
-    mkTxContext,
-    startState,
-    vmParamsStandard,
-  )
-import Alba.Vm.Common (i2SeUnsafe)
-import Alba.Vm.Common.VmState (VmState (..))
-import Data.Maybe (fromJust)
-import Data.Sequence qualified as S
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian (ecAdd, ecMul)
 import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.HUnit (testCase)
 import Test.Tasty.QuickCheck (NonNegative (..), testProperty)
+import TestUtils2026 (evaluateProg, isTrue, isTrue')
 import Prelude hiding (iterate)
 
 testLoops :: TestTree
 testLoops =
   testGroup
     "Loops"
-    [ testCase "Loops — factorial 1" $ evaluateProg progFactorial1 @?= True,
-      testCase "Loops — factorial 2" $ evaluateProg progFactorial2 @?= True,
-      testCase "Loops — factorial 3" $ evaluateProg progFactorial3 @?= True,
-      testCase "Loops — elliptic curve — scalar multiply" $
-        evaluateProg progEllipticCurve @?= True,
+    [ testCase "Loops - factorial 1" $ isTrue (evaluateProg progFactorial1),
+      testCase "Loops - factorial 2" $ isTrue (evaluateProg progFactorial2),
+      testCase "Loops - factorial 3" $ isTrue (evaluateProg progFactorial3),
+      testCase "Loops - elliptic curve - scalar multiply" $
+        isTrue (evaluateProg progEllipticCurve),
       testProperty
         "Loops — elliptic curve scalar multiply additivity"
         propEllipticCurve,
@@ -141,7 +131,7 @@ propEllipticCurve (NonNegative a) (NonNegative b) =
           # ecAdd
           # (nat (fromIntegral (a + b)) # g # ecMul)
           # opEqual
-   in evaluateProg prog
+   in isTrue' $ evaluateProg prog
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =
@@ -153,17 +143,4 @@ propPow b n =
           # pow
           # int expected
           # opNumEqual
-   in evaluateProg prog
-
-evaluateProg :: FNA s '[] s' alt' -> Bool
-evaluateProg prog =
-  let state =
-        (startState vmParamsStandard)
-          { code = compile None prog
-          }
-   in case evaluateScript context state of
-        Right VmState {s, alt} ->
-          s == S.fromList [i2SeUnsafe 1] && alt == S.empty
-        Left (err, _) -> error ("err: " <> show err)
-  where
-    context = fromJust $ mkTxContext undefined 0 undefined
+   in isTrue' $ evaluateProg prog

@@ -308,6 +308,7 @@ executable test
       TestTurtleVm2025,
       TestTurtleVm2026,
       TestUtils,
+      TestUtils2026,
   build-depends: alba, scientific
 
 executable benchmark1

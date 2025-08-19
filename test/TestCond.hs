@@ -1,35 +1,21 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestCond (testCond) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Vm.Common.StackElement
-import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
-import TestUtils (evaluateProg)
+import Test.Tasty.HUnit (testCase)
+import TestUtils (evaluateProg, isTrue)
 
 testCond :: TestTree
 testCond =
   testGroup
     "Cond"
-    [ testCase "Cond — Nats" $
-        case evaluateProg progCondNats of
-          Right (s, alt) -> (s, alt) @?= (S.singleton $ i2SeUnsafe 1, S.empty)
-          Left err -> assertFailure (show err),
-      testCase "Cond — Strings" $
-        case evaluateProg progCondStrings of
-          Right (s, alt) -> (s, alt) @?= (S.singleton $ i2SeUnsafe 1, S.empty)
-          Left err -> assertFailure (show err),
-      testCase "Cond — Strings — Default case" $
-        case evaluateProg progCondStringsDefault of
-          Right (s, alt) -> (s, alt) @?= (S.singleton $ i2SeUnsafe 1, S.empty)
-          Left err -> assertFailure (show err),
-      testCase "Cond — Nested" $
-        case evaluateProg progCondNested of
-          Right (s, alt) -> (s, alt) @?= (S.singleton $ i2SeUnsafe 1, S.empty)
-          Left err -> assertFailure (show err)
+    [ testCase "Cond - Nats" $ isTrue (evaluateProg progCondNats),
+      testCase "Cond - Strings" $ isTrue (evaluateProg progCondStrings),
+      testCase "Cond - Strings - Default case" $
+        isTrue (evaluateProg progCondStringsDefault),
+      testCase "Cond - Nested" $ isTrue (evaluateProg progCondNested)
     ]
 
 progCondNats :: FN s (s > TBool)

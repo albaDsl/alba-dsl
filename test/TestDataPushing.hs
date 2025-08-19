@@ -1,5 +1,4 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 
 module TestDataPushing (testDataPushing) where
 
@@ -19,53 +18,55 @@ import QuickCheckSupport (BytesNonEmpty (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.QuickCheck (testProperty)
-import TestUtils (evaluateProg, evaluateProgWithStack)
+import TestUtils
+  ( evaluateProg,
+    evaluateProgWithStack,
+    getStack,
+    getStacks,
+    isErr,
+  )
 
 testDataPushing :: TestTree
 testDataPushing =
   testGroup
     "Data pushing"
     [ testCase "Simple bytes push" $
-        let res = evaluateProg progPush
+        let res = getStacks $ evaluateProg progPush
             c = compileL2 None progPush
             c' = compile None progPush
          in (res, c, c')
-              @?= ( Right
-                      ( S.singleton $ b2SeUnsafe (B.pack [1, 2, 3]),
-                        S.empty
-                      ),
+              @?= ( ( S.singleton $ b2SeUnsafe (B.pack [1, 2, 3]),
+                      S.empty
+                    ),
                     progPushCodeL2,
                     progPushCodeBin
                   ),
       testCase "Bytes push resulting in OP_PUSHDATA1" $
-        let res = evaluateProg progPush250
+        let res = getStacks $ evaluateProg progPush250
             c = compileL2 None progPush250
             c' = compile None progPush250
          in (res, c, c')
-              @?= ( Right
-                      ( S.singleton $ b2SeUnsafe (B.replicate 250 0xff),
-                        S.empty
-                      ),
+              @?= ( ( S.singleton $ b2SeUnsafe (B.replicate 250 0xff),
+                      S.empty
+                    ),
                     progPush250CodeL2,
                     progPush250CodeBin
                   ),
       testCase "Bytes max push" $
-        let res = evaluateProg progPushLarge
+        let res = getStacks $ evaluateProg progPushLarge
             c = compileL2 None progPushLarge
             c' = compile None progPushLarge
          in (res, c, c')
-              @?= ( Right
-                      ( S.singleton $
-                          b2SeUnsafe
-                            (B.replicate largeElementSize 0xff),
-                        S.empty
-                      ),
+              @?= ( ( S.singleton $
+                        b2SeUnsafe
+                          (B.replicate largeElementSize 0xff),
+                      S.empty
+                    ),
                     progPushLargeCodeL2,
                     progPushLargeCodeBin
                   ),
       testCase "Bytes max push + 1" $
-        let res = evaluateProg progPushMaxPlusOne
-         in res @?= Left SeScriptSize,
+        isErr (evaluateProg progPushMaxPlusOne) SeScriptSize,
       testProperty "Push arbitrary bytes" propBytes
     ]
 
@@ -129,6 +130,5 @@ propBytes :: BytesNonEmpty -> Bool
 propBytes (BytesNonEmpty x) =
   let stack = (S.empty, S.empty)
       x' = if B.length x > 3 then B.drop 3 x else x
-   in case evaluateProgWithStack (bytes x') stack of
-        Right (s, _) -> s == S.singleton (b2SeUnsafe x')
-        Left err -> error $ show err
+   in getStack (evaluateProgWithStack (bytes x') stack)
+        == S.singleton (b2SeUnsafe x')

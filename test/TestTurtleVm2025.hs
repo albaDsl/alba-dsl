@@ -35,17 +35,17 @@ testTurtleVm2025 =
         expectTrueResult (evaluateOnTurtleVm progDataPush),
       testCase "Conditionals" $
         expectTrueResult (evaluateOnTurtleVm progConditionals),
-      testCase "Stack — 1" $
+      testCase "Stack - 1" $
         expectTrueResult (evaluateOnTurtleVm progStack1),
-      testCase "Stack — 2" $
+      testCase "Stack - 2" $
         expectTrueResult (evaluateOnTurtleVm progStack2),
       testCase "Bytes" $
         expectTrueResult (evaluateOnTurtleVm progBytes),
       testCase "Bitwise" $
         expectTrueResult (evaluateOnTurtleVm progBitwise),
-      testCase "Arithmetic — 1" $
+      testCase "Arithmetic - 1" $
         expectTrueResult (evaluateOnTurtleVm progArithmetic1),
-      testCase "Arithmetic — 2" $
+      testCase "Arithmetic - 2" $
         expectTrueResult (evaluateOnTurtleVm progArithmetic2),
       testCase "Introspection" $
         expectTrueResult (evaluateOnTurtleVm progIntrospection),

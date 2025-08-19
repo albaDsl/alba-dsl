@@ -1,6 +1,5 @@
 -- Copyright (c) 2025 albaDsl
 {-# LANGUAGE TemplateHaskell #-}
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 {-# OPTIONS_GHC -Wno-type-defaults #-}
 
 module TestIntPushing (testIntPushing) where
@@ -24,14 +23,19 @@ import QuickCheckSupport (VmInteger (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.QuickCheck (testProperty)
-import TestUtils (evaluateProg, evaluateProgWithStack)
+import TestUtils
+  ( TestResult (..),
+    evaluateProg,
+    evaluateProgWithStack,
+    getStacks,
+  )
 
 testIntPushing :: TestTree
 testIntPushing =
   testGroup
     "Int pushing"
     [ testCase "Op0 - Op16" $
-        let Right (s, alt) = evaluateProg progConstants
+        let (s, alt) = getStacks $ evaluateProg progConstants
             c = compileL2 None progConstants
          in (s, alt, c)
               @?= ( S.singleton (i2SeUnsafe 136),
@@ -39,7 +43,7 @@ testIntPushing =
                     progConstantsCode
                   ),
       testCase "Push integers" $
-        let Right (s, alt) = evaluateProg progPushInt
+        let (s, alt) = getStacks $ evaluateProg progPushInt
             c = compileL2 None progPushInt
          in (s, alt, c)
               @?= ( S.singleton (i2SeUnsafe 72057594037927681),
@@ -110,5 +114,5 @@ propInt (VmInteger x) =
   let stack = (S.empty, S.empty)
       x' = x `div` (256 ^ (3 :: Int))
    in case evaluateProgWithStack (int x') stack of
-        Right (s, _) -> s == S.singleton (i2SeUnsafe x')
+        Right (TestResult {s}) -> s == S.singleton (i2SeUnsafe x')
         Left err -> error $ show err

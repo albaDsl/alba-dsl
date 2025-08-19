@@ -18,8 +18,8 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (evaluateScript)
+import Test.Tasty.HUnit (testCase)
+import TestUtils (evaluateScript, isErr)
 import Prelude hiding (exp)
 
 data ArgCount = Args Int | ZeroArg | PushData | Special | UnusedOp
@@ -34,26 +34,30 @@ testInvalidStack =
               let argCount = opArgCount opcodeL1
               case argCount of
                 Args argCount' ->
-                  evaluateWithStack opcodeL1 (stack (pred argCount'))
-                    @?= Left SeInvalidStackOperation
+                  isErr
+                    (evaluateWithStack opcodeL1 (stack (pred argCount')))
+                    SeInvalidStackOperation
                 _ -> pure ()
           )
           ([L1.OP_0 .. L1.OP_UNASSIGNED_FF] :: [OpcodeL1]),
-      testCase "Invalid Stack — OP_FROMALTSTACK" $
-        evaluateWithStack L1.OP_FROMALTSTACK S.empty
-          @?= Left SeInvalidStackOperation,
-      testCase "Invalid Stack — OP_CHECKMULTISIG" $
+      testCase "Invalid Stack - OP_FROMALTSTACK" $
+        isErr
+          (evaluateWithStack L1.OP_FROMALTSTACK S.empty)
+          SeInvalidStackOperation,
+      testCase "Invalid Stack - OP_CHECKMULTISIG" $
         mapM_
           ( \s -> do
-              evaluateWithStack L1.OP_CHECKMULTISIG s
-                @?= Left SeInvalidStackOperation
+              isErr
+                (evaluateWithStack L1.OP_CHECKMULTISIG s)
+                SeInvalidStackOperation
           )
           multiSigStacks,
-      testCase "Invalid Stack — OP_CHECKMULTISIGVERIFY" $
+      testCase "Invalid Stack - OP_CHECKMULTISIGVERIFY" $
         mapM_
           ( \s -> do
-              evaluateWithStack L1.OP_CHECKMULTISIGVERIFY s
-                @?= Left SeInvalidStackOperation
+              isErr
+                (evaluateWithStack L1.OP_CHECKMULTISIGVERIFY s)
+                SeInvalidStackOperation
           )
           multiSigStacks
     ]
