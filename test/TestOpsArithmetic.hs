@@ -44,7 +44,7 @@ propInt e =
           s == S.singleton (i2SeUnsafe . fromJust $ evalIntExp e)
         Left (SeDivideByZero, _) -> isNothing $ evalIntExp e
         Left (SeModByZero, _) -> isNothing $ evalIntExp e
-        Left err -> error ("Unexpected evavaluation failure: " <> show err)
+        Left err -> error ("Unexpected evaluation failure: " <> show err)
 
 propBool :: BoolExp -> Bool
 propBool e =
@@ -54,7 +54,7 @@ propBool e =
           s == S.singleton (boolToStackElement $ fromJust $ evalBoolExp e)
         Left (SeDivideByZero, _) -> isNothing $ evalBoolExp e
         Left (SeModByZero, _) -> isNothing $ evalBoolExp e
-        Left err -> error ("Unexpected evavaluation failure: " <> show err)
+        Left err -> error ("Unexpected evaluation failure: " <> show err)
 
 propBits :: BitExp -> Bool
 propBits e =
@@ -62,7 +62,7 @@ propBits e =
    in case res of
         Right (TestResult {s}) ->
           s == S.singleton (b2SeUnsafe $ evalBitExp e)
-        Left err -> error ("Unexpected evavaluation failure: " <> show err)
+        Left err -> error ("Unexpected evaluation failure: " <> show err)
 
 instance Arbitrary IntExp where
   arbitrary = resize 7 $ sized go
