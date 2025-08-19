@@ -6,6 +6,7 @@ module Alba.Dsl.V1.Bch2025.Contract.Prelude
     natSub,
     ifZero,
     isZero,
+    null,
   )
 where
 
@@ -19,15 +20,18 @@ import Alba.Dsl.V1.Bch2025.Ops
     opGreaterThanOrEqual,
     opHash160,
     opIf,
+    opNip,
     opNumEqual,
+    opSize,
     opSubUnsafe,
     opVerify,
   )
 import Alba.Dsl.V1.Bch2025.Stack (StackNum, THash160)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.Stack (FN, FNA, TBool, TNat, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Stack (FN, FNA, TBool, TBytes, TNat, TPubKey, TSig)
 import Alba.Vm.Common.BasicTypes (Bytes)
+import Prelude hiding (null)
 
 p2shScriptPubKey :: Bytes -> FN (s > THash160) (s > TBool)
 p2shScriptPubKey scriptHash =
@@ -61,3 +65,6 @@ ifZero ifOps elseOps = isZero # opIf ifOps elseOps
 
 isZero :: (StackNum x1) => FN (s > x1) (s > TBool)
 isZero = op0 # opNumEqual
+
+null :: FN (s > TBytes) (s > TBool)
+null = opSize # opNip # op0 # opNumEqual

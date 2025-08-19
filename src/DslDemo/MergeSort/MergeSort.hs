@@ -3,7 +3,7 @@
 module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
-import Prelude hiding (drop)
+import Prelude hiding (drop, null)
 
 sort :: FN (s > TBytes) (s > TBytes)
 sort = function (unname @1 sort')
@@ -11,18 +11,13 @@ sort = function (unname @1 sort')
     sort' :: FN (s > N "xs" TBytes) (s > TBytes)
     sort' =
       begin
-        # name @"size" (pick @"xs" # opSize # opNip)
-        # pick @"size"
-        # ifZero
-          (drop @"size" # roll @"xs")
+        # (pick @"xs" # opSize # opNip)
+        # (opDup # nat 0 # opNumEqual # opSwap # nat 1 # opNumEqual # opBoolOr)
+        # opIf
+          (roll @"xs")
           ( begin
-              # (roll @"size" # nat 1 # opEqual)
-              # opIf
-                (roll @"xs")
-                ( begin
-                    # name2 @"fst" @"snd" (roll @"xs" # halve)
-                    # (roll @"fst" # sort # roll @"snd" # sort # merge)
-                )
+              # name2 @"fst" @"snd" (roll @"xs" # halve)
+              # (roll @"fst" # sort # roll @"snd" # sort # merge)
           )
 
 halve :: FN (s > TBytes) (s > TBytes > TBytes)
@@ -37,29 +32,39 @@ merge = function (unname @2 merge')
 merge' :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes)
 merge' =
   begin
-    # (pick @"xs" # opSize # opNip)
-    # ifZero
-      (roll @"ys" # drop @"xs")
+    # (pickN @"xs" # pickN @"ys" # baseCases)
+    # opIf
       ( begin
-          # (pick @"ys" # opSize # opNip)
-          # ifZero
-            (drop @"ys" # roll @"xs")
-            ( begin
-                # name2 @"x" @"xRest" (pick @"xs" # uncons)
-                # name2 @"y" @"yRest" (pick @"ys" # uncons)
-                # ( begin
-                      # (pick @"x" # opBin2Num)
-                      # (pick @"y" # opBin2Num)
-                      # opLessThanOrEqual
-                  )
-                # opIf
-                  ( begin
-                      # (roll @"x" # roll @"xRest" # roll @"ys" # merge # opCat)
-                      # (drop @"yRest" # drop @"y" # drop @"xs")
-                  )
-                  ( begin
-                      # (roll @"y" # roll @"xs" # roll @"yRest" # merge # opCat)
-                      # (drop @"ys" # drop @"xRest" # drop @"x")
-                  )
+          # opDrop
+          # name2 @"x" @"xRest" (pick @"xs" # uncons)
+          # name2 @"y" @"yRest" (pick @"ys" # uncons)
+          # ( begin
+                # (pick @"x" # opBin2Num)
+                # (pick @"y" # opBin2Num)
+                # opLessThanOrEqual
             )
+          # opIf
+            ( begin
+                # (roll @"x" # roll @"xRest" # roll @"ys")
+                # (drop @"yRest" # drop @"y" # drop @"xs")
+            )
+            ( begin
+                # (roll @"y" # roll @"xs" # roll @"yRest")
+                # (drop @"ys" # drop @"xRest" # drop @"x")
+            )
+          # (merge # opCat)
       )
+      (drop @"xs" # drop @"ys")
+  where
+    baseCases :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes > TBool)
+    baseCases =
+      begin
+        # (pick @"xs" # null)
+        # opIf
+          (roll @"ys" # drop @"xs" # opFalse)
+          ( begin
+              # (pick @"ys" # null)
+              # opIf
+                (drop @"ys" # roll @"xs" # opFalse)
+                (drop @"xs" # drop @"ys" # bytes [] # opTrue)
+          )

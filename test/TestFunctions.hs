@@ -80,7 +80,7 @@ progFactorial =
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
-  (B.length xs <= 20) ==>
+  (B.length xs <= 48) ==>
     evaluateProg (bytes xs # MS.sort # bytes (B.sort xs) # opEqual)
 
 evaluateProg :: FNA s '[] s' alt' -> Bool
