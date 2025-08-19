@@ -1,4 +1,5 @@
 -- Copyright (c) 2025 albaDsl
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module TestUtils where
 
@@ -9,6 +10,7 @@ import Alba.Dsl.V1.Bch2025
     Optimize (..),
     compile,
     outputScript,
+    writeFunctionTable,
   )
 import Alba.Dsl.V1.Common.FunctionTableJson
   ( FunctionTableEntry (..),
@@ -55,7 +57,12 @@ data TestResult = TestResult
 isTrue :: Either (ScriptError, Maybe TestResult) TestResult -> Assertion
 isTrue res =
   case res of
-    Right tr -> (tr.s, tr.alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
+    Right tr -> do
+      -- dumpLogToFile tr
+      -- case tr.compilationResult of
+      --   Just r -> writeFunctionTable r.code r.functionTable
+      --   Nothing -> pure ()
+      (tr.s, tr.alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
     Left (err, Just tr) -> do
       dumpLogToFile tr
       showLog tr id $ assertFailure ("isTrue: " <> show err)
