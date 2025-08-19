@@ -13,7 +13,8 @@ import Alba.Vm.Bch2026
     i2SeUnsafe,
   )
 import Alba.Vm.Bch2026 qualified as Bch2026
-import Alba.Vm.Common.Logging (defaultDisplayOpts, dumpLog)
+import Alba.Vm.Common.Logging (defaultDisplayOpts)
+import Alba.Vm.Common.LoggingText (dumpLog)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (OP_RESERVED))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.ByteString qualified as B

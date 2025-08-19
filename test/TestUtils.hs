@@ -2,7 +2,18 @@
 
 module TestUtils where
 
-import Alba.Dsl.V1.Bch2025 (FNA, Optimize (..), compile, outputScript)
+import Alba.Dsl.V1.Bch2025
+  ( CompilationResult (..),
+    FNA,
+    FunctionTable,
+    Optimize (..),
+    compile,
+    outputScript,
+  )
+import Alba.Dsl.V1.Common.FunctionTableJson
+  ( FunctionTableEntry (..),
+    tableEntries,
+  )
 import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
 import Alba.Vm.Bch2025 qualified as Bch2025
@@ -16,14 +27,19 @@ import Alba.Vm.Common
     VmState (..),
     mkTxContext,
   )
-import Alba.Vm.Common.Logging (defaultDisplayOpts, logDataToText)
+import Alba.Vm.Common.Logging (defaultDisplayOpts)
+import Alba.Vm.Common.Logging qualified as Log
+import Alba.Vm.Common.LoggingHtml (logDataToHtml)
+import Alba.Vm.Common.LoggingText (logDataToText)
 import Alba.Vm.Common.StackElement (i2SeUnsafe)
 import Alba.Vm.Common.VmState (VmLogs)
 import Control.Monad (unless)
 import Data.ByteString qualified as B
+import Data.Map qualified as M
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text qualified as T
+import Data.Text.IO qualified as T
 import Debug.Trace (trace)
 import Test.Tasty.HUnit (Assertion, assertFailure, (@?=))
 
@@ -31,7 +47,8 @@ data TestResult = TestResult
   { s :: !VmStack,
     alt :: !VmStack,
     limits :: !VmMetrics,
-    logData :: !(Maybe VmLogs)
+    logData :: !(Maybe VmLogs),
+    compilationResult :: !(Maybe CompilationResult)
   }
   deriving (Eq, Show)
 
@@ -39,7 +56,8 @@ isTrue :: Either (ScriptError, Maybe TestResult) TestResult -> Assertion
 isTrue res =
   case res of
     Right tr -> (tr.s, tr.alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
-    Left (err, Just tr) ->
+    Left (err, Just tr) -> do
+      dumpLogToFile tr
       showLog tr id $ assertFailure ("isTrue: " <> show err)
     Left (err, Nothing) -> assertFailure ("isTrue: " <> show err)
 
@@ -84,7 +102,26 @@ getErr res =
 
 showLog :: TestResult -> a -> a
 showLog tr =
-  trace (T.unpack . T.concat $ logDataToText defaultDisplayOpts tr.logData)
+  trace (T.unpack $ logDataToText defaultDisplayOpts tr.logData)
+
+dumpLogToFile :: TestResult -> IO ()
+dumpLogToFile tr = do
+  let opts =
+        defaultDisplayOpts
+          { Log.functionTable =
+              convertTable . (.functionTable) <$> tr.compilationResult
+          }
+      html = logDataToHtml opts tr.logData
+  T.writeFile "log.html" html
+
+convertTable :: FunctionTable -> Log.FunctionTable
+convertTable functions =
+  let entries = tableEntries functions
+      entries' = (\e -> (e.slot, convert e)) <$> entries
+   in M.fromList entries'
+  where
+    convert :: FunctionTableEntry -> Log.FunctionTableEntry
+    convert FunctionTableEntry {..} = Log.FunctionTableEntry {..}
 
 evaluateProg ::
   FNA s '[] s' alt' ->
@@ -110,7 +147,6 @@ evaluateScript code (s, alt) context = do
       res2026 =
         let state = (Bch2026.startState Bch2026.vmParamsStandard) {code, s, alt}
          in toTestResult $ Bch2026.evaluateScript context state
-  -- unless (resultsEqual res2025 res2026) $
   unless (res2025 == res2026) $ error "Bch2025 & Bch2026 results don't match."
   res2026
 
@@ -122,7 +158,8 @@ toTestResult res =
     Right st -> Right (convert st)
     Left (err, st) -> Left (err, convert <$> st)
   where
-    convert VmState {s, alt, limits, logData} = TestResult {..}
+    convert VmState {s, alt, limits, logData} =
+      TestResult {compilationResult = Nothing, ..}
 
 minimalContext :: TxContext
 minimalContext = fromJust $ mkTxContext barboneTx 0 undefined

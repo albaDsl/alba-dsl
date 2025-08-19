@@ -2,52 +2,49 @@
 
 module Alba.Vm.Common.Logging
   ( LogDisplayOpts (..),
+    FunctionTable,
+    FunctionTableEntry (..),
     defaultDisplayOpts,
     logOp,
     logStart,
     logFunctionExit,
-    dumpLog,
-    logDataToText,
-    dumpVerifyScriptResult,
   )
 where
 
-import Alba.Misc.Debug (printf)
-import Alba.Misc.Utils (encodeHex)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
-import Alba.Vm.Common.ScriptError (ScriptError)
-import Alba.Vm.Common.StackElement (Labels, showStackElement)
-import Alba.Vm.Common.Utils (formatBytesWithLabels)
-import Alba.Vm.Common.VmLimits (dumpMetrics)
-import Alba.Vm.Common.VmStack (VmStack)
+import Alba.Vm.Common.StackElement (Labels)
 import Alba.Vm.Common.VmState
   ( LogEntry (..),
     Operation (..),
-    VerifyScriptResult (..),
-    VmLogs,
-    VmMetrics (..),
     VmState (..),
   )
-import Control.Monad (when)
-import Data.ByteString qualified as B
-import Data.Foldable (toList)
-import Data.List (foldl')
 import Data.Map qualified as M
-import Data.Maybe (isNothing)
 import Data.Sequence qualified as S
-import Data.Text qualified as T
+import Data.Text (Text)
 import Prelude hiding (log)
 
 data LogDisplayOpts = LogDisplayOpts
   { labels :: Maybe Labels,
+    functionTable :: Maybe FunctionTable,
     showMetrics :: Bool,
     showUnexecuted :: Bool
   }
+
+type FunctionTable = M.Map Int FunctionTableEntry
+
+data FunctionTableEntry = FunctionTableEntry
+  { functionName :: Text,
+    functionLongName :: Text,
+    slot :: Int,
+    callSites :: Maybe Int
+  }
+  deriving (Show)
 
 defaultDisplayOpts :: LogDisplayOpts
 defaultDisplayOpts =
   LogDisplayOpts
     { labels = Nothing,
+      functionTable = Nothing,
       showMetrics = False,
       showUnexecuted = False
     }
@@ -76,106 +73,3 @@ logFunctionExit state@VmState {s, alt, metrics, logData = Just logData} =
             ..
           }
    in state {logData = Just $ logData S.|> entry}
-
-dumpLog :: LogDisplayOpts -> VmState -> IO ()
-dumpLog displayOpts VmState {logData} = do
-  let log = foldl' (<>) "" (logDataToText displayOpts logData)
-  printf "%s\n" log
-
-logDataToText :: LogDisplayOpts -> Maybe VmLogs -> [T.Text]
-logDataToText _ Nothing = ["No logs."]
-logDataToText displayOpts (Just logData) =
-  logEntryLine displayOpts <$> toList logData
-
-logEntryLine :: LogDisplayOpts -> LogEntry -> T.Text
-logEntryLine LogDisplayOpts {..} LogEntry {..} =
-  let (opStr, execStr :: T.Text) =
-        case op of
-          Op op' -> (formatOp labels op', if exec then "+" else "-")
-          Start -> ("(Start)", " ")
-          FunctionExit -> ("(Function Exit)", " ")
-      stack' = formatStack labels stack
-      metrics' = formatMetrics metrics
-   in case (showUnexecuted || exec || op == Start, showMetrics) of
-        (True, True) ->
-          T.pack $
-            printf "%s %-30s | %-20s | %s\n" execStr opStr metrics' stack'
-        (True, False) ->
-          T.pack $ printf "%s %-30s | %s\n" execStr opStr stack'
-        _ -> T.empty
-
-formatOp :: Maybe Labels -> OpcodeL2 -> T.Text
-formatOp labels op =
-  case op of
-    OP_DATA opcodeL1 bytes ->
-      T.pack (show opcodeL1) <> " " <> formatBytesWithLabels labels bytes
-    _ -> T.pack $ show op
-
-formatStack :: Maybe Labels -> VmStack -> T.Text
-formatStack labels s =
-  Data.List.foldl'
-    (\a x -> a <> T.pack (printf " %s" x))
-    ("" :: T.Text)
-    (showStackElement labels <$> s)
-
-formatMetrics :: VmMetrics -> T.Text
-formatMetrics VmMetrics {..} =
-  T.pack $
-    printf
-      "c:%5d i:%2d b:%4d a:%4d h:%2d s:%d"
-      cost
-      instructions
-      pushedBytes
-      arithmeticBytes
-      hashIterations
-      sigChecks
-
-dumpVerifyScriptResult ::
-  LogDisplayOpts ->
-  Either
-    (ScriptError, VerifyScriptResult)
-    VerifyScriptResult ->
-  IO ()
-dumpVerifyScriptResult displayOpts (Right res) = do
-  dumpVerifyScriptResult' displayOpts res
-  printf "Successful script verification.\n\n"
-dumpVerifyScriptResult displayOpts (Left (scriptError, state)) = do
-  dumpVerifyScriptResult' displayOpts state
-  printf "Script verification failed with: %s\n\n" (show scriptError)
-
-dumpVerifyScriptResult' :: LogDisplayOpts -> VerifyScriptResult -> IO ()
-dumpVerifyScriptResult'
-  displayOpts@LogDisplayOpts {showMetrics}
-  VerifyScriptResult {..} = do
-    showLabels displayOpts.labels
-    case scriptSigResult of
-      Just res -> do
-        printf "scriptSig:\n"
-        dumpLog displayOpts res
-      Nothing -> pure ()
-
-    case scriptPubKeyResult of
-      Just res -> do
-        printf "scriptPubKey:\n"
-        dumpLog displayOpts res
-        when (showMetrics && isNothing scriptRedeemResult) $
-          dumpMetrics res
-      Nothing -> pure ()
-
-    case scriptRedeemResult of
-      Just res -> do
-        printf "redeemScript:\n"
-        dumpLog displayOpts res
-        when showMetrics $ dumpMetrics res
-      Nothing -> pure ()
-
-showLabels :: Maybe Labels -> IO ()
-showLabels (Just labels) = do
-  printf "Labels: \n"
-  mapM_ showLabel (M.toList labels)
-  printf "\n"
-  where
-    showLabel :: (B.ByteString, T.Text) -> IO ()
-    showLabel (bs, name) =
-      printf " %s: %s (%d)\n" name (encodeHex bs) (B.length bs)
-showLabels Nothing = pure ()

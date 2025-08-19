@@ -1,12 +1,15 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-unused-imports #-}
 
 module Alba.Dsl.V1.Common.Compile
   ( Optimize (..),
+    FunctionState,
+    CompilationResult (..),
     compile,
+    compile',
     compileL2,
     pass1,
     optimize,
+    writeFunctionTable,
   )
 where
 
@@ -16,18 +19,20 @@ import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
     FunctionId,
     FunctionState (..),
+    FunctionTable,
     functionsSorted,
     getSlot,
     startState,
   )
-import Alba.Dsl.V1.Common.FunctionsSummaryTable (functionsSummary)
+import Alba.Dsl.V1.Common.FunctionTableJson qualified as FTJ
+import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (Absolute),
     OpcodeL3 (..),
   )
 import Alba.Dsl.V1.Common.Stack (S (..))
-import Alba.Misc.Debug (trace)
+import Alba.Misc.Utils (encodeHex)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2
   ( CodeL2,
@@ -35,36 +40,66 @@ import Alba.Vm.Common.OpcodeL2
     bytesToDataOp,
     codeL2ToCodeL1,
   )
-import Control.Arrow ((>>>))
-import Control.Monad (when)
+import Control.Arrow (first, (>>>))
 import Control.Monad.State.Lazy (State, get, put, runState)
+import Crypto.Hash qualified as H
+import Data.ByteArray (convert)
+import Data.ByteString qualified as B
 import Data.Function (fix, on)
 import Data.List (sortBy)
 import Data.Map qualified as M
-import Data.Maybe (fromMaybe, isJust, isNothing)
+import Data.Maybe (fromMaybe, isJust)
 import Data.Sequence qualified as S
+import Data.Text qualified as T
+import Data.Text.Encoding qualified as T
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath ((<.>), (</>))
 import Text.Printf (printf)
+import Prelude hiding (FilePath)
 
 data Optimize = None | O1
 
-compile :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL1
-compile opt prog = fromMaybe err (codeL2ToCodeL1 (compileL2 opt prog))
-  where
-    err = error "compile: internal error."
+data CompilationResult = CompilationResult
+  { code :: !CodeL1,
+    functionTable :: !FunctionTable
+  }
+  deriving (Eq, Show)
 
-compileL2 :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL2
+compile ::
+  forall s s' alt alt'.
+  Optimize ->
+  (S s alt -> S s' alt') ->
+  CodeL1
+compile opt prog = (compile' opt prog).code
+
+compile' ::
+  forall s s' alt alt'.
+  Optimize ->
+  (S s alt -> S s' alt') ->
+  CompilationResult
+compile' opt prog = do
+  let (code, fs) = compileL2 opt prog
+      functionTable = fs.functions
+   in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 code), ..}
+  where
+    err = error "compile': internal error."
+
+compileL2 ::
+  forall s s' alt alt'.
+  Optimize ->
+  (S s alt -> S s' alt') ->
+  (CodeL2, FunctionState)
 compileL2 opt =
   case opt of
     None -> compileL2'
-    O1 -> optimize . compileL2'
+    O1 -> first optimize <$> compileL2'
   where
     compileL2' prog = do
       let (code, fs) = pass1 S.empty startState prog
           fs' = assignSlots fs
-          -- defs = trace (functionsSummary fs') $ functionDefinitions fs'
           defs = functionDefinitions fs'
           code' = pass2 opt fs' (defs S.>< code)
-       in code'
+       in (code', fs')
 
 pass1 ::
   forall s s' alt alt'.
@@ -145,3 +180,15 @@ pass2 opt fs code =
 
 optimize :: CodeL2 -> CodeL2
 optimize = fix (\f c -> let c' = OR.optimize c in if c' == c then c else f c')
+
+writeFunctionTable :: CodeL1 -> FunctionTable -> IO ()
+writeFunctionTable code functions = do
+  let dir = ".function-tables"
+      jsonFile = T.unpack (encodeHex (sha256 code)) <.> "json"
+      txtFile = T.unpack (encodeHex (sha256 code)) <.> "txt"
+  createDirectoryIfMissing False dir
+  B.writeFile (dir </> txtFile) (T.encodeUtf8 $ FTT.generateTable functions)
+  B.writeFile (dir </> jsonFile) (FTJ.generateTable functions)
+  where
+    sha256 :: B.ByteString -> B.ByteString
+    sha256 x = convert (H.hash x :: H.Digest H.SHA256)

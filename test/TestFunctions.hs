@@ -4,6 +4,7 @@ module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2026
 import Data.ByteString qualified as B
+import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)
 import DslDemo.MergeSort.MergeSort qualified as MS
 import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
@@ -17,7 +18,10 @@ testFunctions =
   testGroup
     "Functions"
     [ testCase "Basic function call" $ isTrue (evaluateProg progBasic),
-      testCase "Nested function calls" $ isTrue (evaluateProg progNestedCalls),
+      testCase "Nested function calls - 1" $
+        isTrue (evaluateProg progNestedCalls1),
+      testCase "Nested function calls - 2" $
+        isTrue (evaluateProg progNestedCalls2),
       testCase "Recursion - factorial" $ isTrue (evaluateProg progFactorial),
       testProperty "Recursion - merge sort" propSort
     ]
@@ -33,20 +37,45 @@ progBasic =
     cube :: FN (s > TInt) (s > TInt)
     cube = function (opDup # opDup # opMul # opMul)
 
-progNestedCalls :: FN s (s > TBool)
-progNestedCalls =
+-- Evaluate: polynomial(x) = x⁴ + 10x³ + 35x² + 50x + 24 for
+-- x = 1, 2, 3, and 4.
+progNestedCalls1 :: FN s (s > TBool)
+progNestedCalls1 =
   begin
-    # int 5
-    # polynomial
-    # int 132
-    # opNumEqual
+    # (int 2 # polynomial # int 360 # opNumEqualVerify)
+    # (int 3 # polynomial # int 840 # opNumEqualVerify)
+    # (int 4 # polynomial # int 1680 # opNumEqualVerify)
+    # (int 5 # polynomial # int 3024 # opNumEqualVerify)
+    # opTrue
   where
+    polynomial :: F (S (s > TInt) alt -> S (s > TInt) alt)
+    polynomial = function (unname @1 polynomial')
+
+    -- When using "S -> S" syntax, surround it in an 'F' for VM functions.
+    polynomial' :: F (S (s > N "x" TInt) alt -> S (s > TInt) alt)
+    polynomial' =
+      begin
+        # (pick @"x" # quartic)
+        # (pick @"x" # cube # int 10 # opMul)
+        # (pick @"x" # square # int 35 # opMul)
+        # (roll @"x" # int 50 # opMul)
+        # int 24
+        # (opAdd # opAdd # opAdd # opAdd)
+
+    quartic :: FN (s > TInt) (s > TInt)
+    quartic = function (square # square)
+
     cube :: FN (s > TInt) (s > TInt)
     cube = function (opDup # opDup # opMul # opMul)
 
-    -- When using "S -> S" syntax, surround it in an 'F' for VM functions.
-    polynomial :: F (S (s > TInt) alt -> S (s > TInt) alt)
-    polynomial = function (cube # int 7 # opAdd)
+    square :: FN (s > TInt) (s > TInt)
+    square = function (opDup # opMul)
+
+progNestedCalls2 :: FN s (s > TBool)
+progNestedCalls2 =
+  begin
+    # (int 3 # int 7 # feMul # int 1 # feAdd # int 12 # feSub # feCube)
+    # (int 1000 # opNumEqual)
 
 progFactorial :: FN s (s > TBool)
 progFactorial =

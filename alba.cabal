@@ -4,6 +4,10 @@ version:        0.1.0.0
 category:       application
 author:         albadsl@proton.me
 
+extra-source-files:
+    src/Alba/Vm/Common/Html/style.css
+    src/Alba/Vm/Common/Html/script.js
+
 common shared-properties
   default-language: GHC2021
   default-extensions:
@@ -24,7 +28,7 @@ common shared-properties
       RecordWildCards
       TypeFamilies
       UndecidableInstances
-  other-extensions: Strict TemplateHaskell MagicHash
+  other-extensions: Strict TemplateHaskell MagicHash QuasiQuotes
   ghc-options: -fno-ignore-asserts -Wall -Werror
                -- Disable some warnings during development.
                -- -Wno-partial-type-signatures
@@ -39,15 +43,19 @@ common shared-properties
       base,
       base16,
       binary,
+      blaze-html,
+      blaze-markup,
       bytestring,
       containers,
       crypton,
       directory,
       entropy,
+      file-embed,
       filepath,
       foldl,
       generic-lens,
       haskoin-core-bch-lite,
+      here,
       liquidhaskell == 0.9.8.2,
       bchn-secp256k1,
       memory,
@@ -97,7 +105,8 @@ library
       Alba.Dsl.V1.Common.ContractDoc,
       Alba.Dsl.V1.Common.FlippedCons,
       Alba.Dsl.V1.Common.FunctionState,
-      Alba.Dsl.V1.Common.FunctionsSummaryTable,
+      Alba.Dsl.V1.Common.FunctionTableJson,
+      Alba.Dsl.V1.Common.FunctionTableText,
       Alba.Dsl.V1.Common.Lang,
       Alba.Dsl.V1.Common.LangArgs,
       Alba.Dsl.V1.Common.LangDispatch,
@@ -161,6 +170,10 @@ library
       Alba.Vm.Common.BasicTypes,
       Alba.Vm.Common.Crypto,
       Alba.Vm.Common.Logging,
+      Alba.Vm.Common.LoggingHtml,
+      Alba.Vm.Common.LoggingHtmlAssets,
+      Alba.Vm.Common.LoggingText,
+      Alba.Vm.Common.LoggingTree,
       Alba.Vm.Common.OpClasses,
       Alba.Vm.Common.OpcodeL1,
       Alba.Vm.Common.OpcodeL2,

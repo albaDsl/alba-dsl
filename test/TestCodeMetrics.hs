@@ -28,4 +28,4 @@ testCodeMetrics =
     ]
 
 compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
-compileForSize prog = sizeStr (compileL2 O1 prog)
+compileForSize prog = sizeStr (fst $ compileL2 O1 prog)

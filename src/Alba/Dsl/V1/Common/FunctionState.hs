@@ -2,6 +2,7 @@
 
 module Alba.Dsl.V1.Common.FunctionState
   ( FunctionState (..),
+    FunctionTable,
     Function (..),
     FunctionId,
     startState,
@@ -12,6 +13,7 @@ module Alba.Dsl.V1.Common.FunctionState
     getSlot,
     getCallerFunctionId,
     functionsSorted,
+    functionsSortedSlot,
   )
 where
 
@@ -20,20 +22,23 @@ import Control.Arrow ((>>>))
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Map qualified as M
+import Data.Maybe (fromMaybe)
 import GHC.Stack (HasCallStack, SrcLoc (..), callStack, getCallStack)
 
 data FunctionState = FunctionState
   { lambdaIdx :: Int,
-    functions :: M.Map FunctionId Function
+    functions :: FunctionTable
   }
-  deriving (Show)
+  deriving (Eq, Show)
 
 data Function = Function
   { code :: Maybe CodeL3,
     slot :: Maybe Int,
     callSites :: Int
   }
-  deriving (Show)
+  deriving (Eq, Show)
+
+type FunctionTable = M.Map FunctionId Function
 
 startState :: FunctionState
 startState = FunctionState {lambdaIdx = 0, functions = M.empty}
@@ -103,3 +108,9 @@ getCallerFunctionId =
 
 functionsSorted :: M.Map FunctionId Function -> [(FunctionId, Function)]
 functionsSorted = M.toList >>> sortBy (flip compare `on` ((.callSites) . snd))
+
+functionsSortedSlot :: M.Map FunctionId Function -> [(FunctionId, Function)]
+functionsSortedSlot =
+  M.toList >>> sortBy (compare `on` ((fromMaybe err1 . (.slot)) . snd))
+  where
+    err1 = error "functionsSortedSlot: internal error."

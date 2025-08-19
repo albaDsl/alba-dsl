@@ -17,6 +17,7 @@ module Alba.Dsl.V1.Bch2025
     module Alba.Dsl.V1.Common.Listing,
     module Alba.Vm.Common.BasicTypes,
     module Alba.Vm.Common.OpcodeL1,
+    module Alba.Dsl.V1.Common.FunctionState,
   )
 where
 
@@ -32,6 +33,7 @@ import Alba.Dsl.V1.Common.Compile
 import Alba.Dsl.V1.Common.Contract
 import Alba.Dsl.V1.Common.ContractCashScriptArtifact
 import Alba.Dsl.V1.Common.ContractDoc
+import Alba.Dsl.V1.Common.FunctionState (FunctionState, FunctionTable)
 import Alba.Dsl.V1.Common.LangDispatch
 import Alba.Dsl.V1.Common.Listing
 import Alba.Vm.Common.BasicTypes

@@ -36,7 +36,7 @@ testIntPushing =
     "Int pushing"
     [ testCase "Op0 - Op16" $
         let (s, alt) = getStacks $ evaluateProg progConstants
-            c = compileL2 None progConstants
+            c = fst $ compileL2 None progConstants
          in (s, alt, c)
               @?= ( S.singleton (i2SeUnsafe 136),
                     S.empty,
@@ -44,7 +44,7 @@ testIntPushing =
                   ),
       testCase "Push integers" $
         let (s, alt) = getStacks $ evaluateProg progPushInt
-            c = compileL2 None progPushInt
+            c = fst $ compileL2 None progPushInt
          in (s, alt, c)
               @?= ( S.singleton (i2SeUnsafe 72057594037927681),
                     S.empty,

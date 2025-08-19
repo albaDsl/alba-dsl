@@ -12,7 +12,8 @@ import Alba.Vm.Bch2025
     i2SeUnsafe,
   )
 import Alba.Vm.Bch2025 qualified as Bch2025
-import Alba.Vm.Common.Logging (defaultDisplayOpts, dumpLog)
+import Alba.Vm.Common.Logging (defaultDisplayOpts)
+import Alba.Vm.Common.LoggingText (dumpLog)
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S

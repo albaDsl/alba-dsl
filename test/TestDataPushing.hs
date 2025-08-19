@@ -32,7 +32,7 @@ testDataPushing =
     "Data pushing"
     [ testCase "Simple bytes push" $
         let res = getStacks $ evaluateProg progPush
-            c = compileL2 None progPush
+            c = fst $ compileL2 None progPush
             c' = compile None progPush
          in (res, c, c')
               @?= ( ( S.singleton $ b2SeUnsafe (B.pack [1, 2, 3]),
@@ -43,7 +43,7 @@ testDataPushing =
                   ),
       testCase "Bytes push resulting in OP_PUSHDATA1" $
         let res = getStacks $ evaluateProg progPush250
-            c = compileL2 None progPush250
+            c = fst $ compileL2 None progPush250
             c' = compile None progPush250
          in (res, c, c')
               @?= ( ( S.singleton $ b2SeUnsafe (B.replicate 250 0xff),
@@ -54,7 +54,7 @@ testDataPushing =
                   ),
       testCase "Bytes max push" $
         let res = getStacks $ evaluateProg progPushLarge
-            c = compileL2 None progPushLarge
+            c = fst $ compileL2 None progPushLarge
             c' = compile None progPushLarge
          in (res, c, c')
               @?= ( ( S.singleton $

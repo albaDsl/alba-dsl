@@ -1,25 +1,26 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Common.FunctionsSummaryTable (functionsSummary) where
+module Alba.Dsl.V1.Common.FunctionTableText (generateTable) where
 
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
-    FunctionState (..),
-    functionsSorted,
+    FunctionTable,
+    functionsSortedSlot,
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
 import Data.Sequence qualified as S
+import Data.Text (Text)
+import Data.Text qualified as T
 import Text.Printf (printf)
 
-functionsSummary :: FunctionState -> String
-functionsSummary FunctionState {functions} =
+generateTable :: FunctionTable -> Text
+generateTable functions =
   let hline = replicate tableWidth '-' <> "\n"
-      functions' = functionsSorted functions
-   in "\n"
-        <> line "Module" "Line" "Function" "Slot" "Ops" "Sites"
-        <> hline
-        <> foldr functionLine "" functions'
-        <> printf "Functions total: %d\n" (length functions')
+      functions' = functionsSortedSlot functions
+   in T.pack (line "Module" "Line" "Function" "Slot" "Ops" "Sites")
+        <> T.pack hline
+        <> T.pack (foldr functionLine "" functions')
+        <> T.pack (printf "Functions total: %d\n" (length functions'))
 
 functionLine :: (FunctionId, Function) -> String -> String
 functionLine

@@ -3,6 +3,8 @@
 module Alba.Vm.Common
   ( module Alba.Vm.Common.BasicTypes,
     module Alba.Vm.Common.Logging,
+    module Alba.Vm.Common.LoggingText,
+    module Alba.Vm.Common.LoggingHtml,
     module Alba.Vm.Common.OpcodeL1,
     module Alba.Vm.Common.OpcodeL2,
     module Alba.Vm.Common.ScriptError,
@@ -21,6 +23,8 @@ where
 import Alba.Vm.Common.BasicTypes
 import Alba.Vm.Common.Crypto
 import Alba.Vm.Common.Logging
+import Alba.Vm.Common.LoggingHtml
+import Alba.Vm.Common.LoggingText
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2
 import Alba.Vm.Common.ScriptError

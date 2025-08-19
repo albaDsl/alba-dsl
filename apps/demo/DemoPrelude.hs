@@ -13,6 +13,7 @@ module DemoPrelude
     evm,
     listProg,
     listProg',
+    listFt,
     plot,
     cube,
   )
@@ -21,13 +22,15 @@ where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Math
+import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Misc.Utils
-import Alba.Vm.Bch2026
+import Alba.Vm.Bch2026 hiding (FunctionTable)
 import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Data.ByteString qualified as B
 import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
+import Data.Text qualified as T
 import Data.Text.Chart (height, options, plotWith)
 import Numeric.Natural (Natural)
 import Test.QuickCheck hiding (function)
@@ -112,10 +115,15 @@ evm code x = dump $ evaluateScript txCtx startState'
         budget = B.length code * vmParamsStandard.costBudgetPerInputByte
 
 listProg :: (S s Base -> S s' alt') -> IO ()
-listProg prog = list (compileL2 Dsl.O1 prog)
+listProg prog = list (fst $ compileL2 Dsl.O1 prog)
 
 listProg' :: (S s Base -> S s' alt') -> IO ()
-listProg' prog = list (compileL2 Dsl.None prog)
+listProg' prog = list (fst $ compileL2 Dsl.None prog)
+
+listFt :: (S s Base -> S s' alt') -> IO ()
+listFt prog = do
+  let cr = compile' Dsl.O1 prog
+  putStrLn $ T.unpack $ FTT.generateTable cr.functionTable
 
 plot :: [Integer] -> IO ()
 plot = plotWith (options {height = 10})

@@ -13,7 +13,12 @@ module TestUtils2026
   )
 where
 
-import Alba.Dsl.V1.Bch2026 (FNA, Optimize (..), compile)
+import Alba.Dsl.V1.Bch2026
+  ( CompilationResult (..),
+    FNA,
+    Optimize (..),
+    compile',
+  )
 import Alba.Vm.Bch2026 qualified as Bch2026
 import Alba.Vm.Common
   ( CodeL1,
@@ -24,7 +29,7 @@ import Alba.Vm.Common
   )
 import Data.Sequence qualified as S
 import TestUtils
-  ( TestResult,
+  ( TestResult (..),
     getErr,
     getStack,
     getStacks,
@@ -45,7 +50,12 @@ evaluateProgWithStack ::
   (VmStack, VmStack) ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProgWithStack prog (s, alt) =
-  evaluateScript (compile None prog) (s, alt) minimalContext
+  let cr@CompilationResult {..} = compile' None prog
+   in case evaluateScript code (s, alt) minimalContext of
+        Right res -> Right $ res {compilationResult = Just cr}
+        Left (err, Nothing) -> Left (err, Nothing)
+        Left (err, Just res) ->
+          Left (err, Just $ res {compilationResult = Just cr})
 
 evaluateScript ::
   CodeL1 ->

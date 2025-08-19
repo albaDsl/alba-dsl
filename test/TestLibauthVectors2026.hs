@@ -23,7 +23,7 @@ import Alba.Vm.Common
     VerifyScriptResult,
     dumpVerifyScriptResult,
   )
-import Alba.Vm.Common.Logging (dumpVerifyScriptResult)
+import Alba.Vm.Common.LoggingText (dumpVerifyScriptResult)
 import Alba.Vm.Common.VmState (VerifyScriptResult)
 import Control.Monad ((>=>))
 import Data.Aeson qualified as A
