@@ -4,6 +4,8 @@ module Alba.Vm.Common.Logging
   ( LogDisplayOpts (..),
     defaultDisplayOpts,
     logOp,
+    logStart,
+    logFunctionExit,
     dumpLog,
     logDataToText,
     dumpVerifyScriptResult,
@@ -20,6 +22,7 @@ import Alba.Vm.Common.VmLimits (dumpMetrics)
 import Alba.Vm.Common.VmStack (VmStack)
 import Alba.Vm.Common.VmState
   ( LogEntry (..),
+    Operation (..),
     VerifyScriptResult (..),
     VmLogs,
     VmMetrics (..),
@@ -49,10 +52,29 @@ defaultDisplayOpts =
       showUnexecuted = False
     }
 
-logOp :: Maybe OpcodeL2 -> Bool -> VmState -> VmState
+logStart :: VmState -> VmState
+logStart state@VmState {logData = Nothing} = state
+logStart state@VmState {s, alt, metrics, logData = Just logData} =
+  let entry = LogEntry {op = Start, exec = True, stack = s, altStack = alt, ..}
+   in state {logData = Just $ logData S.|> entry}
+
+logOp :: OpcodeL2 -> Bool -> VmState -> VmState
 logOp _op _exec state@VmState {logData = Nothing} = state
 logOp op exec state@VmState {s, alt, metrics, logData = Just logData} =
-  let entry = LogEntry {stack = s, altStack = alt, ..}
+  let entry = LogEntry {op = Op op, stack = s, altStack = alt, ..}
+   in state {logData = Just $ logData S.|> entry}
+
+logFunctionExit :: VmState -> VmState
+logFunctionExit state@VmState {logData = Nothing} = state
+logFunctionExit state@VmState {s, alt, metrics, logData = Just logData} =
+  let entry =
+        LogEntry
+          { op = FunctionExit,
+            exec = True,
+            stack = s,
+            altStack = alt,
+            ..
+          }
    in state {logData = Just $ logData S.|> entry}
 
 dumpLog :: LogDisplayOpts -> VmState -> IO ()
@@ -69,11 +91,12 @@ logEntryLine :: LogDisplayOpts -> LogEntry -> T.Text
 logEntryLine LogDisplayOpts {..} LogEntry {..} =
   let (opStr, execStr :: T.Text) =
         case op of
-          Just op' -> (formatOp labels op', if exec then "+" else "-")
-          Nothing -> ("", " ")
+          Op op' -> (formatOp labels op', if exec then "+" else "-")
+          Start -> ("(Start)", " ")
+          FunctionExit -> ("(Function Exit)", " ")
       stack' = formatStack labels stack
       metrics' = formatMetrics metrics
-   in case (showUnexecuted || exec || isNothing op, showMetrics) of
+   in case (showUnexecuted || exec || op == Start, showMetrics) of
         (True, True) ->
           T.pack $
             printf "%s %-30s | %-20s | %s\n" execStr opStr metrics' stack'

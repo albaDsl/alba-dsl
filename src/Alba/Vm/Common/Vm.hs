@@ -9,7 +9,7 @@ module Alba.Vm.Common.Vm
 where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
-import Alba.Vm.Common.Logging (logOp)
+import Alba.Vm.Common.Logging (logFunctionExit, logOp, logStart)
 import Alba.Vm.Common.OpClasses (isConditionalOp, isDisabledOp, isPushOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
@@ -67,7 +67,7 @@ evaluateScript deps txContext state@VmState {code} = do
   let state' = state {exec = condStackEmpty, signedCode = code}
   mapLeft
     (second Just)
-    (evaluateScript' deps txContext (logOp Nothing False state'))
+    (evaluateScript' deps txContext (logStart state'))
   where
     verifyScriptSize :: Either (ScriptError, Maybe VmState) ()
     verifyScriptSize =
@@ -86,15 +86,15 @@ evaluateScript' deps txContext state@(VmState {code, exec})
   | B.null code && not (condStackNull exec) =
       case condStackUncons exec of
         (Just (Eval {..}), exec') ->
-          evaluateScript'
-            deps
-            txContext
-            ( state
-                { code = callerCode,
-                  signedCode = callerSignedCode,
-                  exec = exec'
-                }
-            )
+          let state' =
+                logFunctionExit
+                  ( state
+                      { code = callerCode,
+                        signedCode = callerSignedCode,
+                        exec = exec'
+                      }
+                  )
+           in evaluateScript' deps txContext state'
         _ -> Left (SeUnbalancedConditional, state)
 evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
   (op, rest) <- case getOp code of
@@ -105,11 +105,11 @@ evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
   let execP = condStackExecuteP exec || isConditionalOp op
   let state' = (addOperationCost state) {code = rest}
   if not execP
-    then evaluateScript' deps txContext (logOp (Just op) execP state')
+    then evaluateScript' deps txContext (logOp op execP state')
     else do
       when (isPushOp op && not (isMinimal op)) $ Left (SeMinimalData, state)
       state'' <-
-        logOp (Just op) execP
+        logOp op execP
           <$> maybe
             (Left (SeBadOpcode (show op), state'))
             (mapLeft (,state'))

@@ -6,6 +6,7 @@ module Alba.Vm.Common.VmState
     VmParams (..),
     VmLogs,
     LogEntry (..),
+    Operation (..),
     VerifyScriptResult (..),
     CodeL1,
     zeroedMetrics,
@@ -48,12 +49,15 @@ data VmMetrics = VmMetrics
   deriving (Eq, Show)
 
 data LogEntry = LogEntry
-  { op :: Maybe OpcodeL2,
+  { op :: Operation,
     exec :: Bool,
     stack :: !VmStack,
     altStack :: !VmStack,
     metrics :: !VmMetrics
   }
+  deriving (Eq, Show)
+
+data Operation = Start | Op OpcodeL2 | FunctionExit
   deriving (Eq, Show)
 
 data VerifyScriptResult = VerifyScriptResult
