@@ -12,7 +12,7 @@ import Alba.Vm.Bch2026
     startState,
     vmParamsStandard,
   )
-import Alba.Vm.Common (VmParams (..), i2SeUnsafe)
+import Alba.Vm.Common (i2SeUnsafe)
 import Alba.Vm.Common.VmState (VmState (..))
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
@@ -158,7 +158,7 @@ propPow b n =
 evaluateProg :: FNA s '[] s' alt' -> Bool
 evaluateProg prog =
   let state =
-        (startState (largerLimits vmParamsStandard))
+        (startState vmParamsStandard)
           { code = compile None prog
           }
    in case evaluateScript context state of
@@ -167,6 +167,3 @@ evaluateProg prog =
         Left (err, _) -> error ("err: " <> show err)
   where
     context = fromJust $ mkTxContext undefined 0 undefined
-
-    largerLimits :: VmParams -> VmParams
-    largerLimits params = params {maxScriptSize = 16_000}
