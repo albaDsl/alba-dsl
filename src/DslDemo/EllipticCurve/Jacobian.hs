@@ -38,7 +38,7 @@ ecMul :: FN (s > TNat > TPoint) (s > TPoint)
 ecMul = function (toJacobian # ecMulJ # fromJacobian)
 
 ecMulJ :: FN (s > TNat > TPointJ) (s > TPointJ)
-ecMulJ = function (unname @2 ecMulJ')
+ecMulJ = unname @2 ecMulJ'
   where
     ecMulJ' :: FN (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
     ecMulJ' =

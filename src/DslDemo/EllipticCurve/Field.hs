@@ -18,25 +18,25 @@ import DslDemo.EllipticCurve.Constants (p)
 import Prelude hiding (drop)
 
 feAdd :: FN (s > TInt > TInt) (s > TInt)
-feAdd = opAdd # primeModulus # opMod
+feAdd = function (opAdd # primeModulus # opMod)
 
 feSub :: FN (s > TInt > TInt) (s > TInt)
-feSub = opSub # primeModulus # modulo
+feSub = function (opSub # primeModulus # modulo)
 
 feMul :: FN (s > TInt > TInt) (s > TInt)
-feMul = opMul # primeModulus # opMod
+feMul = function (opMul # primeModulus # opMod)
 
 feSquare :: FN (s > TInt) (s > TInt)
 feSquare = opDup # feMul
 
 feCube :: FN (s > TInt) (s > TInt)
-feCube = opDup # feSquare # feMul
+feCube = function (opDup # feSquare # feMul)
 
 feQuadruple :: FN (s > TInt) (s > TInt)
 feQuadruple = opDup # feSquare # opSwap # feSquare # opMul
 
 feInv :: FN (s > TInt) (s > TInt)
-feInv = primeModulusMinus2 # pow' feMul
+feInv = function (primeModulusMinus2 # pow' feMul)
   where
     primeModulusMinus2 :: FN s (s > TNat)
     primeModulusMinus2 = primeModulus # op2 # opSub # cast
@@ -45,7 +45,7 @@ primeModulus :: FN s (s > TInt)
 primeModulus = function (int (fromIntegral p))
 
 modulo :: FN (s > TInt > TInt) (s > TInt)
-modulo = function (unname @2 modulo')
+modulo = unname @2 modulo'
   where
     modulo' :: FN (s > N "x1" TInt > N "x2" TInt) (s > TInt)
     modulo' =

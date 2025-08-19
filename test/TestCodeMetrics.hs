@@ -23,9 +23,9 @@ testCodeMetrics =
         compileForSize (toTyped (T2026.turtleVm 1))
           @?= "554 opcodes, 1103 bytes.",
       testCase "EC scalar point multiply (Affine)" $
-        compileForSize EA.ecMul @?= "17 opcodes, 550 bytes.",
+        compileForSize EA.ecMul @?= "26 opcodes, 477 bytes.",
       testCase "EC scalar point multiply (Jacobian)" $
-        compileForSize EJ.ecMul @?= "47 opcodes, 764 bytes."
+        compileForSize EJ.ecMul @?= "53 opcodes, 603 bytes."
     ]
 
 compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
