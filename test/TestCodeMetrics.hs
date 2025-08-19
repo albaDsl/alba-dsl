@@ -24,7 +24,7 @@ testCodeMetrics =
       testCase "EC scalar point multiply (Affine)" $
         compileForSize EA.ecMul @?= "26 opcodes, 477 bytes.",
       testCase "EC scalar point multiply (Jacobian)" $
-        compileForSize EJ.ecMul @?= "53 opcodes, 603 bytes."
+        compileForSize EJ.ecMul @?= "53 opcodes, 600 bytes."
     ]
 
 compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String

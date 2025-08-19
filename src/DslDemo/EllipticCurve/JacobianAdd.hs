@@ -3,7 +3,7 @@
 module DslDemo.EllipticCurve.JacobianAdd (ecDoubleJ, ecAddJ) where
 
 import Alba.Dsl.V1.Bch2026
-import DslDemo.EllipticCurve.Field (feCube, feMul, feQuadruple, feSquare, feSub)
+import DslDemo.EllipticCurve.Field (feCube, feMul, feQuartic, feSquare, feSub)
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
     getX,
@@ -100,4 +100,4 @@ term3 :: FN (s > TInt > TInt) (s > TInt)
 term3 = feCube # feMul
 
 term4 :: FN (s > TInt > TInt) (s > TInt)
-term4 = feQuadruple # feMul
+term4 = feQuartic # feMul
