@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html><head><title>albaVm logs</title><meta charset="UTF-8"><style>/*  Copyright (c) 2025 albaDsl */
+
+body {
+    font-family: 'Courier New', monospace;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+
+.log-container {
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.log-header {
+    display: grid;
+    grid-template-columns: 25px 300px 1fr 1fr 80px;
+    padding: 4px 10px 4px 15px;
+    background-color: #333;
+    color: white;
+    font-weight: bold;
+    border-left: 5px solid;
+    border-left-color: #333;
+}
+
+.log-entry {
+    display: grid;
+    grid-template-columns: 25px 300px 1fr 1fr 80px;
+    padding: 4px 10px 4px 15px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-left: 5px solid;
+    margin: 1px 0;
+}
+
+.log-entry.has-children {
+    cursor: pointer;
+}
+
+.triangle {
+    font-size: 14px;
+    transition: transform 0.2s ease;
+    color: #bbb;
+    text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.log-entry.collapsed .triangle {
+    transform-origin: center;
+    transform: rotate(-90deg);
+}
+
+.col-opcode {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.col-stack {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-alt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-cost {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.level-0 {
+    border-left-color: #ffffff;
+    background-color: #ffffff10;
+}
+
+.level-1 {
+    border-left-color: #4363d8;
+    background-color: #4363d810;
+}
+
+.level-2 {
+    border-left-color: #3cb44b;
+    background-color: #3cb44b10;
+}
+
+.level-3 {
+    border-left-color: #f58231;
+    background-color: #f5823110;
+}
+
+.level-4 {
+    border-left-color: #e6194B;
+    background-color: #e6194B10;
+}
+
+.level-5 {
+    border-left-color: #42d4f4;
+    background-color: #42d4f410;
+}
+
+.level-6 {
+    border-left-color: #ffe119;
+    background-color: #ffe11910;
+}
+
+.level-7 {
+    border-left-color: #f032e6;
+    background-color: #f032e610;
+}
+
+.level-8 {
+    border-left-color: #469990;
+    background-color: #46999010;
+}
+
+.level-9 {
+    border-left-color: #dcbeff;
+    background-color: #dcbeff10;
+}
+
+.level-10 {
+    border-left-color: #9A6324;
+    background-color: #9A632410;
+}
+
+.level-11 {
+    border-left-color: #fabed4;
+    background-color: #fabed410;
+}
+
+.level-12 {
+    border-left-color: #fffac8;
+    background-color: #fffac810;
+}
+
+.level-13 {
+    border-left-color: #800000;
+    background-color: #80000010;
+}
+
+.level-14 {
+    border-left-color: #aaffc3;
+    background-color: #aaffc310;
+}
+
+.level-15 {
+    border-left-color: #000075;
+    background-color: #00007510;
+}
+
+@media (max-width: 768px) {
+    .log-header, .log-entry {
+        grid-template-columns: 25px 150px 1fr;
+        padding: 4px 1px 4px 5px;
+    }
+
+    .col-alt, .col-cost {
+        display: none;
+    }
+}
+</style></head><body><div class="log-container"><div class="log-header"><div></div><div>Operation</div><div>Stack</div><div></div><div></div></div><div id="log-entries"><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">(Start Stack)</div><div class="col-stack"></div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_3</div><div class="col-stack"> 3</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_7</div><div class="col-stack"> 3 7</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MUL</div><div class="col-stack"> 21</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_33 &lt;2ffc...ff00:33&gt;</div><div class="col-stack"> 21 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MOD</div><div class="col-stack"> 21</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_1</div><div class="col-stack"> 21 1</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_ADD</div><div class="col-stack"> 22</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_33 &lt;2ffc...ff00:33&gt;</div><div class="col-stack"> 22 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MOD</div><div class="col-stack"> 22</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_12</div><div class="col-stack"> 22 12</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_SUB</div><div class="col-stack"> 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_33 &lt;2ffc...ff00:33&gt;</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_OVER</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_OVER</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MOD</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DUP</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_0</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10 10 0</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_LESSTHAN</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10 False</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_IF</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_ELSE</div><div class="col-stack"> 10 &lt;2ffc...ff00:33&gt; 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_SWAP</div><div class="col-stack"> 10 10 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DROP</div><div class="col-stack"> 10 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_SWAP</div><div class="col-stack"> 10 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DROP</div><div class="col-stack"> 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_ENDIF</div><div class="col-stack"> 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DUP</div><div class="col-stack"> 10 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DUP</div><div class="col-stack"> 10 10 10</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MUL</div><div class="col-stack"> 10 100</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_33 &lt;2ffc...ff00:33&gt;</div><div class="col-stack"> 10 100 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MOD</div><div class="col-stack"> 10 100</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MUL</div><div class="col-stack"> 1000</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_33 &lt;2ffc...ff00:33&gt;</div><div class="col-stack"> 1000 &lt;2ffc...ff00:33&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_MOD</div><div class="col-stack"> 1000</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_DATA_02 &lt;e803:2&gt;</div><div class="col-stack"> 1000 &lt;e803:2&gt;</div><div class="col-alt"></div><div class="col-cost"></div></div><div class="log-entry level-0" data-path="0"><div class="triangle"></div><div class="col-opcode">OP_NUMEQUAL</div><div class="col-stack"> True</div><div class="col-alt"></div><div class="col-cost"></div></div></div></div></body><script>// Copyright (c) 2025 albaDsl
+
+function getChildren(node) {
+    return document.querySelectorAll(`[data-path^="${node.dataset.path + "."}"]`);
+}
+
+function hideChildren(node) {
+    const c = getChildren(node);
+    c.forEach(el => el.style.display = 'none');
+}
+
+function toggleNode(node) {
+    node.classList.toggle('collapsed');
+    if (node.classList.contains('collapsed') === true) {
+        node.querySelector('.col-stack').textContent =
+            node.querySelector('.stackSummary').textContent;
+    } else {
+        node.querySelector('.col-stack').textContent =
+            node.querySelector('.stack').textContent;
+    }
+
+    const elements = getChildren(node);
+    console.log(elements)
+
+    if (node.classList.contains('collapsed') === true) {
+        elements.forEach(el => el.style.display = 'none');
+    }
+    else {
+        elements.forEach(el => el.style.display = 'grid');
+        const collapsed = document.querySelectorAll(`.collapsed[data-path^="${node.dataset.path + "."}"]`);
+        collapsed.forEach(el => hideChildren(el));
+        console.log(collapsed);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const parents = document.querySelectorAll('#log-entries > div.has-children');
+
+    parents.forEach(div => {
+        div.addEventListener('click', function(event) {toggleNode(this);});
+        toggleNode(div);
+    });
+
+});
+</script></html>
