@@ -6,6 +6,8 @@
 module DslDemo.EllipticCurve.Native.Jacobian
   ( g,
     mul,
+    add,
+    mulWindowed,
     toAffine,
     Point (..),
     PointJ (..),
@@ -13,6 +15,7 @@ module DslDemo.EllipticCurve.Native.Jacobian
   )
 where
 
+import Data.Vector qualified as V
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement (..))
 import Numeric.Natural (Natural)
 
@@ -70,6 +73,37 @@ mul' n p r =
   let r' = if odd n then add r p else r
       p' = double p
    in mul' (n `div` 2) p' r'
+
+windowSize :: Natural
+windowSize = 4
+
+numValues :: Natural
+numValues = 2 ^ windowSize
+
+mulWindowed :: Natural -> PointJ -> PointJ
+mulWindowed _ PJIdentity = PJIdentity
+mulWindowed n p = mulWindowed' table (digits n []) PJIdentity
+  where
+    table :: V.Vector PointJ
+    table = V.iterateN (fromIntegral numValues) (add p) PJIdentity
+
+    digits :: Natural -> [Natural] -> [Natural]
+    digits 0 acc = acc
+    digits x acc = digits (x `div` numValues) (x `rem` numValues : acc)
+
+mulWindowed' :: V.Vector PointJ -> [Natural] -> PointJ -> PointJ
+mulWindowed' _table [] q = q
+mulWindowed' table (digit:rest) q =
+  let q' = doubleN windowSize q
+      q'' =
+        if digit > 0
+          then add q' (table V.! fromIntegral digit)
+          else q'
+   in mulWindowed' table rest q''
+  where
+    doubleN :: Natural -> PointJ -> PointJ
+    doubleN 0 p = p
+    doubleN n p = doubleN (pred n) (double p)
 
 toAffine :: PointJ -> Point
 toAffine PJIdentity = Identity

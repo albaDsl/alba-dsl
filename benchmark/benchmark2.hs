@@ -40,6 +40,8 @@ main = do
         "EC multiply (Jacobian)"
         [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) n,
           bench "Haskell native" $ nf ecMultiplyNativeJacobi n,
+          bench "Haskell native (windowed)" $
+            nf ecMultiplyNativeJacobiWindowed n,
           bench "albaVM" $ nf ecMultiply (compile O1 (progMulJacobian n))
         ]
     ]
@@ -99,6 +101,15 @@ ecMultiplyNativeJacobi n =
       (NJ.FieldElement expectedY)
     then ()
     else error "ecMultiplyNativeJacobi"
+
+ecMultiplyNativeJacobiWindowed :: Natural -> ()
+ecMultiplyNativeJacobiWindowed n =
+  if NJ.toAffine (NJ.mulWindowed n NJ.g)
+    == NJ.P
+      (NJ.FieldElement expectedX)
+      (NJ.FieldElement expectedY)
+    then ()
+    else error "ecMultiplyNativeJacobiWindowed"
 
 ecMultiplyLib :: CS.Ctx -> Natural -> ()
 ecMultiplyLib ctx n =
