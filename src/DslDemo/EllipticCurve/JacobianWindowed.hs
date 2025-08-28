@@ -9,6 +9,7 @@ module DslDemo.EllipticCurve.JacobianWindowed
 where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import DslDemo.EllipticCurve.Jacobian
   ( ecAdd,
     ecDouble,
@@ -17,7 +18,7 @@ import DslDemo.EllipticCurve.Jacobian
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
-import DslDemo.EllipticCurve.LookupTable (defineConstant, getConstant)
+import DslDemo.EllipticCurve.LookupTable (getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
 import Prelude hiding (drop)
@@ -39,7 +40,7 @@ setupTable =
             # opIf
               (drop @"fIdx" # drop @"p" # drop @"acc" # drop @"i")
               ( begin
-                  # (pick @"acc" # p2b # pick @"fIdx" # defineConstant)
+                  # (pick @"fIdx" # pick @"acc" # p2b # storePoint)
                   # (roll @"fIdx" # op1Add)
                   # pick @"p"
                   # (roll @"acc" # roll @"p" # EC.ecAddJ)
@@ -50,6 +51,21 @@ setupTable =
 
     p2b :: FN (s > TPointJ) (s > TBytes)
     p2b = cast
+
+    -- Since the record size is fixed we can avoid using 'toPushOp' as an
+    -- optimization.
+    storePoint :: FN (s > TNat > TBytes) s
+    storePoint =
+      begin
+        # (opcode OP_PUSHDATA1 # size # opRot # opCat # opCat)
+        # (opSwap # n2i)
+        # opDefine
+      where
+        size :: FN s (s > TBytes)
+        size = nat 100 # cast
+
+    opcode :: OpcodeL1 -> FN s (s > TBytes)
+    opcode op = bytes [(fromIntegral . fromEnum) op]
 
 ecMul :: FN (s > TTab > TNat) (s > TPoint)
 ecMul = function (unname @2 ecMulJ # fromJacobian)
@@ -121,8 +137,8 @@ digits = bytes [] # opSwap # opUntil (unname @2 loop) # opDrop
     winMod = nat numValues # opMod
     winDiv = nat numValues # opDiv
 
-    n2i :: FN (s > TNat) (s > TInt)
-    n2i = cast
+n2i :: FN (s > TNat) (s > TInt)
+n2i = cast
 
 windowSize :: Natural
 windowSize = 4

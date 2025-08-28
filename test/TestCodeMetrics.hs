@@ -30,7 +30,7 @@ testCodeMetrics =
         compileForSize EJW.ecMul @?= "56 opcodes, 626 bytes.",
       testCase "EC scalar point multiply (Windowed Jacobian / table setup)" $
         compileForSize (EJW.setupTable # EJW.ecMul)
-          @?= "75 opcodes, 822 bytes."
+          @?= "72 opcodes, 723 bytes."
     ]
 
 compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
