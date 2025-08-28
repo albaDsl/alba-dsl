@@ -21,20 +21,26 @@ ecDoubleJ = function (unname @1 ecDoubleJ')
 ecDoubleJ' :: FN (s > N "p" TPointJ) (s > TPointJ)
 ecDoubleJ' =
   begin
-    # name @"x" (pick @"p" # getX)
-    # name @"y" (pick @"p" # getY)
-    # name @"z" (roll @"p" # getZ)
-    # name @"s" (int 4 # pick @"x" # feMul # pick @"y" # term2)
-    # name @"m" (int 3 # roll @"x" # term2)
-    # name @"x'" (pick @"m" # feSquare # pick @"s" # int 2 # feMul # feSub)
-    # name @"y'"
+    # (pick @"p" # isIdentity)
+    # opIf
+      (roll @"p")
       ( begin
-          # (roll @"m" # roll @"s" # pick @"x'" # feSub # feMul)
-          # ex1 (int 8 # pick @"y" # term4)
-          # feSub
+          # name @"x" (pick @"p" # getX)
+          # name @"y" (pick @"p" # getY)
+          # name @"z" (roll @"p" # getZ)
+          # name @"s" (int 4 # pick @"x" # feMul # pick @"y" # term2)
+          # name @"m" (int 3 # roll @"x" # term2)
+          # name @"x'"
+            (pick @"m" # feSquare # pick @"s" # int 2 # feMul # feSub)
+          # name @"y'"
+            ( begin
+                # (roll @"m" # roll @"s" # pick @"x'" # feSub # feMul)
+                # ex1 (int 8 # pick @"y" # term4)
+                # feSub
+            )
+          # name @"z'" (int 2 # roll @"y" # roll @"z" # feMul # feMul)
+          # (roll @"x'" # roll @"y'" # roll @"z'" # makePoint)
       )
-    # name @"z'" (int 2 # roll @"y" # roll @"z" # feMul # feMul)
-    # (roll @"x'" # roll @"y'" # roll @"z'" # makePoint)
 
 ecAddJ :: FN (s > TPointJ > TPointJ) (s > TPointJ)
 ecAddJ = function (unname @2 ecAddJ')

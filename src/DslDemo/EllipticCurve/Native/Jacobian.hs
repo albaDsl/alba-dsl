@@ -7,6 +7,7 @@ module DslDemo.EllipticCurve.Native.Jacobian
   ( g,
     mul,
     add,
+    double,
     mulWindowed,
     toAffine,
     Point (..),
@@ -93,7 +94,7 @@ mulWindowed n p = mulWindowed' table (digits n []) PJIdentity
 
 mulWindowed' :: V.Vector PointJ -> [Natural] -> PointJ -> PointJ
 mulWindowed' _table [] q = q
-mulWindowed' table (digit:rest) q =
+mulWindowed' table (digit : rest) q =
   let q' = doubleN windowSize q
       q'' =
         if digit > 0

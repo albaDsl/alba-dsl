@@ -23,7 +23,7 @@ instance StackEntry TPoint
 -- Byte layout for the Point record:
 -- <tag:1><x:33><y:33>
 makePoint :: FN (s > TInt > TInt) (s > TPoint)
-makePoint = unname @2 makePoint'
+makePoint = function (unname @2 makePoint')
   where
     makePoint' :: FN (s > N "x" TInt > N "y" TInt) (s > TPoint)
     makePoint' =
@@ -43,16 +43,20 @@ pushPoint x y =
 
 makeIdentity :: FN s (s > TPoint)
 makeIdentity =
-  box 1 tagIdentity # box coordSize 0 # box coordSize 0 # opCat # opCat # cast
+  function
+    ( begin
+        # (box 1 tagIdentity # box coordSize 0 # box coordSize 0)
+        # (opCat # opCat # cast)
+    )
 
 box :: Natural -> Integer -> FN s (s > TBytes)
 box size i = int i # nat size # opNum2Bin
 
 isIdentity :: FN (s > TPoint) (s > TBool)
-isIdentity = getTag # int tagIdentity # opNumEqual
+isIdentity = function (getTag # int tagIdentity # opNumEqual)
 
 isEqual :: FN (s > TPoint > TPoint) (s > TBool)
-isEqual = unname @2 isEqual'
+isEqual = function (unname @2 isEqual')
   where
     isEqual' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TBool)
     isEqual' =

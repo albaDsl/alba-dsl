@@ -196,6 +196,7 @@ library
       DslDemo.EllipticCurve.Jacobian,
       DslDemo.EllipticCurve.JacobianAdd,
       DslDemo.EllipticCurve.JacobianPoint,
+      DslDemo.EllipticCurve.JacobianWindowed,
       DslDemo.EllipticCurve.Native.Affine,
       DslDemo.EllipticCurve.Native.Constants,
       DslDemo.EllipticCurve.Native.FieldElement,

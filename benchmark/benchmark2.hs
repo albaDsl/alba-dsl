@@ -15,6 +15,7 @@ import Data.Word (Word8)
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
+import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
 import DslDemo.EllipticCurve.Point qualified as EA
@@ -42,7 +43,9 @@ main = do
           bench "Haskell native" $ nf ecMultiplyNativeJacobi n,
           bench "Haskell native (windowed)" $
             nf ecMultiplyNativeJacobiWindowed n,
-          bench "albaVM" $ nf ecMultiply (compile O1 (progMulJacobian n))
+          bench "albaVM" $ nf ecMultiply (compile O1 (progMulJacobian n)),
+          bench "albaVM (windowed)" $
+            nf ecMultiply (compile O1 (progMulJacobianWindowed n))
         ]
     ]
 
@@ -72,6 +75,14 @@ progMul scalar =
 progMulJacobian :: Natural -> FN s (s > TInt > TInt)
 progMulJacobian scalar =
   nat scalar # g # EJ.ecMul # opDup # EA.getX # opSwap # EA.getY
+
+progMulJacobianWindowed :: Natural -> FN s (s > TInt > TInt)
+progMulJacobianWindowed scalar =
+  begin
+    # (gTable # g # EJW.setupTable)
+    # (gTable # nat scalar # EJW.ecMul # opDup # EA.getX # opSwap # EA.getY)
+  where
+    gTable = nat 100
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =
