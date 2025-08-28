@@ -18,6 +18,7 @@ import TestInvalidStack (testInvalidStack)
 import TestLambdas (testLambdas)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
+import TestLookupTables (testLookupTables)
 import TestLoops (testLoops)
 import TestOpcodes (testOpcodes)
 import TestOpsArithmetic (testOpsArithmetic)
@@ -46,6 +47,7 @@ tests =
       testCustomTypes,
       testDataPushing,
       testDataSig,
+      testLookupTables,
       testFunctions,
       testFunctionsLowLevel,
       testIntPushing,
