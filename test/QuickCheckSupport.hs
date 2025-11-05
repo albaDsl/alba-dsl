@@ -45,7 +45,7 @@ newtype BytesHalf = BytesHalf Bytes
 newtype VmInteger = VmInteger Integer
   deriving (Show)
 
-newtype LargeInteger = LargeInteger Integer
+newtype VmIntegerHalf = VmIntegerHalf Integer
   deriving (Show)
 
 instance Arbitrary Bytes where
@@ -70,6 +70,11 @@ instance Arbitrary VmInteger where
   arbitrary = do
     x <- chooseInteger (integerMin, integerMax) :: Gen Integer
     pure $ VmInteger x
+
+instance Arbitrary VmIntegerHalf where
+  arbitrary = do
+    x <- chooseInteger (integerMin `div` 2, integerMax `div` 2) :: Gen Integer
+    pure $ VmIntegerHalf x
 
 genByteStringOfSize :: Int -> Gen B.ByteString
 genByteStringOfSize n = do

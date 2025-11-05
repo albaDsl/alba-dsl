@@ -19,6 +19,7 @@ data ScriptError
   | SeInvalidBitfieldSize
   | SeInvalidBitCount
   | SeInvalidBitRange
+  | SeInvalidBitShift
   | SeInvalidFunctionIdentifier
   | SeInvalidNumberRange
   | SeInvalidOperandSize

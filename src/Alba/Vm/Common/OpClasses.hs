@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Common.OpClasses (isConditionalOp, isPushOp, isDisabledOp) where
+module Alba.Vm.Common.OpClasses (isConditionalOp, isPushOp) where
 
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
@@ -36,11 +36,3 @@ isPushOp OP_14 = True
 isPushOp OP_15 = True
 isPushOp OP_16 = True
 isPushOp _ = False
-
-isDisabledOp :: OpcodeL2 -> Bool
-isDisabledOp (OP_UNUSED L1.OP_INVERT) = True
-isDisabledOp (OP_UNUSED L1.OP_2MUL) = True
-isDisabledOp (OP_UNUSED L1.OP_2DIV) = True
-isDisabledOp (OP_UNUSED L1.OP_LSHIFT) = True
-isDisabledOp (OP_UNUSED L1.OP_RSHIFT) = True
-isDisabledOp _ = False

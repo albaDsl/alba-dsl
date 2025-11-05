@@ -42,8 +42,8 @@ turtleOpArithmetic =
         condOpLeaf
           [ (is 0x8b, op1Add),
             (is 0x8c, op1Sub),
-            -- 0x8d: OP_2MUL, disabled op
-            -- 0x8e: OP_2DIV, disabled op
+            -- 0x8d: OP_2MUL_OP_LSHIFTNUM, disabled op
+            -- 0x8e: OP_2DIV_OP_RSHIFTNUM, disabled op
             (is 0x8f, opNegate),
             (is 0x90, opAbs),
             (is 0x91, opNot),
@@ -57,8 +57,8 @@ turtleOpArithmetic =
       ),
       ( inRange 0x98 0xa6,
         condOpLeaf
-          [ -- 0x98: OP_LSHIFT, disabled op
-            -- 0x99: OP_RSHIFT, disabled op
+          [ -- 0x98: OP_LSHIFT_OP_LSHIFTBIN, disabled op
+            -- 0x99: OP_RSHIFT_OP_RSHIFTBIN, disabled op
             (is 0x9a, opBoolAnd),
             (is 0x9b, opBoolOr),
             (is 0x9c, opNumEqual),

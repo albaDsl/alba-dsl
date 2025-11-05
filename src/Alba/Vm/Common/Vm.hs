@@ -10,7 +10,7 @@ where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
 import Alba.Vm.Common.Logging (logFunctionExit, logOp, logStart)
-import Alba.Vm.Common.OpClasses (isConditionalOp, isDisabledOp, isPushOp)
+import Alba.Vm.Common.OpClasses (isConditionalOp, isPushOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2, getOp, isMinimal)
@@ -49,12 +49,13 @@ import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
 
-newtype Deps = Deps
+data Deps = Deps
   { evalVmOp ::
       OpcodeL2 ->
       TxContext ->
       VmState ->
-      Maybe (Either ScriptError VmState)
+      Maybe (Either ScriptError VmState),
+    isDisabledOp :: OpcodeL2 -> Bool
   }
 
 evaluateScript ::

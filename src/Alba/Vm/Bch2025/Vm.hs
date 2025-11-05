@@ -2,6 +2,7 @@
 
 module Alba.Vm.Bch2025.Vm (evaluateScript, startState, verifyScript) where
 
+import Alba.Vm.Bch2025.OpClasses (isDisabledOp)
 import Alba.Vm.Bch2025.VmOps (evalVmOp)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.TxContext (TxContext)
@@ -13,14 +14,14 @@ evaluateScript ::
   TxContext ->
   VmState ->
   Either (ScriptError, Maybe VmState) VmState
-evaluateScript = CV.evaluateScript (CV.Deps evalVmOp)
+evaluateScript = CV.evaluateScript (CV.Deps evalVmOp isDisabledOp)
 
 verifyScript ::
   CodeL1 ->
   TxContext ->
   VmParams ->
   Either (ScriptError, VerifyScriptResult) VerifyScriptResult
-verifyScript = CV.verifyScript (CV.Deps evalVmOp)
+verifyScript = CV.verifyScript (CV.Deps evalVmOp isDisabledOp)
 
 startState :: VmParams -> VmState
 startState = CV.startState

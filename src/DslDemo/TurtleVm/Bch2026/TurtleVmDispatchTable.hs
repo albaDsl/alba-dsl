@@ -88,8 +88,8 @@ initOpDispatch maxCsDepth =
     # (unsup # opDefineIdx 0x8a) -- OP_RESERVED2_OP_INVOKE disabled op
     # (bytes [0x8b] # opDefineIdx 0x8b) -- OP_1ADD
     # (bytes [0x8c] # opDefineIdx 0x8c) -- OP_1SUB
-    # (unsup # opDefineIdx 0x8d) -- OP_2MUL disabled op
-    # (unsup # opDefineIdx 0x8e) -- OP_2DIV disabled op
+    # (unsup # opDefineIdx 0x8d) -- OP_2MUL_OP_LSHIFTNUM disabled op
+    # (unsup # opDefineIdx 0x8e) -- OP_2DIV_OP_RSHIFTNUM disabled op
     # (bytes [0x8f] # opDefineIdx 0x8f) -- OP_NEGATE
     # (bytes [0x90] # opDefineIdx 0x90) -- OP_ABS
     # (bytes [0x91] # opDefineIdx 0x91) -- OP_NOT
@@ -99,8 +99,8 @@ initOpDispatch maxCsDepth =
     # (bytes [0x95] # opDefineIdx 0x95) -- OP_MUL
     # (bytes [0x96] # opDefineIdx 0x96) -- OP_DIV
     # (bytes [0x97] # opDefineIdx 0x97) -- OP_MOD
-    # (unsup # opDefineIdx 0x98) -- OP_LSHIFT disabled op
-    # (unsup # opDefineIdx 0x99) -- OP_RSHIFT disabled op
+    # (unsup # opDefineIdx 0x98) -- OP_LSHIFT_OP_LSHIFTBIN disabled op
+    # (unsup # opDefineIdx 0x99) -- OP_RSHIFT_OP_RSHIFTBIN disabled op
     # (bytes [0x9a] # opDefineIdx 0x9a) -- OP_BOOLAND
     # (bytes [0x9b] # opDefineIdx 0x9b) -- OP_BOOLOR
     # (bytes [0x9c] # opDefineIdx 0x9c) -- OP_NUMEQUAL

@@ -80,6 +80,7 @@ data OpcodeL2
   | OP_NUM2BIN
   | OP_BIN2NUM
   | OP_SIZE
+  | OP_INVERT
   | OP_AND
   | OP_OR
   | OP_XOR
@@ -89,6 +90,8 @@ data OpcodeL2
   | OP_INVOKE
   | OP_1ADD
   | OP_1SUB
+  | OP_LSHIFTNUM
+  | OP_RSHIFTNUM
   | OP_NEGATE
   | OP_ABS
   | OP_NOT
@@ -98,6 +101,8 @@ data OpcodeL2
   | OP_MUL
   | OP_DIV
   | OP_MOD
+  | OP_LSHIFTBIN
+  | OP_RSHIFTBIN
   | OP_BOOLAND
   | OP_BOOLOR
   | OP_NUMEQUAL
@@ -237,6 +242,7 @@ opcodeL2ToCodeL1 OP_SPLIT = Just $ toCodeL1 L1.OP_SPLIT
 opcodeL2ToCodeL1 OP_NUM2BIN = Just $ toCodeL1 L1.OP_NUM2BIN
 opcodeL2ToCodeL1 OP_BIN2NUM = Just $ toCodeL1 L1.OP_BIN2NUM
 opcodeL2ToCodeL1 OP_SIZE = Just $ toCodeL1 L1.OP_SIZE
+opcodeL2ToCodeL1 OP_INVERT = Just $ toCodeL1 L1.OP_INVERT
 opcodeL2ToCodeL1 OP_AND = Just $ toCodeL1 L1.OP_AND
 opcodeL2ToCodeL1 OP_OR = Just $ toCodeL1 L1.OP_OR
 opcodeL2ToCodeL1 OP_XOR = Just $ toCodeL1 L1.OP_XOR
@@ -246,6 +252,8 @@ opcodeL2ToCodeL1 OP_DEFINE = Just $ toCodeL1 L1.OP_RESERVED1_OP_DEFINE
 opcodeL2ToCodeL1 OP_INVOKE = Just $ toCodeL1 L1.OP_RESERVED2_OP_INVOKE
 opcodeL2ToCodeL1 OP_1ADD = Just $ toCodeL1 L1.OP_1ADD
 opcodeL2ToCodeL1 OP_1SUB = Just $ toCodeL1 L1.OP_1SUB
+opcodeL2ToCodeL1 OP_LSHIFTNUM = Just $ toCodeL1 L1.OP_2MUL_OP_LSHIFTNUM
+opcodeL2ToCodeL1 OP_RSHIFTNUM = Just $ toCodeL1 L1.OP_2DIV_OP_RSHIFTNUM
 opcodeL2ToCodeL1 OP_NEGATE = Just $ toCodeL1 L1.OP_NEGATE
 opcodeL2ToCodeL1 OP_ABS = Just $ toCodeL1 L1.OP_ABS
 opcodeL2ToCodeL1 OP_NOT = Just $ toCodeL1 L1.OP_NOT
@@ -255,6 +263,8 @@ opcodeL2ToCodeL1 OP_SUB = Just $ toCodeL1 L1.OP_SUB
 opcodeL2ToCodeL1 OP_MUL = Just $ toCodeL1 L1.OP_MUL
 opcodeL2ToCodeL1 OP_DIV = Just $ toCodeL1 L1.OP_DIV
 opcodeL2ToCodeL1 OP_MOD = Just $ toCodeL1 L1.OP_MOD
+opcodeL2ToCodeL1 OP_LSHIFTBIN = Just $ toCodeL1 L1.OP_LSHIFT_OP_LSHIFTBIN
+opcodeL2ToCodeL1 OP_RSHIFTBIN = Just $ toCodeL1 L1.OP_RSHIFT_OP_RSHIFTBIN
 opcodeL2ToCodeL1 OP_BOOLAND = Just $ toCodeL1 L1.OP_BOOLAND
 opcodeL2ToCodeL1 OP_BOOLOR = Just $ toCodeL1 L1.OP_BOOLOR
 opcodeL2ToCodeL1 OP_NUMEQUAL = Just $ toCodeL1 L1.OP_NUMEQUAL
@@ -395,7 +405,7 @@ getOp' L1.OP_SPLIT code = Just (OP_SPLIT, code)
 getOp' L1.OP_NUM2BIN code = Just (OP_NUM2BIN, code)
 getOp' L1.OP_BIN2NUM code = Just (OP_BIN2NUM, code)
 getOp' L1.OP_SIZE code = Just (OP_SIZE, code)
-getOp' op@L1.OP_INVERT code = Just (OP_UNUSED op, code)
+getOp' L1.OP_INVERT code = Just (OP_INVERT, code)
 getOp' L1.OP_AND code = Just (OP_AND, code)
 getOp' L1.OP_OR code = Just (OP_OR, code)
 getOp' L1.OP_XOR code = Just (OP_XOR, code)
@@ -405,8 +415,8 @@ getOp' L1.OP_RESERVED1_OP_DEFINE code = Just (OP_DEFINE, code)
 getOp' L1.OP_RESERVED2_OP_INVOKE code = Just (OP_INVOKE, code)
 getOp' L1.OP_1ADD code = Just (OP_1ADD, code)
 getOp' L1.OP_1SUB code = Just (OP_1SUB, code)
-getOp' op@L1.OP_2MUL code = Just (OP_UNUSED op, code)
-getOp' op@L1.OP_2DIV code = Just (OP_UNUSED op, code)
+getOp' L1.OP_2MUL_OP_LSHIFTNUM code = Just (OP_LSHIFTNUM, code)
+getOp' L1.OP_2DIV_OP_RSHIFTNUM code = Just (OP_RSHIFTNUM, code)
 getOp' L1.OP_NEGATE code = Just (OP_NEGATE, code)
 getOp' L1.OP_ABS code = Just (OP_ABS, code)
 getOp' L1.OP_NOT code = Just (OP_NOT, code)
@@ -416,8 +426,8 @@ getOp' L1.OP_SUB code = Just (OP_SUB, code)
 getOp' L1.OP_MUL code = Just (OP_MUL, code)
 getOp' L1.OP_DIV code = Just (OP_DIV, code)
 getOp' L1.OP_MOD code = Just (OP_MOD, code)
-getOp' op@L1.OP_LSHIFT code = Just (OP_UNUSED op, code)
-getOp' op@L1.OP_RSHIFT code = Just (OP_UNUSED op, code)
+getOp' L1.OP_LSHIFT_OP_LSHIFTBIN code = Just (OP_LSHIFTBIN, code)
+getOp' L1.OP_RSHIFT_OP_RSHIFTBIN code = Just (OP_RSHIFTBIN, code)
 getOp' L1.OP_BOOLAND code = Just (OP_BOOLAND, code)
 getOp' L1.OP_BOOLOR code = Just (OP_BOOLOR, code)
 getOp' L1.OP_NUMEQUAL code = Just (OP_NUMEQUAL, code)

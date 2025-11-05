@@ -365,10 +365,10 @@ nc0 = Right
 nc1 :: (a -> b) -> (a -> Either ScriptError b)
 nc1 f x = Right $ f x
 
-nc2 :: (a -> a -> b) -> (a -> a -> Either ScriptError b)
+nc2 :: (a -> b -> c) -> (a -> b -> Either ScriptError c)
 nc2 f x y = Right $ f x y
 
-nc3 :: (a -> a -> a -> b) -> (a -> a -> a -> Either ScriptError b)
+nc3 :: (a -> b -> c -> d) -> (a -> b -> c -> Either ScriptError d)
 nc3 f x y z = Right $ f x y z
 
 verifyMinStackSize :: Int -> VmStack -> Either ScriptError ()

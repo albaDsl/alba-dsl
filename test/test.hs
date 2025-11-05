@@ -2,6 +2,7 @@
 
 import Test.Tasty (TestTree, defaultMain, testGroup)
 import TestArguments (testArguments)
+import TestBitwise (testBitwise)
 import TestCheckMultiSig (testCheckMultiSig)
 import TestCheckSig (testCheckSig)
 import TestCodeMetrics (testCodeMetrics)
@@ -40,6 +41,7 @@ tests =
   testGroup
     "Tests"
     [ testArguments,
+      testBitwise,
       testCheckMultiSig,
       testCheckSig,
       testCodeMetrics,
