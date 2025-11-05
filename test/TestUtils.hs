@@ -48,6 +48,7 @@ import Test.Tasty.HUnit (Assertion, assertFailure, (@?=))
 data TestResult = TestResult
   { s :: !VmStack,
     alt :: !VmStack,
+    metrics :: !VmMetrics,
     limits :: !VmMetrics,
     logData :: !(Maybe VmLogs),
     compilationResult :: !(Maybe CompilationResult)
@@ -165,7 +166,7 @@ toTestResult res =
     Right st -> Right (convert st)
     Left (err, st) -> Left (err, convert <$> st)
   where
-    convert VmState {s, alt, limits, logData} =
+    convert VmState {s, alt, metrics, limits, logData} =
       TestResult {compilationResult = Nothing, ..}
 
 minimalContext :: TxContext
