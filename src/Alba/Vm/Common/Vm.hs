@@ -23,7 +23,7 @@ import Alba.Vm.Common.VmLimits
     setLimits,
     verifyCondStack,
     verifyMetrics,
-    verifyStackSize,
+    verifySizeLimits,
   )
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack
@@ -116,7 +116,7 @@ evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
             (mapLeft (,state'))
             (evalVmOp op txContext state')
 
-      verifyStackSize state''
+      verifySizeLimits state''
       verifyMetrics state''
       verifyCondStack state''
       evaluateScript' deps txContext state''

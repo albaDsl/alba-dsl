@@ -86,11 +86,7 @@ excludeNonStandardInStandardMode =
 
 excludeInvalid :: [T.Text]
 excludeInvalid =
-  [ "etlqh3", -- passed validation.
-    "kvvfrf", -- passed validation.
-    "tsg0cw", -- passed validation.
-    "mzwujf", -- passed validation.
-    "h4d5nz", -- passed validation.
+  [ "h4d5nz", -- passed validation.
     "j8u53e", -- passed validation.
     "j07snz", -- passed validation.
     "ev6d70", -- passed validation.
