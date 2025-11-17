@@ -7,7 +7,7 @@ import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Bch2025.SigCheckUtils (checkSig)
 import Alba.Vm.Bch2025.SigEncoding
   ( checkPubKeyEncoding,
-    checkRawEcdsaSignatureEncoding,
+    checkTransactionEcdsaSignatureEncoding,
     checkTransactionSchnorrSignatureEncoding,
   )
 import Alba.Vm.Bch2025.Utils (verifyMinStackSize)
@@ -25,7 +25,7 @@ import Alba.Vm.Common.StackElement
 import Alba.Vm.Common.TxContext (TxContext)
 import Alba.Vm.Common.VmLimits (addBytesPushed, addHashIterations, addSigCheck)
 import Alba.Vm.Common.VmState (VmState (..))
-import Control.Monad (unless, when)
+import Control.Monad (unless)
 import Data.Bits (Bits (..), shift, (.&.), (.|.))
 import Data.ByteString qualified as B
 import Data.Foldable (toList)
@@ -33,9 +33,6 @@ import Data.Sequence (Seq ((:|>)))
 import Data.Sequence qualified as S
 import Data.Word (Word64)
 import Prelude hiding (seq)
-
-schnorrSigSize :: Int
-schnorrSigSize = 65
 
 evalOpMultiSig ::
   OpcodeL2 ->
@@ -154,8 +151,7 @@ checkEcdsaMultiSig _txContext sigs pubKeys _code st
       let res = boolToStackElement False
        in pure $ addBytesPushed res.byteSize $ st {s = st.s :|> res}
 checkEcdsaMultiSig txContext (sig : sigs) (pubKey : pubKeys) code st = do
-  verifyNotSchnorr
-  checkRawEcdsaSignatureEncoding sig
+  checkTransactionEcdsaSignatureEncoding sig
   checkPubKeyEncoding pubKey
   let (res, st') = case checkSig txContext code sig pubKey of
         Just (res', imgSize) -> (res', addHashIterations imgSize True st)
@@ -163,8 +159,4 @@ checkEcdsaMultiSig txContext (sig : sigs) (pubKey : pubKeys) code st = do
   if res
     then checkEcdsaMultiSig txContext sigs pubKeys code st'
     else checkEcdsaMultiSig txContext (sig : sigs) pubKeys code st'
-  where
-    verifyNotSchnorr :: Either ScriptError ()
-    verifyNotSchnorr =
-      when (B.length sig == schnorrSigSize) $ Left SeSigBadLength
 checkEcdsaMultiSig _txContext _ [] _ _ = canNotHappen
