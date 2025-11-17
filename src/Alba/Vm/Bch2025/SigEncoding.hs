@@ -2,9 +2,10 @@
 
 module Alba.Vm.Bch2025.SigEncoding
   ( checkTransactionSignatureEncoding,
+    checkTransactionEcdsaSignatureEncoding,
+    checkTransactionSchnorrSignatureEncoding,
     checkDataSignatureEncoding,
     checkRawEcdsaSignatureEncoding,
-    checkTransactionSchnorrSignatureEncoding,
     checkPubKeyEncoding,
   )
 where
@@ -22,12 +23,16 @@ compressedPublicKeySize = 33
 publicKeySize :: Int
 publicKeySize = 65
 
+checkTransactionSignatureEncodingImpl ::
+  Bytes -> (Bytes -> Either ScriptError ()) -> Either ScriptError ()
+checkTransactionSignatureEncodingImpl sig _check | B.null sig = Right ()
+checkTransactionSignatureEncodingImpl sig check = do
+  check (B.init sig)
+  checkSighashEncoding sig
+
 checkTransactionSignatureEncoding :: Bytes -> Either ScriptError ()
 checkTransactionSignatureEncoding sig = do
-  checkSighashEncoding sig
-  if B.null sig
-    then Right ()
-    else checkRawSignatureEncoding sig
+  checkTransactionSignatureEncodingImpl sig checkRawSignatureEncoding
 
 checkSighashEncoding :: Bytes -> Either ScriptError ()
 checkSighashEncoding sig =
@@ -40,12 +45,6 @@ checkSighashEncoding sig =
               Left SeSigHashType
     Nothing -> Right ()
 
-checkDataSignatureEncoding :: Bytes -> Either ScriptError ()
-checkDataSignatureEncoding sig =
-  if B.null sig
-    then Right ()
-    else checkRawSignatureEncoding sig
-
 checkRawSignatureEncoding :: Bytes -> Either ScriptError ()
 checkRawSignatureEncoding sig =
   if isSchnorrSig sig
@@ -57,16 +56,24 @@ isSchnorrSig sig = B.length sig == 64
 
 -- FIXME: Implement remaining checks.
 checkRawEcdsaSignatureEncoding :: Bytes -> Either ScriptError ()
-checkRawEcdsaSignatureEncoding sig =
-  if isSchnorrSig sig
-    then Left SeSigBadLength
-    else Right ()
+checkRawEcdsaSignatureEncoding sig = do
+  when (isSchnorrSig sig) $ Left SeSigBadLength
+
+checkTransactionEcdsaSignatureEncoding :: Bytes -> Either ScriptError ()
+checkTransactionEcdsaSignatureEncoding sig = do
+  checkTransactionSignatureEncodingImpl sig checkRawEcdsaSignatureEncoding
 
 checkTransactionSchnorrSignatureEncoding :: Bytes -> Either ScriptError ()
-checkTransactionSchnorrSignatureEncoding sig | B.null sig = Right ()
-checkTransactionSchnorrSignatureEncoding sig
-  | isSchnorrSig (B.dropEnd 1 sig) = Right ()
-checkTransactionSchnorrSignatureEncoding _ = Left SeSigNonSchnorr
+checkTransactionSchnorrSignatureEncoding sig =
+  checkTransactionSignatureEncodingImpl sig checkRawSchnorrSignatureEncoding
+
+checkRawSchnorrSignatureEncoding :: Bytes -> Either ScriptError ()
+checkRawSchnorrSignatureEncoding sig =
+  unless (isSchnorrSig sig) $ Left SeSigNonSchnorr
+
+checkDataSignatureEncoding :: Bytes -> Either ScriptError ()
+checkDataSignatureEncoding sig | B.null sig = Right ()
+checkDataSignatureEncoding sig = checkRawSignatureEncoding sig
 
 checkPubKeyEncoding :: Bytes -> Either ScriptError ()
 checkPubKeyEncoding pubKey =
