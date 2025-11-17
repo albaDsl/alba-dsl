@@ -6,61 +6,7 @@ import Data.Text qualified as T
 
 excludeStandard :: [T.Text]
 excludeStandard =
-  [ "jckqzk", -- failed with SeInvalidFunctionIdentifier
-    "gnqwhe", -- failed with SeInvalidFunctionIdentifier
-    "3q7mzd", -- failed with SeInvalidFunctionIdentifier
-    "w50l55", -- failed with SeInvalidFunctionIdentifier
-    "svfqs5", -- failed with SeInvalidFunctionIdentifier
-    "s9yl8p", -- failed with SeInvalidFunctionIdentifier
-    "u2pfgg", -- failed with SeInvalidFunctionIdentifier
-    "fmy0mj", -- failed with SeInvalidFunctionIdentifier
-    "693g3y", -- failed with SeInvalidFunctionIdentifier
-    "v2crp8", -- failed with SeInvalidFunctionIdentifier
-    "a4hpkq", -- failed with SeInvalidFunctionIdentifier
-    "jn0yyk", -- failed with SeInvalidFunctionIdentifier
-    "jfzen0", -- failed with SeInvalidFunctionIdentifier
-    "lqlurz", -- failed with SeInvalidFunctionIdentifier
-    "sdy4mu", -- failed with SeInvalidFunctionIdentifier
-    "qs75fx", -- failed with SeInvalidFunctionIdentifier
-    "qacy4z", -- failed with SeInvalidFunctionIdentifier
-    "y5kgz5", -- failed with SeInvalidFunctionIdentifier
-    "4tda00", -- failed with SeInvalidFunctionIdentifier
-    "uh7szc", -- failed with SeInvalidFunctionIdentifier
-    "6tfx66", -- failed with SeInvalidFunctionIdentifier
-    "rxdqw8", -- failed with SeInvalidFunctionIdentifier
-    "klq3ut", -- failed with SeInvalidFunctionIdentifier
-    "yq0f3z", -- failed with SeInvalidFunctionIdentifier
-    "szz6xc", -- failed with SeInvalidFunctionIdentifier
-    "5pnls6", -- failed with SeInvalidFunctionIdentifier
-    "2hadru", -- failed with SeInvalidFunctionIdentifier
-    "fzgycf", -- failed with SeInvalidFunctionIdentifier
-    "mpxcdv", -- failed with SeInvalidFunctionIdentifier
-    "fcddc2", -- failed with SeInvalidFunctionIdentifier
-    "vc8su9", -- failed with SeInvalidFunctionIdentifier
-    "armygs", -- failed with SeInvalidFunctionIdentifier
-    "tutkzs", -- failed with SeInvalidFunctionIdentifier
-    "atywwp", -- failed with SeInvalidFunctionIdentifier
-    "3xa8zg", -- failed with SeInvalidFunctionIdentifier
-    "n7236s", -- failed with SeInvalidFunctionIdentifier
-    "ewehpd", -- failed with SeInvalidFunctionIdentifier
-    "csapv8", -- failed with SeInvalidFunctionIdentifier
-    "7acqj6", -- failed with SeInvalidFunctionIdentifier
-    "allyh5", -- failed with SeInvalidFunctionIdentifier
-    "yc8sh0", -- failed with SeInvalidFunctionIdentifier
-    "3q0yln", -- failed with SeInvalidFunctionIdentifier
-    "zlga55", -- failed with SeInvalidFunctionIdentifier
-    "cxzkrm", -- failed with SeInvalidFunctionIdentifier
-    "mnq063", -- failed with SeInvalidFunctionIdentifier
-    "ax28uc", -- failed with SeInvalidFunctionIdentifier
-    "zdrlhg", -- failed with SeInvalidFunctionIdentifier
-    "cp6p9l", -- failed with SeInvalidFunctionIdentifier
-    "q295ee", -- failed with SeInvalidFunctionIdentifier
-    "csz6e8", -- failed with SeInvalidFunctionIdentifier
-    "ncnmn5", -- failed with SeInvalidFunctionIdentifier
-    "3fyppr", -- failed with SeInvalidFunctionIdentifier
-    "749u9s", -- failed with SeInvalidFunctionIdentifier
-    "kn0w27", -- failed with SeInvalidFunctionIdentifier
-    "dyxfml", -- validation failure VfTxScriptPubKeySize
+  [ "dyxfml", -- validation failure VfTxScriptPubKeySize
     "pwuxfd", -- validation failure VfTxScriptPubKeySize
     "dg2e2u", -- validation failure VfTxScriptPubKeySize
     "ntndgy" -- validation failure VfTxScriptPubKeySize

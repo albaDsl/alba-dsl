@@ -2,13 +2,15 @@
 
 module Alba.Vm.Bch2026.VmOpDefineInvoke (evalOpDefineInvoke) where
 
+import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
-import Alba.Vm.Common.StackElement (stackElementToBytes, stackElementToInteger)
+import Alba.Vm.Common.StackElement (stackElementToBytes)
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack (CondStackElement (..), condStackPush)
 import Alba.Vm.Common.VmState (VmState (..))
+import Data.ByteString qualified as B
 import Data.Map qualified as M
 import Data.Sequence (Seq ((:|>)))
 
@@ -16,45 +18,43 @@ evalOpDefineInvoke :: OpcodeL2 -> VmState -> Maybe (Either ScriptError VmState)
 evalOpDefineInvoke op st@(VmState {code, signedCode, exec, functions, s}) =
   case op of
     OP_DEFINE -> Just $ do
-      (s' :|> body :|> index) <- pure s
-      index' <- stackElementToInteger st.params index
-      let body' = stackElementToBytes body
-      verifyFunctionIndexRange st.params index'
-      functions' <- insertFunctionOrFail index' body' functions
+      (s' :|> body :|> name) <- pure s
+      let name' = stackElementToBytes name
+          body' = stackElementToBytes body
+      verifyFunctionIdentifierSize st.params name'
+      functions' <- insertFunctionOrFail name' body' functions
       pure st {s = s', functions = functions'}
     OP_INVOKE -> Just $ do
-      (s' :|> index) <- pure s
-      index' <- stackElementToInteger st.params index
-      verifyFunctionIndexRange st.params index'
-      body <- lookupFunctionOrFail index' functions
+      (s' :|> name) <- pure s
+      let name' = stackElementToBytes name
+      verifyFunctionIdentifierSize st.params name'
+      body <- lookupFunctionOrFail name' functions
       let entry = Eval {callerCode = code, callerSignedCode = signedCode}
           exec' = condStackPush exec entry
       pure st {code = body, signedCode = body, s = s', exec = exec'}
     _ -> Nothing
 
-verifyFunctionIndexRange :: VmParams -> Integer -> Either ScriptError ()
-verifyFunctionIndexRange vmParams index =
-  if index < 0 || index > fromIntegral vmParams.maxFunctionIdentifier
-    then Left SeInvalidFunctionIdentifier
-    else Right ()
+verifyFunctionIdentifierSize :: VmParams -> Bytes -> Either ScriptError ()
+verifyFunctionIdentifierSize vmParams name =
+  if B.length name <= vmParams.maxFunctionIdentifierLength
+    then Right ()
+    else Left SeInvalidFunctionIdentifier
 
 insertFunctionOrFail ::
-  Integer ->
+  Bytes ->
   CodeL1 ->
-  M.Map Int CodeL1 ->
-  Either ScriptError (M.Map Int CodeL1)
-insertFunctionOrFail index body functions =
-  let index' = fromIntegral index
-   in case M.lookup index' functions of
-        Nothing -> Right $ M.insert index' body functions
-        Just _ -> Left SeFunctionOverwriteDisallowed
+  M.Map Bytes CodeL1 ->
+  Either ScriptError (M.Map Bytes CodeL1)
+insertFunctionOrFail name body functions =
+  case M.lookup name functions of
+    Nothing -> Right $ M.insert name body functions
+    Just _ -> Left SeFunctionOverwriteDisallowed
 
 lookupFunctionOrFail ::
-  Integer ->
-  M.Map Int CodeL1 ->
+  Bytes ->
+  M.Map Bytes CodeL1 ->
   Either ScriptError CodeL1
-lookupFunctionOrFail index functions =
-  let index' = fromIntegral index
-   in case M.lookup index' functions of
-        Just body -> Right body
-        Nothing -> Left SeInvokedUndefinedFunction
+lookupFunctionOrFail name functions =
+  case M.lookup name functions of
+    Just body -> Right body
+    Nothing -> Left SeInvokedUndefinedFunction

@@ -14,6 +14,7 @@ module Alba.Vm.Common.VmState
   )
 where
 
+import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.VmParams (VmParams (..))
@@ -28,7 +29,7 @@ data VmState = VmState
     alt :: !VmStack,
     exec :: !CondStack,
     pushOnly :: !Bool,
-    functions :: !(M.Map Int CodeL1),
+    functions :: !(M.Map Bytes CodeL1),
     metrics :: !VmMetrics,
     limits :: !VmMetrics,
     params :: !VmParams,
