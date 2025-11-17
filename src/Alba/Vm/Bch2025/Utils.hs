@@ -186,7 +186,7 @@ op2v ::
 op2v VmState {..} op = Just $ do
   (s' :|> x1 :|> x2) <- pure s
   case op x1 x2 of
-    Right () -> Right $ VmState {s = s', ..}
+    Right () -> Right $ addBytesPushed 1 (VmState {s = s', ..})
     Left err -> Left err
 
 op3 ::
