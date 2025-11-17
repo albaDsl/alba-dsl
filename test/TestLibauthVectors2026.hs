@@ -64,38 +64,42 @@ testLibauthVectors2026 =
     [ testCase "bch_2026_standard in standard-mode" $ do
         tests <- standardTests
         let tests' = filterTests (`notElem` excludeStandard) tests
-        -- let tests' = filterTests (== "dyxfml") tests
+            -- let tests' = filterTests (== "dyxfml") tests
+            mode = Standard2026
         printSummary tests' tests
-        mapM_ (runTest Standard2026 >=> verifyTxApproved) tests',
+        mapM_ (runTest mode >=> verifyTxApproved mode) tests',
       testCase "bch_2026_standard in non-standard-mode" $ do
         tests <- standardTests
         let tests' = filterTests (`notElem` excludeStandard) tests
+            mode = Nonstandard2026
         printSummary tests' tests
-        mapM_ (runTest Nonstandard2026 >=> verifyTxApproved) tests',
+        mapM_ (runTest mode >=> verifyTxApproved mode) tests',
       testCase "bch_2026_nonstandard in standard-mode" $ do
         tests <- nonStandardTests
         let tests' =
-              filterTests
-                (`notElem` excludeNonStandardInStandardMode)
-                tests
+              filterTests (`notElem` excludeNonStandardInStandardMode) tests
+            mode = Standard2026
         printSummary tests' tests
-        mapM_ (runTest Standard2026 >=> verifyTxNotApproved) tests',
+        mapM_ (runTest mode >=> verifyTxNotApproved mode) tests',
       testCase "bch_2026_nonstandard in non-standard-mode" $ do
         tests <- nonStandardTests
         let tests' =
               filterTests (`notElem` excludeNonStandardInNonStandardMode) tests
+            mode = Nonstandard2026
         printSummary tests' tests
-        mapM_ (runTest Nonstandard2026 >=> verifyTxApproved) tests',
+        mapM_ (runTest mode >=> verifyTxApproved mode) tests',
       testCase "bch_2026_invalid in standard-mode" $ do
         tests <- invalidTests
         let tests' = filterTests (`notElem` excludeInvalid) tests
+            mode = Standard2026
         printSummary tests' tests
-        mapM_ (runTest Standard2026 >=> verifyTxNotApproved) tests',
+        mapM_ (runTest mode >=> verifyTxNotApproved mode) tests',
       testCase "bch_2026_invalid in non-standard-mode" $ do
         tests <- invalidTests
         let tests' = filterTests (`notElem` excludeInvalid) tests
+            mode = Nonstandard2026
         printSummary tests' tests
-        mapM_ (runTest Nonstandard2026 >=> verifyTxNotApproved) tests'
+        mapM_ (runTest mode >=> verifyTxNotApproved mode) tests'
     ]
   where
     standardTests = concat <$> mapM loadTests bch2026StandardFiles
@@ -104,9 +108,7 @@ testLibauthVectors2026 =
 
     invalidTests = concat <$> mapM loadTests bch2026InvalidFiles
 
-    filterTests check =
-      filter
-        (\LibAuthTest {test = LibAuthTestRecord {shortId}} -> check shortId)
+    filterTests check = filter (\test -> check test.testRecord.shortId)
 
     standard = vmParamsStandard
 
