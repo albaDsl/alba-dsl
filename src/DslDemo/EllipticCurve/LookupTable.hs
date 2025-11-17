@@ -12,10 +12,13 @@ import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import Numeric.Natural (Natural)
 
 defineConstant :: FN (s > TBytes > TNat) s
-defineConstant = function (natToInt # opSwap # toPushOp # opSwap # opDefine)
+defineConstant = function (n2b # opSwap # toPushOp # opSwap # opDefine)
+
+n2b :: FN (s > TNat) (s > TBytes)
+n2b = cast
 
 getConstant :: FN (s > TNat) (s > TBytes)
-getConstant = natToInt # opInvoke get
+getConstant = n2b # opInvoke get
   where
     get :: FN s (s > TBytes)
     get = undefined
@@ -43,9 +46,6 @@ toPushOp =
       ]
       (opDrop # opFalse # opVerify)
   where
-    n2b :: FN (s > TNat) (s > TBytes)
-    n2b = cast
-
     b2n :: FN (s > TBytes) (s > TNat)
     b2n = cast
 

@@ -114,8 +114,8 @@ propIntegerDefineAndLookup (BytesHalf x) =
             (opAbs # intToNat # opSplit # opNip)
             opDrop
           # opDup
-          # (toPushOp # int 0 # opDefine)
-          # (int 0 # opInvoke lookupBytes)
+          # (toPushOp # bytes "entry" # opDefine)
+          # (bytes "entry" # opInvoke lookupBytes)
           # opEqual
       )
   where

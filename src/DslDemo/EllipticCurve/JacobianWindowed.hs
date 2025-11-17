@@ -58,11 +58,14 @@ setupTable =
     storePoint =
       begin
         # (opcode OP_PUSHDATA1 # size # opRot # opCat # opCat)
-        # (opSwap # n2i)
+        # (opSwap # n2b)
         # opDefine
       where
         size :: FN s (s > TBytes)
         size = nat 100 # cast
+
+        n2b :: FN (s > TNat) (s > TBytes)
+        n2b = cast
 
     opcode :: OpcodeL1 -> FN s (s > TBytes)
     opcode op = bytes [(fromIntegral . fromEnum) op]

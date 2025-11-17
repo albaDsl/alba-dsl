@@ -19,7 +19,7 @@ opUntil loopBody (S c fs) =
 -- Added for completeness. There are other better options to use. AlbaDsl does
 -- not offer a way for the user of this function to ensure the idx is not
 -- already in use.
-opDefine :: FN (s > TBytes > TInt) s
+opDefine :: FN (s > TBytes > TBytes) s
 opDefine (S c fs) = S (aop c OP_DEFINE) fs
 
 opDefineIdx :: Int -> FN (s > TBytes) s
@@ -39,7 +39,7 @@ opDefineNamed name (S c fs) =
     err = error "opDefineNamed: name already defined."
 
 -- See opDefine.
-opInvoke :: FNA s alt s' alt' -> FNA (s > TInt) alt s' alt'
+opInvoke :: FNA s alt s' alt' -> FNA (s > TBytes) alt s' alt'
 opInvoke _prog (S c fs) = S (aop c OP_INVOKE) fs
 
 opInvokeIdx :: Int -> FNA s alt s' alt' -> FNA s alt s' alt'

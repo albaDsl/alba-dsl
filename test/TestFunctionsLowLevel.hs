@@ -45,10 +45,10 @@ progRaw :: FN s (s > TBool)
 progRaw =
   begin
     # bytes (compile None cube)
-    # int 0
+    # bytes "cube"
     # opDefine
     # int 3
-    # int 0
+    # bytes "cube"
     # opInvoke cube
     # int 27
     # opNumEqual
