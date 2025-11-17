@@ -4,6 +4,8 @@ module Alba.Vm.Common.OpcodeL2
   ( OpcodeL2 (..),
     CodeL2,
     codeL2ToCodeL1,
+    codeL1ToCodeL2,
+    codeL1ToCodeL2Limited,
     bytesToDataOp,
     getOp,
     isMinimal,
@@ -163,6 +165,24 @@ codeL2ToCodeL1 =
         pure $ x' <> a
     )
     B.empty
+
+codeL1ToCodeL2 :: CodeL1 -> Maybe CodeL2
+codeL1ToCodeL2 code | B.null code = Just S.empty
+codeL1ToCodeL2 code = do
+  case getOp code of
+    Just (op, rest) -> (S.singleton op <>) <$> codeL1ToCodeL2 rest
+    Nothing -> Nothing
+
+-- Like 'codeL1ToCodeL2', but will stop after parsing 'numOps' opcodes and
+-- indicate if there are more opcodes left or not in the response.
+codeL1ToCodeL2Limited :: CodeL1 -> Int -> Maybe (CodeL2, Bool)
+codeL1ToCodeL2Limited code _numOps | B.null code = Just (S.empty, False)
+codeL1ToCodeL2Limited _code numOps | numOps == 0 = Just (S.empty, True)
+codeL1ToCodeL2Limited code numOps = do
+  case getOp code of
+    Just (op, rest) ->
+      first (S.singleton op <>) <$> codeL1ToCodeL2Limited rest (pred numOps)
+    Nothing -> Nothing
 
 opcodeL2ToCodeL1 :: OpcodeL2 -> Maybe CodeL1
 opcodeL2ToCodeL1 OP_0 = Just $ toCodeL1 L1.OP_0

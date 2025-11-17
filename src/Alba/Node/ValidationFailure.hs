@@ -9,10 +9,12 @@ data ValidationFailure
   | VfNftExNihilo
   | VfTokenOverSpend
   | VfTokensOverflow
+  | VfTxDust
   | VfTxOversize
+  | VfTxOversizeOpReturns
   | VfTxScriptSigSize
-  | VfTxScriptPubKeySize
   | VfTxScriptSigPushOnly
   | VfTxUndersize
   | VfTxVersion
+  | VfTxNonStandard
   deriving (Show)

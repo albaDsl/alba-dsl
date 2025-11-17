@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Node.ValidateTokens (verifyTxTokens) where
+module Alba.Node.ValidateTokens (checkTxTokens) where
 
 import Alba.Node.ValidationFailure (ValidationFailure (..))
 import Alba.Tx.Bch2025
@@ -31,8 +31,8 @@ data TokenState = TokenState
   }
   deriving (Show)
 
-verifyTxTokens :: TxContext -> VmParams -> Either ValidationFailure ()
-verifyTxTokens txContext vmParams = do
+checkTxTokens :: TxContext -> VmParams -> Either ValidationFailure ()
+checkTxTokens txContext vmParams = do
   let utxos = txContextCoins txContext
       tx = txContextTx txContext
       combined = zip utxos tx.inputs

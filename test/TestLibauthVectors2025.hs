@@ -1,11 +1,12 @@
 -- Copyright (c) 2025 albaDsl
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-unused-local-binds #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module TestLibauthVectors2025 (testLibauthVectors2025) where
 
 import Alba.Misc.Utils (decodeHex)
-import Alba.Node.Validation (acceptToMemoryPool)
+import Alba.Node.Validation (Mode (..))
 import Alba.Node.ValidationFailure (ValidationFailure (..))
 import Alba.Tx.Bch2025 (Tx (..), TxOuts (..))
 import Alba.Vm.Bch2025
@@ -35,7 +36,10 @@ import Data.Scientific (floatingOrInteger)
 import Data.Text qualified as T
 import Data.Vector qualified as V
 import LibauthSupport
-  ( LibAuthTestRecord (..),
+  ( LibAuthLimits,
+    LibAuthTest (..),
+    LibAuthTestRecord (..),
+    TestMode (..),
     loadTests,
     printSummary,
     runTest,
@@ -57,20 +61,18 @@ import Text.Printf (printf)
 testLibauthVectors2025 :: TestTree
 testLibauthVectors2025 =
   testGroup
-    "Libauth vectors"
+    "Libauth vectors 2025"
     [ testCase "bch_2025_standard in standard-mode" $ do
         tests <- standardTests
-        printSummary tests tests
-        mapM_ (runTest verifyScript standard >=> verifyTxApproved) tests,
+        let tests' = filterTests (`notElem` excludeStandard) tests
+        -- tests' = filterTests (== "wjg8aj") tests
+        printSummary tests' tests
+        mapM_ (runTest Standard2025 >=> verifyTxApproved) tests',
       testCase "bch_2025_standard in non-standard-mode" $ do
         tests <- standardTests
-        printSummary tests tests
-        mapM_ (runTest verifyScript nonStandard >=> verifyTxApproved) tests,
-      testCase "bch_2025_nonstandard in non-standard-mode" $ do
-        tests <- nonStandardTests
-        let tests' = filterTests (const True) tests
+        let tests' = filterTests (`notElem` excludeStandard) tests
         printSummary tests' tests
-        mapM_ (runTest verifyScript nonStandard >=> verifyTxApproved) tests',
+        mapM_ (runTest Nonstandard2025 >=> verifyTxApproved) tests',
       testCase "bch_2025_nonstandard in standard-mode" $ do
         tests <- nonStandardTests
         let tests' =
@@ -78,17 +80,22 @@ testLibauthVectors2025 =
                 (`notElem` excludeNonStandardInStandardMode)
                 tests
         printSummary tests' tests
-        mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
+        mapM_ (runTest Standard2025 >=> verifyTxNotApproved) tests',
+      testCase "bch_2025_nonstandard in non-standard-mode" $ do
+        tests <- nonStandardTests
+        let tests' = filterTests (const True) tests
+        printSummary tests' tests
+        mapM_ (runTest Nonstandard2025 >=> verifyTxApproved) tests',
       testCase "bch_2025_invalid in standard-mode" $ do
         tests <- invalidTests
         let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
-        mapM_ (runTest verifyScript standard >=> verifyTxNotApproved) tests',
+        mapM_ (runTest Standard2025 >=> verifyTxNotApproved) tests',
       testCase "bch_2025_invalid in non-standard-mode" $ do
         tests <- invalidTests
         let tests' = filterTests (`notElem` excludeInvalid) tests
         printSummary tests' tests
-        mapM_ (runTest verifyScript nonStandard >=> verifyTxNotApproved) tests'
+        mapM_ (runTest Nonstandard2025 >=> verifyTxNotApproved) tests'
     ]
   where
     standardTests = concat <$> mapM loadTests bch2025StandardFiles
@@ -97,7 +104,9 @@ testLibauthVectors2025 =
 
     invalidTests = concat <$> mapM loadTests bch2025InvalidFiles
 
-    filterTests check = filter (\LibAuthTestRecord {..} -> check shortId)
+    filterTests check =
+      filter
+        (\LibAuthTest {test = LibAuthTestRecord {shortId}} -> check shortId)
 
     standard = vmParamsStandard
 
@@ -105,180 +114,180 @@ testLibauthVectors2025 =
 
 bch2025StandardFiles :: [String]
 bch2025StandardFiles =
-  (\x -> "bch_2025_standard" </> x <.> "json")
-    <$> [ "core.benchmarks.arithmetic.add-sub.vmb_tests",
-          "core.benchmarks.arithmetic.div-mod.vmb_tests",
-          "core.benchmarks.arithmetic.mul.vmb_tests",
-          "core.benchmarks.baseline.vmb_tests",
-          "core.benchmarks.bitwise.vmb_tests",
-          "core.benchmarks.hashing.vmb_tests",
-          "core.benchmarks.roll.vmb_tests",
-          "core.benchmarks.signature-checking.bms-ecdsa.vmb_tests",
-          "core.benchmarks.signature-checking.bms-schnorr.vmb_tests",
-          "core.benchmarks.signature-checking.p2pk.vmb_tests",
-          "core.benchmarks.signature-checking.p2pkh.vmb_tests",
-          "core.benchmarks.stack.vmb_tests",
-          "core.bigint-basics.vmb_tests",
-          "core.bigint-limits.binary.vmb_tests",
-          "core.bigint-limits.ternary.vmb_tests",
-          "core.bigint-limits.unary.vmb_tests",
-          "core.bigint.0notequal.vmb_tests",
-          "core.bigint.1add.vmb_tests",
-          "core.bigint.1sub.vmb_tests",
-          "core.bigint.abs.vmb_tests",
-          "core.bigint.add.vmb_tests",
-          "core.bigint.bin2num.vmb_tests",
-          "core.bigint.booland.vmb_tests",
-          "core.bigint.boolor.vmb_tests",
-          "core.bigint.div.vmb_tests",
-          "core.bigint.greaterthan.vmb_tests",
-          "core.bigint.greaterthanorequal.vmb_tests",
-          "core.bigint.lessthan.vmb_tests",
-          "core.bigint.lessthanorequal.vmb_tests",
-          "core.bigint.max.vmb_tests",
-          "core.bigint.min.vmb_tests",
-          "core.bigint.mod.vmb_tests",
-          "core.bigint.mul.vmb_tests",
-          "core.bigint.negate.vmb_tests",
-          "core.bigint.not.vmb_tests",
-          "core.bigint.num2bin.vmb_tests",
-          "core.bigint.numequal.vmb_tests",
-          "core.bigint.numequalverify.vmb_tests",
-          "core.bigint.numnotequal.vmb_tests",
-          "core.bigint.sub.vmb_tests",
-          "core.bigint.within.vmb_tests",
-          "core.cashtokens.vmb_tests",
-          "core.conditionals.vmb_tests",
-          "core.copy.vmb_tests",
-          "core.data-signatures.vmb_tests",
-          "core.disabled.vmb_tests",
-          "core.formatting.vmb_tests",
-          "core.hashing.vmb_tests",
-          "core.inspection.vmb_tests",
-          "core.limits.vmb_tests",
-          "core.nop.vmb_tests",
-          "core.push.bytes.vmb_tests",
-          "core.push.data.limits.vmb_tests",
-          "core.push.data.vmb_tests",
-          "core.push.minimal.vmb_tests",
-          "core.push.numbers.vmb_tests",
-          "core.push.ops.vmb_tests",
-          "core.signature-checking.multisig.m-of-15.vmb_tests",
-          "core.signature-checking.multisig.m-of-20.vmb_tests",
-          "core.signature-checking.multisig.m-of-3.vmb_tests",
-          "core.signature-checking.multisig.signing-serialization.vmb_tests",
-          "core.signing-serialization.vmb_tests"
+  ("bch_2025_standard" </>)
+    <$> [ "core.benchmarks.arithmetic.add-sub",
+          "core.benchmarks.arithmetic.div-mod",
+          "core.benchmarks.arithmetic.mul",
+          "core.benchmarks.baseline",
+          "core.benchmarks.bitwise",
+          "core.benchmarks.hashing",
+          "core.benchmarks.roll",
+          "core.benchmarks.signature-checking.bms-ecdsa",
+          "core.benchmarks.signature-checking.bms-schnorr",
+          "core.benchmarks.signature-checking.p2pk",
+          "core.benchmarks.signature-checking.p2pkh",
+          "core.benchmarks.stack",
+          "core.bigint-basics",
+          "core.bigint-limits.binary",
+          "core.bigint-limits.ternary",
+          "core.bigint-limits.unary",
+          "core.bigint.0notequal",
+          "core.bigint.1add",
+          "core.bigint.1sub",
+          "core.bigint.abs",
+          "core.bigint.add",
+          "core.bigint.bin2num",
+          "core.bigint.booland",
+          "core.bigint.boolor",
+          "core.bigint.div",
+          "core.bigint.greaterthan",
+          "core.bigint.greaterthanorequal",
+          "core.bigint.lessthan",
+          "core.bigint.lessthanorequal",
+          "core.bigint.max",
+          "core.bigint.min",
+          "core.bigint.mod",
+          "core.bigint.mul",
+          "core.bigint.negate",
+          "core.bigint.not",
+          "core.bigint.num2bin",
+          "core.bigint.numequal",
+          "core.bigint.numequalverify",
+          "core.bigint.numnotequal",
+          "core.bigint.sub",
+          "core.bigint.within",
+          "core.cashtokens",
+          "core.conditionals",
+          "core.copy",
+          "core.data-signatures",
+          "core.disabled",
+          "core.formatting",
+          "core.hashing",
+          "core.inspection",
+          "core.limits",
+          "core.nop",
+          "core.push.bytes",
+          "core.push.data.limits",
+          "core.push.data",
+          "core.push.minimal",
+          "core.push.numbers",
+          "core.push.ops",
+          "core.signature-checking.multisig.m-of-15",
+          "core.signature-checking.multisig.m-of-20",
+          "core.signature-checking.multisig.m-of-3",
+          "core.signature-checking.multisig.signing-serialization",
+          "core.signing-serialization"
         ]
 
 bch2025NonStandardFiles :: [String]
 bch2025NonStandardFiles =
-  (\x -> "bch_2025_nonstandard" </> x <.> "json")
-    <$> [ "core.benchmarks.arithmetic.add-sub.vmb_tests",
-          "core.benchmarks.arithmetic.div-mod.vmb_tests",
-          "core.benchmarks.arithmetic.mul.vmb_tests",
-          "core.benchmarks.hashing-bytes.packed.vmb_tests",
-          "core.benchmarks.hashing-iters.packed.vmb_tests",
-          "core.benchmarks.hashing.vmb_tests",
-          "core.benchmarks.stack.vmb_tests",
-          "core.bigint-basics.vmb_tests",
-          "core.bigint-limits.binary.vmb_tests",
-          "core.bigint-limits.ternary.vmb_tests",
-          "core.bigint-limits.unary.vmb_tests",
-          "core.bigint.0notequal.vmb_tests",
-          "core.bigint.1add.vmb_tests",
-          "core.bigint.1sub.vmb_tests",
-          "core.bigint.abs.vmb_tests",
-          "core.bigint.add.vmb_tests",
-          "core.bigint.bin2num.vmb_tests",
-          "core.bigint.booland.vmb_tests",
-          "core.bigint.boolor.vmb_tests",
-          "core.bigint.div.vmb_tests",
-          "core.bigint.greaterthan.vmb_tests",
-          "core.bigint.greaterthanorequal.vmb_tests",
-          "core.bigint.lessthan.vmb_tests",
-          "core.bigint.lessthanorequal.vmb_tests",
-          "core.bigint.max.vmb_tests",
-          "core.bigint.min.vmb_tests",
-          "core.bigint.mod.vmb_tests",
-          "core.bigint.mul.vmb_tests",
-          "core.bigint.negate.vmb_tests",
-          "core.bigint.not.vmb_tests",
-          "core.bigint.num2bin.vmb_tests",
-          "core.bigint.numequal.vmb_tests",
-          "core.bigint.numequalverify.vmb_tests",
-          "core.bigint.numnotequal.vmb_tests",
-          "core.bigint.sub.vmb_tests",
-          "core.bigint.within.vmb_tests",
-          "core.cashtokens.vmb_tests",
-          "core.conditionals.vmb_tests",
-          "core.copy.vmb_tests",
-          "core.data-signatures.vmb_tests",
-          "core.disabled.vmb_tests",
-          "core.formatting.vmb_tests",
-          "core.hashing.vmb_tests",
-          "core.inspection.vmb_tests",
-          "core.limits.vmb_tests",
-          "core.nop.vmb_tests",
-          "core.push.bytes.vmb_tests",
-          "core.push.data.limits.vmb_tests",
-          "core.push.data.vmb_tests",
-          "core.push.minimal.vmb_tests",
-          "core.push.numbers.vmb_tests",
-          "core.push.ops.vmb_tests",
-          "core.signature-checking.multisig.m-of-15.vmb_tests",
-          "core.signature-checking.multisig.m-of-20.vmb_tests",
-          "core.signing-serialization.vmb_tests"
+  ("bch_2025_nonstandard" </>)
+    <$> [ "core.benchmarks.arithmetic.add-sub",
+          "core.benchmarks.arithmetic.div-mod",
+          "core.benchmarks.arithmetic.mul",
+          "core.benchmarks.hashing-bytes.packed",
+          "core.benchmarks.hashing-iters.packed",
+          "core.benchmarks.hashing",
+          "core.benchmarks.stack",
+          "core.bigint-basics",
+          "core.bigint-limits.binary",
+          "core.bigint-limits.ternary",
+          "core.bigint-limits.unary",
+          "core.bigint.0notequal",
+          "core.bigint.1add",
+          "core.bigint.1sub",
+          "core.bigint.abs",
+          "core.bigint.add",
+          "core.bigint.bin2num",
+          "core.bigint.booland",
+          "core.bigint.boolor",
+          "core.bigint.div",
+          "core.bigint.greaterthan",
+          "core.bigint.greaterthanorequal",
+          "core.bigint.lessthan",
+          "core.bigint.lessthanorequal",
+          "core.bigint.max",
+          "core.bigint.min",
+          "core.bigint.mod",
+          "core.bigint.mul",
+          "core.bigint.negate",
+          "core.bigint.not",
+          "core.bigint.num2bin",
+          "core.bigint.numequal",
+          "core.bigint.numequalverify",
+          "core.bigint.numnotequal",
+          "core.bigint.sub",
+          "core.bigint.within",
+          "core.cashtokens",
+          "core.conditionals",
+          "core.copy",
+          "core.data-signatures",
+          "core.disabled",
+          "core.formatting",
+          "core.hashing",
+          "core.inspection",
+          "core.limits",
+          "core.nop",
+          "core.push.bytes",
+          "core.push.data.limits",
+          "core.push.data",
+          "core.push.minimal",
+          "core.push.numbers",
+          "core.push.ops",
+          "core.signature-checking.multisig.m-of-15",
+          "core.signature-checking.multisig.m-of-20",
+          "core.signing-serialization"
         ]
 
 bch2025InvalidFiles :: [String]
 bch2025InvalidFiles =
-  (\x -> "bch_2025_invalid" </> x <.> "json")
-    <$> [ "core.benchmarks.bitwise.vmb_tests",
-          "core.benchmarks.hashing.vmb_tests",
-          "core.benchmarks.roll.vmb_tests",
-          "core.benchmarks.stack.vmb_tests",
-          "core.bigint-basics.vmb_tests",
-          "core.bigint-limits.binary.vmb_tests",
-          "core.bigint-limits.ternary.vmb_tests",
-          "core.bigint-limits.unary.vmb_tests",
-          "core.bigint.1add.vmb_tests",
-          "core.bigint.1sub.vmb_tests",
-          "core.bigint.abs.vmb_tests",
-          "core.bigint.add.vmb_tests",
-          "core.bigint.bin2num.vmb_tests",
-          "core.bigint.booland.vmb_tests",
-          "core.bigint.boolor.vmb_tests",
-          "core.bigint.div.vmb_tests",
-          "core.bigint.greaterthan.vmb_tests",
-          "core.bigint.greaterthanorequal.vmb_tests",
-          "core.bigint.lessthan.vmb_tests",
-          "core.bigint.lessthanorequal.vmb_tests",
-          "core.bigint.max.vmb_tests",
-          "core.bigint.min.vmb_tests",
-          "core.bigint.mod.vmb_tests",
-          "core.bigint.mul.vmb_tests",
-          "core.bigint.negate.vmb_tests",
-          "core.bigint.num2bin.vmb_tests",
-          "core.bigint.numequal.vmb_tests",
-          "core.bigint.numequalverify.vmb_tests",
-          "core.bigint.numnotequal.vmb_tests",
-          "core.bigint.sub.vmb_tests",
-          "core.bigint.within.vmb_tests",
-          "core.cashtokens.vmb_tests",
-          "core.conditionals.vmb_tests",
-          "core.disabled.vmb_tests",
-          "core.inspection.vmb_tests",
-          "core.limits.vmb_tests",
-          "core.nop.vmb_tests",
-          "core.push-only.vmb_tests",
-          "core.push.bytes.vmb_tests",
-          "core.push.data.limits.vmb_tests",
-          "core.push.data.vmb_tests",
-          "core.push.minimal.vmb_tests",
-          "core.push.numbers.vmb_tests",
-          "core.push.ops.vmb_tests",
-          "core.signature-checking.multisig.m-of-15.vmb_tests",
-          "core.signature-checking.multisig.m-of-20.vmb_tests",
-          "core.signature-checking.multisig.m-of-3.vmb_tests",
-          "core.signing-serialization.vmb_tests"
+  ("bch_2025_invalid" </>)
+    <$> [ "core.benchmarks.bitwise",
+          "core.benchmarks.hashing",
+          "core.benchmarks.roll",
+          "core.benchmarks.stack",
+          "core.bigint-basics",
+          "core.bigint-limits.binary",
+          "core.bigint-limits.ternary",
+          "core.bigint-limits.unary",
+          "core.bigint.1add",
+          "core.bigint.1sub",
+          "core.bigint.abs",
+          "core.bigint.add",
+          "core.bigint.bin2num",
+          "core.bigint.booland",
+          "core.bigint.boolor",
+          "core.bigint.div",
+          "core.bigint.greaterthan",
+          "core.bigint.greaterthanorequal",
+          "core.bigint.lessthan",
+          "core.bigint.lessthanorequal",
+          "core.bigint.max",
+          "core.bigint.min",
+          "core.bigint.mod",
+          "core.bigint.mul",
+          "core.bigint.negate",
+          "core.bigint.num2bin",
+          "core.bigint.numequal",
+          "core.bigint.numequalverify",
+          "core.bigint.numnotequal",
+          "core.bigint.sub",
+          "core.bigint.within",
+          "core.cashtokens",
+          "core.conditionals",
+          "core.disabled",
+          "core.inspection",
+          "core.limits",
+          "core.nop",
+          "core.push-only",
+          "core.push.bytes",
+          "core.push.data.limits",
+          "core.push.data",
+          "core.push.minimal",
+          "core.push.numbers",
+          "core.push.ops",
+          "core.signature-checking.multisig.m-of-15",
+          "core.signature-checking.multisig.m-of-20",
+          "core.signature-checking.multisig.m-of-3",
+          "core.signing-serialization"
         ]

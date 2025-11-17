@@ -126,6 +126,8 @@ library
       Alba.Misc.Opts,
       Alba.Misc.Utils,
       Alba.Misc.Wallet,
+      Alba.Node.Policy,
+      Alba.Node.TxVerify,
       Alba.Node.ValidateTokens,
       Alba.Node.Validation,
       Alba.Node.ValidationFailure,
