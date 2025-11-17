@@ -16,10 +16,10 @@ data ScriptError
   | SeEvalFalse
   | SeFunctionOverwriteDisallowed
   | SeImpossibleEncoding
-  | SeInvalidBitfieldSize
   | SeInvalidBitCount
   | SeInvalidBitRange
   | SeInvalidBitShift
+  | SeInvalidBitfieldSize
   | SeInvalidFunctionIdentifier
   | SeInvalidNumberRange
   | SeInvalidOperandSize
@@ -30,6 +30,7 @@ data ScriptError
   | SeMinimalData
   | SeMinimalNum
   | SeModByZero
+  | SeMustUseForkId
   | SeNegativeLocktime
   | SeNumEqualVerify
   | SeOpReturn
@@ -41,9 +42,10 @@ data ScriptError
   | SeSigBadLength
   | SeSigCount
   | SeSigDer
+  | SeSigHashType
   | SeSigHighS
-  | SeSigNullFail
   | SeSigNonSchnorr
+  | SeSigNullFail
   | SeSigPushOnly
   | SeStackSize
   | SeTooManyHashIters

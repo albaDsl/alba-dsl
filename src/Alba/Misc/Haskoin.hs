@@ -15,6 +15,7 @@ module Alba.Misc.Haskoin
     H.chipnet,
     H.putVarInt,
     H.anyoneCanPay,
+    H.hasForkIdFlag,
     H.hasUtxosFlag,
     H.isSigHashNone,
     H.isSigHashSingle,

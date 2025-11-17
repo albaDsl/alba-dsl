@@ -1,16 +1,19 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Vm.Bch2025.SigEncoding
-  ( checkDataSignatureEncoding,
+  ( checkTransactionSignatureEncoding,
+    checkDataSignatureEncoding,
     checkRawEcdsaSignatureEncoding,
     checkTransactionSchnorrSignatureEncoding,
     checkPubKeyEncoding,
   )
 where
 
+import Alba.Misc.Haskoin (anyoneCanPay, hasForkIdFlag, hasUtxosFlag)
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.ScriptError (ScriptError (..))
 import Alba.Vm.Common.StackElement (Bytes)
+import Control.Monad (unless, when)
 import Data.ByteString qualified as B
 
 compressedPublicKeySize :: Int
@@ -18,6 +21,24 @@ compressedPublicKeySize = 33
 
 publicKeySize :: Int
 publicKeySize = 65
+
+checkTransactionSignatureEncoding :: Bytes -> Either ScriptError ()
+checkTransactionSignatureEncoding sig = do
+  checkSighashEncoding sig
+  if B.null sig
+    then Right ()
+    else checkRawSignatureEncoding sig
+
+checkSighashEncoding :: Bytes -> Either ScriptError ()
+checkSighashEncoding sig =
+  case B.unsnoc sig of
+    Just (_, sigHashType) ->
+      let sigHashType' = fromIntegral sigHashType
+       in do
+            unless (hasForkIdFlag sigHashType') $ Left SeMustUseForkId
+            when (hasUtxosFlag sigHashType' && anyoneCanPay sigHashType') $
+              Left SeSigHashType
+    Nothing -> Right ()
 
 checkDataSignatureEncoding :: Bytes -> Either ScriptError ()
 checkDataSignatureEncoding sig =

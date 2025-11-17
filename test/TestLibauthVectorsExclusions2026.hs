@@ -86,10 +86,7 @@ excludeNonStandardInStandardMode =
 
 excludeInvalid :: [T.Text]
 excludeInvalid =
-  [ "h4d5nz", -- passed validation.
-    "j8u53e", -- passed validation.
-    "j07snz", -- passed validation.
-    "ev6d70", -- passed validation.
+  [ "ev6d70", -- passed validation.
     "euhyv9", -- passed validation.
     "9wpluu", -- passed validation.
     "0wv2x5", -- passed validation.
@@ -98,9 +95,6 @@ excludeInvalid =
     "5vxr09", -- passed validation.
     "d6akln", -- passed validation.
     "rwnd46", -- passed validation.
-    "jcns45", -- passed validation.
-    "9x8hfl", -- passed validation.
-    "nsd77p", -- passed validation.
     "gx55hr", -- passed validation.
     "qwq9x7", -- passed validation.
     "95zm4e", -- passed validation.
@@ -110,9 +104,6 @@ excludeInvalid =
     "wv9xsg", -- passed validation.
     "d2yg6y", -- passed validation.
     "nfuczn", -- passed validation.
-    "yeqv20", -- passed validation.
-    "eydg7p", -- passed validation.
-    "a62s5a", -- passed validation.
     "3vfppz", -- passed validation.
     "8zsq5v", -- passed validation.
     "dll5z4", -- passed validation.
@@ -122,9 +113,6 @@ excludeInvalid =
     "hxp23j", -- passed validation.
     "gqzxg5", -- passed validation.
     "6zz804", -- passed validation.
-    "fqsjgt", -- passed validation.
-    "dx7yvf", -- passed validation.
-    "fl0mfm", -- passed validation.
     "pyq7py", -- passed validation.
     "lclhw9", -- passed validation.
     "8jzadl", -- passed validation.
@@ -134,9 +122,6 @@ excludeInvalid =
     "j79fxv", -- passed validation.
     "mnkfz2", -- passed validation.
     "86d2rh", -- passed validation.
-    "g4ljnx", -- passed validation.
-    "dev6zj", -- passed validation.
-    "s8zuvq", -- passed validation.
     "l80g62", -- passed validation.
     "skzw0z", -- passed validation.
     "89dq8w", -- passed validation.
@@ -146,9 +131,6 @@ excludeInvalid =
     "z478f6", -- passed validation.
     "4z3jpd", -- passed validation.
     "hr2xhm", -- passed validation.
-    "34am3h", -- passed validation.
-    "d7yl06", -- passed validation.
-    "c8nf5t", -- passed validation.
     "7dsdpk", -- passed validation.
     "69rvph", -- passed validation.
     "7lydtd", -- passed validation.
@@ -158,9 +140,6 @@ excludeInvalid =
     "aay9ku", -- passed validation.
     "krp5f8", -- passed validation.
     "3hg37t", -- passed validation.
-    "dp6gmz", -- passed validation.
-    "f5tq95", -- passed validation.
-    "dardju", -- passed validation.
     "yw7eak", -- passed validation.
     "7n5cwh", -- passed validation.
     "nw0h0k", -- passed validation.
@@ -170,9 +149,6 @@ excludeInvalid =
     "e3y9nf", -- passed validation.
     "d6rm8p", -- passed validation.
     "eeufs2", -- passed validation.
-    "ygxnjm", -- passed validation.
-    "7smnd9", -- passed validation.
-    "7my5fz", -- passed validation.
     "tla9ma", -- passed validation.
     "8mcm85", -- passed validation.
     "95hhd6", -- passed validation.
@@ -182,9 +158,6 @@ excludeInvalid =
     "3ek72q", -- passed validation.
     "myqddp", -- passed validation.
     "8g422u", -- passed validation.
-    "90566r", -- passed validation.
-    "6qnne9", -- passed validation.
-    "d5yppm", -- passed validation.
     "405uht", -- passed validation.
     "snpzq2", -- passed validation.
     "lz7wrl", -- passed validation.
@@ -194,9 +167,6 @@ excludeInvalid =
     "y6lg9q", -- passed validation.
     "0f235x", -- passed validation.
     "jemls0", -- passed validation.
-    "gcp2dz", -- passed validation.
-    "5muly8", -- passed validation.
-    "ghga68", -- passed validation.
     "y57nxf", -- passed validation.
     "8m8h75", -- passed validation.
     "aump5c", -- passed validation.
@@ -206,9 +176,6 @@ excludeInvalid =
     "mqss4v", -- passed validation.
     "mq8fuf", -- passed validation.
     "zccu5d", -- passed validation.
-    "4qq55d", -- passed validation.
-    "ycl2h4", -- passed validation.
-    "4cq8qy", -- passed validation.
     "esckzs", -- passed validation.
     "k793xh", -- passed validation.
     "qdmhep", -- passed validation.
@@ -218,9 +185,6 @@ excludeInvalid =
     "npjeqz", -- passed validation.
     "77qqky", -- passed validation.
     "4pwr9u", -- passed validation.
-    "fd8v7f", -- passed validation.
-    "ea6l4g", -- passed validation.
-    "elhuna", -- passed validation.
     "k8p52s", -- passed validation.
     "0ccq6x", -- passed validation.
     "cmndcd", -- passed validation.
@@ -230,9 +194,6 @@ excludeInvalid =
     "jzx23z", -- passed validation.
     "6ppuv5", -- passed validation.
     "tgys5q", -- passed validation.
-    "f8snxd", -- passed validation.
-    "3fakll", -- passed validation.
-    "py5lnv", -- passed validation.
     "tujdhd", -- passed validation.
     "hwkttf", -- passed validation.
     "hqk7rx", -- passed validation.
@@ -242,9 +203,6 @@ excludeInvalid =
     "m9tthm", -- passed validation.
     "wmgkmm", -- passed validation.
     "z24uvm", -- passed validation.
-    "3wkhmt", -- passed validation.
-    "dllkxt", -- passed validation.
-    "4z2y8g", -- passed validation.
     "zlgs7t", -- passed validation.
     "r7yfmq", -- passed validation.
     "spm2kn", -- passed validation.
@@ -254,9 +212,6 @@ excludeInvalid =
     "ds2u6p", -- passed validation.
     "2gxe0f", -- passed validation.
     "hdvvsp", -- passed validation.
-    "2z4c54", -- passed validation.
-    "srue73", -- passed validation.
-    "uuceal", -- passed validation.
     "phcdds", -- passed validation.
     "kup5gf", -- passed validation.
     "rqzzhz", -- passed validation.
@@ -266,9 +221,6 @@ excludeInvalid =
     "2clqrf", -- passed validation.
     "sj54sk", -- passed validation.
     "tf3el7", -- passed validation.
-    "kks2kv", -- passed validation.
-    "7u4sj7", -- passed validation.
-    "c8mhmc", -- passed validation.
     "u3plnj", -- passed validation.
     "92rdpe", -- passed validation.
     "up0w2q", -- passed validation.
@@ -278,9 +230,6 @@ excludeInvalid =
     "auydhr", -- passed validation.
     "cynp8h", -- passed validation.
     "xa6zpa", -- passed validation.
-    "3pej8l", -- passed validation.
-    "wd9gpp", -- passed validation.
-    "r8kzw5", -- passed validation.
     "u4gu6e", -- passed validation.
     "8sfl5x", -- passed validation.
     "9tcgmn", -- passed validation.
@@ -290,9 +239,6 @@ excludeInvalid =
     "hnuent", -- passed validation.
     "gfsyd2", -- passed validation.
     "f5aj5t", -- passed validation.
-    "qthfv2", -- passed validation.
-    "dypunp", -- passed validation.
-    "hzrlss", -- passed validation.
     "ns7tya", -- passed validation.
     "hm0dna", -- passed validation.
     "wkklzu", -- passed validation.
@@ -302,9 +248,6 @@ excludeInvalid =
     "yu87wy", -- passed validation.
     "0vdftj", -- passed validation.
     "s5759z", -- passed validation.
-    "s9gyry", -- passed validation.
-    "rexmu9", -- passed validation.
-    "4a2e0w", -- passed validation.
     "j06tzg", -- passed validation.
     "6x5tsq", -- passed validation.
     "9v3dm8", -- passed validation.
@@ -314,9 +257,6 @@ excludeInvalid =
     "p3pnk0", -- passed validation.
     "9yuq53", -- passed validation.
     "yadhuc", -- passed validation.
-    "2l6fp9", -- passed validation.
-    "umh4zh", -- passed validation.
-    "7pt03f", -- passed validation.
     "jgjd7l", -- passed validation.
     "rn5vlr", -- passed validation.
     "f7p7a7", -- passed validation.
@@ -326,9 +266,6 @@ excludeInvalid =
     "pd8et3", -- passed validation.
     "ycstnl", -- passed validation.
     "r09hvw", -- passed validation.
-    "zd4s4d", -- passed validation.
-    "pfqcf4", -- passed validation.
-    "atr9nq", -- passed validation.
     "jnst4x", -- passed validation.
     "hs9q0g", -- passed validation.
     "7mdnnp", -- passed validation.
@@ -338,9 +275,6 @@ excludeInvalid =
     "x96wut", -- passed validation.
     "73h74c", -- passed validation.
     "0fjrvm", -- passed validation.
-    "ek6n8x", -- passed validation.
-    "2hlfym", -- passed validation.
-    "3xahtq", -- passed validation.
     "u2wh4h", -- passed validation.
     "h7f2p5", -- passed validation.
     "p3lda2", -- passed validation.
@@ -350,9 +284,6 @@ excludeInvalid =
     "wd3tgd", -- passed validation.
     "6hj8wx", -- passed validation.
     "r225jg", -- passed validation.
-    "a3jd4z", -- passed validation.
-    "gvhdzx", -- passed validation.
-    "4rut9j", -- passed validation.
     "4fyk9p", -- passed validation.
     "ved87x", -- passed validation.
     "q6u0zx", -- passed validation.
@@ -362,9 +293,6 @@ excludeInvalid =
     "zxu4kq", -- passed validation.
     "pl3dla", -- passed validation.
     "0k87ea", -- passed validation.
-    "htu4dj", -- passed validation.
-    "tar82w", -- passed validation.
-    "fangsj", -- passed validation.
     "rjmtl4", -- passed validation.
     "9qjdkl", -- passed validation.
     "v9ermw", -- passed validation.
@@ -374,9 +302,6 @@ excludeInvalid =
     "ggwu8k", -- passed validation.
     "h2ffvg", -- passed validation.
     "50gxf5", -- passed validation.
-    "u99xgt", -- passed validation.
-    "rh2vcm", -- passed validation.
-    "q2zfpx", -- passed validation.
     "8rawcp", -- passed validation.
     "qzeg0n", -- passed validation.
     "66t0r4", -- passed validation.
@@ -386,9 +311,6 @@ excludeInvalid =
     "c8xqks", -- passed validation.
     "ds37ce", -- passed validation.
     "lnkqgk", -- passed validation.
-    "xmvka6", -- passed validation.
-    "ljm8qs", -- passed validation.
-    "k6p2mw", -- passed validation.
     "3c3a78", -- passed validation.
     "vw4l9f", -- passed validation.
     "qmgzru", -- passed validation.
@@ -398,9 +320,6 @@ excludeInvalid =
     "e2wjpx", -- passed validation.
     "7hy96r", -- passed validation.
     "8h2qcq", -- passed validation.
-    "xk5x92", -- passed validation.
-    "5gwp9p", -- passed validation.
-    "vr7wfl", -- passed validation.
     "d4zpnr", -- passed validation.
     "3xsk3c", -- passed validation.
     "u2c28c", -- passed validation.
@@ -410,9 +329,6 @@ excludeInvalid =
     "xny5c3", -- passed validation.
     "texldg", -- passed validation.
     "fzxruv", -- passed validation.
-    "yyt29m", -- passed validation.
-    "vhkref", -- passed validation.
-    "patu5e", -- passed validation.
     "rgpalt", -- passed validation.
     "u2fvsv", -- passed validation.
     "p6e42f", -- passed validation.
@@ -422,9 +338,6 @@ excludeInvalid =
     "afkkjm", -- passed validation.
     "84w0gu", -- passed validation.
     "e28lj3", -- passed validation.
-    "uzy4a8", -- passed validation.
-    "5xchcr", -- passed validation.
-    "hy3gpk", -- passed validation.
     "k286fj", -- passed validation.
     "aacnah", -- passed validation.
     "xz32lv", -- passed validation.
@@ -434,9 +347,6 @@ excludeInvalid =
     "5978ek", -- passed validation.
     "4h2rwc", -- passed validation.
     "d4qme9", -- passed validation.
-    "j6yhah", -- passed validation.
-    "8uez8l", -- passed validation.
-    "97z473", -- passed validation.
     "22xq2l", -- passed validation.
     "7akxn9", -- passed validation.
     "l5xstx", -- passed validation.
@@ -446,9 +356,6 @@ excludeInvalid =
     "v4cgfh", -- passed validation.
     "qve3h0", -- passed validation.
     "cwsalg", -- passed validation.
-    "grh3py", -- passed validation.
-    "gzkg2p", -- passed validation.
-    "9lgfc3", -- passed validation.
     "pmfdzt", -- passed validation.
     "hrayw4", -- passed validation.
     "fla645", -- passed validation.
@@ -458,9 +365,6 @@ excludeInvalid =
     "h8ege5", -- passed validation.
     "9f2a3k", -- passed validation.
     "ucy8vs", -- passed validation.
-    "2dw2dn", -- passed validation.
-    "wjqpz3", -- passed validation.
-    "pa8tu2", -- passed validation.
     "mrwz0t", -- passed validation.
     "vwy68l", -- passed validation.
     "36n40p", -- passed validation.
@@ -470,9 +374,6 @@ excludeInvalid =
     "0tenug", -- passed validation.
     "cntgu5", -- passed validation.
     "ngu8tq", -- passed validation.
-    "p92u3n", -- passed validation.
-    "2jnufh", -- passed validation.
-    "zc8sy2", -- passed validation.
     "5aq0az", -- passed validation.
     "kjph8w", -- passed validation.
     "swt5f7", -- passed validation.
@@ -482,9 +383,6 @@ excludeInvalid =
     "gyfdph", -- passed validation.
     "rca7m8", -- passed validation.
     "5jkkp3", -- passed validation.
-    "7gu4yw", -- passed validation.
-    "d83gze", -- passed validation.
-    "vkwe83", -- passed validation.
     "xq7ulx", -- passed validation.
     "lar3jw", -- passed validation.
     "70n3yd", -- passed validation.
@@ -494,9 +392,6 @@ excludeInvalid =
     "gk79dd", -- passed validation.
     "g9yacw", -- passed validation.
     "pkesre", -- passed validation.
-    "dwwvgx", -- passed validation.
-    "3ydry0", -- passed validation.
-    "x7t6ut", -- passed validation.
     "vgn2ln", -- passed validation.
     "lmwn3q", -- passed validation.
     "k4ft7z", -- passed validation.
@@ -506,9 +401,6 @@ excludeInvalid =
     "0m55jv", -- passed validation.
     "8w40wm", -- passed validation.
     "w3hsga", -- passed validation.
-    "5ed0a5", -- passed validation.
-    "60p3t2", -- passed validation.
-    "whr82n", -- passed validation.
     "4unqan", -- passed validation.
     "tz7tup", -- passed validation.
     "0eu4ye", -- passed validation.

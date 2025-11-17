@@ -7,6 +7,7 @@ import Alba.Vm.Bch2025.SigCheckUtils (checkSig, verifySignature)
 import Alba.Vm.Bch2025.SigEncoding
   ( checkDataSignatureEncoding,
     checkPubKeyEncoding,
+    checkTransactionSignatureEncoding,
   )
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
@@ -49,7 +50,7 @@ opCheckSig txContext VmState {..} = do
   (s' :|> sig :|> pubKey) <- pure s
   let sig' = stackElementToBytes sig
       pubKey' = stackElementToBytes pubKey
-  checkDataSignatureEncoding sig'
+  checkTransactionSignatureEncoding sig'
   checkPubKeyEncoding pubKey'
   let st' = case checkSig txContext signedCode sig' pubKey' of
         Just (res, imgSize) ->
