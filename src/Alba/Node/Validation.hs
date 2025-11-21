@@ -1,9 +1,10 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Node.Validation
-  ( acceptToMemoryPool,
+  ( AcceptToMemoryPoolResult,
     VerifyScriptFun,
     Mode (..),
+    acceptToMemoryPool,
   )
 where
 
@@ -30,6 +31,11 @@ type VerifyScriptFun =
   VmParams ->
   Either (ScriptError, VerifyScriptResult) VerifyScriptResult
 
+type AcceptToMemoryPoolResult =
+  Either
+    ValidationFailure
+    (Either (ScriptError, VerifyScriptResult) VerifyScriptResult)
+
 data Mode = Standard | NonStandard
   deriving (Eq)
 
@@ -39,9 +45,7 @@ acceptToMemoryPool ::
   TxContext ->
   VmParams ->
   Mode ->
-  Either
-    ValidationFailure
-    (Either (ScriptError, VerifyScriptResult) VerifyScriptResult)
+  AcceptToMemoryPoolResult
 acceptToMemoryPool verifyScript txContext vmParams mode = do
   let coins = txContextCoins txContext
       idx = txContextInputIndex txContext
