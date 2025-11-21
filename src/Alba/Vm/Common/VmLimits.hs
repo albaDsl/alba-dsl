@@ -35,7 +35,7 @@ addOperationCost st@VmState {metrics = m} =
     { metrics =
         m
           { instructions = succ m.instructions,
-            cost = m.cost + st.params.opCodeCost
+            cost = m.cost + st.params.opcodeCost
           }
     }
 

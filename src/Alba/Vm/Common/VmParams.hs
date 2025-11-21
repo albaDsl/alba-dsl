@@ -19,7 +19,7 @@ data VmParams = VmParams
     maxExecStackSize :: Int,
     maxFunctionIdentifierLength :: Int,
     lockTimeThreshold :: Word32,
-    opCodeCost :: Int,
+    opcodeCost :: Int,
     costBudgetPerInputByte :: Int,
     hashDigestIterationCost :: Int,
     sigCheckCost :: Int,
