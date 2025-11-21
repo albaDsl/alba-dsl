@@ -3,20 +3,38 @@
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_GHC -Wno-unused-local-binds #-}
 
-module LibauthSupport where
+module LibauthSupport
+  ( findAndLoad,
+    runTest,
+    tryTest,
+    printSummary,
+    verifyResult,
+    LibauthTest (..),
+    TestMode (..),
+    loadTests,
+    testModeToVmSetup,
+    testToTxAndUtxos,
+  )
+where
 
 import Alba.Misc.Debug (traceShow)
-import Alba.Misc.Utils (decodeHex)
+import Alba.Misc.Utils (canNotHappen, decodeHex, encodeHex)
 import Alba.Node.Policy (solver)
-import Alba.Node.Validation (Mode (..), VerifyScriptFun, acceptToMemoryPool)
+import Alba.Node.Validation
+  ( AcceptToMemoryPoolResult,
+    Mode (..),
+    VerifyScriptFun,
+    acceptToMemoryPool,
+  )
 import Alba.Node.ValidationFailure (ValidationFailure (..))
 import Alba.Tx.Bch2025 (Tx (..), TxOuts (..))
+import Alba.Tx.Bch2025.TxIn (TxIn (..))
 import Alba.Tx.Bch2025.TxOut (TxOut (..))
 import Alba.Vm.Bch2025 qualified as Vm2025
 import Alba.Vm.Bch2026 qualified as Vm2026
 import Alba.Vm.Common
   ( LogDisplayOpts (..),
-    ScriptError,
+    ScriptError (..),
     VerifyScriptResult,
     VmParams,
     defaultDisplayOpts,
@@ -29,228 +47,302 @@ import Alba.Vm.Common.VmState
     VmMetrics (..),
     VmState (..),
   )
+import Control.Monad (unless)
 import Data.Aeson qualified as A
 import Data.Binary (decodeOrFail)
 import Data.ByteString qualified as B
 import Data.Map qualified as M
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Data.Scientific (floatingOrInteger)
+import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Vector qualified as V
-import System.FilePath (FilePath, (<.>), (</>))
+import LibauthFileParse
+  ( LibAuthFileLimits,
+    LibAuthFileResults,
+    LibAuthFileVmbTestsRecord (..),
+  )
+import System.Directory (listDirectory)
+import System.FilePath (FilePath, takeDirectory, (<.>), (</>))
 import Test.Tasty.HUnit (assertBool, assertFailure, (@?=))
 import Text.Pretty.Simple (pPrintLightBg)
 import Text.Printf (printf)
 
 data TestMode = Standard2025 | Nonstandard2025 | Standard2026 | Nonstandard2026
-  deriving (Eq)
+  deriving (Eq, Show, Read)
 
-data LibAuthTest = LibAuthTest
-  { testRecord :: LibAuthTestRecord,
+data LibauthTest = LibauthTest
+  { shortId :: Text,
+    testClass :: Text,
+    inputIndex :: Int,
+    testTransactionHex :: Text,
+    sourceOutputsHex :: Text,
+    standardResult :: ExpectedResult,
+    nonstandardResult :: ExpectedResult,
     standardLimits :: Limits,
     nonstandardLimits :: Limits
   }
-
-data LibAuthTestRecord = LibAuthTestRecord
-  { shortId :: T.Text,
-    testDescription :: T.Text,
-    unlockingScriptAsm :: T.Text,
-    redeemOrLockingScriptAsm :: T.Text,
-    testTransactionHex :: T.Text,
-    sourceOutputsHex :: T.Text,
-    inputIndex :: Maybe Int
-  }
   deriving (Show)
 
-type LibAuthLimits = M.Map T.Text (Int, Int, Int, T.Text)
+data ExpectedResult = Success | Err T.Text
+  deriving (Show)
 
 data Limits = Limits
   { densityControlLength :: Int,
     maxCost :: Int,
     cost :: Int
   }
-
-type ResultOrFailure = Either TestLibauthFailure TestResult
-
-data TestLibauthFailure = CanNotParseTx
   deriving (Show)
 
-data TestResult = TestResult
-  { test :: LibAuthTest,
-    vmResult ::
-      Either
-        ValidationFailure
-        (Either (ScriptError, VerifyScriptResult) VerifyScriptResult)
-  }
+type ResultOrSetupFailure = Either LibauthSetupFailure AcceptToMemoryPoolResult
 
-instance A.FromJSON LibAuthTestRecord where
-  parseJSON json = do
-    A.Array arr <- pure json
-    Just (A.String txt0) <- pure (arr V.!? 0)
-    Just (A.String txt1) <- pure (arr V.!? 1)
-    Just (A.String txt2) <- pure (arr V.!? 2)
-    Just (A.String txt3) <- pure (arr V.!? 3)
-    Just (A.String txt4) <- pure (arr V.!? 4)
-    Just (A.String txt5) <- pure (arr V.!? 5)
-    let res = arr V.!? 6
-    let x = case res of
-          Just (A.Number x') ->
-            let Right x'' = (floatingOrInteger x' :: Either Double Int)
-             in Just x''
-          _ -> Nothing
-    pure $ LibAuthTestRecord txt0 txt1 txt2 txt3 txt4 txt5 x
+data LibauthSetupFailure = CanNotParseTx
+  deriving (Show)
 
-loadTests :: FilePath -> IO [LibAuthTest]
-loadTests file = do
-  let root = "." </> "test" </> "libauth"
-      testFile = root </> file <.> "vmb_tests" <.> "json"
-      standardLimitsFile = root </> file <.> "standard_limits" <.> "json"
-      nonstandardLimitsFile = root </> file <.> "nonstandard_limits" <.> "json"
+libauthRoot :: FilePath
+libauthRoot = "." </> "test" </> "libauth"
+
+findAndLoad :: FilePath -> Int -> Int -> IO [LibauthTest]
+findAndLoad path expectedFileCount expectedTestCount = do
+  files <- getTestPath path
+  unless (length files == expectedFileCount) $
+    error (printf "File count: %d" (length files))
+  tests <- concat <$> mapM loadTests files
+  unless (length tests == expectedTestCount) $
+    error (printf "Test count: %d" (length tests))
+  pure tests
+  where
+    getTestPath :: FilePath -> IO [FilePath]
+    getTestPath component = do
+      let dir = libauthRoot </> component
+      files <- listDirectory dir
+      let vmbTests = filter (T.isSuffixOf vmbSuffix) (T.pack <$> files)
+       in pure $ (dir </>) . T.unpack . trimSuffix <$> vmbTests
+      where
+        trimSuffix :: Text -> Text
+        trimSuffix str =
+          fromMaybe (error $ "getTestPath " <> show str) $
+            T.stripSuffix vmbSuffix str
+        vmbSuffix = ".vmb_tests.json"
+
+loadTests :: FilePath -> IO [LibauthTest]
+loadTests path = do
+  let testFile = path <.> "vmb_tests" <.> "json"
+      testClass = T.pack $ takeDirectory path
+      standardLimitsFile = path <.> "standard_limits" <.> "json"
+      nonstandardLimitsFile = path <.> "nonstandard_limits" <.> "json"
+      standardResultsFile = path <.> "standard_results" <.> "json"
+      nonstandardResultsFile = path <.> "nonstandard_results" <.> "json"
   tests <- A.eitherDecodeFileStrict testFile
-  standardLimits <- A.eitherDecodeFileStrict standardLimitsFile
-  nonstandardLimits <- A.eitherDecodeFileStrict nonstandardLimitsFile
-  case (tests, standardLimits, nonstandardLimits) of
-    (Right t, Right sl, Right nsl) -> pure $ toLibAuthTest sl nsl <$> t
-    _ -> error "loadTests"
+  sResults <- A.eitherDecodeFileStrict standardResultsFile
+  nsResults <- A.eitherDecodeFileStrict nonstandardResultsFile
+  sLimits <- A.eitherDecodeFileStrict standardLimitsFile
+  nsLimits <- A.eitherDecodeFileStrict nonstandardLimitsFile
+  let tests' =
+        fmap
+          <$> ( toLibauthTest
+                  <$> Right testClass
+                  <*> sResults
+                  <*> nsResults
+                  <*> sLimits
+                  <*> nsLimits
+              )
+          <*> tests
+  case tests' of
+    Right t -> pure t
+    Left _ -> error "loadTests"
 
-toLibAuthTest ::
-  LibAuthLimits ->
-  LibAuthLimits ->
-  LibAuthTestRecord ->
-  LibAuthTest
-toLibAuthTest slMap nslMap testRecord@(LibAuthTestRecord {shortId}) =
-  let standardLimits =
+toLibauthTest ::
+  Text ->
+  LibAuthFileResults ->
+  LibAuthFileResults ->
+  LibAuthFileLimits ->
+  LibAuthFileLimits ->
+  LibAuthFileVmbTestsRecord ->
+  LibauthTest
+toLibauthTest testClass srMap nsrMap slMap nslMap r =
+  let shortId = r.shortId
+      inputIndex = fromMaybe 0 r.inputIndex
+      testTransactionHex = r.testTransactionHex
+      sourceOutputsHex = r.sourceOutputsHex
+      standardResult = convert $ fromMaybe err (M.lookup r.shortId srMap)
+      nonstandardResult = convert $ fromMaybe err (M.lookup r.shortId nsrMap)
+      standardLimits =
         let (densityControlLength, maxCost, cost, _) =
-              fromMaybe (error "toLibAuthTest") (M.lookup shortId slMap)
+              fromMaybe err (M.lookup r.shortId slMap)
          in Limits {..}
       nonstandardLimits =
         let (densityControlLength, maxCost, cost, _) =
-              fromMaybe (error "toLibAuthTest") (M.lookup shortId nslMap)
+              fromMaybe err (M.lookup r.shortId nslMap)
          in Limits {..}
-   in LibAuthTest {..}
+   in LibauthTest {..}
+  where
+    err = error "toLibauthTest"
+
+    convert :: A.Value -> ExpectedResult
+    convert (A.Bool True) = Success
+    convert (A.String errStr) = Err errStr
+    convert _ = error "toLibauthTest / convert"
 
 printSummary :: [a] -> [b] -> IO ()
 printSummary selectedTests allTests =
   if length selectedTests /= length allTests
     then
-      printf
-        "Running %d of %d tests\n"
-        (length selectedTests)
-        (length allTests)
+      printf "Running %d of %d tests\n" (length selectedTests) (length allTests)
     else
       printf "Running all %d tests\n" (length selectedTests)
 
-runTest :: TestMode -> LibAuthTest -> IO (T.Text, ResultOrFailure)
-runTest testMode test@(LibAuthTest {..}) = do
-  let (verifyScript, vmParams, mode) = params testMode
-  case txAndUtxos of
+runTest :: TestMode -> LibauthTest -> IO ResultOrSetupFailure
+runTest testMode test@(LibauthTest {..}) = do
+  let (verifyScript, vmParams, mode) = testModeToVmSetup testMode
+  case testToTxAndUtxos test of
     Right (tx, txOuts) -> do
-      let inputIndex = fromMaybe 0 testRecord.inputIndex
-          txContext = fromJust $ mkTxContext tx inputIndex txOuts.get
-          vmResult = acceptToMemoryPool verifyScript txContext vmParams mode
-      -- pPrintLightBg test
-      -- pPrintLightBg txOuts
-      -- pPrintLightBg $ codeL1ToCodeL2 . (.scriptPubKey) <$> txOuts.get
-      -- print $ codeL1ToCodeL2 . (.scriptPubKey) <$> txOuts.get
-      -- print $ solver vmParams . (.scriptPubKey) <$> txOuts.get
-      -- pPrintLightBg tx
-      pure (testRecord.shortId, Right $ TestResult {..})
-    Left err -> pure (testRecord.shortId, Left err)
+      let txContext = fromJust $ mkTxContext tx inputIndex txOuts.get
+          validationResult =
+            acceptToMemoryPool verifyScript txContext vmParams mode
+      -- debugOutput tx txOuts vmParams
+      pure $ Right validationResult
+    Left err -> pure $ Left err
   where
-    params :: TestMode -> (VerifyScriptFun, VmParams, Mode)
-    params Standard2025 =
-      (Vm2025.verifyScript, Vm2025.vmParamsStandard, Standard)
-    params Nonstandard2025 =
-      (Vm2025.verifyScript, Vm2025.vmParamsNonStandard, NonStandard)
-    params Standard2026 =
-      (Vm2026.verifyScript, Vm2026.vmParamsStandard, Standard)
-    params Nonstandard2026 =
-      (Vm2026.verifyScript, Vm2026.vmParamsNonStandard, NonStandard)
+    debugOutput :: Tx -> TxOuts -> VmParams -> IO ()
+    debugOutput tx txOuts vmParams = do
+      printf "*test*\n"
+      pPrintLightBg test
 
-    txAndUtxos :: Either TestLibauthFailure (Tx, TxOuts)
-    txAndUtxos = do
-      tx <-
-        either
-          (\(_, _, _) -> Left CanNotParseTx)
-          (\(_, _, res) -> Right res)
-          ( decodeOrFail
-              ( B.fromStrict $
-                  fromJust $
-                    decodeHex testRecord.testTransactionHex
-              )
-          )
-      txOuts <-
-        either
-          (\(_, _, _) -> Left CanNotParseTx)
-          (\(_, _, res) -> Right res)
-          ( decodeOrFail
-              (B.fromStrict $ fromJust $ decodeHex testRecord.sourceOutputsHex)
-          )
-      pure (tx, txOuts)
+      printf "\n*txOuts / locking scripts*\n"
+      pPrintLightBg txOuts
+      pPrintLightBg $ codeL1ToCodeL2 . (.scriptPubKey) <$> txOuts.get
+      print $ solver vmParams . (.scriptPubKey) <$> txOuts.get
 
-verifyTxApproved :: TestMode -> (T.Text, ResultOrFailure) -> IO ()
-verifyTxApproved testMode (testId, res) =
+      printf "\n*txIns / unlocking scripts*\n"
+      pPrintLightBg $ encodeHex . (.scriptSig) <$> tx.inputs
+      pPrintLightBg $ codeL1ToCodeL2 . (.scriptSig) <$> tx.inputs
+
+      printf "\n*tx*\n"
+      pPrintLightBg tx
+
+testModeToVmSetup :: TestMode -> (VerifyScriptFun, VmParams, Mode)
+testModeToVmSetup Standard2025 =
+  (Vm2025.verifyScript, Vm2025.vmParamsStandard, Standard)
+testModeToVmSetup Nonstandard2025 =
+  (Vm2025.verifyScript, Vm2025.vmParamsNonStandard, NonStandard)
+testModeToVmSetup Standard2026 =
+  (Vm2026.verifyScript, Vm2026.vmParamsStandard, Standard)
+testModeToVmSetup Nonstandard2026 =
+  (Vm2026.verifyScript, Vm2026.vmParamsNonStandard, NonStandard)
+
+testToTxAndUtxos :: LibauthTest -> Either LibauthSetupFailure (Tx, TxOuts)
+testToTxAndUtxos LibauthTest {..} = do
+  tx <-
+    either
+      (\(_, _, _) -> Left CanNotParseTx)
+      (\(_, _, res) -> Right res)
+      (decodeOrFail (B.fromStrict $ fromJust $ decodeHex testTransactionHex))
+  txOuts <-
+    either
+      (\(_, _, _) -> Left CanNotParseTx)
+      (\(_, _, res) -> Right res)
+      (decodeOrFail (B.fromStrict $ fromJust $ decodeHex sourceOutputsHex))
+  pure (tx, txOuts)
+
+verifyResult :: TestMode -> LibauthTest -> ResultOrSetupFailure -> IO ()
+verifyResult testMode test resultOrFailure =
+  let expected =
+        if inStandardMode testMode
+          then test.standardResult
+          else test.nonstandardResult
+   in case expected of
+        Success -> verifyTxApproved testMode test resultOrFailure
+        Err _ -> verifyTxNotApproved testMode test resultOrFailure
+
+inStandardMode :: TestMode -> Bool
+inStandardMode Standard2025 = True
+inStandardMode Nonstandard2025 = False
+inStandardMode Standard2026 = True
+inStandardMode Nonstandard2026 = False
+
+verifyTxApproved :: TestMode -> LibauthTest -> ResultOrSetupFailure -> IO ()
+verifyTxApproved testMode test res =
   case res of
     Right testResult ->
-      case testResult.vmResult of
+      case testResult of
         (Left err) -> do
-          assertFailure (printf "%s: validation failure %s" testId (show err))
+          assertFailure
+            (printf "%s: validation failure %s" test.shortId (show err))
         (Right res'@(Left (err, _))) -> do
           let displayOpts = defaultDisplayOpts {showMetrics = True}
           dumpVerifyScriptResult displayOpts res'
-          assertFailure (printf "%s: failed with %s" testId (show err))
+          assertFailure (printf "%s: failed with %s" test.shortId (show err))
         (Right (Right _res')) -> do
           -- dumpVerifyScriptResult Nothing True res'
-          assertBool "metrics" (verifyMetrics testMode testResult)
+          assertBool "metrics" (verifyMetrics testMode test testResult)
           pure ()
     Left err ->
-      assertFailure (printf "%s: failed with %s" testId (show err))
+      assertFailure (printf "%s: failed with %s" test.shortId (show err))
 
-verifyTxNotApproved :: TestMode -> (T.Text, ResultOrFailure) -> IO ()
-verifyTxNotApproved _testMode (testId, res) =
+verifyTxNotApproved :: TestMode -> LibauthTest -> ResultOrSetupFailure -> IO ()
+verifyTxNotApproved testMode test res =
   case res of
     Right testResult ->
-      case testResult.vmResult of
+      case testResult of
         (Left _err) -> pure ()
-        (Right (Left (_err, _))) -> pure ()
+        (Right (Left (err, r))) -> do
+          unless
+            ( ( isNothing r.scriptSigResult
+                  && isNothing r.scriptPubKeyResult
+                  && isNothing r.scriptRedeemResult
+              )
+                || T.isInfixOf "invalid" test.testClass
+                || standardModeIntraOpError err
+            )
+            $ assertBool
+              ("metrics check after " <> show err)
+              (verifyMetrics testMode test testResult)
         (Right _res'@(Right _)) -> do
           -- let displayOpts = defaultDisplayOpts {showMetrics = True}
           -- dumpVerifyScriptResult displayOpts res'
-          assertFailure (printf "%s: passed validation" testId)
+          assertFailure (printf "%s: passed validation" test.shortId)
     Left _ -> pure ()
 
-verifyMetrics :: TestMode -> TestResult -> Bool
-verifyMetrics testMode TestResult {test = LibAuthTest {..}, ..} =
-  let standard = case testMode of
-        Standard2025 -> True
-        Nonstandard2025 -> False
-        Standard2026 -> True
-        Nonstandard2026 -> False
-      limits = if standard then standardLimits else nonstandardLimits
-      verifyScriptResult = case vmResult of
-        Right (Right (VerifyScriptResult {..})) -> scriptRedeemResult
-        Right (Left (_, VerifyScriptResult {..})) -> scriptRedeemResult
-        _ -> Nothing
-   in case verifyScriptResult of
-        Just (VmState {metrics = VmMetrics {cost}}) ->
-          let res = cost == limits.cost
-           in if res
-                then res
-                else traceShow (testRecord.shortId, cost, limits.cost) res
-        Nothing -> True
+-- Op evaluation errors specific to standard mode. We don't check metrics for
+-- in-the-middle-of-op-evaluation errors, since we do accounting in such cases
+-- differently from Libauth.
+standardModeIntraOpError :: ScriptError -> Bool
+standardModeIntraOpError SeDiscourageUpgradableNops = True
+standardModeIntraOpError _ = False
 
-tryTest :: TestMode -> LibAuthTest -> IO ()
-tryTest testMode t@(LibAuthTest {testRecord}) = do
-  (testId, res) <- runTest testMode t
+verifyMetrics :: TestMode -> LibauthTest -> AcceptToMemoryPoolResult -> Bool
+verifyMetrics testMode test validationResult =
+  let limits =
+        if inStandardMode testMode
+          then test.standardLimits
+          else test.nonstandardLimits
+      VmState {metrics = VmMetrics {cost}} = case validationResult of
+        Right (Right vsResult) -> getVmState vsResult
+        Right (Left (_, vsResult)) -> getVmState vsResult
+        _ -> canNotHappen
+      res = cost == limits.cost
+   in if res
+        then res
+        else traceShow (test.shortId, test.testClass, cost, limits.cost) res
+  where
+    getVmState VerifyScriptResult {..} =
+      fromMaybe
+        (fromMaybe (fromMaybe canNotHappen scriptSigResult) scriptPubKeyResult)
+        scriptRedeemResult
+
+tryTest :: TestMode -> LibauthTest -> IO ()
+tryTest testMode t@(LibauthTest {shortId}) = do
+  res <- runTest testMode t
   case res of
     Right testResult ->
-      case testResult.vmResult of
+      case testResult of
         (Left err) -> do
-          printf " , \"%s\" -- validation failure %s\n" testId (show err)
+          printf " , \"%s\" -- validation failure %s\n" shortId (show err)
         (Right (Left (err, _))) -> do
-          printf " , \"%s\" -- failed with %s\n" testId (show err)
+          printf " , \"%s\" -- failed with %s\n" shortId (show err)
         (Right (Right _res')) -> do
-          printf " , \"%s\" -- passed validation.\n" testRecord.shortId
+          printf " , \"%s\" -- passed validation.\n" shortId
     Left err ->
-      printf " , \"%s\" -- failure %s\n" testId (show err)
+      printf " , \"%s\" -- failure %s\n" shortId (show err)
   1 @?= (1 :: Int)

@@ -294,6 +294,7 @@ executable test
   hs-source-dirs:
       test
   other-modules:
+      LibauthFileParse,
       LibauthSupport,
       QuickCheckSupport,
       TestArguments,
