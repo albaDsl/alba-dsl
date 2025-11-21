@@ -242,9 +242,10 @@ library
 executable alba
   import: shared-properties
   main-is: main.hs
-  hs-source-dirs: apps/alba
+  hs-source-dirs: apps/alba test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
-  build-depends: alba
+  other-modules: LibauthFileParse, LibauthSupport
+  build-depends: alba, scientific
 
 executable simpleP2pkh
   import: shared-properties
