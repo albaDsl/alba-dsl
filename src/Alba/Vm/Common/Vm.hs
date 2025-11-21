@@ -112,8 +112,8 @@ evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
       state'' <-
         logOp op execP
           <$> maybe
-            (Left (SeBadOpcode (show op), state'))
-            (mapLeft (,state'))
+            (Left (SeBadOpcode (show op), state))
+            (mapLeft (,state))
             (evalVmOp op txContext state')
 
       verifySizeLimits state''
