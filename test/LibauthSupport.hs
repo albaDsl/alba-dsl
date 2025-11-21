@@ -225,11 +225,11 @@ testModeToVmSetup :: TestMode -> (VerifyScriptFun, VmParams, Mode)
 testModeToVmSetup Standard2025 =
   (Vm2025.verifyScript, Vm2025.vmParamsStandard, Standard)
 testModeToVmSetup Nonstandard2025 =
-  (Vm2025.verifyScript, Vm2025.vmParamsNonStandard, NonStandard)
+  (Vm2025.verifyScript, Vm2025.vmParamsNonStandard, Nonstandard)
 testModeToVmSetup Standard2026 =
   (Vm2026.verifyScript, Vm2026.vmParamsStandard, Standard)
 testModeToVmSetup Nonstandard2026 =
-  (Vm2026.verifyScript, Vm2026.vmParamsNonStandard, NonStandard)
+  (Vm2026.verifyScript, Vm2026.vmParamsNonStandard, Nonstandard)
 
 testToTxAndUtxos :: LibauthTest -> Either LibauthSetupFailure (Tx, TxOuts)
 testToTxAndUtxos LibauthTest {..} = do

@@ -131,7 +131,7 @@ main' Opts {command = (Libauth LibauthOpts {..})} = do
             Standard -> do
               printf "Result: %s\n" $ show test.standardResult
               printf "Limits: %s\n" $ show test.standardLimits
-            NonStandard -> do
+            Nonstandard -> do
               printf "Result: %s\n" $ show test.nonstandardResult
               printf "Limits: %s\n" $ show test.nonstandardLimits
           printf "\n"

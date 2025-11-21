@@ -36,7 +36,7 @@ type AcceptToMemoryPoolResult =
     ValidationFailure
     (Either (ScriptError, VerifyScriptResult) VerifyScriptResult)
 
-data Mode = Standard | NonStandard
+data Mode = Standard | Nonstandard
   deriving (Eq)
 
 -- FIXME: Having a Mode flag to this function is a temporary solution.
