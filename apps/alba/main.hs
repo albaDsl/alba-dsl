@@ -11,12 +11,15 @@ import Alba.Vm.Bch2025 qualified as Vm2025
 import Alba.Vm.Bch2025.VmParams (vmParamsStandard)
 import Alba.Vm.Common (dumpVerifyScriptResult)
 import Alba.Vm.Common.Logging (LogDisplayOpts (..))
+import Alba.Vm.Common.LoggingHtml (verifyScriptResultToHtml)
 import Control.Applicative ((<**>))
+import Control.Monad (when)
 import Data.Binary (decode)
 import Data.ByteString (fromStrict)
 import Data.Maybe (fromJust)
 import Data.Text (Text)
 import Data.Text qualified as T
+import Data.Text.IO qualified as T
 import LibauthSupport
   ( LibauthTest (..),
     TestMode (..),
@@ -39,6 +42,7 @@ import Options.Applicative
     option,
     progDesc,
     strOption,
+    switch,
   )
 import System.Exit (exitFailure)
 import Text.Printf (printf)
@@ -59,7 +63,8 @@ data LibauthOpts = LibauthOpts
   { file :: Text,
     shortId :: Text,
     testMode :: TestMode,
-    metrics :: Bool
+    metrics :: Bool,
+    htmlLogs :: Bool
   }
   deriving (Show)
 
@@ -91,7 +96,11 @@ cmdOpts =
                 <*> strOption (long "test" <> help "ShortId for the test.")
                 <*> option auto (long "mode" <> help "Test mode.")
                 <*> metricsSwitch
+                <*> htmlLogsSwitch
             )
+
+htmlLogsSwitch :: Parser Bool
+htmlLogsSwitch = switch (long "html" <> help "Dump HTML logs to logs.html.")
 
 main :: IO ()
 main = main' =<< execParser opts
@@ -124,7 +133,12 @@ main' Opts {command = (Libauth LibauthOpts {..})} = do
           case validationResult of
             Right res ->
               let displayOpts = defaultDisplayOpts {showMetrics = metrics}
-               in dumpVerifyScriptResult displayOpts res
+               in do
+                    dumpVerifyScriptResult displayOpts res
+                    when htmlLogs $
+                      T.writeFile
+                        "log.html"
+                        (verifyScriptResultToHtml displayOpts res)
             Left err -> printf "VM evaluation failure: %s\n" (show err)
           printf "Libauth expected:\n"
           case mode of
