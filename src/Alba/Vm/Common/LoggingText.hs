@@ -93,42 +93,37 @@ formatMetrics VmMetrics {..} =
 
 dumpVerifyScriptResult ::
   LogDisplayOpts ->
-  Either
-    (ScriptError, VerifyScriptResult)
-    VerifyScriptResult ->
+  Either (ScriptError, VerifyScriptResult) VerifyScriptResult ->
   IO ()
-dumpVerifyScriptResult displayOpts (Right res) = do
-  dumpVerifyScriptResult' displayOpts res
-  printf "Successful script verification.\n\n"
-dumpVerifyScriptResult displayOpts (Left (scriptError, state)) = do
-  dumpVerifyScriptResult' displayOpts state
-  printf "Script verification failed with: %s\n\n" (show scriptError)
+dumpVerifyScriptResult displayOpts@LogDisplayOpts {showMetrics} result = do
+  let (VerifyScriptResult {..}, msg) = case result of
+        (Right res) -> (res, "Successful script verification.\n\n")
+        (Left (scriptError, res)) ->
+          ( res,
+            printf "Script verification failed with: %s\n\n" (show scriptError)
+          )
+  showLabels displayOpts.labels
+  case scriptSigResult of
+    Just res -> do
+      printf "scriptSig:\n"
+      dumpLog displayOpts res
+    Nothing -> pure ()
 
-dumpVerifyScriptResult' :: LogDisplayOpts -> VerifyScriptResult -> IO ()
-dumpVerifyScriptResult'
-  displayOpts@LogDisplayOpts {showMetrics}
-  VerifyScriptResult {..} = do
-    showLabels displayOpts.labels
-    case scriptSigResult of
-      Just res -> do
-        printf "scriptSig:\n"
-        dumpLog displayOpts res
-      Nothing -> pure ()
+  case scriptPubKeyResult of
+    Just res -> do
+      printf "scriptPubKey:\n"
+      dumpLog displayOpts res
+      when (showMetrics && isNothing scriptRedeemResult) $
+        dumpMetrics res
+    Nothing -> pure ()
 
-    case scriptPubKeyResult of
-      Just res -> do
-        printf "scriptPubKey:\n"
-        dumpLog displayOpts res
-        when (showMetrics && isNothing scriptRedeemResult) $
-          dumpMetrics res
-      Nothing -> pure ()
-
-    case scriptRedeemResult of
-      Just res -> do
-        printf "redeemScript:\n"
-        dumpLog displayOpts res
-        when showMetrics $ dumpMetrics res
-      Nothing -> pure ()
+  case scriptRedeemResult of
+    Just res -> do
+      printf "redeemScript:\n"
+      dumpLog displayOpts res
+      when showMetrics $ dumpMetrics res
+    Nothing -> pure ()
+  printf msg
 
 showLabels :: Maybe Labels -> IO ()
 showLabels (Just labels) = do
