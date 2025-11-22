@@ -47,41 +47,43 @@ loop ::
   (Node, VmLogs, Text)
 loop _opts S.Empty _processed _path tree = (tree, S.Empty, "")
 loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
-  if entry.exec
-    then case entry.op of
-      Start -> addAndContinue
-      FunctionExit -> (tree, rest, formatStack labels entry.stack)
-      Op OP_DEFINE ->
-        case processed of
-          _ S.:|> code S.:|> slot
-            | isPushOp code.op && isPushOp slot.op ->
-                let path' = increment path
-                    path'' = addLevel path'
-                    opStr = opCodeStr opts entry
-                    opDefine = logEntryNode opts opStr entry path''
-                    (children', lastTwo) =
-                      splitAt (length tree.children - 2) tree.children
-                    tree' = tree {children = children'}
-                    header = opDefineHeader opts prevEntry
-                    stack = formatStack labels entry.stack
-                    children = ((setPath path'' <$> lastTwo) <> [opDefine])
-                    parent = Node header False stack Nothing path' children
-                 in loop opts rest processed' path' (addChild parent tree')
-          _ S.:|> _code S.:|> _slot -> addAndContinue
-          _ -> canNotHappen
-      Op OP_INVOKE ->
-        let path' = increment path
-            header = opInvokeHeader opts prevEntry
-            node = logEntryNode opts header entry path'
-            (n', rest', summary) =
-              loop opts rest processed' (addLevel path') node
-            tree' =
-              addChild
-                (n' {stackSummary = Just summary})
-                (removeLastIfPushOp tree)
-         in loop opts rest' processed' path' tree'
-      Op _x -> addAndContinue
-    else loop opts rest processed' path tree
+  case entry of
+    Completed {exec} | exec ->
+      case entry.op of
+        Start -> addAndContinue
+        FunctionExit -> (tree, rest, formatStack labels entry.stack)
+        Op OP_DEFINE ->
+          case processed of
+            _ S.:|> code S.:|> slot
+              | isPushOp code.op && isPushOp slot.op ->
+                  let path' = increment path
+                      path'' = addLevel path'
+                      opStr = opCodeStr opts entry
+                      opDefine = logEntryNode opts opStr entry path''
+                      (children', lastTwo) =
+                        splitAt (length tree.children - 2) tree.children
+                      tree' = tree {children = children'}
+                      header = opDefineHeader opts prevEntry
+                      stack = formatStack labels entry.stack
+                      children = ((setPath path'' <$> lastTwo) <> [opDefine])
+                      parent = Node header False stack Nothing path' children
+                   in loop opts rest processed' path' (addChild parent tree')
+            _ S.:|> _code S.:|> _slot -> addAndContinue
+            _ -> canNotHappen
+        Op OP_INVOKE ->
+          let path' = increment path
+              header = opInvokeHeader opts prevEntry
+              node = logEntryNode opts header entry path'
+              (n', rest', summary) =
+                loop opts rest processed' (addLevel path') node
+              tree' =
+                addChild
+                  (n' {stackSummary = Just summary})
+                  (removeLastIfPushOp tree)
+           in loop opts rest' processed' path' tree'
+        Op _x -> addAndContinue
+    Completed {} -> loop opts rest processed' path tree
+    Failed {} -> addAndContinue
   where
     addAndContinue =
       let opStr = opCodeStr opts entry
@@ -96,16 +98,20 @@ loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
         else Nothing
 
 logEntryNode :: LogDisplayOpts -> Text -> LogEntry -> Path -> Node
-logEntryNode LogDisplayOpts {..} opStr LogEntry {..} path =
+logEntryNode LogDisplayOpts {..} opStr (Completed {..}) path =
   let stack' = formatStack labels stack
    in Node opStr (isPushOp op) stack' Nothing path []
+logEntryNode _ opStr (Failed _) path =
+  let stack = "(operation failed)"
+   in Node opStr False stack Nothing path []
 
 opCodeStr :: LogDisplayOpts -> LogEntry -> Text
-opCodeStr LogDisplayOpts {..} LogEntry {..} =
+opCodeStr LogDisplayOpts {..} (Completed {..}) =
   case op of
     Op op' -> formatOp labels op'
     Start -> "(Start Stack)"
     FunctionExit -> "(Function Exit)"
+opCodeStr LogDisplayOpts {..} (Failed {..}) = formatOp labels opcode
 
 opDefineHeader :: LogDisplayOpts -> Maybe LogEntry -> Text
 opDefineHeader LogDisplayOpts {..} prevEntry = do

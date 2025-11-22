@@ -46,7 +46,7 @@ logDataToText displayOpts (Just logData) =
   T.concat $ logEntryLine displayOpts <$> toList logData
 
 logEntryLine :: LogDisplayOpts -> LogEntry -> T.Text
-logEntryLine LogDisplayOpts {..} LogEntry {..} =
+logEntryLine LogDisplayOpts {..} (Completed {..}) =
   let (opStr, execStr :: T.Text) =
         case op of
           Op op' -> (formatOp labels op', if exec then "+" else "-")
@@ -61,6 +61,9 @@ logEntryLine LogDisplayOpts {..} LogEntry {..} =
         (True, False) ->
           T.pack $ printf "%s %-30s | %s\n" execStr opStr stack'
         _ -> T.empty
+logEntryLine LogDisplayOpts {..} (Failed {..}) =
+  let (opStr, execStr :: T.Text) = (formatOp labels opcode, "+")
+   in T.pack $ printf "%s %-30s | (operation failed)\n" execStr opStr
 
 formatOp :: Maybe Labels -> OpcodeL2 -> T.Text
 formatOp labels op =

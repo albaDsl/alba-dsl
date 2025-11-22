@@ -8,6 +8,7 @@ module Alba.Vm.Common.Logging
     logOp,
     logStart,
     logFunctionExit,
+    logFailure,
   )
 where
 
@@ -52,24 +53,30 @@ defaultDisplayOpts =
 logStart :: VmState -> VmState
 logStart state@VmState {logData = Nothing} = state
 logStart state@VmState {s, alt, metrics, logData = Just logData} =
-  let entry = LogEntry {op = Start, exec = True, stack = s, altStack = alt, ..}
+  let entry = Completed {op = Start, exec = True, stack = s, altStack = alt, ..}
    in state {logData = Just $ logData S.|> entry}
 
 logOp :: OpcodeL2 -> Bool -> VmState -> VmState
 logOp _op _exec state@VmState {logData = Nothing} = state
 logOp op exec state@VmState {s, alt, metrics, logData = Just logData} =
-  let entry = LogEntry {op = Op op, stack = s, altStack = alt, ..}
+  let entry = Completed {op = Op op, stack = s, altStack = alt, ..}
    in state {logData = Just $ logData S.|> entry}
 
 logFunctionExit :: VmState -> VmState
 logFunctionExit state@VmState {logData = Nothing} = state
 logFunctionExit state@VmState {s, alt, metrics, logData = Just logData} =
   let entry =
-        LogEntry
+        Completed
           { op = FunctionExit,
             exec = True,
             stack = s,
             altStack = alt,
             ..
           }
+   in state {logData = Just $ logData S.|> entry}
+
+logFailure :: OpcodeL2 -> VmState -> VmState
+logFailure _op state@VmState {logData = Nothing} = state
+logFailure op state@VmState {logData = Just logData} =
+  let entry = Failed {opcode = op}
    in state {logData = Just $ logData S.|> entry}

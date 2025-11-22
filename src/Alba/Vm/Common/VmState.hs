@@ -49,13 +49,15 @@ data VmMetrics = VmMetrics
   }
   deriving (Eq, Show)
 
-data LogEntry = LogEntry
-  { op :: Operation,
-    exec :: Bool,
-    stack :: !VmStack,
-    altStack :: !VmStack,
-    metrics :: !VmMetrics
-  }
+data LogEntry
+  = Completed
+      { op :: Operation,
+        exec :: Bool,
+        stack :: !VmStack,
+        altStack :: !VmStack,
+        metrics :: !VmMetrics
+      }
+  | Failed {opcode :: OpcodeL2}
   deriving (Eq, Show)
 
 data Operation = Start | Op OpcodeL2 | FunctionExit

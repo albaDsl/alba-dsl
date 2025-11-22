@@ -9,7 +9,7 @@ module Alba.Vm.Common.Vm
 where
 
 import Alba.Misc.Utils (canNotHappen, mapLeft)
-import Alba.Vm.Common.Logging (logFunctionExit, logOp, logStart)
+import Alba.Vm.Common.Logging (logFailure, logFunctionExit, logOp, logStart)
 import Alba.Vm.Common.OpClasses (isConditionalOp, isPushOp)
 import Alba.Vm.Common.OpcodeL1 (opcodeL1ToWord8)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
@@ -112,8 +112,8 @@ evaluateScript' deps@(Deps {..}) txContext state@(VmState {code, exec}) = do
       state'' <-
         logOp op execP
           <$> maybe
-            (Left (SeBadOpcode (show op), state))
-            (mapLeft (,state))
+            (Left (SeBadOpcode (show op), logFailure op state))
+            (mapLeft (,logFailure op state))
             (evalVmOp op txContext state')
 
       verifySizeLimits state''
