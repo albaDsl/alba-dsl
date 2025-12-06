@@ -17,28 +17,43 @@ generateTable :: FunctionTable -> Text
 generateTable functions =
   let hline = replicate tableWidth '-' <> "\n"
       functions' = functionsSortedSlot functions
-   in T.pack (line "Module" "Line" "Function" "Slot" "Ops" "Sites")
+   in T.pack (line "Module" "Line" "Col" "Function" "Slot" "Ops" "Sites")
         <> T.pack hline
         <> T.pack (foldr functionLine "" functions')
         <> T.pack (printf "Functions total: %d\n" (length functions'))
 
 functionLine :: (FunctionId, Function) -> String -> String
 functionLine
-  (Standard moduleName lineNumber _columnNumber functionName, function)
+  (Standard moduleName lineNumber columnNumber functionName, function)
   acc =
-    functionLine' moduleName (show lineNumber) functionName function <> acc
+    functionLine'
+      moduleName
+      (show lineNumber)
+      (show columnNumber)
+      functionName
+      function
+      <> acc
 functionLine (Named name, function) acc =
-  functionLine' "" "" name function <> acc
-functionLine (Lambda idx, function) acc =
-  functionLine' "" "" (printf "Lambda %d" idx) function <> acc
+  functionLine' "-" "-" "-" name function <> acc
+functionLine
+  (Lambda moduleName lineNumber columnNumber _functionName, function)
+  acc =
+    functionLine'
+      moduleName
+      (show lineNumber)
+      (show columnNumber)
+      "<lambda>"
+      function
+      <> acc
 functionLine (Absolute slot, function) acc =
-  functionLine' "" "" (printf "Absolute %d" slot) function <> acc
+  functionLine' "-" "-" "-" (printf "<absolute:%d>" slot) function <> acc
 
-functionLine' :: String -> String -> String -> Function -> String
-functionLine' moduleName lineNumber functionName (Function {..}) =
+functionLine' :: String -> String -> String -> String -> Function -> String
+functionLine' moduleName lineNumber columnNumber functionName (Function {..}) =
   line
     (trunc widthModule moduleName)
     (trunc widthLine lineNumber)
+    (trunc widthColumn columnNumber)
     (trunc widthFunction functionName)
     (trunc widthSlot (maybe "?" show slot))
     (trunc widthOps (maybe "-" (show . S.length) code))
@@ -55,6 +70,9 @@ widthModule = 40
 
 widthLine :: Int
 widthLine = 5
+
+widthColumn :: Int
+widthColumn = 5
 
 widthFunction :: Int
 widthFunction = 25
@@ -78,14 +96,24 @@ tableWidth =
     + widthSites
     + 5
 
-line :: String -> String -> String -> String -> String -> String -> String
-line modStr lineStr funStr slotStr opsStr sitesStr =
+line ::
+  String ->
+  String ->
+  String ->
+  String ->
+  String ->
+  String ->
+  String ->
+  String
+line modStr lineStr colStr funStr slotStr opsStr sitesStr =
   printf
     formattingStr
     widthModule
     modStr
     widthLine
     lineStr
+    widthColumn
+    colStr
     widthFunction
     funStr
     widthSlot
@@ -96,4 +124,4 @@ line modStr lineStr funStr slotStr opsStr sitesStr =
     sitesStr
   where
     formattingStr :: String
-    formattingStr = "%-*s %-*s %-*s %-*s %-*s %-*s\n"
+    formattingStr = "%-*s %-*s %-*s %-*s %-*s %-*s %-*s\n"

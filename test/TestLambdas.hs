@@ -13,19 +13,41 @@ testLambdas :: TestTree
 testLambdas =
   testGroup
     "Lambdas"
-    [ testCase "Basic lambda ops" $ isTrue (evaluateProg progBasic),
+    [ testCase "Basic lambda ops (lambda1)" $ isTrue (evaluateProg progBasic1),
+      testCase "Basic lambda ops (lambda2)" $ isTrue (evaluateProg progBasic2),
+      testCase "Basic lambda ops (lambda3)" $ isTrue (evaluateProg progBasic3),
+      testCase "Untyped lambdas" $ isTrue (evaluateProg progUntyped),
       testCase "Mapping a lambda" $ isTrue (evaluateProg progMapLambda),
       testCase "Nested lambdas" $ isTrue (evaluateProg progNested)
     ]
 
-progBasic :: FN s (s > TBool)
-progBasic =
+progBasic1 :: FN s (s > TBool)
+progBasic1 =
   begin
-    # op3
+    # int 3
+    # lambda1 (opDup # opDup # opMul # opMul)
+    # (opDup # opToAltStack)
+    # (invoke1 # int 27 # opNumEqual)
+    # int 5
+    # opFromAltStack
+    # (invoke1 # int 125 # opNumEqual)
+    # opBoolAnd
+
+progBasic2 :: FN s (s > TBool)
+progBasic2 = int 3 # int 4 # lambda2 opMul # invoke2 # int 12 # opNumEqual
+
+progBasic3 :: FN s (s > TBool)
+progBasic3 =
+  int 6 # int 3 # int 7 # lambda3 opWithin # invoke3 # opTrue # opEqual
+
+progUntyped :: FN s (s > TBool)
+progUntyped =
+  begin
+    # int 3
     # lambda cube
     # (opDup # opToAltStack)
     # (invoke cube # int 27 # opNumEqual)
-    # op5
+    # int 5
     # opFromAltStack
     # (invoke cube # int 125 # opNumEqual)
     # opBoolAnd
@@ -36,7 +58,7 @@ progBasic =
 progMapLambda :: FN s (s > TBool)
 progMapLambda =
   begin
-    # lambda double
+    # lambda1 double
     # bytes [0, 1, 2, 3]
     # mapVec 1
     # bytes [0, 2, 4, 6]
@@ -45,10 +67,18 @@ progMapLambda =
     double :: FN (s > TBytes) (s > TBytes)
     double = opBin2Num # int 2 # opMul # nat 1 # opNum2Bin
 
-    mapVec :: Natural -> FN (s > TLambda > TBytes) (s > TBytes)
+    mapVec ::
+      Natural ->
+      FN
+        (s > TLambda '[TBytes] '[TBytes] > TBytes)
+        (s > TBytes)
     mapVec elemSize = unname @2 (mapVec' elemSize)
 
-    mapVec' :: Natural -> FN (s > N "f" TLambda > N "vec" TBytes) (s > TBytes)
+    mapVec' ::
+      Natural ->
+      FN
+        (s > N "f" (TLambda '[TBytes] '[TBytes]) > N "vec" TBytes)
+        (s > TBytes)
     mapVec' elemSize =
       begin
         # name @"size"
@@ -76,7 +106,7 @@ progMapLambda =
                       )
                     # uncons elemSize
                     # opSwap
-                    # (pick @"f" # invoke f)
+                    # (pick @"f" # invoke1)
                     # opSwap
                     # opCat
                     # opCat
@@ -88,9 +118,6 @@ progMapLambda =
               # drop @"size"
               # drop @"f"
           )
-
-    f :: FN (s > TBytes) (s > TBytes)
-    f = undefined
 
     uncons :: Natural -> FN (s > TBytes) (s > TBytes > TBytes)
     uncons elemSize = nat elemSize # opSplit
@@ -106,13 +133,13 @@ progNested :: FN s (s > TBool)
 progNested =
   begin
     # int 5
-    # lambda polynomial
-    # invoke polynomial
+    # lambda1 polynomial
+    # invoke1
     # int 132
     # opNumEqual
   where
     polynomial :: FN (s > TInt) (s > TInt)
-    polynomial = lambda cube # invoke cube # int 7 # opAdd
+    polynomial = lambda1 cube # invoke1 # int 7 # opAdd
 
     cube :: FN (s > TInt) (s > TInt)
     cube = opDup # opDup # opMul # opMul

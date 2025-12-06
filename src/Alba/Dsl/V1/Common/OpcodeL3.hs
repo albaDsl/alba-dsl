@@ -20,7 +20,7 @@ data OpcodeL3
 data FunctionId
   = Standard ModuleName LineNumber ColumnNumber FunctionName
   | Named String
-  | Lambda Int
+  | Lambda ModuleName LineNumber ColumnNumber FunctionName
   | Absolute Slot
   deriving (Eq, Ord, Show)
 

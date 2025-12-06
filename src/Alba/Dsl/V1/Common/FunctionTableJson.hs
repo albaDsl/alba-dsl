@@ -77,8 +77,9 @@ functionLongName fId =
     Standard moduleName line column functionName ->
       T.pack (printf "%s:%s:%d:%d" moduleName functionName line column)
     Named name -> T.pack name
-    Lambda slot -> T.pack (printf "Lambda %d" slot)
-    Absolute slot -> T.pack (printf "Absolute %d" slot)
+    Lambda moduleName line column functionName ->
+      T.pack (printf "lambda (%s:%s:%d:%d)" moduleName functionName line column)
+    Absolute slot -> T.pack (printf "absolute:%d" slot)
 
 functionShortName :: FunctionId -> Text
 functionShortName fId =

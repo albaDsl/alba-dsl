@@ -4,7 +4,7 @@ module Alba.Dsl.V1.Common.FunctionState
   ( FunctionState (..),
     FunctionTable,
     Function (..),
-    FunctionId,
+    FunctionId (..),
     startState,
     registerFunction,
     addFunctionBody,
@@ -12,6 +12,7 @@ module Alba.Dsl.V1.Common.FunctionState
     isRegistered,
     getSlot,
     getCallerFunctionId,
+    getCallerLambdaId,
     functionsSorted,
     functionsSortedSlot,
   )
@@ -25,9 +26,8 @@ import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
 import GHC.Stack (HasCallStack, SrcLoc (..), callStack, getCallStack)
 
-data FunctionState = FunctionState
-  { lambdaIdx :: Int,
-    functions :: FunctionTable
+newtype FunctionState = FunctionState
+  { functions :: FunctionTable
   }
   deriving (Eq, Show)
 
@@ -41,7 +41,7 @@ data Function = Function
 type FunctionTable = M.Map FunctionId Function
 
 startState :: FunctionState
-startState = FunctionState {lambdaIdx = 0, functions = M.empty}
+startState = FunctionState {functions = M.empty}
 
 registerFunction :: FunctionId -> FunctionState -> Maybe FunctionState
 registerFunction fId fs@FunctionState {functions} =
@@ -50,11 +50,8 @@ registerFunction fId fs@FunctionState {functions} =
       case fId of
         Standard {} ->
           fs {functions = M.insert fId (Function Nothing Nothing 1) functions}
-        Lambda idx ->
-          fs
-            { lambdaIdx = succ idx,
-              functions = M.insert fId (Function Nothing Nothing 0) functions
-            }
+        Lambda {} ->
+          fs {functions = M.insert fId (Function Nothing Nothing 0) functions}
         Named _ ->
           fs {functions = M.insert fId (Function Nothing Nothing 0) functions}
         Absolute slot ->
@@ -105,6 +102,13 @@ getCallerFunctionId =
                 fun
             )
         _ -> Nothing
+
+getCallerLambdaId :: (HasCallStack) => Maybe FunctionId
+getCallerLambdaId = convert <$> getCallerFunctionId
+  where
+    convert :: FunctionId -> FunctionId
+    convert (Standard moduleName line col fun) = Lambda moduleName line col fun
+    convert _ = error ""
 
 functionsSorted :: M.Map FunctionId Function -> [(FunctionId, Function)]
 functionsSorted = M.toList >>> sortBy (flip compare `on` ((.callSites) . snd))
