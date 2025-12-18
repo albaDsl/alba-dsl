@@ -9,8 +9,10 @@ module DemoPrelude
     module Dsl,
     Natural,
     c,
+    c',
     ev,
     evl,
+    evlh,
     evm,
     progSize,
     progList,
@@ -23,6 +25,7 @@ where
 import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progSize)
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Math
+import Alba.Misc.Logging (dumpLogToFile)
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026 hiding (FunctionTable)
 import Alba.Vm.Common.VmLimits (dumpMetrics)
@@ -32,11 +35,14 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text.Chart (height, options, plotWith)
 import Numeric.Natural (Natural)
-import Test.QuickCheck hiding (function)
+import Test.QuickCheck hiding (function, generate)
 import Text.Printf (printf)
 
 c :: (S s Base -> S s' alt') -> CodeL1
 c = compile Dsl.O1
+
+c' :: (S s Base -> S s' alt') -> CompilationResult
+c' = compile' Dsl.O1
 
 ev :: CodeL1 -> Integer -> Integer
 ev code x = toInt $ evaluateScript txCtx startState'
@@ -72,13 +78,24 @@ evl code x = dump $ evaluateScript txCtx startState'
   where
     txCtx = fromJust $ mkTxContext undefined 0 undefined
     startState' =
+      (startState paramsWithLargeStackLimits) {code, s = [i2SeUnsafe x]}
+
+    dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
+    dump (Right res) = dumpLog defaultDisplayOpts res
+    dump (Left (res, _)) = error (show res)
+
+evlh :: CompilationResult -> Integer -> IO ()
+evlh cr x = dump $ evaluateScript txCtx startState'
+  where
+    txCtx = fromJust $ mkTxContext undefined 0 undefined
+    startState' =
       (startState paramsWithLargeStackLimits)
-        { code,
+        { code = cr.code,
           s = [i2SeUnsafe x]
         }
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
-    dump (Right res) = dumpLog defaultDisplayOpts res
+    dump (Right res) = dumpLogToFile (Just cr) res.logData "log.html"
     dump (Left (res, _)) = error (show res)
 
 -- Prints VM metrics for the run.

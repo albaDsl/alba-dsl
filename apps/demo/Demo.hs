@@ -12,6 +12,7 @@ module Demo
     f7,
     f8,
     f9,
+    f10,
     prop1,
     prop2,
     prop3,
@@ -22,6 +23,8 @@ module Demo
   )
 where
 
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DemoPrelude
 import DslDemo.EllipticCurve.Constants qualified as EC
@@ -32,6 +35,7 @@ import DslDemo.Exponentiation qualified as Exp
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T25
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T26
+import Prelude hiding (foldl)
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -125,3 +129,20 @@ f9 =
   where
     solution :: Bytes
     solution = [0x02, 0x8b, 0x95, 0x89, 0x51, 0x8b, 0x51, 0x8a, 0x8b]
+
+-- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
+-- >>> Dsl.progSize f10
+-- "18 opcodes, 18 bytes. Including function table: 69 opcodes, 232 bytes.\n"
+f10 :: FN (s > TInt) (s > TInt)
+f10 = opDrop # f
+  where
+    f :: FN s (s > TInt)
+    f =
+      begin
+        # lambda2 add8
+        # int 0
+        # (nat 10 # lambda1 (op1Add # cast) # generate)
+        # foldl
+
+    add8 :: FN (s > TInt > TInt8) (s > TInt)
+    add8 = cast # opAdd
