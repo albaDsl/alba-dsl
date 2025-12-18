@@ -93,6 +93,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.Math,
       Alba.Dsl.V1.Bch2026.Contract.Prelude,
       Alba.Dsl.V1.Bch2026.Lang,
+      Alba.Dsl.V1.Bch2026.LangArgs,
       Alba.Dsl.V1.Bch2026.Ops,
       Alba.Dsl.V1.Bch2026.OpsUntyped,
       Alba.Dsl.V1.Bch2026.Stack,

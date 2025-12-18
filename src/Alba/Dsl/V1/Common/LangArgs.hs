@@ -6,11 +6,19 @@ module Alba.Dsl.V1.Common.LangArgs
     FindName,
     FindNamedArgs,
     RemoveNamedArgs,
+    UnNameSeveral,
+    UnNameNamed,
     name,
     name2,
     name2',
     name3,
     unname,
+    unnameArg,
+    unnameArg2,
+    unnameArg3,
+    unnameArg4,
+    unnameArg5,
+    unnameArg6,
   )
 where
 
@@ -59,6 +67,60 @@ unname ::
   FNA s'' alt s' alt'
 unname prog (S c fs) = let state' = S c fs in prog state'
 
+unnameArg ::
+  forall name s s'.
+  (UnNameNamed name s ~ s') =>
+  FN s s'
+unnameArg (S c fs) = let state' = S c fs in state'
+
+unnameArg2 ::
+  forall n1 n2 s1 s2 s3.
+  (UnNameNamed n1 s1 ~ s2, UnNameNamed n2 s2 ~ s3) =>
+  FN s1 s3
+unnameArg2 (S c fs) = let state' = S c fs in state'
+
+unnameArg3 ::
+  forall n1 n2 n3 s1 s2 s3 s4.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4
+  ) =>
+  FN s1 s4
+unnameArg3 (S c fs) = let state' = S c fs in state'
+
+unnameArg4 ::
+  forall n1 n2 n3 n4 s1 s2 s3 s4 s5.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5
+  ) =>
+  FN s1 s5
+unnameArg4 (S c fs) = let state' = S c fs in state'
+
+unnameArg5 ::
+  forall n1 n2 n3 n4 n5 s1 s2 s3 s4 s5 s6.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6
+  ) =>
+  FN s1 s6
+unnameArg5 (S c fs) = let state' = S c fs in state'
+
+unnameArg6 ::
+  forall n1 n2 n3 n4 n5 n6 s1 s2 s3 s4 s5 s6 s7.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6,
+    UnNameNamed n6 s6 ~ s7
+  ) =>
+  FN s1 s7
+unnameArg6 (S c fs) = let state' = S c fs in state'
+
 type family
   FindName
     (name :: Symbol)
@@ -67,7 +129,7 @@ type family
     Maybe Nat
   where
   FindName name '[] idx = TypeError ('Text "Can't find name.")
-  FindName name (xs > N name t) idx = 'Just idx
+  FindName name (xs > N name _) idx = 'Just idx
   FindName name (xs > _) idx = FindName name xs (idx + 1)
 
 type family
@@ -102,3 +164,7 @@ type family UnNameSeveral (count :: Nat) (xs :: [Type]) :: [Type] where
   UnNameSeveral 0 xs = xs
   UnNameSeveral count (xs > N n t) = UnNameSeveral (count - 1) xs > t
   UnNameSeveral count (xs > x) = UnNameSeveral count xs > x
+
+type family UnNameNamed (name :: Symbol) (xs :: [Type]) :: [Type] where
+  UnNameNamed name (xs > N name t) = xs > t
+  UnNameNamed name (xs > x) = UnNameNamed name xs > x
