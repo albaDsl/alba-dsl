@@ -51,7 +51,7 @@ registerFunction fId fs@FunctionState {functions} =
         Standard {} ->
           fs {functions = M.insert fId (Function Nothing Nothing 1) functions}
         Lambda {} ->
-          fs {functions = M.insert fId (Function Nothing Nothing 0) functions}
+          fs {functions = M.insert fId (Function Nothing Nothing 1) functions}
         Named _ ->
           fs {functions = M.insert fId (Function Nothing Nothing 0) functions}
         Absolute slot ->
