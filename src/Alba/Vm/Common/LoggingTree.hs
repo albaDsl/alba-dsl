@@ -31,12 +31,17 @@ data Node = Node
 
 type Path = [Int]
 
+data LoopResult = LoopResult
+  { node :: Node,
+    _rest :: VmLogs,
+    _processed :: VmLogs,
+    _summary :: Text
+  }
+
 logDataToTree :: LogDisplayOpts -> VmLogs -> Node
 logDataToTree opts logData =
   let topNode = Node "Top" False "" Nothing startPath []
-   in fst3 $ loop opts logData S.empty startPath topNode
-  where
-    fst3 (x, _, _) = x
+   in (loop opts logData S.empty startPath topNode).node
 
 loop ::
   LogDisplayOpts ->
@@ -44,14 +49,15 @@ loop ::
   VmLogs ->
   Path ->
   Node ->
-  (Node, VmLogs, Text)
-loop _opts S.Empty _processed _path tree = (tree, S.Empty, "")
+  LoopResult
+loop _opts S.Empty processed _path tree = LoopResult tree S.Empty processed ""
 loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
   case entry of
     Completed {exec} | exec ->
       case entry.op of
         Start -> addAndContinue
-        FunctionExit -> (tree, rest, formatStack labels entry.stack)
+        FunctionExit ->
+          LoopResult tree rest processed (formatStack labels entry.stack)
         Op OP_DEFINE ->
           case processed of
             _ S.:|> code S.:|> slot
@@ -74,13 +80,13 @@ loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
           let path' = increment path
               header = opInvokeHeader opts prevEntry
               node = logEntryNode opts header entry path'
-              (n', rest', summary) =
+              LoopResult n' rest' processed'' summary =
                 loop opts rest processed' (addLevel path') node
               tree' =
                 addChild
                   (n' {stackSummary = Just summary})
                   (removeLastIfPushOp tree)
-           in loop opts rest' processed' path' tree'
+           in loop opts rest' processed'' path' tree'
         Op _x -> addAndContinue
     Completed {} -> loop opts rest processed' path tree
     Failed {} -> addAndContinue
