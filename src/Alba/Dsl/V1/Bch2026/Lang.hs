@@ -13,6 +13,7 @@ module Alba.Dsl.V1.Bch2026.Lang
     lambda,
     invoke,
     progBytes,
+    emptyProg,
   )
 where
 
@@ -127,3 +128,6 @@ progBytes :: FNA s alt s' alt' -> FN s (s > TBytes)
 progBytes prog (S c fs) =
   let (c', fs') = pass1 S.empty fs prog
    in S (aop' c (FunctionBody c')) fs'
+
+emptyProg :: FN s s
+emptyProg (S c fs) = S c fs
