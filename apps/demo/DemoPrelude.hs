@@ -1,28 +1,28 @@
 -- Copyright (c) 2025 albaDsl
 
 module DemoPrelude
-  ( module Alba.Dsl.V1.Bch2026,
+  ( -- module Alba.Dsl.V1.Bch2026,
     module Alba.Dsl.V1.Bch2026.Contract.Math,
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
+    module Dsl,
     Natural,
     c,
     ev,
     evl,
     evm,
-    listProg,
-    listProg',
-    listFt,
+    progSize,
+    progList,
+    progFt,
     plot,
     cube,
   )
 where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progSize)
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Math
-import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026 hiding (FunctionTable)
 import Alba.Vm.Common.VmLimits (dumpMetrics)
@@ -30,7 +30,6 @@ import Data.ByteString qualified as B
 import Data.Either (fromRight)
 import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
-import Data.Text qualified as T
 import Data.Text.Chart (height, options, plotWith)
 import Numeric.Natural (Natural)
 import Test.QuickCheck hiding (function)
@@ -114,16 +113,14 @@ evm code x = dump $ evaluateScript txCtx startState'
       where
         budget = B.length code * vmParamsStandard.costBudgetPerInputByte
 
-listProg :: (S s Base -> S s' alt') -> IO ()
-listProg prog = list (fst $ compileL2 Dsl.O1 prog)
+progSize :: FNA s alt s' alt' -> IO ()
+progSize prog = putStrLn (Dsl.progSize prog)
 
-listProg' :: (S s Base -> S s' alt') -> IO ()
-listProg' prog = list (fst $ compileL2 Dsl.None prog)
+progList :: FNA s alt s' alt' -> IO ()
+progList prog = putStrLn (Dsl.progList prog)
 
-listFt :: (S s Base -> S s' alt') -> IO ()
-listFt prog = do
-  let cr = compile' Dsl.O1 prog
-  putStrLn $ T.unpack $ FTT.generateTable cr.functionTable
+progFt :: FNA s alt s' alt' -> IO ()
+progFt prog = putStrLn (Dsl.progFt prog)
 
 plot :: [Integer] -> IO ()
 plot = plotWith (options {height = 10})

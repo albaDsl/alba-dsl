@@ -90,11 +90,12 @@ tableWidth :: Int
 tableWidth =
   widthModule
     + widthLine
+    + widthColumn
     + widthFunction
     + widthOps
     + widthSlot
     + widthSites
-    + 5
+    + 6
 
 line ::
   String ->

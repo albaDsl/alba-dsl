@@ -7,6 +7,7 @@ module Alba.Dsl.V1.Common.Compile
     compile,
     compile',
     compileL2,
+    compileL2WithDetails,
     pass1,
     optimize,
     writeFunctionTable,
@@ -40,7 +41,7 @@ import Alba.Vm.Common.OpcodeL2
     bytesToDataOp,
     codeL2ToCodeL1,
   )
-import Control.Arrow (first, (>>>))
+import Control.Arrow ((>>>))
 import Control.Monad.State.Lazy (State, get, put, runState)
 import Crypto.Hash qualified as H
 import Data.ByteArray (convert)
@@ -89,17 +90,29 @@ compileL2 ::
   Optimize ->
   (S s alt -> S s' alt') ->
   (CodeL2, FunctionState)
-compileL2 opt =
+compileL2 opt prog =
+  let (code, fs, _) = compileL2WithDetails opt prog
+   in (code, fs)
+
+compileL2WithDetails ::
+  forall s s' alt alt'.
+  Optimize ->
+  (S s alt -> S s' alt') ->
+  (CodeL2, FunctionState, CodeL2)
+compileL2WithDetails opt prog =
   case opt of
-    None -> compileL2'
-    O1 -> first optimize <$> compileL2'
+    None -> compileL2' prog
+    O1 ->
+      let (c1, fs, c2) = compileL2' prog
+       in (optimize c1, fs, optimize c2)
   where
-    compileL2' prog = do
-      let (code, fs) = pass1 S.empty startState prog
+    compileL2' prog' = do
+      let (code, fs) = pass1 S.empty startState prog'
           fs' = assignSlots fs
           defs = functionDefinitions fs'
           code' = pass2 opt fs' (defs S.>< code)
-       in (code', fs')
+          codeWithoutFunTable = pass2 opt fs' code
+       in (code', fs', codeWithoutFunTable)
 
 pass1 ::
   forall s s' alt alt'.
