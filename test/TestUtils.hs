@@ -16,6 +16,7 @@ import Alba.Dsl.V1.Common.FunctionTableJson
   ( FunctionTableEntry (..),
     tableEntries,
   )
+import Alba.Misc.Logging qualified as ML
 import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
 import Alba.Vm.Bch2025 qualified as Bch2025
@@ -113,23 +114,8 @@ showLog tr =
   trace (T.unpack $ logDataToText defaultDisplayOpts tr.logData)
 
 dumpLogToFile :: TestResult -> IO ()
-dumpLogToFile tr = do
-  let opts =
-        defaultDisplayOpts
-          { Log.functionTable =
-              convertTable . (.functionTable) <$> tr.compilationResult
-          }
-      html = logDataToHtml opts tr.logData
-  T.writeFile "log.html" html
-
-convertTable :: FunctionTable -> Log.FunctionTable
-convertTable functions =
-  let entries = tableEntries functions
-      entries' = (\e -> (e.slot, convert e)) <$> entries
-   in M.fromList entries'
-  where
-    convert :: FunctionTableEntry -> Log.FunctionTableEntry
-    convert FunctionTableEntry {..} = Log.FunctionTableEntry {..}
+dumpLogToFile TestResult {..} =
+  ML.dumpLogToFile compilationResult logData "log.html"
 
 evaluateProg ::
   FNA s '[] s' alt' ->

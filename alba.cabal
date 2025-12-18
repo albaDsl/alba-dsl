@@ -134,6 +134,7 @@ library
       Alba.Misc.Debug,
       Alba.Misc.Haskoin,
       Alba.Misc.KeyPair,
+      Alba.Misc.Logging,
       Alba.Misc.MockVals,
       Alba.Misc.Opts,
       Alba.Misc.Utils,
