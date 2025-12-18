@@ -23,7 +23,7 @@ module Demo
   )
 where
 
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DemoPrelude
@@ -139,10 +139,10 @@ f10 = opDrop # f
     f :: FN s (s > TInt)
     f =
       begin
-        # lambda2 add8
+        # lambda2 add
         # int 0
         # (nat 10 # lambda1 (op1Add # cast) # generate)
         # foldl
 
-    add8 :: FN (s > TInt > TInt8) (s > TInt)
-    add8 = cast # opAdd
+    add :: FN (s > TInt > TInt8) (s > TInt)
+    add = cast # opAdd
