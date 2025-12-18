@@ -42,6 +42,10 @@ newtype BytesNonEmpty = BytesNonEmpty Bytes
 newtype BytesHalf = BytesHalf Bytes
   deriving (Show)
 
+-- Size range of a bytestring on the stack.
+newtype BytesSize = BytesSize Integer
+  deriving (Show)
+
 newtype VmInteger = VmInteger Integer
   deriving (Show)
 
@@ -62,6 +66,11 @@ instance Arbitrary BytesHalf where
   arbitrary = do
     x <- resize bytesHalfMaxSize (listOf byte)
     pure $ BytesHalf (B.pack x)
+
+instance Arbitrary BytesSize where
+  arbitrary = do
+    x <- chooseInteger (0, fromIntegral bytesMaxSize) :: Gen Integer
+    pure $ BytesSize x
 
 byte :: Gen Word8
 byte = arbitrary
