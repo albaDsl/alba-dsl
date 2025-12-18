@@ -90,6 +90,7 @@ library
       Alba.Dsl.V1.Bch2025.TxDsl,
       Alba.Dsl.V1.Bch2025.Version,
       Alba.Dsl.V1.Bch2026,
+      Alba.Dsl.V1.Bch2026.Contract.Int64,
       Alba.Dsl.V1.Bch2026.Contract.Math,
       Alba.Dsl.V1.Bch2026.Contract.PackFs,
       Alba.Dsl.V1.Bch2026.Contract.Prelude,
