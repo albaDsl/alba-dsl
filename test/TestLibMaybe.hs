@@ -1,0 +1,70 @@
+-- Copyright (c) 2025 albaDsl
+
+module TestLibMaybe (testLibMaybe) where
+
+import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
+import Alba.Dsl.V1.Bch2026.Contract.Maybe
+  ( TMaybe,
+    fromMaybe,
+    ifJust,
+    isJust,
+    isNothing,
+    just,
+    maybe,
+    nothing,
+  )
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.HUnit (testCase)
+import TestUtils2026 (evaluateProg, isTrue)
+import Prelude (($))
+
+testLibMaybe :: TestTree
+testLibMaybe =
+  testGroup
+    "Maybe"
+    [ testCase "Basics" $ do isTrue (evaluateProg progBasics)
+    ]
+
+progBasics :: FN s (s > TBool)
+progBasics =
+  begin
+    # ( begin
+          # (int8 1 # just # isJust # opVerify)
+          # (int8 1 # just # isNothing # opFalse # opEqualVerify)
+          # (emptyInt8 # isJust # opFalse # opEqualVerify)
+          # (emptyInt8 # isNothing # opVerify)
+          # (int64 1 # just # isJust # opVerify)
+          # (int64 1 # just # isNothing # opFalse # opEqualVerify)
+          # (emptyInt64 # isJust # opFalse # opEqualVerify)
+          # (emptyInt64 # isNothing # opVerify)
+      )
+    # ( begin
+          # (int8 2 # int8 1 # just # fromMaybe # int8 1 # opEqualVerify)
+          # (int8 2 # emptyInt8 # fromMaybe # int8 2 # opEqualVerify)
+          # (int64 2 # int64 1 # just # fromMaybe # int64 1 # opEqualVerify)
+          # (int64 2 # emptyInt64 # fromMaybe # int64 2 # opEqualVerify)
+      )
+    # ( begin
+          # (int8 1 # just # ifJust opNop (int8 0) # int8 1 # opEqualVerify)
+          # (emptyInt8 # ifJust opNop (int8 0) # int8 0 # opEqualVerify)
+          # (int64 1 # just # ifJust opNop (int64 0) # int64 1 # opEqualVerify)
+          # (emptyInt64 # ifJust opNop (int64 0) # int64 0 # opEqualVerify)
+      )
+    # ( begin
+          # (int8 2 # lambda1 int64To8 # int64 1 # just # maybe)
+          # (int8 1 # opEqualVerify)
+          # (int8 2 # lambda1 int64To8 # nothing # maybe)
+          # (int8 2 # opEqualVerify)
+      )
+    # opTrue
+  where
+    emptyInt8 :: FN s (s > TMaybe TInt8)
+    emptyInt8 = nothing
+
+    emptyInt64 :: FN s (s > TMaybe TInt64)
+    emptyInt64 = nothing
+
+    int64To8 :: FN (s > TInt64) (s > TInt8)
+    int64To8 = cast

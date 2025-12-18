@@ -33,6 +33,7 @@ import TestStackBranches (testStackBranches)
 import TestTurtleVm2025 (testTurtleVm2025)
 import TestTurtleVm2026 (testTurtleVm2026)
 import TestLibTuple (testLibTuple)
+import TestLibMaybe (testLibMaybe)
 
 main :: IO ()
 main = defaultMain tests
@@ -59,6 +60,7 @@ tests =
       testInvalidStack,
       testLambdas,
       testLibTuple,
+      testLibMaybe,
       testLibauthVectors2025,
       testLibauthVectors2026,
       testLoops,
