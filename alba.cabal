@@ -93,6 +93,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.Applicative,
       Alba.Dsl.V1.Bch2026.Contract.Int64,
       Alba.Dsl.V1.Bch2026.Contract.Int8,
+      Alba.Dsl.V1.Bch2026.Contract.Hide,
       Alba.Dsl.V1.Bch2026.Contract.Math,
       Alba.Dsl.V1.Bch2026.Contract.PackFs,
       Alba.Dsl.V1.Bch2026.Contract.Maybe,
