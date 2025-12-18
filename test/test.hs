@@ -17,6 +17,9 @@ import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
 import TestLambdas (testLambdas)
+import TestLibMaybe (testLibMaybe)
+import TestLibTuple (testLibTuple)
+import TestLibVector (testLibVector)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
 import TestLookupTables (testLookupTables)
@@ -32,8 +35,6 @@ import TestOptimizer (testOptimizer)
 import TestStackBranches (testStackBranches)
 import TestTurtleVm2025 (testTurtleVm2025)
 import TestTurtleVm2026 (testTurtleVm2026)
-import TestLibTuple (testLibTuple)
-import TestLibMaybe (testLibMaybe)
 
 main :: IO ()
 main = defaultMain tests
@@ -61,6 +62,7 @@ tests =
       testLambdas,
       testLibTuple,
       testLibMaybe,
+      testLibVector,
       testLibauthVectors2025,
       testLibauthVectors2026,
       testLoops,
