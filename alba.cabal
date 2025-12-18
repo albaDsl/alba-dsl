@@ -56,7 +56,7 @@ common shared-properties
       generic-lens,
       haskoin-core-bch-lite,
       here,
-      liquidhaskell == 0.9.8.2,
+      -- liquidhaskell == 0.9.8.2, -- Disable for now.
       bchn-secp256k1,
       memory,
       microlens,

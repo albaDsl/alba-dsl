@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-import: ./lts-nightly-2024-10-11.config
+import: ./lts-23.28.config
 packages: alba.cabal bchn-secp256k1
 
 jobs: $ncpus
