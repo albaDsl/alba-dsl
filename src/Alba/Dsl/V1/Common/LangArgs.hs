@@ -8,6 +8,13 @@ module Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     UnNameSeveral,
     UnNameNamed,
+    ns1,
+    ns2,
+    ns3,
+    ns4,
+    ns5,
+    ns6,
+    ns7,
     name,
     name2,
     name2',
@@ -19,11 +26,13 @@ module Alba.Dsl.V1.Common.LangArgs
     unnameArg4,
     unnameArg5,
     unnameArg6,
+    unnameArg7,
   )
 where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (FNA, S (S), type (:|))
+import Alba.Dsl.V1.Common.Lang (castStack)
+import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Reverse)
 import Data.Kind (Type)
 import GHC.TypeLits
@@ -36,6 +45,46 @@ import GHC.TypeLits
   )
 
 data N (n :: Symbol) (t :: Type)
+
+-- ## "Name stack" (ns) functions.
+ns1 :: forall n1 s x1. FN (s > x1) (s > N n1 x1)
+ns1 = castStack
+
+ns2 ::
+  forall n1 n2 s x1 x2.
+  FN (s > x1 > x2) (s > N n1 x1 > N n2 x2)
+ns2 = castStack
+
+ns3 ::
+  forall n1 n2 n3 s x1 x2 x3.
+  FN (s > x1 > x2 > x3) (s > N n1 x1 > N n2 x2 > N n3 x3)
+ns3 = castStack
+
+ns4 ::
+  forall n1 n2 n3 n4 s x1 x2 x3 x4.
+  FN (s > x1 > x2 > x3 > x4) (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4)
+ns4 = castStack
+
+ns5 ::
+  forall n1 n2 n3 n4 n5 s x1 x2 x3 x4 x5.
+  FN
+    (s > x1 > x2 > x3 > x4 > x5)
+    (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5)
+ns5 = castStack
+
+ns6 ::
+  forall n1 n2 n3 n4 n5 n6 s x1 x2 x3 x4 x5 x6.
+  FN
+    (s > x1 > x2 > x3 > x4 > x5 > x6)
+    (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5 > N n6 x6)
+ns6 = castStack
+
+ns7 ::
+  forall n1 n2 n3 n4 n5 n6 n7 s x1 x2 x3 x4 x5 x6 x7.
+  FN
+    (s > x1 > x2 > x3 > x4 > x5 > x6 > x7)
+    (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5 > N n6 x6 > N n7 x7)
+ns7 = castStack
 
 name ::
   forall name t s s' alt alt'.
@@ -120,6 +169,19 @@ unnameArg6 ::
   ) =>
   FN s1 s7
 unnameArg6 (S c fs) = let state' = S c fs in state'
+
+unnameArg7 ::
+  forall n1 n2 n3 n4 n5 n6 n7 s1 s2 s3 s4 s5 s6 s7 s8.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6,
+    UnNameNamed n6 s6 ~ s7,
+    UnNameNamed n7 s7 ~ s8
+  ) =>
+  FN s1 s8
+unnameArg7 (S c fs) = let state' = S c fs in state'
 
 type family
   FindName

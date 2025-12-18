@@ -8,6 +8,7 @@ module Alba.Dsl.V1.Common.Lang
     ex2,
     natToInt,
     cast,
+    castStack,
     branch1,
     branch2,
     branch3,
@@ -46,6 +47,9 @@ natToInt = cast
 
 cast :: FN (s > t1) (s > t2)
 cast (S c fs) = let state = S c fs in state
+
+castStack :: FNA s alt s' alt'
+castStack (S c fs) = let state = S c fs in state
 
 branch1 :: forall s. FN s (Branch1 s)
 branch1 (S c fs) = S c fs
