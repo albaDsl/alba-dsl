@@ -42,7 +42,7 @@ testCodeMetrics =
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            costOfWindowedMul @?= 33_532_367
+            costOfWindowedMul @?= 33_534_819
         ]
     ]
 

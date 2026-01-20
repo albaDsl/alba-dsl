@@ -6,7 +6,8 @@ import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))
-import Alba.Vm.Common.StackElement (stackElementToBytes)
+import Alba.Vm.Common.StackElement (StackElement (..), stackElementToBytes)
+import Alba.Vm.Common.VmLimits (addBytesPushed)
 import Alba.Vm.Common.VmParams (VmParams (..))
 import Alba.Vm.Common.VmStack (CondStackElement (..), condStackPush)
 import Alba.Vm.Common.VmState (VmState (..))
@@ -23,7 +24,7 @@ evalOpDefineInvoke op st@(VmState {code, signedCode, exec, functions, s}) =
           body' = stackElementToBytes body
       verifyFunctionIdentifierSize st.params name'
       functions' <- insertFunctionOrFail name' body' functions
-      pure st {s = s', functions = functions'}
+      pure $ addBytesPushed body.byteSize (st {s = s', functions = functions'})
     OP_INVOKE -> Just $ do
       (s' :|> name) <- pure s
       let name' = stackElementToBytes name

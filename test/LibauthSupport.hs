@@ -332,8 +332,8 @@ verifyMetrics testMode test validationResult =
         scriptRedeemResult
 
 tryTest :: TestMode -> LibauthTest -> IO ()
-tryTest testMode t@(LibauthTest {shortId}) = do
-  res <- runTest testMode t
+tryTest testMode test@(LibauthTest {shortId}) = do
+  res <- runTest testMode test
   case res of
     Right testResult ->
       case testResult of
@@ -342,7 +342,10 @@ tryTest testMode t@(LibauthTest {shortId}) = do
         (Right (Left (err, _))) -> do
           printf " , \"%s\" -- failed with %s\n" shortId (show err)
         (Right (Right _res')) -> do
-          printf " , \"%s\" -- passed validation.\n" shortId
+          printf " , \"%s\" -- " shortId
+          if verifyMetrics testMode test testResult
+            then printf "passed validation.\n"
+            else printf "passed validation but failed metrics!\n"
     Left err ->
       printf " , \"%s\" -- failure %s\n" shortId (show err)
   1 @?= (1 :: Int)

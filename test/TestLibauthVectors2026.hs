@@ -13,6 +13,7 @@ import LibauthSupport
     findAndLoad,
     printSummary,
     runTest,
+    tryTest,
     verifyResult,
   )
 import Test.Tasty (TestTree, testGroup)
@@ -59,6 +60,8 @@ testLibauthVectors2026 =
       pure tests'
 
     runAndVerify mode test = runTest mode test >>= verifyResult mode test
+
+    -- runAndVerify' = tryTest
 
     standardTests = findAndLoad "bch_2026_standard" 69 14283
 
