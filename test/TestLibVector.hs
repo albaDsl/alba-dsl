@@ -468,11 +468,14 @@ propLastInitUnsnoc (BytesSize size) =
         # (pick @"vec" # V.last # liftA2Maybe)
         # (roll @"vec" # V.unsnoc # opEqual)
 
-propTakeDropSplitAt :: BytesSize -> BytesSize -> Bool
+-- 9998 is based on current 10K element limit and leaving room for the
+-- tuple size field.
+propTakeDropSplitAt :: BytesSize -> BytesSize -> Property
 propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
-  let len = size1 `div` testVectorElemSize
-      idx = size2 `div` testVectorElemSize
-   in isTrue' (evaluateProg (prog (fromIntegral len) (fromIntegral idx)))
+  (size1 <= 9_998 && size2 <= 9_998) ==>
+    let len = size1 `div` testVectorElemSize
+        idx = size2 `div` testVectorElemSize
+     in isTrue' (evaluateProg (prog (fromIntegral len) (fromIntegral idx)))
   where
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len' idx' =
