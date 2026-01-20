@@ -10,11 +10,10 @@ module Alba.Dsl.V1.Bch2025.LangUntyped
 where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opDup, opIf)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, pushIntegerOp)
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, SU (SU))
 import Alba.Vm.Common.BasicTypes (Bytes)
-import Alba.Vm.Common.OpcodeL2 (bytesToDataOp)
 
 int :: Integer -> FNU
 int n (SU c fs) = SU (aop c (pushIntegerOp (fromIntegral n))) fs

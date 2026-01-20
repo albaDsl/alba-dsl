@@ -15,7 +15,7 @@ where
 
 import Alba.Dsl.V1.Bch2025.Ops (opDup, opIf)
 import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackEntry, StackInt, StackNat)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, pushIntegerOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.Stack
@@ -29,7 +29,6 @@ import Alba.Dsl.V1.Common.Stack
     TSig,
   )
 import Alba.Vm.Common.BasicTypes (Bytes)
-import Alba.Vm.Common.OpcodeL2 (bytesToDataOp)
 import Numeric.Natural (Natural)
 
 int :: Integer -> FN s (s > TInt)

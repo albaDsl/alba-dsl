@@ -6,7 +6,6 @@ module Alba.Vm.Common.OpcodeL2
     codeL2ToCodeL1,
     codeL1ToCodeL2,
     codeL1ToCodeL2Limited,
-    bytesToDataOp,
     getOp,
     isMinimal,
   )
@@ -558,24 +557,6 @@ getOp' opcodeL1 code =
 getPushVal :: Int -> CodeL1 -> Maybe (Bytes, CodeL1)
 getPushVal count code | count <= B.length code = Just $ B.splitAt count code
 getPushVal _count _code = Nothing
-
-{- ORMOLU_DISABLE -}
-bytesToDataOp :: Bytes -> OpcodeL2
-bytesToDataOp bytes =
-  case B.length bytes of
-    0 -> OP_0
-    1 -> case B.head bytes of
-      1 -> OP_1; 2 -> OP_2; 3 -> OP_3; 4 -> OP_4; 5 -> OP_5; 6 -> OP_6;
-      7 -> OP_7; 8 -> OP_8; 9 -> OP_9; 10 -> OP_10; 11 -> OP_11; 12 -> OP_12;
-      13 -> OP_13; 14 -> OP_14; 15 -> OP_15; 16 -> OP_16
-      0x81 -> OP_1NEGATE
-      _ -> OP_DATA L1.OP_DATA_01 bytes
-    x | x > 1 && x <= 75 -> OP_DATA (toEnum x) bytes
-    x | x <= fromIntegral (maxBound :: Word8) -> OP_DATA L1.OP_PUSHDATA1 bytes
-    x | x <= fromIntegral (maxBound :: Word16) -> OP_DATA L1.OP_PUSHDATA2 bytes
-    x | x <= fromIntegral (maxBound :: Word32) -> OP_DATA L1.OP_PUSHDATA4 bytes
-    _ -> error "bytesToDataOp: ByteString too long."
-{- ORMOLU_ENABLE -}
 
 isMinimal :: OpcodeL2 -> Bool
 isMinimal (OP_DATA L1.OP_DATA_01 bytes) =

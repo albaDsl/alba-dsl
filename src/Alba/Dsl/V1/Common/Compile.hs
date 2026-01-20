@@ -15,7 +15,10 @@ module Alba.Dsl.V1.Common.Compile
 where
 
 import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
-import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils
+  ( bytesToDataOp,
+    pushIntegerOp,
+  )
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
     FunctionId,
@@ -38,7 +41,6 @@ import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2
   ( CodeL2,
     OpcodeL2 (..),
-    bytesToDataOp,
     codeL2ToCodeL1,
   )
 import Control.Arrow ((>>>))
