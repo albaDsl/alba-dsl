@@ -8,7 +8,7 @@ import Alba.Dsl.V1.Bch2026
     TInt,
     begin,
     cast,
-    function,
+    constant,
     int,
     lambda1,
     nat,
@@ -19,7 +19,7 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFs)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
 
@@ -36,12 +36,12 @@ instance PackFs TInt64 where
 
 int64PackFs :: FN s (s > TPackFs TInt64)
 int64PackFs =
-  function
+  constant
     ( begin
         # size @TInt64
         # lambda1 (pack @TInt64)
         # lambda1 (unpack @TInt64)
-        # mkPackFs
+        # mkPackFsM
     )
 
 int64Max :: Integer

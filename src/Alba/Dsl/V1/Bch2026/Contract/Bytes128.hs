@@ -18,7 +18,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    function,
+    constant,
     int,
     lambda1,
     name,
@@ -38,7 +38,7 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFs)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Control.Exception (assert)
 import Data.ByteString qualified as B
@@ -58,12 +58,12 @@ instance PackFs TBytes128 where
 
 bytes128PackFs :: FN s (s > TPackFs TBytes128)
 bytes128PackFs =
-  function
+  constant
     ( begin
         # size @TBytes128
         # lambda1 (pack @TBytes128)
         # lambda1 (unpack @TBytes128)
-        # mkPackFs
+        # mkPackFsM
     )
 
 maxPayloadSize :: Int

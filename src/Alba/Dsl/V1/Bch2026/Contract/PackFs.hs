@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Bch2026.Contract.PackFs
     TPackFs,
     packFs,
     mkPackFs,
+    mkPackFsM,
     getSize,
     getPack,
     getUnpack,
@@ -70,14 +71,18 @@ mkPackFs ::
   FN
     (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
     (s > TPackFs a)
-mkPackFs =
-  function
-    ( begin
-        # (toInt # nat fieldSize # opNum2Bin # rot)
-        # (toInt # nat fieldSize # opNum2Bin # rot)
-        # (toInt # nat fieldSize # opNum2Bin # rot)
-        # (opCat # opCat # cast)
-    )
+mkPackFs = function mkPackFsM
+
+mkPackFsM ::
+  FN
+    (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
+    (s > TPackFs a)
+mkPackFsM =
+  begin
+    # (toInt # nat fieldSize # opNum2Bin # rot)
+    # (toInt # nat fieldSize # opNum2Bin # rot)
+    # (toInt # nat fieldSize # opNum2Bin # rot)
+    # (opCat # opCat # cast)
   where
     toInt :: forall s' a'. FN (s' > a') (s' > TInt)
     toInt = cast

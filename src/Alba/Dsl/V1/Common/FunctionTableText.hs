@@ -2,11 +2,12 @@
 
 module Alba.Dsl.V1.Common.FunctionTableText (generateTable) where
 
-import Alba.Dsl.V1.Common.FunctionState
+import Alba.Dsl.V1.Common.FunctionStateResolved
   ( Function (..),
     FunctionTable,
-    functionsSortedSlot,
+    functionsSortedBySlot,
   )
+import Alba.Dsl.V1.Common.FunctionTableJson (functionLongName, functionType)
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
 import Data.Sequence qualified as S
 import Data.Text (Text)
@@ -16,66 +17,58 @@ import Text.Printf (printf)
 generateTable :: FunctionTable -> Text
 generateTable functions =
   let hline = replicate tableWidth '-' <> "\n"
-      functions' = functionsSortedSlot functions
-   in T.pack (line "Module" "Line" "Col" "Function" "Slot" "Ops" "Sites")
+      functions' = functionsSortedBySlot functions
+   in line "Location" "Function" "Type" "Slot" "Ops" "Sites"
         <> T.pack hline
-        <> T.pack (foldr functionLine "" functions')
+        <> foldr functionLine "" functions'
         <> T.pack (printf "Functions total: %d\n" (length functions'))
 
-functionLine :: (FunctionId, Function) -> String -> String
-functionLine
-  (Standard moduleName lineNumber columnNumber functionName, function)
-  acc =
-    functionLine'
-      moduleName
-      (show lineNumber)
-      (show columnNumber)
-      functionName
-      function
-      <> acc
-functionLine (Named name, function) acc =
-  functionLine' "-" "-" "-" name function <> acc
-functionLine
-  (Lambda moduleName lineNumber columnNumber _functionName, function)
-  acc =
-    functionLine'
-      moduleName
-      (show lineNumber)
-      (show columnNumber)
-      "<lambda>"
-      function
-      <> acc
-functionLine (Absolute slot, function) acc =
-  functionLine' "-" "-" "-" (printf "<absolute:%d>" slot) function <> acc
+functionLine :: (FunctionId, Function) -> Text -> Text
+functionLine (fId, fun) acc =
+  let (loc, fName) = splitName (functionLongName fId)
+      fType = functionType fId
+   in functionLine' (dropTrailingColon loc) fName (trim fType) fun <> acc
+  where
+    splitName :: Text -> (Text, Text)
+    splitName = T.breakOnEnd ":"
 
-functionLine' :: String -> String -> String -> String -> Function -> String
-functionLine' moduleName lineNumber columnNumber functionName (Function {..}) =
+    dropTrailingColon :: Text -> Text
+    dropTrailingColon = T.dropEnd 1
+
+    trim :: Text -> Text
+    trim str | match "Function" str = ""
+    trim str = str
+
+    match :: Text -> Text -> Bool
+    match _ "" = False
+    match needle haystack
+      | T.take (T.length needle) haystack == needle = True
+      | otherwise = match needle (T.tail haystack)
+
+functionLine' :: Text -> Text -> Text -> Function -> Text
+functionLine' loc fName fType (Function {..}) =
   line
-    (trunc widthModule moduleName)
-    (trunc widthLine lineNumber)
-    (trunc widthColumn columnNumber)
-    (trunc widthFunction functionName)
-    (trunc widthSlot (maybe "?" show slot))
-    (trunc widthOps (maybe "-" (show . S.length) code))
-    (trunc widthSites (show callSites))
+    (trunc widthLocation loc)
+    (trunc widthFunction fName)
+    (trunc widthType fType)
+    (trunc widthSlot (T.pack $ show slot))
+    (trunc widthOps (maybe "-" (T.pack . show . S.length) code))
+    (trunc widthSites (T.pack $ show callSites))
 
-trunc :: Int -> String -> String
+trunc :: Int -> Text -> Text
 trunc n str =
-  if length str > n
-    then take (pred n) str <> "$"
+  if T.length str > n
+    then T.take (pred n) str <> "$"
     else str
 
-widthModule :: Int
-widthModule = 40
-
-widthLine :: Int
-widthLine = 5
-
-widthColumn :: Int
-widthColumn = 5
+widthLocation :: Int
+widthLocation = 50
 
 widthFunction :: Int
-widthFunction = 25
+widthFunction = 30
+
+widthType :: Int
+widthType = 17
 
 widthOps :: Int
 widthOps = 5 :: Int
@@ -88,41 +81,38 @@ widthSites = 5
 
 tableWidth :: Int
 tableWidth =
-  widthModule
-    + widthLine
-    + widthColumn
+  widthLocation
     + widthFunction
+    + widthType
     + widthOps
     + widthSlot
     + widthSites
     + 6
 
 line ::
-  String ->
-  String ->
-  String ->
-  String ->
-  String ->
-  String ->
-  String ->
-  String
-line modStr lineStr colStr funStr slotStr opsStr sitesStr =
-  printf
-    formattingStr
-    widthModule
-    modStr
-    widthLine
-    lineStr
-    widthColumn
-    colStr
-    widthFunction
-    funStr
-    widthSlot
-    slotStr
-    widthOps
-    opsStr
-    widthSites
-    sitesStr
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text ->
+  Text
+line locStr funStr typeStr slotStr opsStr sitesStr =
+  T.pack $
+    printf
+      formattingStr
+      widthLocation
+      locStr
+      widthFunction
+      funStr
+      widthType
+      typeStr
+      widthSlot
+      slotStr
+      widthOps
+      opsStr
+      widthSites
+      sitesStr
   where
     formattingStr :: String
-    formattingStr = "%-*s %-*s %-*s %-*s %-*s %-*s %-*s\n"
+    formattingStr = "%-*s %-*s %-*s %-*s %-*s %-*s\n"

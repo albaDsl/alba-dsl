@@ -1,4 +1,7 @@
 -- Copyright (c) 2025 albaDsl
+{-# OPTIONS_GHC -Wno-unused-imports #-}
+{-# OPTIONS_GHC -Wno-unused-local-binds #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module TestCodeMetrics (testCodeMetrics) where
 
@@ -7,6 +10,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
+import Alba.Misc.Logging qualified as ML
 import Alba.Vm.Bch2026 (VmMetrics (..))
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
@@ -17,24 +21,12 @@ import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
 import Numeric.Natural (Natural)
+import System.IO.Unsafe (unsafePerformIO)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import TestUtils (TestResult (..), showLog)
 import TestUtils2026 (evaluateProg)
-import Prelude
-  ( Either (..),
-    Int,
-    Maybe (..),
-    Semigroup ((<>)),
-    Show (show),
-    String,
-    error,
-    fromIntegral,
-    fst,
-    ($),
-    (*),
-    (+),
-  )
+import Prelude hiding (foldl, reverse, zipWith)
 
 testCodeMetrics :: TestTree
 testCodeMetrics =
@@ -61,13 +53,13 @@ testCodeMetrics =
             sizeOf (EJW.setupTable # EJW.ecMul)
               @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "205 opcodes, 891 bytes."
+            sizeOf vectorOps @?= "202 opcodes, 874 bytes."
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
             costOf windowedMul @?= 33_534_819,
-          testCase "Vector ops" $ costOf vectorOps @?= 16_397_601
+          testCase "Vector ops" $ costOf vectorOps @?= 16_379_070
         ]
     ]
 
@@ -77,7 +69,14 @@ sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 costOf :: forall s s' alt'. FNA s '[] s' alt' -> Int
 costOf prog =
   case evaluateProg prog of
-    Right tr -> tr.metrics.cost
+    Right tr ->
+      -- unsafePerformIO $ do
+      --   ML.dumpLogToFile tr.compilationResult tr.logData "log.html"
+      --   case tr.compilationResult of
+      --     Just r -> writeFunctionTable r.code r.functionTable
+      --     Nothing -> pure ()
+      --   pure tr.metrics.cost
+      tr.metrics.cost
     Left (err, Just tr) -> showLog tr (error ("costOf: " <> show err))
     Left (err, Nothing) -> error ("costOf: " <> show err)
 

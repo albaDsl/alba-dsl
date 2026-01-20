@@ -4,6 +4,8 @@ module Alba.Dsl.V1.Common.OpcodeL3
   ( OpcodeL3 (..),
     CodeL3,
     FunctionId (..),
+    isConstant,
+    isRtConstant,
   )
 where
 
@@ -19,8 +21,10 @@ data OpcodeL3
 
 data FunctionId
   = Standard ModuleName LineNumber ColumnNumber FunctionName
-  | Named String
+  | Constant ModuleName LineNumber ColumnNumber FunctionName
+  | RuntimeConstant ModuleName LineNumber ColumnNumber FunctionName
   | Lambda ModuleName LineNumber ColumnNumber FunctionName
+  | Named String
   | Absolute Slot
   deriving (Eq, Ord, Show)
 
@@ -35,3 +39,11 @@ type FunctionName = String
 type CodeL3 = S.Seq OpcodeL3
 
 type Slot = Int
+
+isConstant :: FunctionId -> Bool
+isConstant (Constant _ _ _ _) = True
+isConstant _ = False
+
+isRtConstant :: FunctionId -> Bool
+isRtConstant (RuntimeConstant _ _ _ _) = True
+isRtConstant _ = False

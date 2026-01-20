@@ -4,13 +4,15 @@ module Alba.Dsl.V1.Common.FunctionTableJson
   ( FunctionTableEntry (..),
     generateTable,
     tableEntries,
+    functionLongName,
+    functionType,
   )
 where
 
-import Alba.Dsl.V1.Common.FunctionState
+import Alba.Dsl.V1.Common.FunctionStateResolved
   ( Function (..),
     FunctionTable,
-    functionsSortedSlot,
+    functionsSortedBySlot,
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
 import Data.Aeson (ToJSON)
@@ -22,7 +24,6 @@ import Data.Aeson.Encode.Pretty
   )
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy (toStrict)
-import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Data.Text qualified as T
 import GHC.Generics (Generic)
@@ -56,7 +57,7 @@ generateTable functions =
       (tableEntries functions)
 
 tableEntries :: FunctionTable -> [FunctionTableEntry]
-tableEntries functions = toTableEntry <$> functionsSortedSlot functions
+tableEntries functions = toTableEntry <$> functionsSortedBySlot functions
 
 toTableEntry :: (FunctionId, Function) -> FunctionTableEntry
 toTableEntry (fId, Function {..}) =
@@ -65,24 +66,40 @@ toTableEntry (fId, Function {..}) =
    in FunctionTableEntry
         { functionName = name,
           functionLongName = longName,
-          slot = fromMaybe err slot,
+          slot = slot,
           callSites = Just callSites
         }
-  where
-    err = error "functionDefinitions: internal error."
 
 functionLongName :: FunctionId -> Text
 functionLongName fId =
   case fId of
     Standard moduleName line column functionName ->
-      T.pack (printf "%s:%s:%d:%d" moduleName functionName line column)
+      format moduleName line column functionName
+    Constant moduleName line column functionName ->
+      format moduleName line column functionName
+    RuntimeConstant moduleName line column functionName ->
+      format moduleName line column functionName
+    Lambda moduleName line column _ ->
+      format moduleName line column "<lambda>"
     Named name -> T.pack name
-    Lambda moduleName line column functionName ->
-      T.pack (printf "lambda (%s:%s:%d:%d)" moduleName functionName line column)
-    Absolute slot -> T.pack (printf "absolute:%d" slot)
+    Absolute slot -> T.pack (printf "<absolute:%d>" slot)
+  where
+    format :: String -> Int -> Int -> String -> Text
+    format moduleName line column functionName =
+      T.pack (printf "%s:%d:%d:%s" moduleName line column functionName)
 
 functionShortName :: FunctionId -> Text
 functionShortName fId =
   case fId of
     Standard _ _ _ functionName -> T.pack functionName
     x -> functionLongName x
+
+functionType :: FunctionId -> Text
+functionType fId =
+  case fId of
+    Standard {} -> "Function"
+    Constant {} -> "Constant"
+    RuntimeConstant {} -> "Runtime Constant"
+    Lambda {} -> "Lambda"
+    Named {} -> "Named"
+    Absolute {} -> "Absolute"

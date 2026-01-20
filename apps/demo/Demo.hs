@@ -132,7 +132,7 @@ f9 =
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize f10
--- "18 opcodes, 18 bytes. Including function table: 69 opcodes, 232 bytes.\n"
+-- "18 opcodes, 18 bytes. Including function table: 66 opcodes, 220 bytes.\n"
 f10 :: FN (s > TInt) (s > TInt)
 f10 = opDrop # f
   where

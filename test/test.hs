@@ -7,6 +7,7 @@ import TestCheckMultiSig (testCheckMultiSig)
 import TestCheckSig (testCheckSig)
 import TestCodeMetrics (testCodeMetrics)
 import TestCond (testCond)
+import TestConstants (testConstants)
 import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
@@ -32,6 +33,7 @@ import TestOpsHash (testOpsHash)
 import TestOpsOrdering (testOpsOrdering)
 import TestOpsStack (testOpsStack)
 import TestOptimizer (testOptimizer)
+import TestRuntimeLib (testRuntimeLib)
 import TestStackBranches (testStackBranches)
 import TestTurtleVm2025 (testTurtleVm2025)
 import TestTurtleVm2026 (testTurtleVm2026)
@@ -49,6 +51,7 @@ tests =
       testCheckSig,
       testCodeMetrics,
       testCond,
+      testConstants,
       testCustomTypes,
       testDataPushing,
       testDataSig,
@@ -75,6 +78,7 @@ tests =
       testOpsStack,
       testOptimizer,
       testStackBranches,
+      testRuntimeLib,
       testTurtleVm2025,
       testTurtleVm2026
     ]

@@ -2,6 +2,8 @@
 
 module Alba.Dsl.V1.Bch2026.Lang
   ( function,
+    constant,
+    runtimeConstant,
     lambda0,
     lambda1,
     lambda2,
@@ -27,8 +29,10 @@ import Alba.Dsl.V1.Common.FunctionState
   ( FunctionState (..),
     addCallSite,
     addFunctionBody,
+    getCallerConstantId,
     getCallerFunctionId,
     getCallerLambdaId,
+    getCallerRtConstantId,
     isRegistered,
     registerFunction,
   )
@@ -58,10 +62,24 @@ register :: FNA s alt s' alt' -> FunctionId -> FunctionState -> FunctionState
 register prog fId fs =
   if not (isRegistered fId fs)
     then
-      let fs'' = fromMaybe canNotHappen (registerFunction fId fs)
-          (c', fs''') = pass1 S.empty fs'' prog
-       in fromMaybe canNotHappen (addFunctionBody fId c' fs''')
+      let fs' = fromMaybe canNotHappen (registerFunction fId fs)
+          (c', fs'') = pass1 S.empty fs' prog
+       in fromMaybe canNotHappen (addFunctionBody fId c' fs'')
     else fromMaybe canNotHappen (addCallSite fId fs)
+
+constant :: (HasCallStack) => FN s (s > a) -> FN s (s > a)
+constant prog (S c fs) =
+  let fId = fromMaybe regErr (withFrozenCallStack getCallerConstantId)
+      fs' = register prog fId fs
+   in opInvoke prog (S (aop' c (FunctionIndexRef {fId})) fs')
+
+-- Runtime constants have a size limit of maxScriptElementSize - 4 (as of
+-- writing, 9996 bytes). See 'toPushOp'.
+runtimeConstant :: (HasCallStack) => FN s (s > a) -> FN s (s > a)
+runtimeConstant prog (S c fs) =
+  let fId = fromMaybe regErr (withFrozenCallStack getCallerRtConstantId)
+      fs' = register prog fId fs
+   in opInvoke prog (S (aop' c (FunctionIndexRef {fId})) fs')
 
 lambda0 ::
   (HasCallStack, StackEntry r1) =>
