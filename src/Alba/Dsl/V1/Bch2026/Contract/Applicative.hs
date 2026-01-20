@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
+    function,
     invoke2,
     lambda0,
     op2Drop,
@@ -37,11 +38,13 @@ liftA2Maybe ::
   (StackEntry a, StackEntry b) =>
   FN (s > TLambda '[a, b] '[c] > TMaybe a > TMaybe b) (s > TMaybe c)
 liftA2Maybe =
-  begin
-    # (op2Dup # isJust # swap # isJust # opBoolAnd)
-    # opIf
-      (fromJust # swap # fromJust # swap # rot # invoke2 # just)
-      (op2Drop # drop # nothing)
+  function
+    ( begin
+        # (op2Dup # isJust # swap # isJust # opBoolAnd)
+        # opIf
+          (fromJust # swap # fromJust # swap # rot # invoke2 # just)
+          (op2Drop # drop # nothing)
+    )
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => FN (s > TMaybe a) (s > a)
