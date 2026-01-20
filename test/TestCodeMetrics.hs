@@ -3,6 +3,9 @@
 module TestCodeMetrics (testCodeMetrics) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Vm.Bch2026 (VmMetrics (..))
 import DslDemo.EllipticCurve.Affine qualified as EA
@@ -10,12 +13,28 @@ import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
+import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
+import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (TestResult (..))
+import TestUtils (TestResult (..), showLog)
 import TestUtils2026 (evaluateProg)
+import Prelude
+  ( Either (..),
+    Int,
+    Maybe (..),
+    Semigroup ((<>)),
+    Show (show),
+    String,
+    error,
+    fromIntegral,
+    fst,
+    ($),
+    (*),
+    (+),
+  )
 
 testCodeMetrics :: TestTree
 testCodeMetrics =
@@ -24,45 +43,83 @@ testCodeMetrics =
     [ testGroup
         "Code size"
         [ testCase "turtleVm 2025" $
-            compileForSize (toTyped (T2025.turtleVm 1 1))
+            sizeOf (toTyped (T2025.turtleVm 1 1))
               @?= "1462 opcodes, 1762 bytes.",
           testCase "turtleVm 2026" $
-            compileForSize (toTyped (T2026.turtleVm 1))
+            sizeOf (toTyped (T2026.turtleVm 1))
               @?= "554 opcodes, 1103 bytes.",
           testCase "EC scalar point multiply (Affine)" $
-            compileForSize EA.ecMul @?= "38 opcodes, 452 bytes.",
+            sizeOf EA.ecMul
+              @?= "38 opcodes, 452 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $
-            compileForSize EJ.ecMul @?= "62 opcodes, 630 bytes.",
+            sizeOf EJ.ecMul
+              @?= "62 opcodes, 630 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian)" $
-            compileForSize EJW.ecMul @?= "56 opcodes, 626 bytes.",
+            sizeOf EJW.ecMul
+              @?= "56 opcodes, 626 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            compileForSize (EJW.setupTable # EJW.ecMul)
-              @?= "72 opcodes, 723 bytes."
+            sizeOf (EJW.setupTable # EJW.ecMul)
+              @?= "72 opcodes, 723 bytes.",
+          testCase "Vector ops" $
+            sizeOf vectorOps @?= "205 opcodes, 891 bytes."
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            costOfWindowedMul @?= 33_534_819
+            costOf windowedMul @?= 33_534_819,
+          testCase "Vector ops" $ costOf vectorOps @?= 16_397_601
         ]
     ]
 
-compileForSize :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
-compileForSize prog = sizeStr (fst $ compileL2 O1 prog)
+sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
+sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 
-costOfWindowedMul :: Int
-costOfWindowedMul =
+costOf :: forall s s' alt'. FNA s '[] s' alt' -> Int
+costOf prog =
   case evaluateProg prog of
     Right tr -> tr.metrics.cost
-    Left _ -> error ""
+    Left (err, Just tr) -> showLog tr (error ("costOf: " <> show err))
+    Left (err, Nothing) -> error ("costOf: " <> show err)
+
+windowedMul :: FN s s
+windowedMul =
+  begin
+    # (gTable # g # EJW.setupTable)
+    # gTable
+    # nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+    # EJW.ecMul
+    # pushPoint
+      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+      0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
+    # (isEqual # opVerify)
   where
     gTable = nat 100
-    prog =
+
+vectorOps :: FN s s
+vectorOps = f
+  where
+    f :: FN s s
+    f =
       begin
-        # (gTable # g # EJW.setupTable)
-        # gTable
-        # nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-        # EJW.ecMul
-        # pushPoint
-          0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-          0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-        # (isEqual # opVerify)
+        # (nat n # lambda1 (op1Add # cast # toInt64) # generate)
+        # (opDup # reverse # sort # opEqualVerify)
+        # (nat n # lambda1 (op1Add # cast # toInt8) # generate)
+        # (opDup # reverse # sort # opEqualVerify)
+        # lambda2 add
+        # int 0
+        # ( begin
+              # lambda2 add'
+              # (nat n # lambda1 (op1Add # cast # toInt64) # generate)
+              # (nat n # lambda1 (op1Add # cast # toInt8) # generate)
+              # zipWith
+          )
+        # (foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
+
+    n :: Natural
+    n = 50
+
+    add :: FN (s > TInt > TInt64) (s > TInt)
+    add = castStack # opAdd
+
+    add' :: FN (s > TInt64 > TInt8) (s > TInt64)
+    add' = castStack # opAdd # toInt64
