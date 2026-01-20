@@ -3,6 +3,9 @@
 module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Int64 (toInt64)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector, generate, reverse)
 import Data.ByteString qualified as B
 import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)
 import DslDemo.MergeSort.MergeSort qualified as MS
@@ -11,7 +14,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import Test.Tasty.QuickCheck (Property, testProperty, (==>))
 import TestUtils2026 (evaluateProg, isTrue, isTrue')
-import Prelude hiding (drop)
+import Prelude hiding (drop, reverse)
 
 testFunctions :: TestTree
 testFunctions =
@@ -23,6 +26,8 @@ testFunctions =
       testCase "Nested function calls - 2" $
         isTrue (evaluateProg progNestedCalls2),
       testCase "Recursion - factorial" $ isTrue (evaluateProg progFactorial),
+      testCase "Recursion - merge sort TInt64s" $
+        isTrue (evaluateProg progSort),
       testProperty "Recursion - merge sort" propSort
     ]
 
@@ -97,7 +102,18 @@ progFactorial =
           (nat 1 # drop @"n")
           (pick @"n" # roll @"n" # op1SubUnsafe # fac # opMul)
 
+progSort :: FN s (s > TBool)
+progSort =
+  begin
+    # (nat 10 # lambda1 (op1Add # cast # toInt64) # generate)
+    # (opDup # reverse # MS.sort # opEqual)
+
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
   (B.length xs <= 48) ==> do
-    isTrue' $ evaluateProg (bytes xs # MS.sort # bytes (B.sort xs) # opEqual)
+    isTrue' $
+      evaluateProg
+        (bytes xs # toVector # MS.sort # bytes (B.sort xs) # toVector # opEqual)
+  where
+    toVector :: FN (s > TBytes) (s > TVector TInt8)
+    toVector = cast

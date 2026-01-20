@@ -3,68 +3,134 @@
 module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
-import Prelude hiding (drop, null)
+  ( FN,
+    StackEntry,
+    TBool,
+    TInt,
+    begin,
+    bytes,
+    cast,
+    castStack,
+    drop,
+    name2,
+    nat,
+    ns2,
+    ns3,
+    opBin2Num,
+    opDiv,
+    opDrop,
+    opFalse,
+    opGreaterThan,
+    opIf,
+    opLessThanOrEqual,
+    opRot,
+    opSwap,
+    opTrue,
+    opVerify,
+    pick,
+    roll,
+    (#),
+    type (>),
+  )
+import Alba.Dsl.V1.Bch2026.Contract.Hide (Hide, nipHide)
+import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe')
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, TPackFs, packFs)
+import Alba.Dsl.V1.Bch2026.Contract.Tuple (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.Vector
+  ( TVector,
+    consF,
+    empty,
+    lengthF,
+    null,
+    splitAtF,
+    unconsF,
+  )
+import Alba.Dsl.V1.Bch2026.Lang (function, lambda0)
+import Prelude ()
 
-sort :: FN (s > TBytes) (s > TBytes)
-sort = function (unname @1 sort')
-  where
-    sort' :: FN (s > N "xs" TBytes) (s > TBytes)
-    sort' =
-      begin
-        # (pick @"xs" # opSize # opNip)
-        # (opDup # nat 0 # opNumEqual # opSwap # nat 1 # opNumEqual # opBoolOr)
+sort :: forall a s. (PackFs a) => FN (s > TVector a) (s > TVector a)
+sort = packFs @a # opSwap # sortF
+
+sortF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
+sortF =
+  function
+    ( begin
+        # ns2 @"pfs" @"vec"
+        # (pick @"pfs" # pick @"vec" # lengthF # nat 1 # opGreaterThan)
         # opIf
-          (roll @"xs")
           ( begin
-              # name2 @"fst" @"snd" (roll @"xs" # halve)
-              # (roll @"fst" # sort # roll @"snd" # sort # merge)
+              # (pick @"pfs" # roll @"vec" # halveF)
+              # (pick @"pfs" # opSwap # sortF # opSwap)
+              # (pick @"pfs" # opSwap # sortF # opSwap)
+              # (pick @"pfs" # opRot # opRot # mergeF)
           )
+          (roll @"vec")
+        # drop @"pfs"
+    )
 
-halve :: FN (s > TBytes) (s > TBytes > TBytes)
-halve = opSize # op2 # opDiv # opSplit
+halveF :: FN (s > TPackFs a > TVector a) (s > TVector a > TVector a)
+halveF =
+  function
+    ( begin
+        # ns2 @"pfs" @"vec"
+        # (pick @"pfs" # pick @"vec" # lengthF # nat 2 # opDiv)
+        # (roll @"pfs" # opSwap # roll @"vec" # splitAtF)
+    )
 
-uncons :: FN (s > TBytes) (s > TBytes > TBytes)
-uncons = nat 1 # opSplit
-
-merge :: FN (s > TBytes > TBytes) (s > TBytes)
-merge = function (unname @2 merge')
-
-merge' :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes)
-merge' =
-  begin
-    # (pickN @"xs" # pickN @"ys" # baseCases)
-    # opIf
-      ( begin
-          # opDrop
-          # name2 @"x" @"xRest" (pick @"xs" # uncons)
-          # name2 @"y" @"yRest" (pick @"ys" # uncons)
-          # ( begin
-                # (pick @"x" # opBin2Num)
-                # (pick @"y" # opBin2Num)
-                # opLessThanOrEqual
-            )
-          # opIf
-            ( begin
-                # (roll @"x" # roll @"xRest" # roll @"ys")
-                # (drop @"yRest" # drop @"y" # drop @"xs")
-            )
-            ( begin
-                # (roll @"y" # roll @"xs" # roll @"yRest")
-                # (drop @"ys" # drop @"xRest" # drop @"x")
-            )
-          # (merge # opCat)
-      )
-      (drop @"xs" # drop @"ys")
+mergeF ::
+  (StackEntry a) =>
+  FN (s > TPackFs a > TVector a > TVector a) (s > TVector a)
+mergeF =
+  function
+    ( begin
+        # (ns3 @"pfs" @"xs" @"ys" # pick @"xs" # pick @"ys" # baseCases)
+        # opIf
+          ( begin
+              # opDrop
+              # name2 @"x" @"xRest" (pick @"pfs" # pick @"xs" # uncons')
+              # name2 @"y" @"yRest" (pick @"pfs" # pick @"ys" # uncons')
+              # ( begin
+                    # (pick @"x" # toNum # pick @"y" # toNum)
+                    # opLessThanOrEqual
+                )
+              # opIf
+                ( begin
+                    # (roll @"x" # roll @"xRest" # roll @"ys")
+                    # (drop @"yRest" # drop @"y" # drop @"xs")
+                )
+                ( begin
+                    # (roll @"y" # roll @"xs" # roll @"yRest")
+                    # (drop @"ys" # drop @"xRest" # drop @"x")
+                )
+              # (pick @"pfs" # opRot # opRot # mergeF)
+              # (roll @"pfs" # opRot # opRot # nipHide # consF)
+          )
+          (drop @"pfs" # drop @"xs" # drop @"ys")
+    )
   where
-    baseCases :: FN (s > N "xs" TBytes > N "ys" TBytes) (s > TBytes > TBool)
+    uncons' ::
+      (StackEntry a) =>
+      FN (s' > TPackFs a > TVector a) (s' > Hide a > TVector a)
+    uncons' = unconsF # fromJust # untuple # castStack
+
+    toNum :: FN (s' > Hide a) (s' > TInt)
+    toNum = cast # opBin2Num
+
+    baseCases :: FN (s' > TVector a > TVector a) (s' > TVector a > TBool)
     baseCases =
       begin
-        # (pick @"xs" # null)
+        # (ns2 @"xs" @"ys" # pick @"xs" # null)
         # opIf
           (roll @"ys" # drop @"xs" # opFalse)
           ( begin
               # (pick @"ys" # null)
               # opIf
                 (drop @"ys" # roll @"xs" # opFalse)
-                (drop @"xs" # drop @"ys" # bytes [] # opTrue)
+                (drop @"xs" # drop @"ys" # empty # opTrue)
           )
+
+-- Used from contexts where it is expected to never fail.
+fromJust :: (StackEntry a) => FN (s > TMaybe a) (s > a)
+fromJust = err # opSwap # fromMaybe'
+  where
+    err = lambda0 (bytes "E0" # opFalse # opVerify # cast)
