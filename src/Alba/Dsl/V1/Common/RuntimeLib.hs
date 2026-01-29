@@ -30,7 +30,7 @@ toPushOp =
         (lessOrEq 0x4b, n2b # opSwap # opCat),
         (lessOrEq 0x7f, n2b # opcode OP_PUSHDATA1 # assemblePushData),
         (lessOrEq 0xff, dropSign # opcode OP_PUSHDATA1 # assemblePushData),
-        (lessOrEq 9996, n2b # opcode OP_PUSHDATA2 # assemblePushData)
+        (lessOrEq 9997, n2b # opcode OP_PUSHDATA2 # assemblePushData)
       ]
       (opDrop # opFalse # opVerify)
   where

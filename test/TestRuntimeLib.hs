@@ -19,7 +19,7 @@ testRuntimeLib =
 
 propToPushOp :: Bytes -> Property
 propToPushOp b =
-  (B.length b <= 9996) ==>
+  (B.length b <= 9997) ==>
     isTrue' (evaluateProgWithStack prog (S.singleton $ b2SeUnsafe b, S.empty))
   where
     prog :: FN (s > TBytes) (s > TBool)
