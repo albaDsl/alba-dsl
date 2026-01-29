@@ -4,7 +4,7 @@
 module TestOptimizer (testOptimizer) where
 
 import Alba.Dsl.V1.Bch2025 (optimize)
-import Alba.Dsl.V1.Common.CompilerUtils (pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (integerToDataOp)
 import Alba.Tx.Bch2025 (Tx (..))
 import Alba.Vm.Bch2025
   ( CodeL2,
@@ -45,7 +45,7 @@ instance Arbitrary SetupStackCode where
         SetupStackCode res <- go (pred n)
         let maxVal = 2 ^ (128 :: Int) :: Integer
         x <- choose (-maxVal, maxVal) :: Gen Integer
-        pure $ SetupStackCode (aopL2 res (pushIntegerOp x))
+        pure $ SetupStackCode (aopL2 res (integerToDataOp x))
 
 instance {-# OVERLAPS #-} Arbitrary CodeL2 where
   arbitrary = resize numInstructions $ sized go
@@ -82,7 +82,7 @@ instance {-# OVERLAPS #-} Arbitrary CodeL2 where
         where
           go' = go (n - 1)
 
-          pushInt = pushIntegerOp
+          pushInt = integerToDataOp
 
 aopL2 :: CodeL2 -> OpcodeL2 -> CodeL2
 aopL2 = (S.:|>)

@@ -15,7 +15,7 @@ import Alba.Dsl.V1.Bch2025.Stack
     TSha1,
     TSha256,
   )
-import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, integerToDataOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack
   ( FN,
@@ -162,7 +162,7 @@ opPick ::
   FN s (s > arg)
 opPick (S c fs) =
   let idx = natVal (Proxy :: Proxy idx) :: Integer
-   in S (aops c [pushIntegerOp idx, OP_PICK]) fs
+   in S (aops c [integerToDataOp idx, OP_PICK]) fs
 
 opRoll ::
   forall idx arg s s'.
@@ -170,7 +170,7 @@ opRoll ::
   FN s (s' > arg)
 opRoll (S c fs) =
   let idx = natVal (Proxy :: Proxy idx) :: Integer
-   in S (aops c [pushIntegerOp idx, OP_ROLL]) fs
+   in S (aops c [integerToDataOp idx, OP_ROLL]) fs
 
 opRot ::
   (StackEntry x1, StackEntry x2, StackEntry x3) =>

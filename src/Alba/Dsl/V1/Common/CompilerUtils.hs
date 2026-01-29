@@ -5,7 +5,7 @@ module Alba.Dsl.V1.Common.CompilerUtils
     aop',
     aops,
     aops',
-    pushIntegerOp,
+    integerToDataOp,
     bytesToDataOp,
   )
 where
@@ -33,8 +33,8 @@ aops code ops = code <> (Opcode <$> S.fromList ops)
 aops' :: CodeL3 -> [OpcodeL3] -> CodeL3
 aops' code ops = code <> S.fromList ops
 
-pushIntegerOp :: Integer -> OpcodeL2
-pushIntegerOp n = bytesToDataOp (integerToBytes n)
+integerToDataOp :: Integer -> OpcodeL2
+integerToDataOp n = bytesToDataOp (integerToBytes n)
 
 {- ORMOLU_DISABLE -}
 bytesToDataOp :: Bytes -> OpcodeL2

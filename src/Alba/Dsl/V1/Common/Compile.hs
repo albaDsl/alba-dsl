@@ -16,7 +16,7 @@ where
 import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
 import Alba.Dsl.V1.Common.CompilerUtils
   ( bytesToDataOp,
-    pushIntegerOp,
+    integerToDataOp,
   )
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
@@ -244,10 +244,10 @@ pass2 opt fs code = fromMaybe err (mapM (f fs) code)
     f :: FSR.FunctionState -> OpcodeL3 -> Maybe OpcodeL2
     f fs' (FunctionIndexDef fId) = do
       slot <- getSlot fId fs'
-      pure $ pushIntegerOp (fromIntegral slot)
+      pure $ integerToDataOp (fromIntegral slot)
     f fs' (FunctionIndexRef fId) = do
       slot <- getSlot fId fs'
-      pure $ pushIntegerOp (fromIntegral slot)
+      pure $ integerToDataOp (fromIntegral slot)
     f fs' (FunctionBody body) = do
       let body' = pass2 opt fs' body
           body'' = case opt of

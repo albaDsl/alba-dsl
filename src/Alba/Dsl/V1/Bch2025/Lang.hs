@@ -16,7 +16,7 @@ where
 
 import Alba.Dsl.V1.Bch2025.Ops (opDup, opIf)
 import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackEntry, StackInt, StackNat)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, pushIntegerOp)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, integerToDataOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.Stack
@@ -33,20 +33,20 @@ import Alba.Vm.Common.BasicTypes (Bytes)
 import Numeric.Natural (Natural)
 
 int :: Integer -> FN s (s > TInt)
-int n (S c fs) = S (aop c (pushIntegerOp n)) fs
+int n (S c fs) = S (aop c (integerToDataOp n)) fs
 
 -- Push integer value. Which specific type (of class StackInt) it gets is given
 -- by the context.
 int' :: (StackInt x1) => Integer -> FN s (s > x1)
-int' n (S c fs) = S (aop c (pushIntegerOp n)) fs
+int' n (S c fs) = S (aop c (integerToDataOp n)) fs
 
 nat :: Natural -> FN s (s > TNat)
-nat n (S c fs) = S (aop c (pushIntegerOp (fromIntegral n))) fs
+nat n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
 
 -- Push nat value. Which specific type (of class StackNat) it gets is given by
 -- the context.
 nat' :: (StackNat x1) => Natural -> FN s (s > x1)
-nat' n (S c fs) = S (aop c (pushIntegerOp (fromIntegral n))) fs
+nat' n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
 
 bytes :: Bytes -> FN s (s > TBytes)
 bytes x (S c fs) = S (aop c (bytesToDataOp x)) fs
