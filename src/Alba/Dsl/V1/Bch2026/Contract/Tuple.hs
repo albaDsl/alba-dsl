@@ -3,35 +3,38 @@
 module Alba.Dsl.V1.Bch2026.Contract.Tuple
   ( TTuple,
     tuple,
+    tupleM,
     untuple,
     fst,
     snd,
   )
 where
 
-import Alba.Dsl.V1.Bch2025
-  ( FN,
-    N,
-    StackEntry,
-    TBytes,
-    TInt,
-    TNat,
-    cast,
-    castStack,
-    nat,
-    natToInt,
-    opBin2Num,
+import Alba.Dsl.V1.Bch2025.Lang (nat)
+import Alba.Dsl.V1.Bch2025.LangArgs (roll)
+import Alba.Dsl.V1.Bch2025.Ops
+  ( opBin2Num,
     opCat,
     opNum2Bin,
     opSize,
     opSplit,
-    roll,
-    unname,
+  )
+import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
+import Alba.Dsl.V1.Bch2026.Lang (function)
+import Alba.Dsl.V1.Common
+  ( FN,
+    TBytes,
+    TInt,
+    TNat,
+    begin,
+    cast,
+    castStack,
+    natToInt,
+    ns2,
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
-import Alba.Dsl.V1.Bch2026.Lang (function)
 import Data.Kind (Type)
 import Prelude ()
 
@@ -40,12 +43,14 @@ data TTuple (a :: Type) (b :: Type)
 instance StackEntry (TTuple a b)
 
 tuple :: (StackEntry a, StackEntry b) => FN (s > a > b) (s > TTuple a b)
-tuple = function (unname @2 tuple')
-  where
-    tuple' :: FN (s > N "fst" a > N "snd" b) (s > TTuple a b)
-    tuple' =
-      roll @"fst" # toBytes # addSizeTag # roll @"snd" # toBytes # opCat # cast
+tuple = function tupleM
 
+tupleM :: (StackEntry a, StackEntry b) => FN (s > a > b) (s > TTuple a b)
+tupleM =
+  begin
+    # (ns2 @"fst" @"snd" # roll @"fst" # toBytes # addSizeTag # roll @"snd")
+    # (toBytes # opCat # cast)
+  where
     addSizeTag :: FN (s > TBytes) (s > TBytes)
     addSizeTag = opSize # natToInt # tagSize # opNum2Bin # swap # opCat
 

@@ -18,37 +18,30 @@ module Alba.Dsl.V1.Bch2026.Contract.PackFs
   )
 where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
   ( FN,
     FindName,
     Ref,
     Remove,
     StackEntry,
     TBytes,
-    TInt,
-    TLambda,
     TNat,
     UnName,
-    begin,
     cast,
     del,
-    function,
-    invoke1,
-    nat,
-    opBin2Num,
-    opCat,
-    opNum2Bin,
-    opSplit,
     pick,
     roll,
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, rot)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
+import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, fst, snd, tupleM, untuple)
+import Alba.Dsl.V1.Bch2026.Lang (function, invoke1)
+import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Data.Kind (Type)
 import GHC.TypeLits (KnownNat)
 import Numeric.Natural (Natural)
-import Prelude (Maybe (..), (*))
+import Prelude (Maybe (..))
 
 data TPackFs (t :: Type)
 
@@ -60,9 +53,6 @@ class (StackEntry a) => PackFs a where
   pack :: (StackEntry a) => FN (s > a) (s > TBytes)
   unpack :: (StackEntry a) => FN (s > TBytes) (s > a)
   record :: FN s (s > TPackFs a)
-
-fieldSize :: Natural
-fieldSize = 2
 
 packFs :: forall a s. (PackFs a, StackEntry a) => FN s (s > TPackFs a)
 packFs = record @a
@@ -77,33 +67,22 @@ mkPackFsM ::
   FN
     (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
     (s > TPackFs a)
-mkPackFsM =
-  begin
-    # (toInt # nat fieldSize # opNum2Bin # rot)
-    # (toInt # nat fieldSize # opNum2Bin # rot)
-    # (toInt # nat fieldSize # opNum2Bin # rot)
-    # (opCat # opCat # cast)
-  where
-    toInt :: forall s' a'. FN (s' > a') (s' > TInt)
-    toInt = cast
+mkPackFsM = tupleM # tupleM # cast
 
 getSize :: FN (s > TPackFs a) (s > TNat)
-getSize = function (toBytes # nat fieldSize # opSplit # drop # opBin2Num # cast)
+getSize = function (toTuples # fst)
 
 getPack :: FN (s > TPackFs a) (s > TLambda '[a] '[TBytes])
-getPack =
-  function
-    ( begin
-        # (toBytes # nat fieldSize # opSplit # nip # nat fieldSize # opSplit)
-        # (drop # opBin2Num # cast)
-    )
+getPack = function (toTuples # untuple # nip # fst)
 
 getUnpack :: FN (s > TPackFs a) (s > TLambda '[TBytes] '[a])
-getUnpack =
-  function (toBytes # nat (fieldSize * 2) # opSplit # nip # opBin2Num # cast)
+getUnpack = function (toTuples # untuple # nip # snd)
 
-toBytes :: FN (s > a) (s > TBytes)
-toBytes = cast
+toTuples ::
+  FN
+    (s > TPackFs a)
+    (s > TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a])))
+toTuples = cast
 
 tcPick ::
   forall arg idx s a.
