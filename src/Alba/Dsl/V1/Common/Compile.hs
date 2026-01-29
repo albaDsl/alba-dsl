@@ -253,15 +253,18 @@ evaluateConstant fs fId code =
         (Bch2026.startState Bch2026.vmParamsStandard) {VmState.code = code''}
    in case Bch2026.evaluateScript err2 state of
         Right vmState ->
-          maybe err3 Bch2026.stackElementToBytes (Bch2026.stackTop vmState.s)
-        Left _ -> err3
+          maybe
+            (err3 ".")
+            Bch2026.stackElementToBytes
+            (Bch2026.stackTop vmState.s)
+        Left (e, _) -> err3 (": " <> show e)
   where
     err :: String -> a
     err msg = error (printf ("evaluateConstant: " <> msg <> ": %s") (show fId))
 
     err1 = err "internal error."
-    err2 = err "introspection not allowed for constants"
-    err3 = err "error while evaluating constant"
+    err2 = err "introspection not allowed for constants."
+    err3 str = err ("error while evaluating constant" <> str)
 
 pass2 :: Options -> FSR.FunctionState -> CodeL3 -> CodeL2
 pass2 opts fs code = fromMaybe err (mapM (f fs) code)
