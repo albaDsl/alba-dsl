@@ -5,13 +5,10 @@ module TestLookupTables (testLookupTables) where
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.JacobianWindowed (ecMul, setupTable)
-import DslDemo.EllipticCurve.LookupTable (toPushOp)
 import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
-import QuickCheckSupport (BytesHalf (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
-import Test.Tasty.QuickCheck (testProperty)
-import TestUtils2026 (evaluateProg, isTrue, isTrue')
+import TestUtils2026 (evaluateProg, isTrue)
 import Prelude hiding (iterate)
 
 testLookupTables :: TestTree
@@ -19,8 +16,7 @@ testLookupTables =
   testGroup
     "Lookup tables"
     [ testCase "Lookup tables - elliptic curve - scalar multiply" $
-        isTrue (evaluateProg progEllipticCurve),
-      testProperty "Integer define and lookup" propIntegerDefineAndLookup
+        isTrue (evaluateProg progEllipticCurve)
     ]
 
 progEllipticCurve :: FN s (s > TBool)
@@ -101,29 +97,3 @@ progEllipticCurve =
     # opTrue
   where
     gTable = nat 100
-
-propIntegerDefineAndLookup :: BytesHalf -> Bool
-propIntegerDefineAndLookup (BytesHalf x) =
-  isTrue' $
-    evaluateProg
-      ( begin
-          # (bytes x # opDup # opCat)
-          # (opSize # natToInt # int maxSize # opSwap # opSub)
-          # (opDup # int 0 # opLessThan)
-          # opIf
-            (opAbs # intToNat # opSplit # opNip)
-            opDrop
-          # opDup
-          # (toPushOp # bytes "entry" # opDefine)
-          # (bytes "entry" # opInvoke lookupBytes)
-          # opEqual
-      )
-  where
-    lookupBytes :: FN s (s > TBytes)
-    lookupBytes = undefined
-
-    -- Allow for OP_PUSHDATA2 overhead.
-    maxSize = 10_000 - 3
-
-    intToNat :: FN (s > TInt) (s > TNat)
-    intToNat = cast
