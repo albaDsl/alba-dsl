@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Common.Compile
     CompilationResult (..),
     compile,
     compile',
+    compileLibrary,
     compileL2,
     compileL2WithDetails,
     pass1,
@@ -96,6 +97,17 @@ compile' opt prog = do
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 code), ..}
   where
     err = error "compile': internal error."
+
+compileLibrary ::
+  forall s s' alt alt'.
+  Optimize ->
+  (S s alt -> S s' alt') ->
+  (CodeL1, FSR.FunctionTable)
+compileLibrary opt prog =
+  let (_code, defs, fs) = compileL2WithDetails opt prog
+   in (fromMaybe err (codeL2ToCodeL1 defs), fs.functions)
+  where
+    err = error "compileLibrary: internal error."
 
 compileL2 ::
   forall s s' alt alt'.
