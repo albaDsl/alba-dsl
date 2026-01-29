@@ -8,6 +8,7 @@ module TestCodeMetrics (testCodeMetrics) where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Lzss (decompress)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Misc.Logging qualified as ML
@@ -38,22 +39,18 @@ testCodeMetrics =
             sizeOf (toTyped (T2025.turtleVm 1 1))
               @?= "1462 opcodes, 1762 bytes.",
           testCase "turtleVm 2026" $
-            sizeOf (toTyped (T2026.turtleVm 1))
-              @?= "554 opcodes, 1103 bytes.",
+            sizeOf (toTyped (T2026.turtleVm 1)) @?= "554 opcodes, 1103 bytes.",
           testCase "EC scalar point multiply (Affine)" $
-            sizeOf EA.ecMul
-              @?= "38 opcodes, 452 bytes.",
+            sizeOf EA.ecMul @?= "38 opcodes, 452 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $
-            sizeOf EJ.ecMul
-              @?= "62 opcodes, 630 bytes.",
+            sizeOf EJ.ecMul @?= "62 opcodes, 630 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian)" $
-            sizeOf EJW.ecMul
-              @?= "56 opcodes, 626 bytes.",
+            sizeOf EJW.ecMul @?= "56 opcodes, 626 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            sizeOf (EJW.setupTable # EJW.ecMul)
-              @?= "72 opcodes, 723 bytes.",
+            sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "202 opcodes, 874 bytes."
+            sizeOf vectorOps @?= "202 opcodes, 874 bytes.",
+          testCase "LZSS" $ sizeOf decompress @?= "8 opcodes, 194 bytes."
         ],
       testGroup
         "Cost"
@@ -63,6 +60,7 @@ testCodeMetrics =
         ]
     ]
 
+-- Gives size of code + function table.
 sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
 sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 

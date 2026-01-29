@@ -25,6 +25,7 @@ import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
 import TestLookupTables (testLookupTables)
 import TestLoops (testLoops)
+import TestLzss (testLzss)
 import TestOpcodes (testOpcodes)
 import TestOpsArithmetic (testOpsArithmetic)
 import TestOpsBytes (testOpsBytes)
@@ -69,6 +70,7 @@ tests =
       testLibauthVectors2025,
       testLibauthVectors2026,
       testLoops,
+      testLzss,
       testOpcodes,
       testOpsArithmetic,
       testOpsBytes,
