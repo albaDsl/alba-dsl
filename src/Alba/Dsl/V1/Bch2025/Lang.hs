@@ -10,6 +10,7 @@ module Alba.Dsl.V1.Bch2025.Lang
     sigBytes,
     pubKeyBytes,
     case',
+    cond,
   )
 where
 
@@ -70,3 +71,11 @@ case' ::
 case' [] def st = def st
 case' ((test, result) : rest) def st =
   (opDup # test # opIf result (case' rest def)) st
+
+cond ::
+  forall s alt s' alt'.
+  [(S s alt -> S (s > TBool) alt, S s alt -> S s' alt')] ->
+  (S s alt -> S s' alt') ->
+  (S s alt -> S s' alt')
+cond [] def st = def st
+cond ((test, result) : rest) def st = (test # opIf result (cond rest def)) st
