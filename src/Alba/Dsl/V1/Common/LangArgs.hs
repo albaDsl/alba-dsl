@@ -8,25 +8,25 @@ module Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     UnNameSeveral,
     UnNameNamed,
-    ns1,
+    ns,
     ns2,
     ns3,
     ns4,
     ns5,
     ns6,
     ns7,
+    un,
+    un2,
+    un3,
+    un4,
+    un5,
+    un6,
+    un7,
     name,
     name2,
     name2',
     name3,
     unname,
-    unnameArg,
-    unnameArg2,
-    unnameArg3,
-    unnameArg4,
-    unnameArg5,
-    unnameArg6,
-    unnameArg7,
   )
 where
 
@@ -47,8 +47,8 @@ import GHC.TypeLits
 data N (n :: Symbol) (t :: Type)
 
 -- ## "Name stack" (ns) functions.
-ns1 :: forall n1 s x1. FN (s > x1) (s > N n1 x1)
-ns1 = castStack
+ns :: forall n1 s x1. FN (s > x1) (s > N n1 x1)
+ns = castStack
 
 ns2 ::
   forall n1 n2 s x1 x2.
@@ -86,6 +86,75 @@ ns7 ::
     (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5 > N n6 x6 > N n7 x7)
 ns7 = castStack
 
+-- ## "Unname stack" (un) functions.
+un ::
+  forall name s s'.
+  (UnNameNamed name s ~ s') =>
+  FN s s'
+un (S c fs) = let state' = S c fs in state'
+
+un2 ::
+  forall n1 n2 s1 s2 s3.
+  (UnNameNamed n1 s1 ~ s2, UnNameNamed n2 s2 ~ s3) =>
+  FN s1 s3
+un2 (S c fs) = let state' = S c fs in state'
+
+un3 ::
+  forall n1 n2 n3 s1 s2 s3 s4.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4
+  ) =>
+  FN s1 s4
+un3 (S c fs) = let state' = S c fs in state'
+
+un4 ::
+  forall n1 n2 n3 n4 s1 s2 s3 s4 s5.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5
+  ) =>
+  FN s1 s5
+un4 (S c fs) = let state' = S c fs in state'
+
+un5 ::
+  forall n1 n2 n3 n4 n5 s1 s2 s3 s4 s5 s6.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6
+  ) =>
+  FN s1 s6
+un5 (S c fs) = let state' = S c fs in state'
+
+un6 ::
+  forall n1 n2 n3 n4 n5 n6 s1 s2 s3 s4 s5 s6 s7.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6,
+    UnNameNamed n6 s6 ~ s7
+  ) =>
+  FN s1 s7
+un6 (S c fs) = let state' = S c fs in state'
+
+un7 ::
+  forall n1 n2 n3 n4 n5 n6 n7 s1 s2 s3 s4 s5 s6 s7 s8.
+  ( UnNameNamed n1 s1 ~ s2,
+    UnNameNamed n2 s2 ~ s3,
+    UnNameNamed n3 s3 ~ s4,
+    UnNameNamed n4 s4 ~ s5,
+    UnNameNamed n5 s5 ~ s6,
+    UnNameNamed n6 s6 ~ s7,
+    UnNameNamed n7 s7 ~ s8
+  ) =>
+  FN s1 s8
+un7 (S c fs) = let state' = S c fs in state'
+
+-- ## Functions to name results of prog execution. And uname progs.
 name ::
   forall name t s s' alt alt'.
   FNA s alt (s' > t) alt' ->
@@ -116,73 +185,7 @@ unname ::
   FNA s'' alt s' alt'
 unname prog (S c fs) = let state' = S c fs in prog state'
 
-unnameArg ::
-  forall name s s'.
-  (UnNameNamed name s ~ s') =>
-  FN s s'
-unnameArg (S c fs) = let state' = S c fs in state'
-
-unnameArg2 ::
-  forall n1 n2 s1 s2 s3.
-  (UnNameNamed n1 s1 ~ s2, UnNameNamed n2 s2 ~ s3) =>
-  FN s1 s3
-unnameArg2 (S c fs) = let state' = S c fs in state'
-
-unnameArg3 ::
-  forall n1 n2 n3 s1 s2 s3 s4.
-  ( UnNameNamed n1 s1 ~ s2,
-    UnNameNamed n2 s2 ~ s3,
-    UnNameNamed n3 s3 ~ s4
-  ) =>
-  FN s1 s4
-unnameArg3 (S c fs) = let state' = S c fs in state'
-
-unnameArg4 ::
-  forall n1 n2 n3 n4 s1 s2 s3 s4 s5.
-  ( UnNameNamed n1 s1 ~ s2,
-    UnNameNamed n2 s2 ~ s3,
-    UnNameNamed n3 s3 ~ s4,
-    UnNameNamed n4 s4 ~ s5
-  ) =>
-  FN s1 s5
-unnameArg4 (S c fs) = let state' = S c fs in state'
-
-unnameArg5 ::
-  forall n1 n2 n3 n4 n5 s1 s2 s3 s4 s5 s6.
-  ( UnNameNamed n1 s1 ~ s2,
-    UnNameNamed n2 s2 ~ s3,
-    UnNameNamed n3 s3 ~ s4,
-    UnNameNamed n4 s4 ~ s5,
-    UnNameNamed n5 s5 ~ s6
-  ) =>
-  FN s1 s6
-unnameArg5 (S c fs) = let state' = S c fs in state'
-
-unnameArg6 ::
-  forall n1 n2 n3 n4 n5 n6 s1 s2 s3 s4 s5 s6 s7.
-  ( UnNameNamed n1 s1 ~ s2,
-    UnNameNamed n2 s2 ~ s3,
-    UnNameNamed n3 s3 ~ s4,
-    UnNameNamed n4 s4 ~ s5,
-    UnNameNamed n5 s5 ~ s6,
-    UnNameNamed n6 s6 ~ s7
-  ) =>
-  FN s1 s7
-unnameArg6 (S c fs) = let state' = S c fs in state'
-
-unnameArg7 ::
-  forall n1 n2 n3 n4 n5 n6 n7 s1 s2 s3 s4 s5 s6 s7 s8.
-  ( UnNameNamed n1 s1 ~ s2,
-    UnNameNamed n2 s2 ~ s3,
-    UnNameNamed n3 s3 ~ s4,
-    UnNameNamed n4 s4 ~ s5,
-    UnNameNamed n5 s5 ~ s6,
-    UnNameNamed n6 s6 ~ s7,
-    UnNameNamed n7 s7 ~ s8
-  ) =>
-  FN s1 s8
-unnameArg7 (S c fs) = let state' = S c fs in state'
-
+-- ## Type families.
 type family
   FindName
     (name :: Symbol)

@@ -24,7 +24,7 @@ import Alba.Dsl.V1.Bch2026
     name,
     name2,
     nat,
-    ns1,
+    ns,
     opBin2Num,
     opCat,
     opLessThanOrEqual,
@@ -78,7 +78,7 @@ sizeFieldSize = 2
 packTBytes128 :: FN (s > TBytes128) (s > TBytes)
 packTBytes128 =
   begin
-    # ns1 @"b128"
+    # ns @"b128"
     # name @"size" (pick @"b128" # toBytes # opSize # nip)
     # (pick @"size" # cast # nat sizeFieldSize # opNum2Bin)
     # (roll @"b128" # toBytes # int 0 # nat (fromIntegral maxPayloadSize))
@@ -87,7 +87,7 @@ packTBytes128 =
 unpackTBytes128 :: FN (s > TBytes) (s > TBytes128)
 unpackTBytes128 =
   begin
-    # ns1 @"bytes"
+    # ns @"bytes"
     # name2 @"size" @"rest" (roll @"bytes" # nat 2 # opSplit)
     # (roll @"rest" # roll @"size" # opBin2Num # i2n # opSplit # drop # cast)
 

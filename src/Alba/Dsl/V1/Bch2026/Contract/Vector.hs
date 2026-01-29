@@ -104,12 +104,12 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     pick,
     roll,
-    unnameArg,
-    unnameArg2,
-    unnameArg3,
-    unnameArg4,
-    unnameArg5,
-    unnameArg6,
+    un,
+    un2,
+    un3,
+    un4,
+    un5,
+    un6,
     (#),
     type (>),
   )
@@ -168,7 +168,7 @@ lengthF :: FN (s > TPackFs a > TVector a) (s > TNat)
 lengthF =
   function
     ( begin
-        # (ns2 @"packFs" @"vec" # unnameArg @"vec")
+        # (ns2 @"packFs" @"vec" # un @"vec")
         # (v2b # opSize # nip # tcSize # opDiv # tcDrop)
     )
 
@@ -298,7 +298,7 @@ unconsF ::
 unconsF =
   function
     ( begin
-        # (ns2 @"packFs" @"vec" # unnameArg @"vec" # dup # null)
+        # (ns2 @"packFs" @"vec" # un @"vec" # dup # null)
         # opNotIf
           ( begin
               # (nat 1 # swap # tcPick # rot # rot # splitAtUnsafeF # swap)
@@ -320,7 +320,7 @@ unsnocF ::
 unsnocF =
   function
     ( begin
-        # (ns2 @"packFs" @"vec" # unnameArg @"vec" # dup # null)
+        # (ns2 @"packFs" @"vec" # un @"vec" # dup # null)
         # opNotIf
           ( begin
               # (dup # tcPick # swap # lengthF # op1SubUnsafe # swap)
@@ -363,7 +363,7 @@ replicateF =
         # ns4 @"packFs" @"val" @"cnt" @"acc"
         # (roll @"cnt" # op1SubUnsafe # dup # nat 0 # opNumEqual)
         # (tcPick # pick @"val" # roll @"acc" # nipHide # consF)
-        # (swap # unnameArg2 @"packFs" @"val")
+        # (swap # un2 @"packFs" @"val")
 
 generate ::
   forall a s.
@@ -395,7 +395,7 @@ generateF =
         # ns5 @"packFs" @"fn" @"limit" @"cnt" @"acc"
         # (pick @"cnt" # op1Add # dup # pick @"limit" # opGreaterThanOrEqual)
         # (tcPick # roll @"acc" # roll @"cnt" # pick @"fn" # invoke1 # snocF)
-        # (swap # unnameArg3 @"packFs" @"fn" @"limit")
+        # (swap # un3 @"packFs" @"fn" @"limit")
 
 iterateN ::
   forall a s.
@@ -417,7 +417,7 @@ iterateNF =
           ( begin
               # (pick @"packFs" # roll @"fn" # name @"val'" (roll @"val"))
               # (roll @"cnt" # op1SubUnsafe)
-              # (roll @"packFs" # pick @"val'" # singletonF # unnameArg @"val'")
+              # (roll @"packFs" # pick @"val'" # singletonF # un @"val'")
               # (opUntil loop # nip # nip # nip # nip)
           )
           (delCount @4 # empty)
@@ -432,7 +432,7 @@ iterateNF =
         # name @"val'" (pick @"fn" # roll @"val" # swap # invoke1)
         # (roll @"cnt" # op1SubUnsafe # dup # nat 0 # opNumEqual)
         # (tcPick # roll @"acc" # pick @"val'" # snocF)
-        # (swap # unnameArg3 @"packFs" @"fn" @"val'")
+        # (swap # un3 @"packFs" @"fn" @"val'")
 
 -- ## Concatenation.
 cons :: forall a s. (PackFs a) => FN (s > a > TVector a) (s > TVector a)
@@ -547,11 +547,11 @@ zipF = function (empty # opUntil loop # nip # nip # nip # nip)
               # (pick @"pfsA" # pick @"pfsB" # rot # untuple # TFS.tupleF)
               # (pick @"pfsA" # pick @"pfsB" # calcPackFs)
               # (roll @"res" # rot # snocF)
-              # (opFalse # unnameArg2 @"pfsA" @"pfsB")
+              # (opFalse # un2 @"pfsA" @"pfsB")
           )
           ( begin
               # (op2Drop # opTrue)
-              # unnameArg5 @"pfsA" @"pfsB" @"vecA" @"vecB" @"res"
+              # un5 @"pfsA" @"pfsB" @"vecA" @"vecB" @"res"
           )
 
 lambdaFst :: (StackEntry a) => FN s (s > TLambda '[TTuple a (TVector a)] '[a])
@@ -598,11 +598,11 @@ zipWithF =
               # (hide # del @"vecA" # del @"vecB")
               # (rot # fromJust # snd # rot # fromJust # snd # rot)
               # (pick @"packFsC" # roll @"res" # rot # dropHide # snocF)
-              # (opFalse # unnameArg4 @"pfsA" @"pfsB" @"packFsC" @"fn")
+              # (opFalse # un4 @"pfsA" @"pfsB" @"packFsC" @"fn")
           )
           ( begin
-              # (op2Drop # opTrue # unnameArg @"pfsA")
-              # (unnameArg6 @"pfsB" @"packFsC" @"fn" @"vecA" @"vecB" @"res")
+              # (op2Drop # opTrue # un @"pfsA")
+              # (un6 @"pfsB" @"packFsC" @"fn" @"vecA" @"vecB" @"res")
           )
 
 unzip ::
@@ -642,11 +642,11 @@ unzipF =
               # (TFS.untupleF # swap # hide2)
               # (pick @"pfsA" # roll @"resA" # rot # dropHide # snocF # swap)
               # (pick @"pfsB" # roll @"resB" # rot # dropHide # snocF)
-              # (opFalse # unnameArg3 @"pfsA" @"pfsB" @"pfsTup")
+              # (opFalse # un3 @"pfsA" @"pfsB" @"pfsTup")
           )
           ( begin
               # opTrue
-              # unnameArg6 @"pfsA" @"pfsB" @"pfsTup" @"vec" @"resA" @"resB"
+              # un6 @"pfsA" @"pfsB" @"pfsTup" @"vec" @"resA" @"resB"
           )
 
 -- ## Filtering.
@@ -713,9 +713,9 @@ foldlF =
           ( begin
               # (del @"vec" # untuple # swap # hide # roll @"acc" # swap)
               # (pick @"fn" # fixup2 # invoke2 # hide # opFalse)
-              # unnameArg2 @"packFs" @"fn"
+              # un2 @"packFs" @"fn"
           )
-          (opTrue # unnameArg4 @"packFs" @"fn" @"vec" @"acc")
+          (opTrue # un4 @"packFs" @"fn" @"vec" @"acc")
 
     fixup2 :: FN (s > Hide a > Hide b > c) (s > a > b > c)
     fixup2 = castStack
