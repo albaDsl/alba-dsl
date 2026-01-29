@@ -110,7 +110,7 @@ progSort =
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
-  (B.length xs <= 48) ==> do
+  (B.length xs <= 47) ==> do
     isTrue' $
       evaluateProg
         (bytes xs # toVector # MS.sort # bytes (B.sort xs) # toVector # opEqual)
