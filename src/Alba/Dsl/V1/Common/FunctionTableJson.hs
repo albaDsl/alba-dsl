@@ -71,7 +71,7 @@ toTableEntry (fId, Function {..}) =
     { functionName = functionShortName fId,
       functionLongName = functionLongName fId,
       functionId = functionIdentifier vmFId,
-      callSites = Just callSites
+      callSites = callSites
     }
 
 functionLongName :: FunctionId -> Text

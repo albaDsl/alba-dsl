@@ -57,7 +57,7 @@ functionLine' loc fName fType (Function {..}) =
     (trunc widthType fType)
     (trunc widthVmFid (functionIdentifier vmFId))
     (trunc widthOps (maybe "-" (T.pack . show . S.length) code))
-    (trunc widthSites (T.pack $ show callSites))
+    (trunc widthSites (maybe "-" (T.pack . show) callSites))
 
 trunc :: Int -> Text -> Text
 trunc n str =

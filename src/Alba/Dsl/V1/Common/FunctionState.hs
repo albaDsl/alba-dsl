@@ -33,7 +33,7 @@ newtype FunctionState = FunctionState
 data Function = Function
   { code :: Maybe CodeL3,
     index :: Maybe Int,
-    callSites :: Int
+    callSites :: Maybe Int
   }
   deriving (Eq, Show)
 
@@ -48,17 +48,20 @@ registerFunction fId fs@FunctionState {functions = fns} =
     then Just $
       case fId of
         Standard {} ->
-          fs {functions = M.insert fId (Function Nothing Nothing 1) fns}
+          fs {functions = M.insert fId (Function Nothing Nothing (Just 1)) fns}
         Constant {} ->
-          fs {functions = M.insert fId (Function Nothing Nothing 1) fns}
+          fs {functions = M.insert fId (Function Nothing Nothing (Just 1)) fns}
         RuntimeConstant {} ->
-          fs {functions = M.insert fId (Function Nothing Nothing 1) fns}
+          fs {functions = M.insert fId (Function Nothing Nothing (Just 1)) fns}
         Lambda {} ->
-          fs {functions = M.insert fId (Function Nothing Nothing 1) fns}
+          fs {functions = M.insert fId (Function Nothing Nothing Nothing) fns}
         Named _ ->
-          fs {functions = M.insert fId (Function Nothing Nothing 0) fns}
+          fs {functions = M.insert fId (Function Nothing Nothing (Just 0)) fns}
         Absolute idx ->
-          fs {functions = M.insert fId (Function Nothing (Just idx) 0) fns}
+          fs
+            { functions =
+                M.insert fId (Function Nothing (Just idx) (Just 0)) fns
+            }
     else Nothing
 
 addFunctionBody :: FunctionId -> CodeL3 -> FunctionState -> Maybe FunctionState
@@ -78,9 +81,13 @@ addCallSite fId fs@FunctionState {functions} =
       Just $
         fs
           { functions =
-              M.insert fId (Function {callSites = succ callSites, ..}) functions
+              M.insert fId (Function {callSites = inc callSites, ..}) functions
           }
     Nothing -> Nothing
+  where
+    inc :: Maybe Int -> Maybe Int
+    inc Nothing = Nothing
+    inc (Just n) = Just (succ n)
 
 setCallSites :: FunctionId -> FunctionState -> Int -> Maybe FunctionState
 setCallSites fId fs@FunctionState {functions} count =
@@ -89,7 +96,7 @@ setCallSites fId fs@FunctionState {functions} count =
       Just $
         fs
           { functions =
-              M.insert fId (Function {callSites = count, ..}) functions
+              M.insert fId (Function {callSites = Just count, ..}) functions
           }
     Nothing -> Nothing
 

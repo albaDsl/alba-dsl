@@ -39,7 +39,7 @@ data Function = Function
   { code :: Maybe CodeL3,
     index :: Int,
     vmFId :: VmFunctionId,
-    callSites :: Int
+    callSites :: Maybe Int
   }
   deriving (Eq, Show)
 
