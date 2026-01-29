@@ -102,7 +102,7 @@ progRange comp1 comp2 =
     # opIf
       (pick @"x" # pick @"max" # comp2)
       opFalse
-    # dropCount @3
+    # delCount @3
 
 propWithin :: Integer -> Integer -> Integer -> Bool
 propWithin x min max =

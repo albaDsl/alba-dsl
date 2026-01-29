@@ -11,7 +11,7 @@ import Alba.Dsl.V1.Bch2026
     bytes,
     cast,
     castStack,
-    drop,
+    del,
     name2,
     nat,
     ns2,
@@ -65,7 +65,7 @@ sortF =
               # (pick @"pfs" # opRot # opRot # mergeF)
           )
           (roll @"vec")
-        # drop @"pfs"
+        # del @"pfs"
     )
 
 halveF :: FN (s > TPackFs a > TVector a) (s > TVector a > TVector a)
@@ -96,16 +96,16 @@ mergeF =
               # opIf
                 ( begin
                     # (roll @"x" # roll @"xRest" # roll @"ys")
-                    # (drop @"yRest" # drop @"y" # drop @"xs")
+                    # (del @"yRest" # del @"y" # del @"xs")
                 )
                 ( begin
                     # (roll @"y" # roll @"xs" # roll @"yRest")
-                    # (drop @"ys" # drop @"xRest" # drop @"x")
+                    # (del @"ys" # del @"xRest" # del @"x")
                 )
               # (pick @"pfs" # opRot # opRot # mergeF)
               # (roll @"pfs" # opRot # opRot # nipHide # consF)
           )
-          (drop @"pfs" # drop @"xs" # drop @"ys")
+          (del @"pfs" # del @"xs" # del @"ys")
     )
   where
     uncons' ::
@@ -121,12 +121,12 @@ mergeF =
       begin
         # (ns2 @"xs" @"ys" # pick @"xs" # null)
         # opIf
-          (roll @"ys" # drop @"xs" # opFalse)
+          (roll @"ys" # del @"xs" # opFalse)
           ( begin
               # (pick @"ys" # null)
               # opIf
-                (drop @"ys" # roll @"xs" # opFalse)
-                (drop @"xs" # drop @"ys" # empty # opTrue)
+                (del @"ys" # roll @"xs" # opFalse)
+                (del @"xs" # del @"ys" # empty # opTrue)
           )
 
 -- Used from contexts where it is expected to never fail.

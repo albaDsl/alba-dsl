@@ -14,7 +14,6 @@ where
 
 import Alba.Dsl.V1.Bch2026
 import Numeric.Natural (Natural)
-import Prelude hiding (drop)
 
 data TPoint
 
@@ -63,7 +62,7 @@ isEqual = function (unname @2 isEqual')
       begin
         # (pick @"p" # isIdentity # pick @"q" # isIdentity # opBoolAnd)
         # opIf
-          (opTrue # drop @"q" # drop @"p")
+          (opTrue # del @"q" # del @"p")
           ( begin
               # name @"equalTag"
                 (pick @"p" # getTag # pick @"q" # getTag # opNumEqual)

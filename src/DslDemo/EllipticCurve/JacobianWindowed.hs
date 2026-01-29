@@ -21,7 +21,6 @@ import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
 import DslDemo.EllipticCurve.LookupTable (getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
-import Prelude hiding (drop)
 
 type TFIdx = TNat -- Index into the functions array.
 
@@ -38,7 +37,7 @@ setupTable =
         ( begin
             # (pick @"i" # op0 # opEqual)
             # opIf
-              (drop @"fIdx" # drop @"p" # drop @"acc" # drop @"i")
+              (del @"fIdx" # del @"p" # del @"acc" # del @"i")
               ( begin
                   # (pick @"fIdx" # pick @"acc" # p2b # storePoint)
                   # (roll @"fIdx" # op1Add)
@@ -78,7 +77,7 @@ ecMulJ =
   begin
     # (pick @"n" # nat 0 # opNumEqual)
     # opIf
-      (drop @"tab" # drop @"n" # makeIdentity)
+      (del @"tab" # del @"n" # makeIdentity)
       ( begin
           # (roll @"tab" # roll @"n" # digits # makeIdentity)
           # (opUntil (unname @3 ecMulJLoop) # opNip # opNip)
@@ -103,7 +102,7 @@ ecMulJLoop =
                 # (pick @"tab" # roll @"digit" # tableLookup)
                 # (roll @"q'" # EC.ecAddJ)
             )
-            (drop @"digit" # roll @"q'")
+            (del @"digit" # roll @"q'")
           # (roll @"tab" # roll @"arr'" # opRot # opFalse)
       )
   where

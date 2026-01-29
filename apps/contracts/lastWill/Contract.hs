@@ -6,7 +6,6 @@ import Alba.Dsl.V1.Bch2025
 import Data.Word (Word64)
 import Numeric.Natural (Natural)
 import Params (fee, inheritDelay, refreshDelay)
-import Prelude hiding (drop)
 
 type LastWill =
   Contract
@@ -39,7 +38,7 @@ refresh =
     # verifyOutputAmount 0
     # verifyOutputScript 0
     # verifySequence refreshDelay
-    # (drop @"withdrawHash" # drop @"inheritHash")
+    # (del @"withdrawHash" # del @"inheritHash")
     # opTrue
   where
     verifyOutputAmount :: Natural -> FNC
@@ -66,7 +65,7 @@ withdraw =
           # (roll @"sig" # roll @"withdrawHash" # roll @"pubKey")
           # verifyAuthorized
       )
-    # (drop @"refreshHash" # drop @"inheritHash")
+    # (del @"refreshHash" # del @"inheritHash")
     # opTrue
 
 inherit :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
@@ -77,7 +76,7 @@ inherit =
           # verifyAuthorized
       )
     # verifySequence inheritDelay
-    # (drop @"refreshHash" # drop @"withdrawHash")
+    # (del @"refreshHash" # del @"withdrawHash")
     # opTrue
 
 verifyAuthorized :: FN (s > TSig > THash160 > TPubKey) s

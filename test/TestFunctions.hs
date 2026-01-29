@@ -14,7 +14,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import Test.Tasty.QuickCheck (Property, testProperty, (==>))
 import TestUtils2026 (evaluateProg, isTrue, isTrue')
-import Prelude hiding (drop, reverse)
+import Prelude hiding (reverse)
 
 testFunctions :: TestTree
 testFunctions =
@@ -99,7 +99,7 @@ progFactorial =
       begin
         # pick @"n"
         # ifZero
-          (nat 1 # drop @"n")
+          (nat 1 # del @"n")
           (pick @"n" # roll @"n" # op1SubUnsafe # fac # opMul)
 
 progSort :: FN s (s > TBool)

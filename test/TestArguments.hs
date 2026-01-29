@@ -6,7 +6,6 @@ import Alba.Dsl.V1.Bch2025
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils (evaluateProg, isTrue)
-import Prelude hiding (drop)
 
 testArguments :: TestTree
 testArguments =
@@ -17,7 +16,7 @@ testArguments =
       testCase "Args - Named at call site" $
         isTrue (evaluateProg progNamedArgsAtCallSite),
       testCase "pick inside if" $ isTrue (evaluateProg progIfArgPick),
-      testCase "roll / drop" $ isTrue (evaluateProg progArgRollDrop),
+      testCase "roll / del" $ isTrue (evaluateProg progArgRollDrop),
       testCase "Naming stack items" $ isTrue (evaluateProg namingStackItems),
       testCase "Duplicate name" $ isTrue (evaluateProg duplicateName)
     ]
@@ -44,7 +43,7 @@ progNamedArgsAtCallSite =
     # name @"w" (nat 1 # nat 1 # opAdd)
     # name @"h" (nat 3)
     # calculateProperties
-    # drop @"does-not-interfere"
+    # del @"does-not-interfere"
     # (nat 6 # opNumEqual)
     # opSwap
     # (nat 10 # opNumEqual)
@@ -62,7 +61,7 @@ calculateProperties =
     # perimeter
     # (pick @"w" # pick @"h")
     # area
-    # (drop @"h" # drop @"w")
+    # (del @"h" # del @"w")
   where
     area :: FN (s > TNat > TNat) (s > TNat)
     area = opMul
@@ -89,18 +88,18 @@ progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
           (pick @"x2" # pick @"x5")
           (pick @"x1" # pick @"x2")
         # opAdd
-        # dropCount @5
+        # delCount @5
         # nat 10
         # opNumEqual
 
--- Exercising drop / roll with various types on the stack.
+-- Exercising del / roll with various types on the stack.
 progArgRollDrop :: FN s (s > TBool)
 progArgRollDrop = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
   where
     f :: FN (MiscArgs s) (s > TBool)
     f =
       begin
-        # (drop @"x3" # drop @"x4" # drop @"x1")
+        # (del @"x3" # del @"x4" # del @"x1")
         # (roll @"x2" # roll @"x5")
         # opAdd
         # nat 10
@@ -112,7 +111,7 @@ namingStackItems =
   begin
     # momentum
     # pick @"momentum"
-    # drop @"momentum"
+    # del @"momentum"
     # int 1250
     # opNumEqual
   where
@@ -156,5 +155,5 @@ duplicateName =
 --   begin
 --     # opRoll @0
 --     # opRoll @1
---     # (drop @"x2" # drop @"x1")
+--     # (del @"x2" # del @"x1")
 --     # op1

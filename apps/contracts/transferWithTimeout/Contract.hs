@@ -3,7 +3,6 @@
 module Contract (TransferWithTimeout, Params, contract) where
 
 import Alba.Dsl.V1.Bch2025
-import Prelude hiding (drop)
 
 type TransferWithTimeout =
   Contract
@@ -21,12 +20,12 @@ contract = MkContract $ entry2 recipientWithdraw senderWithdraw
     recipientWithdraw =
       begin
         # (roll @"sig" # roll @"recipientPub" # opCheckSigVerify)
-        # (drop @"timeout" # drop @"senderPub")
+        # (del @"timeout" # del @"senderPub")
         # opTrue
 
     senderWithdraw =
       begin
         # (roll @"sig" # roll @"senderPub" # opCheckSigVerify)
         # (roll @"timeout" # opCheckLockTimeVerify # opDrop)
-        # drop @"recipientPub"
+        # del @"recipientPub"
         # opTrue

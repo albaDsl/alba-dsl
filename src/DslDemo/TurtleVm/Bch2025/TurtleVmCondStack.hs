@@ -13,7 +13,7 @@ import Alba.Dsl.V1.Bch2025
     TBytes,
     begin,
     bytes,
-    drop,
+    del,
     name,
     name2,
     nat,
@@ -36,7 +36,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
-import Prelude hiding (and, drop)
+import Prelude hiding (and)
 
 executeP ::
   Int ->
@@ -55,7 +55,7 @@ executeP maxCsDepth =
             (roll @"op'" # opDup # isConditionalOp # (roll @"exec?") # opBoolOr)
             (roll @"op'" # roll @"exec?")
       )
-      (drop @"condStack" # bytes [] # opFalse)
+      (del @"condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: Int -> FN (s > TBytes) (s > TBool)
 condStackExecuteP maxCsDepth =

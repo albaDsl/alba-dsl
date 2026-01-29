@@ -13,7 +13,6 @@ import DslDemo.EllipticCurve.Point
     makeIdentity,
     makePoint,
   )
-import Prelude hiding (drop)
 
 ecDouble :: FN (s > TPoint) (s > TPoint)
 ecDouble = function (unname @1 ecDouble')
@@ -55,16 +54,16 @@ ecAdd' =
   begin
     # (pick @"p" # isIdentity)
     # opIf
-      (roll @"q" # drop @"p")
+      (roll @"q" # del @"p")
       ( (pick @"q" # isIdentity)
           # opIf
-            (roll @"p" # drop @"q")
+            (roll @"p" # del @"q")
             ( pointsAreEqual
                 # opIf
-                  (roll @"p" # ecDouble # drop @"q")
+                  (roll @"p" # ecDouble # del @"q")
                   ( xCoordsEqual
                       # opIf
-                        (makeIdentity # drop @"q" # drop @"p")
+                        (makeIdentity # del @"q" # del @"p")
                         doAdd
                   )
             )

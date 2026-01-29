@@ -64,7 +64,8 @@ import Alba.Dsl.V1.Bch2026
     bytes,
     cast,
     castStack,
-    dropCount,
+    del,
+    delCount,
     function,
     invoke1,
     invoke2,
@@ -112,7 +113,6 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
 import Alba.Dsl.V1.Bch2026.Contract.Hide
   ( Hide,
@@ -268,9 +268,9 @@ splitAtF =
               # (tcPick # pick @"vec" # lengthF # pick @"idx" # opGreaterThan)
               # opIf
                 (tcRoll # roll @"idx" # roll @"vec" # splitAtUnsafeF)
-                (roll @"vec" # empty # dropCount @2)
+                (roll @"vec" # empty # delCount @2)
           )
-          (empty # roll @"vec" # dropCount @2)
+          (empty # roll @"vec" # delCount @2)
     )
 
 splitAtUnsafeF ::
@@ -354,7 +354,7 @@ replicateF =
               # (roll @"packFs" # roll @"val" # hide # roll @"cnt" # empty)
               # (opUntil loop # nip # nip # nip)
           )
-          (dropCount @3 # empty)
+          (delCount @3 # empty)
     )
   where
     loop :: (StackEntry a) => Loop (s > TPackFs a > Hide a > TNat > TVector a)
@@ -384,7 +384,7 @@ generateF =
               # (tcRoll # roll @"fn" # roll @"cnt" # nat 0 # empty)
               # (opUntil loop # nip # nip # nip # nip)
           )
-          (dropCount @3 # empty)
+          (delCount @3 # empty)
     )
   where
     loop ::
@@ -420,7 +420,7 @@ iterateNF =
               # (roll @"packFs" # pick @"val'" # singletonF # unnameArg @"val'")
               # (opUntil loop # nip # nip # nip # nip)
           )
-          (dropCount @4 # empty)
+          (delCount @4 # empty)
     )
   where
     loop ::
@@ -542,7 +542,7 @@ zipF = function (empty # opUntil loop # nip # nip # nip # nip)
         # (lambda2 tuple # rot # rot # liftA2Maybe)
         # ifJust
           ( begin
-              # (Dsl.drop @"vecA" # Dsl.drop @"vecB")
+              # (del @"vecA" # del @"vecB")
               # (rot # fromJust # snd # rot # fromJust # snd # rot)
               # (pick @"pfsA" # pick @"pfsB" # rot # untuple # TFS.tupleF)
               # (pick @"pfsA" # pick @"pfsB" # calcPackFs)
@@ -595,7 +595,7 @@ zipWithF =
         # (pick @"fn" # rot # rot # liftA2Maybe)
         # ifJust
           ( begin
-              # (hide # Dsl.drop @"vecA" # Dsl.drop @"vecB")
+              # (hide # del @"vecA" # del @"vecB")
               # (rot # fromJust # snd # rot # fromJust # snd # rot)
               # (pick @"packFsC" # roll @"res" # rot # dropHide # snocF)
               # (opFalse # unnameArg4 @"pfsA" @"pfsB" @"packFsC" @"fn")
@@ -637,7 +637,7 @@ unzipF =
         # (pick @"pfsTup" # pick @"vec" # unconsF)
         # ifJust
           ( begin
-              # Dsl.drop @"vec"
+              # del @"vec"
               # (untuple # swap # pick @"pfsA" # pick @"pfsB" # rot)
               # (TFS.untupleF # swap # hide2)
               # (pick @"pfsA" # roll @"resA" # rot # dropHide # snocF # swap)
@@ -684,7 +684,7 @@ filterF =
         # opIf
           (pick @"packFs" # roll @"acc" # pick @"val" # dropHide # snocF)
           (roll @"acc")
-        # (Dsl.drop @"val" # Dsl.drop @"packFs" # fromAlt # tuple)
+        # (del @"val" # del @"packFs" # fromAlt # tuple)
 
 -- ## Folding.
 foldl ::
@@ -711,7 +711,7 @@ foldlF =
         # (ns4 @"packFs" @"fn" @"vec" @"acc" # tcPick # pick @"vec" # unconsF)
         # ifJust
           ( begin
-              # (Dsl.drop @"vec" # untuple # swap # hide # roll @"acc" # swap)
+              # (del @"vec" # untuple # swap # hide # roll @"acc" # swap)
               # (pick @"fn" # fixup2 # invoke2 # hide # opFalse)
               # unnameArg2 @"packFs" @"fn"
           )

@@ -13,7 +13,7 @@ import Alba.Dsl.V1.Bch2026
     TBytes,
     begin,
     bytes,
-    drop,
+    del,
     function,
     nat,
     opBoolOr,
@@ -35,7 +35,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
-import Prelude hiding (and, drop)
+import Prelude hiding (and)
 
 executeP ::
   FN
@@ -55,7 +55,7 @@ executeP =
             )
             (roll @"condStack" # condStackExecuteP)
       )
-      (drop @"condStack" # bytes [] # opFalse)
+      (del @"condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
 condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)

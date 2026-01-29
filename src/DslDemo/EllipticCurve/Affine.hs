@@ -6,7 +6,6 @@ import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
-import Prelude hiding (drop)
 
 type LoopTypeN s = s > N "n" TNat > N "p" TPoint > N "r" TPoint
 
@@ -21,7 +20,7 @@ ecMul' =
     # pick @"n"
     # (nat 0 # opNumEqual)
     # opIf
-      (drop @"n" # drop @"p" # makeIdentity)
+      (del @"n" # del @"p" # makeIdentity)
       ( begin
           # roll @"n"
           # roll @"p"

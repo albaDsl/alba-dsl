@@ -26,7 +26,6 @@ import DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertFailure, testCase, (@?=))
 import TestUtils (txContext, utxoWithPubkey)
-import Prelude hiding (drop)
 
 testTurtleVm2025 :: TestTree
 testTurtleVm2025 =
@@ -134,7 +133,7 @@ progStack2 =
     # name @"x1" (int 1)
     # name @"x0" (int 0)
     # (pick @"x4" # roll @"x3" # opMul # int 12 # opNumEqual)
-    # (drop @"x0" # drop @"x1" # drop @"x2" # drop @"x4")
+    # (del @"x0" # del @"x1" # del @"x2" # del @"x4")
 
 progBytes :: FN s (s > TBool)
 progBytes =

@@ -13,7 +13,6 @@ import DslDemo.EllipticCurve.JacobianPoint
     makeIdentity,
     makePoint,
   )
-import Prelude hiding (drop)
 
 ecDoubleJ :: FN (s > TPointJ) (s > TPointJ)
 ecDoubleJ = function (unname @1 ecDoubleJ')
@@ -50,8 +49,8 @@ ecAddJ' =
   begin
     # (pick @"p1" # isIdentity)
     # opIf
-      (roll @"p2" # drop @"p1")
-      (pick @"p2" # isIdentity # opIf (roll @"p1" # drop @"p2") doAdd)
+      (roll @"p2" # del @"p1")
+      (pick @"p2" # isIdentity # opIf (roll @"p1" # del @"p2") doAdd)
 
 doAdd :: FN (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
 doAdd =
@@ -69,10 +68,10 @@ doAdd =
     # ex1 (pick @"u1" # pick @"u2" # opNumEqual)
     # opIf
       ( begin
-          # (drop @"z1" # drop @"z2" # drop @"u1" # drop @"u2")
+          # (del @"z1" # del @"z2" # del @"u1" # del @"u2")
           # (roll @"s1" # roll @"s2" # opNumNotEqual)
           # opIf
-            (drop @"p1" # makeIdentity)
+            (del @"p1" # makeIdentity)
             (roll @"p1" # ecDoubleJ)
       )
       ( begin
@@ -96,7 +95,7 @@ doAdd =
             )
           # name @"z3" (roll @"h" # roll @"z1" # feMul # roll @"z2" # feMul)
           # (roll @"x3" # roll @"y3" # roll @"z3" # makePoint)
-          # drop @"p1"
+          # del @"p1"
       )
 
 term2 :: FN (s > TInt > TInt) (s > TInt)

@@ -31,6 +31,7 @@ import Alba.Dsl.V1.Bch2026
     UnName,
     begin,
     cast,
+    del,
     function,
     invoke1,
     nat,
@@ -43,7 +44,6 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026 qualified as Dsl
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, rot)
 import Data.Kind (Type)
 import GHC.TypeLits (KnownNat)
@@ -135,7 +135,7 @@ tcDrop ::
     Remove s idx ~ s'
   ) =>
   FN s s'
-tcDrop = Dsl.drop @"packFs"
+tcDrop = del @"packFs"
 
 tcSize ::
   forall arg idx s a.

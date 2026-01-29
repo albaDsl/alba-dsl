@@ -5,8 +5,8 @@ module Alba.Dsl.V1.Bch2025.LangArgs
     pickN,
     roll,
     rollN,
-    drop,
-    dropCount,
+    del,
+    delCount,
   )
 where
 
@@ -26,7 +26,6 @@ import Alba.Dsl.V1.Common.TermClass (Term (..))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Proxy (Proxy (..))
 import GHC.TypeLits (KnownNat, natVal)
-import Prelude hiding (drop)
 
 pick ::
   forall argName arg idx s.
@@ -75,7 +74,7 @@ rollN ::
   FN s (s' > arg)
 rollN = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll' idx
 
-drop ::
+del ::
   forall argName arg idx s s'.
   ( KnownNat idx,
     StackEntry (UnName arg),
@@ -84,16 +83,16 @@ drop ::
     Remove s idx ~ s'
   ) =>
   FN s s'
-drop = roll @argName # opDrop
+del = roll @argName # opDrop
 
-dropCount ::
+delCount ::
   forall argCount idxs s s'.
   ( Term idxs,
     FindNamedArgs s argCount 0 '[] ~ idxs,
     RemoveNamedArgs s argCount ~ s'
   ) =>
   FN s s'
-dropCount (S c fs) =
+delCount (S c fs) =
   let idxs = term @idxs :: [Integer]
       idxs' = fixIndices idxs
    in foldl (flip remove) (S c fs) idxs'

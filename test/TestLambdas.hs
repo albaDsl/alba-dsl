@@ -7,7 +7,6 @@ import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)
-import Prelude hiding (drop)
 
 testLambdas :: TestTree
 testLambdas =
@@ -93,7 +92,7 @@ progMapLambda =
           )
         # pick @"size"
         # ifZero
-          (drop @"size" # drop @"f" # roll @"vec")
+          (del @"size" # del @"f" # roll @"vec")
           ( begin
               # (nat 0 # roll @"vec")
               # opUntil
@@ -115,8 +114,8 @@ progMapLambda =
                     # (opRot # opSwap)
                 )
               # opNip
-              # drop @"size"
-              # drop @"f"
+              # del @"size"
+              # del @"f"
           )
 
     uncons :: Natural -> FN (s > TBytes) (s > TBytes > TBytes)

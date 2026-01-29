@@ -14,7 +14,6 @@ import Data.Sequence qualified as S
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import TestUtils (evaluateProgWithStack, getStacks)
-import Prelude hiding (drop)
 
 testStackBranches :: TestTree
 testStackBranches =
@@ -89,10 +88,10 @@ progSimpleStackBranch =
     # op1
     # opEqual
     # opIf
-      (branch1 # drop @"b1" # int 2)
+      (branch1 # del @"b1" # int 2)
       ( branch2
-          # drop @"b2"
-          # drop @"b3"
+          # del @"b2"
+          # del @"b3"
           # roll @"int"
           # int 29
           # opSub

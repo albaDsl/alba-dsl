@@ -22,7 +22,6 @@ import DslDemo.EllipticCurve.JacobianPoint
 import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
-import Prelude hiding (drop)
 
 type LoopTypeN s = s > N "n" TNat > N "p" TPointJ > N "r" TPointJ
 
@@ -46,7 +45,7 @@ ecMulJ = unname @2 ecMulJ'
         # pick @"n"
         # (nat 0 # opNumEqual)
         # opIf
-          (drop @"n" # drop @"p" # makeIdentity)
+          (del @"n" # del @"p" # makeIdentity)
           ( begin
               # roll @"n"
               # roll @"p"
@@ -74,7 +73,7 @@ toJacobian = function (unname @1 toJacobian')
       begin
         # ex1 (pick @"p" # AP.isIdentity)
         # opIf
-          (drop @"p" # makeIdentity)
+          (del @"p" # makeIdentity)
           (pick @"p" # AP.getX # roll @"p" # AP.getY # int 1 # makePoint)
 
 fromJacobian :: FN (s > TPointJ) (s > TPoint)
@@ -85,7 +84,7 @@ fromJacobian = function (unname @1 fromJacobian')
       begin
         # (pick @"p" # isIdentity)
         # opIf
-          (drop @"p" # AP.makeIdentity)
+          (del @"p" # AP.makeIdentity)
           ( begin
               # name @"z" (pick @"p" # JP.getZ)
               # name @"x'"
