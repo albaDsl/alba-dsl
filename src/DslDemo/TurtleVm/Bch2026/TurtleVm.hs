@@ -24,7 +24,11 @@ import DslDemo.TurtleVm.Bch2026.TurtleVmState
     initState,
     isEndOfProgram,
   )
-import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isOpDataOp, isSingleByteOp)
+import DslDemo.TurtleVm.Bch2026.TurtleVmUtils
+  ( fromSigned,
+    isOpDataOp,
+    isSingleByteOp,
+  )
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtilsUntyped (condOp, is, unsupportedOp)
 
 turtleVm :: Int -> FNU
@@ -53,7 +57,7 @@ handleOp =
           # ft toSigned
           # condOp
             [ (is 0x00, opDrop # op0),
-              (inRange 0x4f 0xd4, opInvoke)
+              (inRange 0x4f 0xd4, ft fromSigned # opInvoke)
             ]
       )
       ( begin

@@ -17,6 +17,7 @@ import Alba.Dsl.V1.Common.Compile
     compile',
     compileL2,
     compileL2WithDetails,
+    defOpts,
   )
 import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Dsl.V1.Common.Stack (FNA)
@@ -30,7 +31,7 @@ import Text.Printf (printf)
 
 progSize :: FNA s alt s' alt' -> String
 progSize prog =
-  let (code, defs, _) = compileL2WithDetails O1 prog
+  let (code, defs, _) = compileL2WithDetails (defOpts O1) prog
    in printf
         "%s Including function table: %s\n"
         (sizeStr code)

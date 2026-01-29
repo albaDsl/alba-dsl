@@ -9,11 +9,13 @@ module Alba.Vm.Common.Logging
     logStart,
     logFunctionExit,
     logFailure,
+    functionIdToText,
   )
 where
 
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
-import Alba.Vm.Common.StackElement (Labels)
+import Alba.Vm.Common.StackElement (Bytes, Labels)
+import Alba.Vm.Common.Utils (formatBytesFull)
 import Alba.Vm.Common.VmState
   ( LogEntry (..),
     Operation (..),
@@ -31,12 +33,12 @@ data LogDisplayOpts = LogDisplayOpts
     showUnexecuted :: Bool
   }
 
-type FunctionTable = M.Map Int FunctionTableEntry
+type FunctionTable = M.Map Text FunctionTableEntry
 
 data FunctionTableEntry = FunctionTableEntry
   { functionName :: Text,
     functionLongName :: Text,
-    slot :: Int,
+    functionId :: Text,
     callSites :: Maybe Int
   }
   deriving (Show)
@@ -80,3 +82,6 @@ logFailure _op state@VmState {logData = Nothing} = state
 logFailure op state@VmState {logData = Just logData} =
   let entry = Failed {opcode = op}
    in state {logData = Just $ logData S.|> entry}
+
+functionIdToText :: Bytes -> Text
+functionIdToText = formatBytesFull

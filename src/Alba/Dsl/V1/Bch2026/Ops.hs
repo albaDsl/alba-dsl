@@ -22,13 +22,14 @@ opUntil loopBody (S c fs) =
 opDefine :: FN (s > TBytes > TBytes) s
 opDefine (S c fs) = S (aop c OP_DEFINE) fs
 
+-- Define function at an index relative current namespace.
 opDefineIdx :: Int -> FN (s > TBytes) s
 opDefineIdx idx (S c fs) =
   let fId = Absolute idx
       fs' = fromMaybe err (registerFunction fId fs)
    in S (aops' c [FunctionIndexDef {fId}, Opcode OP_DEFINE]) fs'
   where
-    err = error "opDefine: name already defined."
+    err = error "opDefineIdx: idx already defined."
 
 opDefineNamed :: String -> FN (s > TBytes) s
 opDefineNamed name (S c fs) =

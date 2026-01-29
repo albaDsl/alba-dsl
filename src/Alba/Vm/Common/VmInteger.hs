@@ -4,6 +4,7 @@
 module Alba.Vm.Common.VmInteger
   ( bytesToInteger,
     integerToBytes,
+    integerToBytesUnsigned,
     integerByteSize,
     extendToByteSize,
     maxInteger,
@@ -66,11 +67,15 @@ integerToBytes :: Integer -> Bytes
 integerToBytes 0 = B.empty
 integerToBytes n =
   let neg = n < 0
-      res = B.unfoldr f (abs n)
+      res = integerToBytesUnsigned n
       (init, msb) = fromMaybe canNotHappen (B.unsnoc res)
    in if testBit msb signBit
         then B.snoc res (if neg then signBitMask else 0)
         else if neg then B.snoc init (msb .|. signBitMask) else res
+
+integerToBytesUnsigned :: Integer -> Bytes
+integerToBytesUnsigned 0 = B.empty
+integerToBytesUnsigned n = B.unfoldr f (abs n)
   where
     f :: Integer -> Maybe (Word8, Integer)
     f 0 = Nothing

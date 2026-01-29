@@ -39,6 +39,8 @@ vmError msg = bytes msg # opFalse # opVerify # castStack
 castStack :: FNA s alt s' alt'
 castStack (S c fs) = let state = S c fs in state
 
+-- Convert a positive value [0, 255] represented as a single byte to a positive
+-- CashVm integer.
 toSigned :: FN (s > TBytes) (s > TInt)
 toSigned = bytes [0] # opCat # opBin2Num
 

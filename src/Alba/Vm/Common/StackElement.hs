@@ -154,6 +154,9 @@ se2iUnsafe (StackElement (SevBytes val) _) = bytesToInteger val
 se2iUnsafe (StackElement (SevBool True) _) = 1
 se2iUnsafe (StackElement (SevBool False) _) = 0
 
+-- Cases below are:
+-- [bX000_0000] = 0bX000_0000 => not minimal
+-- [...,0b0XXX_XXXX,0bX000_0000] = 0bX000_0000_0XXX_XXXX_... => not minimal
 isMinimallyEncoded :: VmParams -> Bytes -> Bool
 isMinimallyEncoded _ bytes | B.null bytes = True
 isMinimallyEncoded vmParams bytes

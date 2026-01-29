@@ -4,6 +4,7 @@ module Alba.Vm.Common.Utils
   ( Labels,
     formatBytesWithLabels,
     formatBytes,
+    formatBytesFull,
     pubKeyLabels,
   )
 where
@@ -36,7 +37,7 @@ formatBytes bytes =
       numChars = 4
       cutOff = numChars * 2 + 3
    in case str of
-        _ | T.null str -> "<>:0"
+        _ | T.null str -> "<:0>"
         _
           | T.length str > cutOff ->
               T.pack $
@@ -49,6 +50,14 @@ formatBytes bytes =
   where
     size x | B.length x <= 999 = T.pack $ ":" <> show (B.length x)
     size _ = ":XL"
+
+formatBytesFull :: B.ByteString -> T.Text
+formatBytesFull bytes =
+  let hex = encodeHex bytes
+      size = (T.pack . show . B.length) bytes
+   in case hex of
+        _ | T.null hex -> "<:0>"
+        _ -> "<" <> hex <> ":" <> size <> ">"
 
 pubKeyLabels :: Ctx -> PubKey -> Text -> Labels
 pubKeyLabels ctx pubKey name =

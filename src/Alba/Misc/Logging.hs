@@ -33,7 +33,7 @@ dumpLogToFile cr logs file = do
 convertTable :: FunctionTable -> Log.FunctionTable
 convertTable functions =
   let entries = tableEntries functions
-      entries' = (\e -> (e.slot, convert e)) <$> entries
+      entries' = (\e -> (e.functionId, convert e)) <$> entries
    in M.fromList entries'
 
 convert :: FunctionTableEntry -> Log.FunctionTableEntry

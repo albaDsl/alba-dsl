@@ -3,6 +3,7 @@
 module DslDemo.TurtleVm.Bch2026.TurtleVmUtils
   ( vmError,
     toSigned,
+    fromSigned,
     unsupportedOp,
     unsupportedOpBytes,
     inRange,
@@ -21,15 +22,20 @@ import Alba.Dsl.V1.Bch2026
     TBytes,
     TInt,
     bytes,
+    cast,
     function,
     int,
     nat,
     opBin2Num,
     opCat,
+    opDrop,
     opFalse,
+    opGreaterThan,
     opNumEqual,
     opSize,
+    opSplit,
     opVerify,
+    opWhen,
     opWithin,
     progBytes,
     (#),
@@ -42,8 +48,19 @@ vmError msg = bytes msg # opFalse # opVerify # castStack
 castStack :: FNA s alt s' alt'
 castStack (S c fs) = let state = S c fs in state
 
+-- Convert a positive value represented as a bytestring to a positive CashVm
+-- integer.
 toSigned :: FN (s > TBytes) (s > TInt)
 toSigned = bytes [0] # opCat # opBin2Num
+
+-- Convert a positive value [0, 255] represented as an CashVm integer to a
+-- single byte bytestring.
+fromSigned :: FN (s > TInt) (s > TBytes)
+fromSigned =
+  i2b # opSize # nat 1 # opGreaterThan # opWhen (nat 1 # opSplit # opDrop)
+  where
+    i2b :: FN (s > TInt) (s > TBytes)
+    i2b = cast
 
 unsupportedOp :: FN s (s > TBytes)
 unsupportedOp = function (vmError "E1")

@@ -5,15 +5,20 @@ module Alba.Dsl.V1.Common.FunctionStateResolved
     FunctionTable,
     Function (..),
     toResolved,
-    getSlot,
-    functionsSortedBySlot,
-    functionsSortedBySlotTopological,
+    getVmFunctionId,
+    functionsSortedByIndex,
+    functionsSortedByIndexTopological,
   )
 where
 
 import Alba.Dsl.V1.Common.FunctionState qualified as FS
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (..))
-import Alba.Dsl.V1.Common.OpcodeL3 qualified as OL3
+import Alba.Dsl.V1.Common.OpcodeL3
+  ( CodeL3,
+    FunctionId (..),
+    OpcodeL3 (FunctionIndexRef),
+    VmFunctionId,
+    mkVmFunctionId,
+  )
 import Control.Arrow ((>>>))
 import Data.Array (assocs)
 import Data.Function (on)
@@ -28,48 +33,49 @@ import Text.Printf (printf)
 newtype FunctionState = FunctionState
   { functions :: FunctionTable
   }
-  deriving (Eq, Show)
+  deriving (Show)
 
 data Function = Function
   { code :: Maybe CodeL3,
-    slot :: Int,
+    index :: Int,
+    vmFId :: VmFunctionId,
     callSites :: Int
   }
   deriving (Eq, Show)
 
 type FunctionTable = M.Map FunctionId Function
 
-toResolved :: FS.FunctionState -> FunctionState
-toResolved FS.FunctionState {functions} =
+toResolved :: VmFunctionId -> FS.FunctionState -> FunctionState
+toResolved prefix FS.FunctionState {functions} =
   FunctionState
     { functions = M.map (fromMaybe (err functions) . convert) functions
     }
   where
     convert :: FS.Function -> Maybe Function
     convert FS.Function {..} = do
-      s <- slot
-      pure $ Function {slot = s, ..}
+      idx <- index
+      pure $ Function {index = idx, vmFId = mkVmFunctionId prefix idx, ..}
 
     err x =
       error
-        (printf "toResolved: FunctionState has undefined slot: %s" (show x))
+        (printf "toResolved: FunctionState has undefined index: %s" (show x))
 
-getSlot :: FunctionId -> FunctionState -> Maybe Int
-getSlot fId FunctionState {functions} =
+getVmFunctionId :: FunctionId -> FunctionState -> Maybe VmFunctionId
+getVmFunctionId fId FunctionState {functions} =
   case M.lookup fId functions of
-    Just (Function {slot}) -> pure slot
+    Just (Function {vmFId}) -> pure vmFId
     Nothing -> Nothing
 
-functionsSortedBySlot :: FunctionTable -> [(FunctionId, Function)]
-functionsSortedBySlot = M.toList >>> sortBy (compare `on` ((.slot) . snd))
+functionsSortedByIndex :: FunctionTable -> [(FunctionId, Function)]
+functionsSortedByIndex = M.toList >>> sortBy (compare `on` ((.index) . snd))
 
-functionsSortedBySlotTopological :: FunctionTable -> [(FunctionId, Function)]
-functionsSortedBySlotTopological table | M.null table = []
-functionsSortedBySlotTopological table =
-  let tableAsList = functionsSortedBySlot table
+functionsSortedByIndexTopological :: FunctionTable -> [(FunctionId, Function)]
+functionsSortedByIndexTopological table | M.null table = []
+functionsSortedByIndexTopological table =
+  let tableAsList = functionsSortedByIndex table
       edges = fromJust $ mapM (functionEdges table) tableAsList
       edges' = concat edges
-      maxFId = maximum ((.slot) . snd <$> tableAsList)
+      maxFId = maximum ((.index) . snd <$> tableAsList)
       graph = G.buildG (0, maxFId) edges'
       vertices =
         if null (cyclicNodes graph)
@@ -83,11 +89,11 @@ functionsSortedBySlotTopological table =
     topsortedTable order tableAsList =
       let orderMap = M.fromList (zip order ([0 ..] :: [Int]))
           position idx = fromMaybe err2 (M.lookup idx orderMap)
-       in sortOn (position . (.slot) . snd) tableAsList
+       in sortOn (position . (.index) . snd) tableAsList
 
     err :: String -> a
     err msg =
-      error ("functionsSortedBySlotTopological: " <> msg)
+      error ("functionsSortedByIndexTopological: " <> msg)
 
     err1 = err "cyclic dependency between constants."
     err2 = err "internal error."
@@ -95,14 +101,14 @@ functionsSortedBySlotTopological table =
 functionEdges :: FunctionTable -> (FunctionId, Function) -> Maybe [G.Edge]
 functionEdges table (RuntimeConstant {}, function) = do
   c <- function.code
-  (fmap . fmap) (function.slot,) (refs c (Just []))
+  (fmap . fmap) (function.index,) (refs c (Just []))
   where
     refs :: CodeL3 -> Maybe [Int] -> Maybe [Int]
     refs _ Nothing = Nothing
     refs S.Empty acc = acc
-    refs ((OL3.FunctionIndexRef fId') S.:<| rest) acc =
-      let slot = M.lookup fId' table >>= \x -> pure x.slot
-       in refs rest ((:) <$> slot <*> acc)
+    refs ((FunctionIndexRef fId') S.:<| rest) acc =
+      let index = M.lookup fId' table >>= \x -> pure x.index
+       in refs rest ((:) <$> index <*> acc)
     refs (_ S.:<| rest) acc = refs rest acc
 functionEdges _ _ = Just []
 

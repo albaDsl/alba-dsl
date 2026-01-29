@@ -5,9 +5,13 @@ module Alba.Dsl.V1.Common.FunctionTableText (generateTable) where
 import Alba.Dsl.V1.Common.FunctionStateResolved
   ( Function (..),
     FunctionTable,
-    functionsSortedBySlot,
+    functionsSortedByIndex,
   )
-import Alba.Dsl.V1.Common.FunctionTableJson (functionLongName, functionType)
+import Alba.Dsl.V1.Common.FunctionTableJson
+  ( functionIdentifier,
+    functionLongName,
+    functionType,
+  )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
 import Data.Sequence qualified as S
 import Data.Text (Text)
@@ -17,8 +21,8 @@ import Text.Printf (printf)
 generateTable :: FunctionTable -> Text
 generateTable functions =
   let hline = replicate tableWidth '-' <> "\n"
-      functions' = functionsSortedBySlot functions
-   in line "Location" "Function" "Type" "Slot" "Ops" "Sites"
+      functions' = functionsSortedByIndex functions
+   in line "Location" "Function" "Type" "Function ID" "Ops" "Sites"
         <> T.pack hline
         <> foldr functionLine "" functions'
         <> T.pack (printf "Functions total: %d\n" (length functions'))
@@ -51,7 +55,7 @@ functionLine' loc fName fType (Function {..}) =
     (trunc widthLocation loc)
     (trunc widthFunction fName)
     (trunc widthType fType)
-    (trunc widthSlot (T.pack $ show slot))
+    (trunc widthVmFid (functionIdentifier vmFId))
     (trunc widthOps (maybe "-" (T.pack . show . S.length) code))
     (trunc widthSites (T.pack $ show callSites))
 
@@ -73,8 +77,8 @@ widthType = 17
 widthOps :: Int
 widthOps = 5 :: Int
 
-widthSlot :: Int
-widthSlot = 5
+widthVmFid :: Int
+widthVmFid = 20
 
 widthSites :: Int
 widthSites = 5
@@ -85,7 +89,7 @@ tableWidth =
     + widthFunction
     + widthType
     + widthOps
-    + widthSlot
+    + widthVmFid
     + widthSites
     + 6
 
@@ -97,7 +101,7 @@ line ::
   Text ->
   Text ->
   Text
-line locStr funStr typeStr slotStr opsStr sitesStr =
+line locStr funStr typeStr vmFIdStr opsStr sitesStr =
   T.pack $
     printf
       formattingStr
@@ -107,8 +111,8 @@ line locStr funStr typeStr slotStr opsStr sitesStr =
       funStr
       widthType
       typeStr
-      widthSlot
-      slotStr
+      widthVmFid
+      vmFIdStr
       widthOps
       opsStr
       widthSites

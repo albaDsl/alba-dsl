@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Common.FunctionTableJson
     generateTable,
     tableEntries,
     functionLongName,
+    functionIdentifier,
     functionType,
   )
 where
@@ -12,9 +13,14 @@ where
 import Alba.Dsl.V1.Common.FunctionStateResolved
   ( Function (..),
     FunctionTable,
-    functionsSortedBySlot,
+    functionsSortedByIndex,
   )
-import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
+import Alba.Dsl.V1.Common.OpcodeL3
+  ( FunctionId (..),
+    VmFunctionId,
+    vmFunctionIdToByteString,
+  )
+import Alba.Vm.Common.Logging (functionIdToText)
 import Data.Aeson (ToJSON)
 import Data.Aeson.Encode.Pretty
   ( Config (..),
@@ -33,7 +39,7 @@ import Prelude hiding (head, tail)
 data FunctionTableEntry = FunctionTableEntry
   { functionName :: Text,
     functionLongName :: Text,
-    slot :: Int,
+    functionId :: Text,
     callSites :: Maybe Int
   }
   deriving (Generic, Show)
@@ -49,7 +55,7 @@ generateTable functions =
               keyOrder
                 [ "functionName",
                   "functionLongName",
-                  "slot",
+                  "functionId",
                   "callSites"
                 ]
           }
@@ -57,18 +63,16 @@ generateTable functions =
       (tableEntries functions)
 
 tableEntries :: FunctionTable -> [FunctionTableEntry]
-tableEntries functions = toTableEntry <$> functionsSortedBySlot functions
+tableEntries functions = toTableEntry <$> functionsSortedByIndex functions
 
 toTableEntry :: (FunctionId, Function) -> FunctionTableEntry
 toTableEntry (fId, Function {..}) =
-  let name = functionShortName fId
-      longName = functionLongName fId
-   in FunctionTableEntry
-        { functionName = name,
-          functionLongName = longName,
-          slot = slot,
-          callSites = Just callSites
-        }
+  FunctionTableEntry
+    { functionName = functionShortName fId,
+      functionLongName = functionLongName fId,
+      functionId = functionIdentifier vmFId,
+      callSites = Just callSites
+    }
 
 functionLongName :: FunctionId -> Text
 functionLongName fId =
@@ -82,7 +86,7 @@ functionLongName fId =
     Lambda moduleName line column _ ->
       format moduleName line column "<lambda>"
     Named name -> T.pack name
-    Absolute slot -> T.pack (printf "<absolute:%d>" slot)
+    Absolute idx -> T.pack (printf "<absolute %d>" idx)
   where
     format :: String -> Int -> Int -> String -> Text
     format moduleName line column functionName =
@@ -93,6 +97,9 @@ functionShortName fId =
   case fId of
     Standard _ _ _ functionName -> T.pack functionName
     x -> functionLongName x
+
+functionIdentifier :: VmFunctionId -> Text
+functionIdentifier = functionIdToText . vmFunctionIdToByteString
 
 functionType :: FunctionId -> Text
 functionType fId =

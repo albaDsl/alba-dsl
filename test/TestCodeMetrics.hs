@@ -39,7 +39,7 @@ testCodeMetrics =
             sizeOf (toTyped (T2025.turtleVm 1 1))
               @?= "1462 opcodes, 1762 bytes.",
           testCase "turtleVm 2026" $
-            sizeOf (toTyped (T2026.turtleVm 1)) @?= "554 opcodes, 1103 bytes.",
+            sizeOf (toTyped (T2026.turtleVm 1)) @?= "562 opcodes, 1026 bytes.",
           testCase "EC scalar point multiply (Affine)" $
             sizeOf EA.ecMul @?= "38 opcodes, 452 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $

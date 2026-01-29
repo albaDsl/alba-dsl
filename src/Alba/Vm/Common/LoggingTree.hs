@@ -3,11 +3,15 @@
 module Alba.Vm.Common.LoggingTree (Node (..), logDataToTree) where
 
 import Alba.Misc.Utils (canNotHappen)
-import Alba.Vm.Common.Logging (FunctionTableEntry (..), LogDisplayOpts (..))
+import Alba.Vm.Common.Logging
+  ( FunctionTableEntry (..),
+    LogDisplayOpts (..),
+    functionIdToText,
+  )
 import Alba.Vm.Common.LoggingText (formatOp, formatStack)
 import Alba.Vm.Common.OpClasses qualified as OC
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
-import Alba.Vm.Common.StackElement (se2iUnsafe)
+import Alba.Vm.Common.StackElement (stackElementToBytes)
 import Alba.Vm.Common.VmStack (stackTop)
 import Alba.Vm.Common.VmState (LogEntry (..), Operation (..), VmLogs)
 import Data.Map qualified as M
@@ -60,8 +64,8 @@ loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
           LoopResult tree rest processed (formatStack labels entry.stack)
         Op OP_DEFINE ->
           case processed of
-            _ S.:|> code S.:|> slot
-              | isPushOp code.op && isPushOp slot.op ->
+            _ S.:|> code S.:|> fId
+              | isPushOp code.op && isPushOp fId.op ->
                   let path' = increment path
                       path'' = addLevel path'
                       opStr = opCodeStr opts entry
@@ -74,7 +78,7 @@ loop opts@LogDisplayOpts {labels} (entry S.:<| rest) processed path tree =
                       children = ((setPath path'' <$> lastTwo) <> [opDefine])
                       parent = Node header False stack Nothing path' children
                    in loop opts rest processed' path' (addChild parent tree')
-            _ S.:|> _code S.:|> _slot -> addAndContinue
+            _ S.:|> _code S.:|> _fId -> addAndContinue
             _ -> canNotHappen
         Op OP_INVOKE ->
           let path' = increment path
@@ -121,31 +125,31 @@ opCodeStr LogDisplayOpts {..} (Failed {..}) = formatOp labels opcode
 
 opDefineHeader :: LogDisplayOpts -> Maybe LogEntry -> Text
 opDefineHeader LogDisplayOpts {..} prevEntry = do
-  let fIdx = fromMaybe canNotHappen (stackTopAsInt prevEntry)
+  let fId = fromMaybe canNotHappen (stackTopAsFunctionId prevEntry)
   case ( do
            ft <- functionTable
-           M.lookup fIdx ft
+           M.lookup fId ft
        ) of
     Just FunctionTableEntry {..} ->
-      T.pack $ printf "Function %d (%s)" slot functionName
+      T.pack $ printf "Function %s (%s)" functionId functionName
     Nothing ->
-      T.pack $ printf "Function %d definition" fIdx
+      T.pack $ printf "Function %s definition" fId
 
 opInvokeHeader :: LogDisplayOpts -> Maybe LogEntry -> Text
 opInvokeHeader LogDisplayOpts {..} prevEntry = do
-  let fIdx = fromMaybe canNotHappen (stackTopAsInt prevEntry)
+  let fId = fromMaybe canNotHappen (stackTopAsFunctionId prevEntry)
   case ( do
            ft <- functionTable
-           M.lookup fIdx ft
+           M.lookup fId ft
        ) of
     Just FunctionTableEntry {..} -> functionName
-    Nothing -> T.pack $ printf "Function %d" fIdx
+    Nothing -> T.pack $ printf "Function %s" fId
 
-stackTopAsInt :: Maybe LogEntry -> Maybe Int
-stackTopAsInt entry = do
+stackTopAsFunctionId :: Maybe LogEntry -> Maybe Text
+stackTopAsFunctionId entry = do
   entry' <- entry
   element <- stackTop entry'.stack
-  pure $ fromIntegral (se2iUnsafe element)
+  pure $ (functionIdToText . stackElementToBytes) element
 
 isPushOp :: Operation -> Bool
 isPushOp (Op op) | OC.isPushOp op = True

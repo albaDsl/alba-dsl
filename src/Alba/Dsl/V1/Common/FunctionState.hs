@@ -32,7 +32,7 @@ newtype FunctionState = FunctionState
 
 data Function = Function
   { code :: Maybe CodeL3,
-    slot :: Maybe Int,
+    index :: Maybe Int,
     callSites :: Int
   }
   deriving (Eq, Show)
@@ -57,8 +57,8 @@ registerFunction fId fs@FunctionState {functions = fns} =
           fs {functions = M.insert fId (Function Nothing Nothing 1) fns}
         Named _ ->
           fs {functions = M.insert fId (Function Nothing Nothing 0) fns}
-        Absolute slot ->
-          fs {functions = M.insert fId (Function Nothing (Just slot) 0) fns}
+        Absolute idx ->
+          fs {functions = M.insert fId (Function Nothing (Just idx) 0) fns}
     else Nothing
 
 addFunctionBody :: FunctionId -> CodeL3 -> FunctionState -> Maybe FunctionState

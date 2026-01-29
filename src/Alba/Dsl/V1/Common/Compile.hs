@@ -8,6 +8,7 @@ module Alba.Dsl.V1.Common.Compile
     compileLibrary,
     compileL2,
     compileL2WithDetails,
+    defOpts,
     pass1,
     optimize,
     writeFunctionTable,
@@ -15,10 +16,7 @@ module Alba.Dsl.V1.Common.Compile
 where
 
 import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
-import Alba.Dsl.V1.Common.CompilerUtils
-  ( bytesToDataOp,
-    integerToDataOp,
-  )
+import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
     FunctionState (..),
@@ -29,9 +27,9 @@ import Alba.Dsl.V1.Common.FunctionState
     startState,
   )
 import Alba.Dsl.V1.Common.FunctionStateResolved
-  ( functionsSortedBySlot,
-    functionsSortedBySlotTopological,
-    getSlot,
+  ( functionsSortedByIndex,
+    functionsSortedByIndexTopological,
+    getVmFunctionId,
   )
 import Alba.Dsl.V1.Common.FunctionStateResolved qualified as FSR
 import Alba.Dsl.V1.Common.FunctionTableJson qualified as FTJ
@@ -40,8 +38,10 @@ import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (..),
     OpcodeL3 (..),
+    VmFunctionId,
     isConstant,
     isRtConstant,
+    vmFunctionIdToByteString,
   )
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 import Alba.Dsl.V1.Common.Stack (S (..))
@@ -71,6 +71,12 @@ import System.FilePath ((<.>), (</>))
 import Text.Printf (printf)
 import Prelude hiding (FilePath)
 
+data Options = Options
+  { level :: !Optimize,
+    prefix :: !VmFunctionId,
+    maxFuns :: Int
+  }
+
 data Optimize = None | O1
 
 data CompilationResult = CompilationResult
@@ -79,20 +85,16 @@ data CompilationResult = CompilationResult
   }
   deriving (Eq, Show)
 
-compile ::
-  forall s s' alt alt'.
-  Optimize ->
-  (S s alt -> S s' alt') ->
-  CodeL1
-compile opt prog = (compile' opt prog).code
+compile :: forall s s' alt alt'. Optimize -> (S s alt -> S s' alt') -> CodeL1
+compile level prog = (compile' level prog).code
 
 compile' ::
   forall s s' alt alt'.
   Optimize ->
   (S s alt -> S s' alt') ->
   CompilationResult
-compile' opt prog = do
-  let (code, fs) = compileL2 opt prog
+compile' level prog = do
+  let (code, fs) = compileL2 level prog
       functionTable = fs.functions
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 code), ..}
   where
@@ -101,12 +103,15 @@ compile' opt prog = do
 compileLibrary ::
   forall s s' alt alt'.
   Optimize ->
+  VmFunctionId ->
   (S s alt -> S s' alt') ->
   (CodeL1, FSR.FunctionTable)
-compileLibrary opt prog =
-  let (_code, defs, fs) = compileL2WithDetails opt prog
+compileLibrary level prefix prog =
+  let (_code, defs, fs) = compileL2WithDetails options prog
    in (fromMaybe err (codeL2ToCodeL1 defs), fs.functions)
   where
+    -- FIXME: hardcoded max.
+    options = Options {maxFuns = 256, ..}
     err = error "compileLibrary: internal error."
 
 compileL2 ::
@@ -114,17 +119,22 @@ compileL2 ::
   Optimize ->
   (S s alt -> S s' alt') ->
   (CodeL2, FSR.FunctionState)
-compileL2 opt prog =
-  let (code, defs, fs) = compileL2WithDetails opt prog
+compileL2 level prog =
+  let (code, defs, fs) = compileL2WithDetails (defOpts level) prog
    in (defs <> code, fs)
+
+-- We consider 0-byte, 1-byte, and 2-byte identifiers as part of the local
+-- Function Identifier space for the contract.
+defOpts :: Optimize -> Options
+defOpts level = Options {prefix = mempty, maxFuns = 2 ^ (16 :: Int) - 1, ..}
 
 compileL2WithDetails ::
   forall s s' alt alt'.
-  Optimize ->
+  Options ->
   (S s alt -> S s' alt') ->
   (CodeL2, CodeL2, FSR.FunctionState)
-compileL2WithDetails opt prog =
-  case opt of
+compileL2WithDetails opts prog =
+  case opts.level of
     None -> compileL2' prog
     O1 ->
       let (code, defs, fs) = compileL2' prog
@@ -132,10 +142,10 @@ compileL2WithDetails opt prog =
   where
     compileL2' prog' = do
       let (code, fs) = pass1 S.empty startState prog'
-          fs' = assignSlots (addSupportFunctions fs)
+          fs' = assignIndices opts (addSupportFunctions fs)
           defs = functionDefinitions fs'
-          code' = pass2 opt fs' code
-          defs' = pass2 opt fs' defs
+          code' = pass2 opts fs' code
+          defs' = pass2 opts fs' defs
        in (code', defs', fs')
 
 pass1 ::
@@ -169,25 +179,28 @@ addSupportFunctions fs@FunctionState {functions} =
 toPushOpFunctionName :: FunctionId
 toPushOpFunctionName = Named "__toPushOp"
 
-assignSlots :: FunctionState -> FSR.FunctionState
-assignSlots fs@FunctionState {functions} =
+assignIndices :: Options -> FunctionState -> FSR.FunctionState
+assignIndices opts fs@FunctionState {functions} =
   let functions' = functionsSortedBySites functions
       (functions'', _) = runState (mapM assign functions') 0
-   in FSR.toResolved $ fs {functions = M.fromList functions''}
+   in FSR.toResolved opts.prefix (fs {functions = M.fromList functions''})
   where
     assign :: (FunctionId, Function) -> State Int (FunctionId, Function)
     assign (fId@(Absolute _), fun) = pure (fId, fun)
     assign (fId, fun) = do
-      slot <- get
-      let slot' = nextFree slot
-      put (succ slot')
-      pure (fId, (fun {slot = Just slot'}))
+      idx <- get
+      let idx' = nextFree idx
+          next = succ idx'
+      put (if next >= opts.maxFuns then err else next)
+      pure (fId, (fun {index = Just idx'}))
 
     nextFree :: Int -> Int
     nextFree idx =
       case M.lookup (Absolute idx) functions of
         Just _ -> nextFree (succ idx)
         Nothing -> idx
+
+    err = error "assignIndices: function index limit exceeded."
 
 functionDefinitions :: FSR.FunctionState -> CodeL3
 functionDefinitions fs@FSR.FunctionState {functions} =
@@ -200,10 +213,10 @@ functionDefinitions fs@FSR.FunctionState {functions} =
   where
     order :: FSR.FunctionTable -> [(FunctionId, FSR.Function)]
     order ft =
-      functionsSortedBySlot (M.filterWithKey (\k _ -> not $ isRtConstant k) ft)
+      functionsSortedByIndex (M.filterWithKey (\k _ -> not $ isRtConstant k) ft)
         <> filter
           (\(k, _) -> isRtConstant k)
-          (functionsSortedBySlotTopological ft)
+          (functionsSortedByIndexTopological ft)
 
     invokeToPushOp :: CodeL3
     invokeToPushOp =
@@ -234,7 +247,7 @@ functionDefinitions fs@FSR.FunctionState {functions} =
 
 evaluateConstant :: FSR.FunctionState -> FunctionId -> CodeL3 -> Bytes
 evaluateConstant fs fId code =
-  let code' = pass2 None fs code
+  let code' = pass2 (defOpts None) fs code
       code'' = fromMaybe err1 (codeL2ToCodeL1 code')
       state =
         (Bch2026.startState Bch2026.vmParamsStandard) {VmState.code = code''}
@@ -250,19 +263,19 @@ evaluateConstant fs fId code =
     err2 = err "introspection not allowed for constants"
     err3 = err "error while evaluating constant"
 
-pass2 :: Optimize -> FSR.FunctionState -> CodeL3 -> CodeL2
-pass2 opt fs code = fromMaybe err (mapM (f fs) code)
+pass2 :: Options -> FSR.FunctionState -> CodeL3 -> CodeL2
+pass2 opts fs code = fromMaybe err (mapM (f fs) code)
   where
     f :: FSR.FunctionState -> OpcodeL3 -> Maybe OpcodeL2
     f fs' (FunctionIndexDef fId) = do
-      slot <- getSlot fId fs'
-      pure $ integerToDataOp (fromIntegral slot)
+      vmFId <- getVmFunctionId fId fs'
+      pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
     f fs' (FunctionIndexRef fId) = do
-      slot <- getSlot fId fs'
-      pure $ integerToDataOp (fromIntegral slot)
+      vmFId <- getVmFunctionId fId fs'
+      pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
     f fs' (FunctionBody body) = do
-      let body' = pass2 opt fs' body
-          body'' = case opt of
+      let body' = pass2 opts fs' body
+          body'' = case opts.level of
             None -> body'
             O1 -> optimize body'
       pure $ bytesToDataOp (fromMaybe err (codeL2ToCodeL1 body''))

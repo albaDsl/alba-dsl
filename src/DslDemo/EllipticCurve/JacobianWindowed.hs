@@ -22,25 +22,25 @@ import DslDemo.EllipticCurve.LookupTable (getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
 
-type TFIdx = TNat -- Index into the functions array.
+type TFId = TNat -- Function Id
 
-type TTab = TFIdx -- Lookup table
+type TTab = TFId -- Lookup table (represented by the base Function Id)
 
-setupTable :: FN (s > TFIdx > TPoint) s
+setupTable :: FN (s > TFId > TPoint) s
 setupTable =
   toJacobian # makeIdentity # nat numValues # unname @4 setupTable'
   where
     setupTable' ::
-      FN (s > N "fIdx" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
+      FN (s > N "fId" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
     setupTable' =
       function
         ( begin
             # (pick @"i" # op0 # opEqual)
             # opIf
-              (del @"fIdx" # del @"p" # del @"acc" # del @"i")
+              (del @"fId" # del @"p" # del @"acc" # del @"i")
               ( begin
-                  # (pick @"fIdx" # pick @"acc" # p2b # storePoint)
-                  # (roll @"fIdx" # op1Add)
+                  # (pick @"fId" # pick @"acc" # p2b # storePoint)
+                  # (roll @"fId" # op1Add)
                   # pick @"p"
                   # (roll @"acc" # roll @"p" # EC.ecAddJ)
                   # (roll @"i" # op1SubUnsafe)
