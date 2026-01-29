@@ -30,8 +30,11 @@ import Text.Printf (printf)
 
 progSize :: FNA s alt s' alt' -> String
 progSize prog =
-  let (code1, _, code2) = compileL2WithDetails O1 prog
-   in printf "%s Including function table: %s\n" (sizeStr code2) (sizeStr code1)
+  let (code, defs, _) = compileL2WithDetails O1 prog
+   in printf
+        "%s Including function table: %s\n"
+        (sizeStr code)
+        (sizeStr (defs <> code))
 
 progList :: FNA s alt s' alt' -> String
 progList prog = listStr (fst $ compileL2 O1 prog)

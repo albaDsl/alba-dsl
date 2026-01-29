@@ -103,28 +103,28 @@ compileL2 ::
   (S s alt -> S s' alt') ->
   (CodeL2, FSR.FunctionState)
 compileL2 opt prog =
-  let (code, fs, _) = compileL2WithDetails opt prog
-   in (code, fs)
+  let (code, defs, fs) = compileL2WithDetails opt prog
+   in (defs <> code, fs)
 
 compileL2WithDetails ::
   forall s s' alt alt'.
   Optimize ->
   (S s alt -> S s' alt') ->
-  (CodeL2, FSR.FunctionState, CodeL2)
+  (CodeL2, CodeL2, FSR.FunctionState)
 compileL2WithDetails opt prog =
   case opt of
     None -> compileL2' prog
     O1 ->
-      let (c1, fs, c2) = compileL2' prog
-       in (optimize c1, fs, optimize c2)
+      let (code, defs, fs) = compileL2' prog
+       in (optimize code, defs, fs)
   where
     compileL2' prog' = do
       let (code, fs) = pass1 S.empty startState prog'
           fs' = assignSlots (addSupportFunctions fs)
           defs = functionDefinitions fs'
-          code' = pass2 opt fs' (defs S.>< code)
-          codeWithoutFunTable = pass2 opt fs' code
-       in (code', fs', codeWithoutFunTable)
+          code' = pass2 opt fs' code
+          defs' = pass2 opt fs' defs
+       in (code', defs', fs')
 
 pass1 ::
   forall s s' alt alt'.
