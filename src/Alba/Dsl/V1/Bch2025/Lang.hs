@@ -9,7 +9,7 @@ module Alba.Dsl.V1.Bch2025.Lang
     bytes',
     sigBytes,
     pubKeyBytes,
-    cond,
+    case',
   )
 where
 
@@ -61,12 +61,12 @@ sigBytes x (S c fs) = bytes' x (S c fs)
 pubKeyBytes :: Bytes -> FN s (s > TPubKey)
 pubKeyBytes x (S c fs) = bytes' x (S c fs)
 
-cond ::
+case' ::
   forall s t alt s' alt'.
   (StackEntry t) =>
   [(S (s > t > t) alt -> S (s > t > TBool) alt, S (s > t) alt -> S s' alt')] ->
   (S (s > t) alt -> S s' alt') ->
   (S (s > t) alt -> S s' alt')
-cond [] def st = def st
-cond ((test, result) : rest) def st =
-  (opDup # test # opIf result (cond rest def)) st
+case' [] def st = def st
+case' ((test, result) : rest) def st =
+  (opDup # test # opIf result (case' rest def)) st

@@ -22,7 +22,7 @@ progCondNats :: FN s (s > TBool)
 progCondNats =
   begin
     # nat 2
-    # cond
+    # case'
       [ (is 1, nat 2),
         (is 2, nat 3),
         (is 3, nat 4)
@@ -38,7 +38,7 @@ progCondStrings :: FN s (s > TBool)
 progCondStrings =
   begin
     # bytes "orange"
-    # cond
+    # case'
       [ (is "apple", nat 1),
         (is "pear", nat 2),
         (is "orange", nat 3),
@@ -55,7 +55,7 @@ progCondStringsDefault :: FN s (s > TBool)
 progCondStringsDefault =
   begin
     # bytes "strawberry"
-    # cond
+    # case'
       [ (is "apple", nat 1),
         (is "pear", nat 2),
         (is "orange", nat 3),
@@ -72,10 +72,10 @@ progCondNested :: FN s (s > TBool)
 progCondNested =
   begin
     # nat 75
-    # cond
+    # case'
       [ (inRange 0 50, bytes "low"),
         ( inRange 50 100,
-          cond
+          case'
             [ (inRange 50 75, bytes "mid — first"),
               (inRange 75 100, bytes "mid — second")
             ]

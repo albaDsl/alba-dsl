@@ -16,12 +16,12 @@ toPushOp :: FN (s > TBytes) (s > TBytes)
 toPushOp =
   begin
     # opSize
-    # cond
+    # case'
       [ (is 0x00, op2Drop # opcode OP_0),
         ( is 0x01,
           begin
             # (opDrop # b2n)
-            # cond
+            # case'
               [ (inRange 0x01 0x11, opcode OP_RESERVED # b2n # opAdd # n2b),
                 (is 0x81, opDrop # opcode OP_1NEGATE)
               ]
