@@ -24,6 +24,7 @@ test: build
 	cabal run lastWill -- test
 	cabal run transferWithTimeout -- test
 	cabal run miniTurtleChallenge -- test
+	cabal run permutationChallenge -- test
 
 benchmark:
 	cabal run benchmark1 -- --output benchmark1.html

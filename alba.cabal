@@ -105,10 +105,15 @@ library
       Alba.Dsl.V1.Bch2026.Contract.Tuple,
       Alba.Dsl.V1.Bch2026.Contract.TupleFs,
       Alba.Dsl.V1.Bch2026.Contract.Vector,
+      Alba.Dsl.V1.Bch2026.Contract.ExternalLib,
+      Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc,
+      Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc,
+      Alba.Dsl.V1.Bch2026.ExternalLib,
       Alba.Dsl.V1.Bch2026.Lang,
       Alba.Dsl.V1.Bch2026.LangArgs,
       Alba.Dsl.V1.Bch2026.Ops,
       Alba.Dsl.V1.Bch2026.OpsUntyped,
+      Alba.Dsl.V1.Bch2026.TxDsl,
       Alba.Dsl.V1.Bch2026.Stack,
       Alba.Dsl.V1.Common,
       Alba.Dsl.V1.Common.CashScriptOptimizerRules,
@@ -152,7 +157,6 @@ library
       Alba.Tx.Bch2025,
       Alba.Tx.Bch2025.Constants,
       Alba.Tx.Bch2025.Hash,
-      Alba.Vm.Bch2025.OpClasses,
       Alba.Tx.Bch2025.SerializationUtils,
       Alba.Tx.Bch2025.Tx,
       Alba.Tx.Bch2025.TxId,
@@ -160,6 +164,7 @@ library
       Alba.Tx.Bch2025.TxOut,
       Alba.Tx.Bch2025.TxOuts,
       Alba.Vm.Bch2025,
+      Alba.Vm.Bch2025.OpClasses,
       Alba.Vm.Bch2025.SigCheckUtils,
       Alba.Vm.Bch2025.SigEncoding,
       Alba.Vm.Bch2025.Utils,
@@ -294,6 +299,14 @@ executable miniTurtleChallenge
   hs-source-dirs: apps/contracts/miniTurtleChallenge
   main-is: main.hs
   other-modules: Contract, ContractApi, Opts, Params, Spend, Test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
+executable permutationChallenge
+  import: shared-properties
+  hs-source-dirs: apps/contracts/permutationChallenge
+  main-is: main.hs
+  other-modules: Contract, ContractApi, Opts, Params, Deploy, Spend, Test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba
 
