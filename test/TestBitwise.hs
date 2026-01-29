@@ -81,7 +81,7 @@ propInvert x =
 -- unchanged when bin shifted left and then back by 'bitCount' bits.
 propShiftBinLeftAndBack :: Bytes -> Int -> Property
 propShiftBinLeftAndBack x bitCount =
-  (bitCount > 0 && bitCount <= B.length x) ==>
+  (bitCount > 0 && bitCount <= B.length x * 8) ==>
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
@@ -106,7 +106,7 @@ propShiftBinLeftAndBack x bitCount =
 -- unchanged when bin shifted right and then back by 'bitCount' bits.
 propShiftBinRightAndBack :: Bytes -> Int -> Property
 propShiftBinRightAndBack x bitCount =
-  (bitCount > 0 && bitCount <= B.length x) ==>
+  (bitCount > 0 && bitCount <= B.length x * 8) ==>
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
