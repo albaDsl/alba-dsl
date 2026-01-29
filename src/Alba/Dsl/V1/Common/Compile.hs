@@ -239,27 +239,22 @@ evaluateConstant fs fId code =
     err3 = err "error while evaluating constant"
 
 pass2 :: Optimize -> FSR.FunctionState -> CodeL3 -> CodeL2
-pass2 opt fs code =
-  let (code', _) = runState (mapM f code) fs
-   in code'
+pass2 opt fs code = fromMaybe err (mapM (f fs) code)
   where
-    f :: OpcodeL3 -> State FSR.FunctionState OpcodeL2
-    f (FunctionIndexDef fId) = do
-      fs' <- get
-      let slot = fromMaybe err (getSlot fId fs')
+    f :: FSR.FunctionState -> OpcodeL3 -> Maybe OpcodeL2
+    f fs' (FunctionIndexDef fId) = do
+      slot <- getSlot fId fs'
       pure $ pushIntegerOp (fromIntegral slot)
-    f (FunctionIndexRef fId) = do
-      fs' <- get
-      let slot = fromMaybe err (getSlot fId fs')
+    f fs' (FunctionIndexRef fId) = do
+      slot <- getSlot fId fs'
       pure $ pushIntegerOp (fromIntegral slot)
-    f (FunctionBody body) = do
-      fs' <- get
+    f fs' (FunctionBody body) = do
       let body' = pass2 opt fs' body
           body'' = case opt of
             None -> body'
             O1 -> optimize body'
       pure $ bytesToDataOp (fromMaybe err (codeL2ToCodeL1 body''))
-    f (Opcode op) = pure op
+    f _fs (Opcode op) = pure op
 
     err = error "compile: internal error."
 
