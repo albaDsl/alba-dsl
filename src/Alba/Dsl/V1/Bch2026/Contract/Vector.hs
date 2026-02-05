@@ -74,6 +74,7 @@ import Alba.Dsl.V1.Bch2026
     lambda2,
     name,
     nat,
+    ns,
     ns2,
     ns3,
     ns4,
@@ -103,7 +104,9 @@ import Alba.Dsl.V1.Bch2026
     opUntil,
     opVerify,
     pick,
+    pickN,
     roll,
+    rollN,
     un,
     un2,
     un3,
@@ -114,13 +117,6 @@ import Alba.Dsl.V1.Bch2026
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
-import Alba.Dsl.V1.Bch2026.Contract.Hide
-  ( Hide,
-    dropHide,
-    hide,
-    hide2,
-    nipHide,
-  )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe
   ( TMaybe,
     fromMaybe',
@@ -351,18 +347,18 @@ replicateF =
         # (ns3 "packFs" "cnt" "val" # pick "cnt" # op0NotEqual)
         # opIf
           ( begin
-              # (roll "packFs" # roll "val" # hide # roll "cnt" # empty)
-              # (opUntil loop # nip # nip # nip)
+              # (roll "packFs" # rollN "val" # roll "cnt" # empty)
+              # (un "val" # opUntil loop # nip # nip # nip)
           )
           (delCount 3 # empty)
     )
   where
-    loop :: (StackEntry a) => Loop (s > TPackFs a > Hide a > TNat > TVector a)
+    loop :: (StackEntry a) => Loop (s > TPackFs a > a > TNat > TVector a)
     loop =
       begin
         # ns4 "packFs" "val" "cnt" "acc"
         # (roll "cnt" # op1SubUnsafe # dup # nat 0 # opNumEqual)
-        # (tcPick # pick "val" # roll "acc" # nipHide # consF)
+        # (tcPick # pickN "val" # roll "acc" # un "val" # consF)
         # (swap # un2 "packFs" "val")
 
 generate ::
@@ -505,8 +501,8 @@ mapF =
         (s > TTuple (TVector b) (TTuple (TPackFs b) (TLambda '[a] '[b])))
     f =
       begin
-        # (hide # swap # untuple # untuple # ns4 "val" "acc" "pfs" "fn")
-        # (pick "pfs" # roll "acc" # roll "val" # pick "fn" # nipHide)
+        # (swap # untuple # untuple # ns4 "val" "acc" "pfs" "fn")
+        # (pick "pfs" # roll "acc" # rollN "val" # pick "fn" # un "val")
         # (invoke1 # snocF # roll "pfs" # roll "fn" # tuple # tuple)
 
 zip ::
@@ -595,9 +591,9 @@ zipWithF =
         # (pick "fn" # rot # rot # liftA2Maybe)
         # ifJust
           ( begin
-              # (hide # del "vecA" # del "vecB")
+              # (ns "c" # del "vecA" # del "vecB")
               # (rot # fromJust # snd # rot # fromJust # snd # rot)
-              # (pick "packFsC" # roll "res" # rot # dropHide # snocF)
+              # (pick "packFsC" # roll "res" # rot # un "c" # snocF)
               # (opFalse # un4 "pfsA" "pfsB" "packFsC" "fn")
           )
           ( begin
@@ -639,9 +635,9 @@ unzipF =
           ( begin
               # del "vec"
               # (untuple # swap # pick "pfsA" # pick "pfsB" # rot)
-              # (TFS.untupleF # swap # hide2)
-              # (pick "pfsA" # roll "resA" # rot # dropHide # snocF # swap)
-              # (pick "pfsB" # roll "resB" # rot # dropHide # snocF)
+              # (TFS.untupleF # swap # ns2 "b" "a")
+              # (pick "pfsA" # roll "resA" # rot # un "a" # snocF # swap)
+              # (pick "pfsB" # roll "resB" # rot # un "b" # snocF)
               # (opFalse # un3 "pfsA" "pfsB" "pfsTup")
           )
           ( begin
@@ -678,11 +674,11 @@ filterF =
         (s > TTuple (TVector a) (TTuple (TPackFs a) (TLambda '[a] '[TBool])))
     f =
       begin
-        # (hide # swap # untuple # dup # toAlt # untuple)
+        # (swap # untuple # dup # toAlt # untuple)
         # ns4 "val" "acc" "packFs" "fn"
-        # (pick "val" # roll "fn" # nipHide # invoke1)
+        # (name "val'" (pick "val") # roll "fn" # un "val'" # invoke1)
         # opIf
-          (pick "packFs" # roll "acc" # pick "val" # dropHide # snocF)
+          (pick "packFs" # roll "acc" # pick "val" # snocF)
           (roll "acc")
         # (del "val" # del "packFs" # fromAlt # tuple)
 
@@ -694,31 +690,28 @@ foldl ::
 foldl =
   begin
     # ns3 "fn" "val" "vec"
-    # (packFs @b # roll "fn" # roll "val" # hide # roll "vec" # nipHide)
+    # (packFs @b # roll "fn" # rollN "val" # roll "vec" # un "val")
     # foldlF
 
 foldlF ::
   (StackEntry a, StackEntry b) =>
   FN (s > TPackFs b > TLambda '[a, b] '[a] > a > TVector b) (s > a)
 foldlF =
-  function (swap # hide # opUntil loop # nip # nip # nip # dropHide)
+  function (swap # opUntil loop # nip # nip # nip)
   where
     loop ::
       (StackEntry a, StackEntry b) =>
-      Loop (s > TPackFs b > TLambda '[a, b] '[a] > TVector b > Hide a)
+      Loop (s > TPackFs b > TLambda '[a, b] '[a] > TVector b > a)
     loop =
       begin
         # (ns4 "packFs" "fn" "vec" "acc" # tcPick # pick "vec" # unconsF)
         # ifJust
           ( begin
-              # (del "vec" # untuple # swap # hide # roll "acc" # swap)
-              # (pick "fn" # fixup2 # invoke2 # hide # opFalse)
-              # un2 "packFs" "fn"
+              # (del "vec" # untuple # swap # ns "b" # rollN "acc" # swap)
+              # (pick "fn" # un2 "acc" "b" # invoke2 # ns "acc" # opFalse)
+              # un3 "packFs" "fn" "acc"
           )
           (opTrue # un4 "packFs" "fn" "vec" "acc")
-
-    fixup2 :: FN (s > Hide a > Hide b > c) (s > a > b > c)
-    fixup2 = castStack
 
 -- ## Misc.
 -- Used from contexts where it is expected to never fail.

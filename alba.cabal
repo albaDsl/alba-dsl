@@ -93,7 +93,6 @@ library
       Alba.Dsl.V1.Bch2026,
       Alba.Dsl.V1.Bch2026.Contract.Applicative,
       Alba.Dsl.V1.Bch2026.Contract.Bytes128,
-      Alba.Dsl.V1.Bch2026.Contract.Hide,
       Alba.Dsl.V1.Bch2026.Contract.Int64,
       Alba.Dsl.V1.Bch2026.Contract.Int8,
       Alba.Dsl.V1.Bch2026.Contract.Lzss,

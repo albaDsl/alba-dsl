@@ -10,8 +10,8 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    castStack,
     del,
+    name,
     name2,
     nat,
     ns2,
@@ -29,10 +29,10 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     pick,
     roll,
+    un,
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Hide (Hide, nipHide)
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe')
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, TPackFs, packFs)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (untuple)
@@ -95,25 +95,25 @@ mergeF =
                 )
               # opIf
                 ( begin
-                    # (roll "x" # roll "xRest" # roll "ys")
+                    # (name "elem" (roll "x") # roll "xRest" # roll "ys")
                     # (del "yRest" # del "y" # del "xs")
                 )
                 ( begin
-                    # (roll "y" # roll "xs" # roll "yRest")
+                    # (name "elem" (roll "y") # roll "xs" # roll "yRest")
                     # (del "ys" # del "xRest" # del "x")
                 )
               # (pick "pfs" # opRot # opRot # mergeF)
-              # (roll "pfs" # opRot # opRot # nipHide # consF)
+              # (roll "pfs" # opRot # opRot # un "elem" # consF)
           )
           (del "pfs" # del "xs" # del "ys")
     )
   where
     uncons' ::
       (StackEntry a) =>
-      FN (s' > TPackFs a > TVector a) (s' > Hide a > TVector a)
-    uncons' = unconsF # fromJust # untuple # castStack
+      FN (s' > TPackFs a > TVector a) (s' > a > TVector a)
+    uncons' = unconsF # fromJust # untuple
 
-    toNum :: FN (s' > Hide a) (s' > TInt)
+    toNum :: FN (s' > a) (s' > TInt)
     toNum = cast # opBin2Num
 
     baseCases :: FN (s' > TVector a > TVector a) (s' > TVector a > TBool)

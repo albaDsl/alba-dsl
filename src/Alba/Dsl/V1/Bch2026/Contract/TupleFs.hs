@@ -20,22 +20,24 @@ import Alba.Dsl.V1.Bch2026
     TNat,
     begin,
     cast,
-    castStack,
     function,
     invoke1,
     lambda1,
     nat,
+    ns,
+    ns2,
     ns3,
     opAdd,
     opCat,
-    opRoll,
     opSplit,
     pick,
     roll,
+    rollN,
+    un,
+    un2,
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Hide (Hide, dropHide, hide, hide2)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
@@ -84,10 +86,9 @@ tuple ::
   (PackFs a, PackFs b) =>
   FN (s > a > b) (s > TTupleFs a b)
 tuple =
-  hide2 # packFs @a # packFs @b # opRoll 3 # opRoll 3 # fixup # tupleF
-  where
-    fixup :: FN (s' > Hide a > Hide b) (s' > a > b)
-    fixup = castStack
+  begin
+    # (ns2 "a" "b" # packFs @a # packFs @b # rollN "a" # rollN "b")
+    # (un2 "a" "b" # tupleF)
 
 tupleF ::
   (StackEntry a, StackEntry b) =>
@@ -121,8 +122,8 @@ untupleF =
   begin
     # ns3 "pfsA" "pfsB" "tuple"
     # (roll "tuple" # toBytes # pick "pfsA" # getSize # opSplit)
-    # (roll "pfsB" # getUnpack # invoke1 # hide # swap)
-    # (roll "pfsA" # getUnpack # invoke1 # swap # dropHide)
+    # (roll "pfsB" # getUnpack # invoke1 # ns "b" # swap)
+    # (roll "pfsA" # getUnpack # invoke1 # swap # un "b")
 
 toBytes :: FN (s > TTupleFs a b) (s > TBytes)
 toBytes = cast
