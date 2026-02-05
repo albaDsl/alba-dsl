@@ -9,9 +9,11 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
-import Alba.Dsl.V1.Bch2026.Contract.Lzss (decompress)
+import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
+import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
-import Alba.Dsl.V1.Common.Lzss (compress)
+import Alba.Dsl.V1.Common.Lzss qualified as LZ
+import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Misc.Logging qualified as ML
 import Alba.Vm.Bch2026 (VmMetrics (..))
@@ -52,7 +54,9 @@ testCodeMetrics =
             sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
             sizeOf vectorOps @?= "202 opcodes, 875 bytes.",
-          testCase "LZSS" $ sizeOf decompress @?= "8 opcodes, 194 bytes."
+          testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 194 bytes.",
+          testCase "LZSS Bitstream" $
+            sizeOf CLZB.decompress @?= "5 opcodes, 111 bytes."
         ],
       testGroup
         "Code Compressibility"
@@ -72,7 +76,8 @@ testCodeMetrics =
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 33_534_819,
           testCase "Vector ops" $ costOf vectorOps @?= 18_577_985,
-          testCase "LZSS" $ costOf decompressTest @?= 22_104_866
+          testCase "LZSS" $ costOf decompressTest @?= 22_104_866,
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 12_948_025
         ]
     ]
 
@@ -143,4 +148,9 @@ vectorOps = f
 decompressTest :: FN s s
 decompressTest =
   let code = Vc.lib.code
-   in bytes (compress code) # decompress # bytes code # opEqualVerify
+   in bytes (LZ.compress code) # CLZ.decompress # bytes code # opEqualVerify
+
+decompressTestBit :: FN s s
+decompressTestBit =
+  let code = Vc.lib.code
+   in bytes (LZB.compress code) # CLZB.decompress # bytes code # opEqualVerify

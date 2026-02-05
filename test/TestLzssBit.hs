@@ -1,10 +1,10 @@
 -- Copyright (c) 2026 albaDsl
 
-module TestLzss (testLzss) where
+module TestLzssBit (testLzssBit) where
 
 import Alba.Dsl.V1.Bch2025 (Bytes, FN, TBool, bytes, opEqual, (#), type (>))
-import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as LZ
-import Alba.Dsl.V1.Common.Lzss (compress, decompress)
+import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as LZ
+import Alba.Dsl.V1.Common.LzssBit (compress, decompress)
 import Alba.Misc.Utils (decodeHex)
 import Alba.Vm.Common (b2SeUnsafe, stackElementToBytes, stackTop)
 import Data.ByteString qualified as B
@@ -15,27 +15,25 @@ import Data.Text (Text)
 import Data.Word (Word8)
 import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 import Test.Tasty.QuickCheck (Property, testProperty, (==>))
 import TestUtils (isTrue)
 import TestUtils2026 (evaluateProg, evaluateProgWithStack, getStack)
 
-testLzss :: TestTree
-testLzss =
+testLzssBit :: TestTree
+testLzssBit =
   testGroup
-    "LZSS Compression"
-    [ testCase "LZSS test vectors" $
+    "LZSS Bitstream Compression"
+    [ testCase "LzssBit test vectors" $
         mapM_
           ( \(plain, compressed) -> do
               let plain' = fromMaybe err $ decodeHex plain
                   compressed' = fromMaybe err $ decodeHex compressed
               compress plain' @?= compressed'
-              case decompress compressed' of
-                Right val -> val @?= plain'
-                Left _ -> assertFailure "test vectors"
+              decompress compressed' @?= plain'
           )
           testVectors,
-      testCase "LZSS test vectors - VM decompressor" $
+      testCase "LzssBit test vectors - VM decompressor" $
         mapM_
           ( \(plain, compressed) -> do
               let plain' = fromMaybe err $ decodeHex plain
@@ -43,28 +41,28 @@ testLzss =
               isTrue $ evaluateProg (progDecompress plain' compressed')
           )
           testVectors,
-      testProperty "LZSS A/B sequences" propCompressDecompressAb,
-      testProperty "LZSS A/B sequences 2" propCompressDecompressAb2,
-      testProperty "LZSS sequences" propCompressDecompress,
-      testProperty "LZSS A/B sequences - CashVM" propCompressDecompressAbVm,
-      testProperty "LZSS sequences - CashVM" propCompressDecompressVm
+      testProperty "LzssBit A/B sequences" propCompressDecompressAb,
+      testProperty "LzssBit A/B sequences 2" propCompressDecompressAb2,
+      testProperty "LzssBit sequences" propCompressDecompress,
+      testProperty "LzssBit A/B sequences - CashVM" propCompressDecompressAbVm,
+      testProperty "LzssBit sequences - CashVM" propCompressDecompressVm
     ]
   where
     err = error "err"
 
 testVectors :: [(Text, Text)]
 testVectors =
-  [ ("41", "0141"),
-    ("4142", "034142"),
-    ("414141", "07414141"),
-    ("414243414243", "074142432000"),
-    ("4142414241424142", "0341421300"),
+  [ ("41", "8300"),
+    ("4142", "830A01"),
+    ("414141", "83060D02"),
+    ("414243414243", "830A1D020200"),
+    ("4142414241424142", "830A990000"),
     ( "414243414243414243414243414243414243414243414243414243414243",
-      "074142432f004601"
+      "830A1DF202C02800"
     ),
     ( "4142434142434142434142434142434142434142434142434142434142434142434142"
         <> "43414243414243",
-      "074142432f004f016002"
+      "830A1DF202E029009800"
     )
   ]
 
@@ -76,7 +74,7 @@ propCompressDecompressAb :: Bytes -> Property
 propCompressDecompressAb str =
   (B.length (compress str') < B.length str') ==>
     case (decompress . compress) str' of
-      Right s' | s' == str' -> True
+      s' | s' == str' -> True
       _ -> False
   where
     str' = B.map reduceCharSpace str
@@ -91,7 +89,7 @@ propCompressDecompressAb2 :: Bytes -> Property
 propCompressDecompressAb2 str =
   (B.length str > 4096 && B.length (compress str') < B.length str') ==>
     case (decompress . compress) str' of
-      Right s' | s' == str' -> True
+      s' | s' == str' -> True
       _ -> False
   where
     str' = B.map reduceCharSpace str
@@ -99,7 +97,7 @@ propCompressDecompressAb2 str =
 propCompressDecompress :: Bytes -> Bool
 propCompressDecompress str =
   case (decompress . compress) str of
-    Right s' | s' == str -> True
+    s' | s' == str -> True
     _ -> False
 
 propCompressDecompressAbVm :: Bytes -> Property

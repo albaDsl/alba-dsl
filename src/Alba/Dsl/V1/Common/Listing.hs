@@ -21,7 +21,7 @@ import Alba.Dsl.V1.Common.Compile
     defOpts,
   )
 import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
-import Alba.Dsl.V1.Common.Lzss (compress)
+import Alba.Dsl.V1.Common.LzssBit (compress)
 import Alba.Dsl.V1.Common.Stack (FNA)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Data.ByteString qualified as B
