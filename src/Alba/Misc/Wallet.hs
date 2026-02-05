@@ -29,7 +29,7 @@ getWallet net walletName = withContext (\ctx -> getWallet' ctx net walletName)
 getWallet' :: Ctx -> H.Network -> String -> IO (Maybe KeyPair)
 getWallet' ctx net walletName = do
   home <- getHomeDirectory
-  let dir = home </> ".alba-bch" </> "wallets" </> net.name
+  let dir = home </> ".alba" </> "wallets" </> net.name
       path = dir </> walletName
   createDirectoryIfMissing True dir
   exists <- doesFileExist path
