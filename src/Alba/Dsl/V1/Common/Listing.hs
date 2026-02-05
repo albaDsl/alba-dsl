@@ -8,6 +8,7 @@ module Alba.Dsl.V1.Common.Listing
     list,
     listStr,
     sizeStr,
+    compressibilityStr,
   )
 where
 
@@ -20,6 +21,7 @@ import Alba.Dsl.V1.Common.Compile
     defOpts,
   )
 import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
+import Alba.Dsl.V1.Common.Lzss (compress)
 import Alba.Dsl.V1.Common.Stack (FNA)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Data.ByteString qualified as B
@@ -76,5 +78,20 @@ sizeStr code =
     "%d opcodes, %d bytes."
     (S.length code)
     (B.length $ fromMaybe err (codeL2ToCodeL1 code))
-  where
-    err = error "list: internal error."
+
+err :: a
+err = error "list: internal error."
+
+compressibilityStr :: CodeL2 -> String
+compressibilityStr code =
+  let code' = fromMaybe err (codeL2ToCodeL1 code)
+      compressed = compress code'
+      codeSize = B.length code'
+      compressedSize = B.length compressed
+   in printf
+        "%d byte to %d bytes (saving %0.1f%%)"
+        codeSize
+        compressedSize
+        ( (1 - fromIntegral compressedSize / (fromIntegral codeSize :: Double))
+            * 100
+        )

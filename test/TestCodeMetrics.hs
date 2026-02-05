@@ -6,10 +6,12 @@
 module TestCodeMetrics (testCodeMetrics) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Lzss (decompress)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
+import Alba.Dsl.V1.Common.Lzss (compress)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Misc.Logging qualified as ML
 import Alba.Vm.Bch2026 (VmMetrics (..))
@@ -53,16 +55,33 @@ testCodeMetrics =
           testCase "LZSS" $ sizeOf decompress @?= "8 opcodes, 194 bytes."
         ],
       testGroup
+        "Code Compressibility"
+        [ testCase "turtleVm 2025" $
+            ratio (toTyped (T2025.turtleVm 1 1))
+              @?= "1762 byte to 1050 bytes (saving 40.4%)",
+          testCase "turtleVm 2026" $
+            ratio (toTyped (T2026.turtleVm 1))
+              @?= "1026 byte to 986 bytes (saving 3.9%)",
+          testCase "EC scalar point multiply (Windowed Jacobian demo)" $
+            ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
+          testCase "Vector ops" $
+            ratio vectorOps @?= "876 byte to 731 bytes (saving 16.6%)"
+        ],
+      testGroup
         "Cost"
-        [ testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
+        [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 33_534_819,
-          testCase "Vector ops" $ costOf vectorOps @?= 18_577_985
+          testCase "Vector ops" $ costOf vectorOps @?= 18_577_985,
+          testCase "LZSS" $ costOf decompressTest @?= 22_164_026
         ]
     ]
 
 -- Gives size of code + function table.
 sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
 sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
+
+ratio :: FNA s alt s' alt' -> String
+ratio prog = compressibilityStr (fst $ compileL2 O1 prog)
 
 costOf :: forall s s' alt'. FNA s '[] s' alt' -> Int
 costOf prog =
@@ -120,3 +139,8 @@ vectorOps = f
 
     add' :: FN (s > TInt64 > TInt8) (s > TInt64)
     add' = castStack # opAdd # toInt64
+
+decompressTest :: FN s s
+decompressTest =
+  let code = Vc.lib.code
+   in bytes (compress code) # decompress # bytes code # opEqualVerify
