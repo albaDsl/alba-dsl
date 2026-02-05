@@ -100,7 +100,7 @@ progPick =
     # two
     # opFalse
     # three
-    # opPick @2
+    # opPick 2
     # opNip
     # opNip
     # opNip
@@ -119,7 +119,7 @@ progRoll =
     # op1
     # op2
     # op3
-    # opRoll @3
+    # opRoll 3
     # opDrop
     # (opAdd # opAdd # int 6 # opNumEqual)
 

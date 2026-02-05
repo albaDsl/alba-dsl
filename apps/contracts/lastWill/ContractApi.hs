@@ -29,9 +29,9 @@ instantiate ctx refreshPk withdrawPk inheritPk =
           withdrawHash = (hash160 . marshalPk) withdrawPk
           inheritHash = (hash160 . marshalPk) inheritPk
        in begin
-            # name @"refreshHash" (bytes' refreshHash)
-            # name @"withdrawHash" (bytes' withdrawHash)
-            # name @"inheritHash" (bytes' inheritHash)
+            # name "refreshHash" (bytes' refreshHash)
+            # name "withdrawHash" (bytes' withdrawHash)
+            # name "inheritHash" (bytes' inheritHash)
 
 refresh :: Ctx -> CodeL1 -> PubKey -> TxSignature -> CodeL1
 refresh = scriptSig 0

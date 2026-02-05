@@ -28,23 +28,23 @@ type TTab = TFId -- Lookup table (represented by the base Function Id)
 
 setupTable :: FN (s > TFId > TPoint) s
 setupTable =
-  toJacobian # makeIdentity # nat numValues # unname @4 setupTable'
+  toJacobian # makeIdentity # nat numValues # unname 4 setupTable'
   where
     setupTable' ::
       FN (s > N "fId" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
     setupTable' =
       function
         ( begin
-            # (pick @"i" # op0 # opEqual)
+            # (pick "i" # op0 # opEqual)
             # opIf
-              (del @"fId" # del @"p" # del @"acc" # del @"i")
+              (del "fId" # del "p" # del "acc" # del "i")
               ( begin
-                  # (pick @"fId" # pick @"acc" # p2b # storePoint)
-                  # (roll @"fId" # op1Add)
-                  # pick @"p"
-                  # (roll @"acc" # roll @"p" # EC.ecAddJ)
-                  # (roll @"i" # op1SubUnsafe)
-                  # unname @4 setupTable'
+                  # (pick "fId" # pick "acc" # p2b # storePoint)
+                  # (roll "fId" # op1Add)
+                  # pick "p"
+                  # (roll "acc" # roll "p" # EC.ecAddJ)
+                  # (roll "i" # op1SubUnsafe)
+                  # unname 4 setupTable'
               )
         )
 
@@ -70,17 +70,17 @@ setupTable =
     opcode op = bytes [(fromIntegral . fromEnum) op]
 
 ecMul :: FN (s > TTab > TNat) (s > TPoint)
-ecMul = function (unname @2 ecMulJ # fromJacobian)
+ecMul = function (unname 2 ecMulJ # fromJacobian)
 
 ecMulJ :: FN (s > N "tab" TTab > N "n" TNat) (s > TPointJ)
 ecMulJ =
   begin
-    # (pick @"n" # nat 0 # opNumEqual)
+    # (pick "n" # nat 0 # opNumEqual)
     # opIf
-      (del @"tab" # del @"n" # makeIdentity)
+      (del "tab" # del "n" # makeIdentity)
       ( begin
-          # (roll @"tab" # roll @"n" # digits # makeIdentity)
-          # (opUntil (unname @3 ecMulJLoop) # opNip # opNip)
+          # (roll "tab" # roll "n" # digits # makeIdentity)
+          # (opUntil (unname 3 ecMulJLoop) # opNip # opNip)
       )
 
 ecMulJLoop ::
@@ -89,21 +89,23 @@ ecMulJLoop ::
     (s > TTab > TBytes > TPointJ > TBool)
 ecMulJLoop =
   begin
-    # (pick @"arr" # bytes [] # opEqual)
+    # (pick "arr" # bytes [] # opEqual)
     # opIf
-      (roll @"tab" # roll @"arr" # roll @"q" # opTrue)
+      (roll "tab" # roll "arr" # roll "q" # opTrue)
       ( begin
-          # name @"q'" (nat windowSize # roll @"q" # doubleN)
-          # name2 @"arr'" @"digit"
-            (roll @"arr" # nat 1 # opSplit # opSwap # opBin2Num # i2n)
-          # (pick @"digit" # op0 # opGreaterThan)
+          # name "q'" (nat windowSize # roll "q" # doubleN)
+          # name2
+            "arr'"
+            "digit"
+            (roll "arr" # nat 1 # opSplit # opSwap # opBin2Num # i2n)
+          # (pick "digit" # op0 # opGreaterThan)
           # opIf
             ( begin
-                # (pick @"tab" # roll @"digit" # tableLookup)
-                # (roll @"q'" # EC.ecAddJ)
+                # (pick "tab" # roll "digit" # tableLookup)
+                # (roll "q'" # EC.ecAddJ)
             )
-            (del @"digit" # roll @"q'")
-          # (roll @"tab" # roll @"arr'" # opRot # opFalse)
+            (del "digit" # roll "q'")
+          # (roll "tab" # roll "arr'" # opRot # opFalse)
       )
   where
     tableLookup :: FN (s > TTab > TNat) (s > TPointJ)
@@ -127,13 +129,13 @@ doubleN =
     # opNip
 
 digits :: FN (s > TNat) (s > TBytes)
-digits = bytes [] # opSwap # opUntil (unname @2 loop) # opDrop
+digits = bytes [] # opSwap # opUntil (unname 2 loop) # opDrop
   where
     loop :: FN (s > N "arr" TBytes > N "n" TNat) (s > TBytes > TNat > TBool)
     loop =
       begin
-        # (pick @"n" # winMod # n2i # nat 1 # opNum2Bin)
-        # (roll @"arr" # opCat # roll @"n" # winDiv)
+        # (pick "n" # winMod # n2i # nat 1 # opNum2Bin)
+        # (roll "arr" # opCat # roll "n" # winDiv)
         # (opDup # op0 # opNumEqual)
 
     winMod = nat numValues # opMod

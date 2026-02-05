@@ -434,9 +434,9 @@ propConsSnocAppend (BytesSize size) =
     prog :: Natural -> FN s (s > TBool)
     prog len' =
       begin
-        # name @"vec" (testVector len')
-        # (int64 1 # pick @"vec" # V.cons # int64 2 # V.snoc)
-        # (int64 1 # V.singleton # roll @"vec" # int64 2 # V.singleton)
+        # name "vec" (testVector len')
+        # (int64 1 # pick "vec" # V.cons # int64 2 # V.snoc)
+        # (int64 1 # V.singleton # roll "vec" # int64 2 # V.singleton)
         # (V.append # V.append)
         # opEqual
 
@@ -449,10 +449,10 @@ propHeadTailUncons (BytesSize size) =
     prog :: Natural -> FN s (s > TBool)
     prog len' =
       begin
-        # name @"vec" (testVector len')
-        # (lambda2 tuple # pick @"vec" # V.head)
-        # (pick @"vec" # V.tail # liftA2Maybe)
-        # (roll @"vec" # V.uncons # opEqual)
+        # name "vec" (testVector len')
+        # (lambda2 tuple # pick "vec" # V.head)
+        # (pick "vec" # V.tail # liftA2Maybe)
+        # (roll "vec" # V.uncons # opEqual)
 
 propLastInitUnsnoc :: BytesSize -> Property
 propLastInitUnsnoc (BytesSize size) =
@@ -463,10 +463,10 @@ propLastInitUnsnoc (BytesSize size) =
     prog :: Natural -> FN s (s > TBool)
     prog len' =
       begin
-        # name @"vec" (testVector len')
-        # (lambda2 tuple # pick @"vec" # V.init)
-        # (pick @"vec" # V.last # liftA2Maybe)
-        # (roll @"vec" # V.unsnoc # opEqual)
+        # name "vec" (testVector len')
+        # (lambda2 tuple # pick "vec" # V.init)
+        # (pick "vec" # V.last # liftA2Maybe)
+        # (roll "vec" # V.unsnoc # opEqual)
 
 -- 9998 is based on current 10K element limit and leaving room for the
 -- tuple size field.
@@ -480,10 +480,10 @@ propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len' idx' =
       begin
-        # name @"vec" (testVector len')
-        # (nat idx' # pick @"vec" # V.take)
-        # (nat idx' # pick @"vec" # V.drop # tuple)
-        # (nat idx' # roll @"vec" # V.splitAt # tuple # opEqual)
+        # name "vec" (testVector len')
+        # (nat idx' # pick "vec" # V.take)
+        # (nat idx' # pick "vec" # V.drop # tuple)
+        # (nat idx' # roll "vec" # V.splitAt # tuple # opEqual)
 
 -- 4000 is based on current 10K element limit and leaving ample room for the
 -- tuple size field.
@@ -497,11 +497,11 @@ propZipUnzip (BytesSize size1) (BytesSize size2) =
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len1' len2' =
       begin
-        # (name @"vec1" (testVector len1') # name @"vec2" (testVector len2'))
-        # (pick @"vec1" # pick @"vec2" # V.zip # V.unzip # V.zip)
-        # name @"minLen" (nat len1' # nat len2' # opMin)
-        # (pick @"minLen" # roll @"vec1" # V.take)
-        # (roll @"minLen" # roll @"vec2" # V.take)
+        # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
+        # (pick "vec1" # pick "vec2" # V.zip # V.unzip # V.zip)
+        # name "minLen" (nat len1' # nat len2' # opMin)
+        # (pick "minLen" # roll "vec1" # V.take)
+        # (roll "minLen" # roll "vec2" # V.take)
         # (V.zip # opEqual)
 
 propZipWithUnzip :: BytesSize -> BytesSize -> Property
@@ -514,12 +514,12 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len1' len2' =
       begin
-        # (name @"vec1" (testVector len1') # name @"vec2" (testVector len2'))
+        # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
         # (lambda2 TFS.tuple # opDup)
-        # (pick @"vec1" # pick @"vec2" # V.zipWith # V.unzip # V.zipWith)
-        # name @"minLen" (nat len1' # nat len2' # opMin)
-        # (pick @"minLen" # roll @"vec1" # V.take)
-        # (roll @"minLen" # roll @"vec2" # V.take)
+        # (pick "vec1" # pick "vec2" # V.zipWith # V.unzip # V.zipWith)
+        # name "minLen" (nat len1' # nat len2' # opMin)
+        # (pick "minLen" # roll "vec1" # V.take)
+        # (roll "minLen" # roll "vec2" # V.take)
         # (V.zip # opEqual)
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -557,9 +557,9 @@ propMapComposition (BytesSize size) =
     prog :: Natural -> FN s (s > TBool)
     prog len' =
       begin
-        # name @"vec" (testVector len')
-        # (lambda1 f # lambda1 g # pick @"vec" # V.map # V.map)
-        # (lambda1 (g # f) # roll @"vec" # V.map)
+        # name "vec" (testVector len')
+        # (lambda1 f # lambda1 g # pick "vec" # V.map # V.map)
+        # (lambda1 (g # f) # roll "vec" # V.map)
         # opEqual
 
     f :: FN (s > TInt64) (s > TInt64)
@@ -580,8 +580,8 @@ propMapIdentity (BytesSize size) =
     prog :: Natural -> FN s (s > TBool)
     prog len' =
       begin
-        # name @"vec" (testVector len')
-        # (pick @"vec" # lambda1 f # roll @"vec" # V.map # opEqual)
+        # name "vec" (testVector len')
+        # (pick "vec" # lambda1 f # roll "vec" # V.map # opEqual)
 
     f :: FN (s > TInt64) (s > TInt64)
     f = cast

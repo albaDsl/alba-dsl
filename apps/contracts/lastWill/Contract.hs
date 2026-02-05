@@ -32,13 +32,13 @@ refresh :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 refresh =
   begin
     # ( begin
-          # (roll @"sig" # roll @"refreshHash" # roll @"pubKey")
+          # (roll "sig" # roll "refreshHash" # roll "pubKey")
           # verifyAuthorized
       )
     # verifyOutputAmount 0
     # verifyOutputScript 0
     # verifySequence refreshDelay
-    # (del @"withdrawHash" # del @"inheritHash")
+    # (del "withdrawHash" # del "inheritHash")
     # opTrue
   where
     verifyOutputAmount :: Natural -> FNC
@@ -62,21 +62,21 @@ withdraw :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 withdraw =
   begin
     # ( begin
-          # (roll @"sig" # roll @"withdrawHash" # roll @"pubKey")
+          # (roll "sig" # roll "withdrawHash" # roll "pubKey")
           # verifyAuthorized
       )
-    # (del @"refreshHash" # del @"inheritHash")
+    # (del "refreshHash" # del "inheritHash")
     # opTrue
 
 inherit :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 inherit =
   begin
     # ( begin
-          # (roll @"sig" # roll @"inheritHash" # roll @"pubKey")
+          # (roll "sig" # roll "inheritHash" # roll "pubKey")
           # verifyAuthorized
       )
     # verifySequence inheritDelay
-    # (del @"refreshHash" # del @"withdrawHash")
+    # (del "refreshHash" # del "withdrawHash")
     # opTrue
 
 verifyAuthorized :: FN (s > TSig > THash160 > TPubKey) s

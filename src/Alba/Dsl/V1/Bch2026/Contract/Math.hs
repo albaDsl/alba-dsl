@@ -51,7 +51,7 @@ pow' mul =
     # opDup
     # ifZero
       (op2Drop # int 1)
-      (int 1 # opUntil (unname @3 fn) # opNip # opNip)
+      (int 1 # opUntil (unname 3 fn) # opNip # opNip)
   where
     fn ::
       FN
@@ -59,12 +59,12 @@ pow' mul =
         (s > TInt > TNat > TInt > TBool)
     fn =
       begin
-        # roll @"res" -- <args> res
-        # ex1 (pick @"n" # isOdd) -- <args> res odd?
-        # opWhen (pick @"b" # mul) -- <args> res'
-        # (roll @"b" # square') -- <args> res' b
+        # roll "res" -- <args> res
+        # ex1 (pick "n" # isOdd) -- <args> res odd?
+        # opWhen (pick "b" # mul) -- <args> res'
+        # (roll "b" # square') -- <args> res' b
         # opSwap -- <args> b res'
-        # (roll @"n" # half) -- <args> b res' n
+        # (roll "n" # half) -- <args> b res' n
         # ex1 (opDup # isZero) -- b res' n zero?
         # opRot -- b n zero? res'
         # opSwap -- b n res' zero?
@@ -89,7 +89,7 @@ pow'' mul =
           # opSwap
           # int 1
           # opSwap
-          # opUntil (unname @4 fn)
+          # opUntil (unname 4 fn)
           # opDrop
           # opNip
           # opNip
@@ -101,15 +101,15 @@ pow'' mul =
         (s > TInt > TNat > TInt > t > TBool)
     fn =
       begin
-        # roll @"res" -- <args> res
-        # ex1 (pick @"n" # isOdd) -- <args> res odd?
-        # opWhen (pick @"b" # pick @"data" # mul) -- <args> res'
-        # (roll @"b" # pick @"data" # square') -- <args> res' b'
+        # roll "res" -- <args> res
+        # ex1 (pick "n" # isOdd) -- <args> res odd?
+        # opWhen (pick "b" # pick "data" # mul) -- <args> res'
+        # (roll "b" # pick "data" # square') -- <args> res' b'
         # opSwap -- <args> b' res'
-        # (roll @"n" # half) -- <args> b' res' n'
+        # (roll "n" # half) -- <args> b' res' n'
         # ex1 (opDup # isZero) -- <args> b' res' n' zero?
         # opRot -- <args> b' n' zero? res'
-        # roll @"data" -- b' n' zero? res' data
+        # roll "data" -- b' n' zero? res' data
         # opRot -- <args> b' n' res' data zero?
     square' :: forall s'. FN (s' > TInt > t) (s' > TInt)
     square' = opOver # opSwap # mul
@@ -120,11 +120,11 @@ factorial =
     # opDup
     # ifZero
       (opDrop # op1)
-      (nat 1 # opSwap # opUntil (unname @2 fn) # opDrop)
+      (nat 1 # opSwap # opUntil (unname 2 fn) # opDrop)
   where
     fn :: FN (s > N "product" TNat > N "n" TNat) (s > TNat > TNat > TBool)
     fn =
       begin
-        # (roll @"product" # pick @"n" # opMul)
-        # (roll @"n" # op1SubUnsafe)
+        # (roll "product" # pick "n" # opMul)
+        # (roll "n" # op1SubUnsafe)
         # (opDup # isZero)

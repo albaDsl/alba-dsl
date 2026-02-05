@@ -1,4 +1,5 @@
 -- Copyright (c) 2025 albaDsl
+{-# LANGUAGE RequiredTypeArguments #-}
 
 module Alba.Dsl.V1.Bch2025.Ops where
 
@@ -157,20 +158,22 @@ opOver :: (StackEntry x1, StackEntry x2) => FN (s > x1 > x2) (s > x1 > x2 > x1)
 opOver (S c fs) = S (aop c OP_OVER) fs
 
 opPick ::
-  forall idx arg s.
+  forall arg s.
+  forall idx ->
   (KnownNat idx, StackEntry arg, Ref s idx ~ 'Just arg) =>
   FN s (s > arg)
-opPick (S c fs) =
-  let idx = natVal (Proxy :: Proxy idx) :: Integer
-   in S (aops c [integerToDataOp idx, OP_PICK]) fs
+opPick idx (S c fs) =
+  let idx' = natVal (Proxy :: Proxy idx) :: Integer
+   in S (aops c [integerToDataOp idx', OP_PICK]) fs
 
 opRoll ::
-  forall idx arg s s'.
+  forall arg s s'.
+  forall idx ->
   (KnownNat idx, StackEntry arg, Ref s idx ~ 'Just arg, s' ~ Remove s idx) =>
   FN s (s' > arg)
-opRoll (S c fs) =
-  let idx = natVal (Proxy :: Proxy idx) :: Integer
-   in S (aops c [integerToDataOp idx, OP_ROLL]) fs
+opRoll idx (S c fs) =
+  let idx' = natVal (Proxy :: Proxy idx) :: Integer
+   in S (aops c [integerToDataOp idx', OP_ROLL]) fs
 
 opRot ::
   (StackEntry x1, StackEntry x2, StackEntry x3) =>

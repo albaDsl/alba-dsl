@@ -84,7 +84,7 @@ tuple ::
   (PackFs a, PackFs b) =>
   FN (s > a > b) (s > TTupleFs a b)
 tuple =
-  hide2 # packFs @a # packFs @b # opRoll @3 # opRoll @3 # fixup # tupleF
+  hide2 # packFs @a # packFs @b # opRoll 3 # opRoll 3 # fixup # tupleF
   where
     fixup :: FN (s' > Hide a > Hide b) (s' > a > b)
     fixup = castStack
@@ -119,10 +119,10 @@ untupleF ::
   FN (s > TPackFs a > TPackFs b > TTupleFs a b) (s > a > b)
 untupleF =
   begin
-    # ns3 @"pfsA" @"pfsB" @"tuple"
-    # (roll @"tuple" # toBytes # pick @"pfsA" # getSize # opSplit)
-    # (roll @"pfsB" # getUnpack # invoke1 # hide # swap)
-    # (roll @"pfsA" # getUnpack # invoke1 # swap # dropHide)
+    # ns3 "pfsA" "pfsB" "tuple"
+    # (roll "tuple" # toBytes # pick "pfsA" # getSize # opSplit)
+    # (roll "pfsB" # getUnpack # invoke1 # hide # swap)
+    # (roll "pfsA" # getUnpack # invoke1 # swap # dropHide)
 
 toBytes :: FN (s > TTupleFs a b) (s > TBytes)
 toBytes = cast

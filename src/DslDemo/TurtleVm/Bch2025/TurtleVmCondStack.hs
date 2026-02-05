@@ -45,17 +45,17 @@ executeP ::
     (s > TBytes > TBool)
 executeP maxCsDepth =
   begin
-    # (roll @"op")
+    # (roll "op")
     # ifJust
       ( begin
-          # name2 @"op'" @"singleByte" isSingleByteOp
-          # name @"exec?" (roll @"condStack" # condStackExecuteP maxCsDepth)
-          # roll @"singleByte"
+          # name2 "op'" "singleByte" isSingleByteOp
+          # name "exec?" (roll "condStack" # condStackExecuteP maxCsDepth)
+          # roll "singleByte"
           # opIf
-            (roll @"op'" # opDup # isConditionalOp # (roll @"exec?") # opBoolOr)
-            (roll @"op'" # roll @"exec?")
+            (roll "op'" # opDup # isConditionalOp # (roll "exec?") # opBoolOr)
+            (roll "op'" # roll "exec?")
       )
-      (del @"condStack" # bytes [] # opFalse)
+      (del "condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: Int -> FN (s > TBytes) (s > TBool)
 condStackExecuteP maxCsDepth =

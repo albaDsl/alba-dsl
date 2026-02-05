@@ -71,7 +71,7 @@ progMapLambda =
       FN
         (s > TLambda '[TBytes] '[TBytes] > TBytes)
         (s > TBytes)
-    mapVec elemSize = unname @2 (mapVec' elemSize)
+    mapVec elemSize = unname 2 (mapVec' elemSize)
 
     mapVec' ::
       Natural ->
@@ -80,42 +80,43 @@ progMapLambda =
         (s > TBytes)
     mapVec' elemSize =
       begin
-        # name @"size"
+        # name
+          "size"
           ( ex1
               ( begin
-                  # pick @"vec"
+                  # pick "vec"
                   # opSize
                   # opNip
                   # nat elemSize
                   # opDiv
               )
           )
-        # pick @"size"
+        # pick "size"
         # ifZero
-          (del @"size" # del @"f" # roll @"vec")
+          (del "size" # del "f" # roll "vec")
           ( begin
-              # (nat 0 # roll @"vec")
+              # (nat 0 # roll "vec")
               # opUntil
                 ( begin
-                    # name2' @"i" @"v"
+                    # ns2 "i" "v"
                     # ( begin
-                          # pick @"i"
-                          # roll @"v"
+                          # pick "i"
+                          # roll "v"
                           # split elemSize
                       )
                     # uncons elemSize
                     # opSwap
-                    # (pick @"f" # invoke1)
+                    # (pick "f" # invoke1)
                     # opSwap
                     # opCat
                     # opCat
-                    # (roll @"i" # op1Add)
-                    # ex1 (opDup # pick @"size" # opNumEqual)
+                    # (roll "i" # op1Add)
+                    # ex1 (opDup # pick "size" # opNumEqual)
                     # (opRot # opSwap)
                 )
               # opNip
-              # del @"size"
-              # del @"f"
+              # del "size"
+              # del "f"
           )
 
     uncons :: Natural -> FN (s > TBytes) (s > TBytes > TBytes)

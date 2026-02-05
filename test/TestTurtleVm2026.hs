@@ -123,13 +123,13 @@ progStack1 = nat 2 # opTrue # opNip # opDup # opDrop
 progStack2 :: FN s (s > TBool)
 progStack2 =
   begin
-    # name @"x4" (int 4)
-    # name @"x3" (int 3)
-    # name @"x2" (int 2)
-    # name @"x1" (int 1)
-    # name @"x0" (int 0)
-    # (pick @"x4" # roll @"x3" # opMul # int 12 # opNumEqual)
-    # (del @"x0" # del @"x1" # del @"x2" # del @"x4")
+    # name "x4" (int 4)
+    # name "x3" (int 3)
+    # name "x2" (int 2)
+    # name "x1" (int 1)
+    # name "x0" (int 0)
+    # (pick "x4" # roll "x3" # opMul # int 12 # opNumEqual)
+    # (del "x0" # del "x1" # del "x2" # del "x4")
 
 progAltStack :: FN s (s > TBool)
 progAltStack =

@@ -78,18 +78,18 @@ sizeFieldSize = 2
 packTBytes128 :: FN (s > TBytes128) (s > TBytes)
 packTBytes128 =
   begin
-    # ns @"b128"
-    # name @"size" (pick @"b128" # toBytes # opSize # nip)
-    # (pick @"size" # cast # nat sizeFieldSize # opNum2Bin)
-    # (roll @"b128" # toBytes # int 0 # nat (fromIntegral maxPayloadSize))
-    # (roll @"size" # opSubUnsafe # opNum2Bin # opCat # opCat)
+    # ns "b128"
+    # name "size" (pick "b128" # toBytes # opSize # nip)
+    # (pick "size" # cast # nat sizeFieldSize # opNum2Bin)
+    # (roll "b128" # toBytes # int 0 # nat (fromIntegral maxPayloadSize))
+    # (roll "size" # opSubUnsafe # opNum2Bin # opCat # opCat)
 
 unpackTBytes128 :: FN (s > TBytes) (s > TBytes128)
 unpackTBytes128 =
   begin
-    # ns @"bytes"
-    # name2 @"size" @"rest" (roll @"bytes" # nat 2 # opSplit)
-    # (roll @"rest" # roll @"size" # opBin2Num # i2n # opSplit # drop # cast)
+    # ns "bytes"
+    # name2 "size" "rest" (roll "bytes" # nat 2 # opSplit)
+    # (roll "rest" # roll "size" # opBin2Num # i2n # opSplit # drop # cast)
 
 bytes128 :: Bytes -> FN s (s > TBytes128)
 bytes128 x =

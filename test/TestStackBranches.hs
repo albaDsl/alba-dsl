@@ -79,20 +79,20 @@ progSimpleStackBranch ::
     (s > TInt)
 progSimpleStackBranch =
   begin
-    # roll @"bytes"
+    # roll "bytes"
     # opSize
     # op5
     # opEqualVerify
     # opDrop
-    # roll @"choice"
+    # roll "choice"
     # op1
     # opEqual
     # opIf
-      (branch1 # del @"b1" # int 2)
+      (branch1 # del "b1" # int 2)
       ( branch2
-          # del @"b2"
-          # del @"b3"
-          # roll @"int"
+          # del "b2"
+          # del "b3"
+          # roll "int"
           # int 29
           # opSub
       )
@@ -122,45 +122,45 @@ progEntry8 = entry8 f0 f1 f2 f3 f4 f5 f6 f7
     f0 :: FN (Append s (Append Args0 '[Param])) (s > TInt)
     f0 =
       begin
-        # (roll @"x0" # roll @"param")
+        # (roll "x0" # roll "param")
         # opAdd
     f1 :: FN (Append s (Append Args1 '[Param])) (s > TInt)
     f1 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"param")
+        # (roll "x0" # roll "x1" # roll "param")
         # (opAdd # opAdd)
     f2 :: FN (Append s (Append Args2 '[Param])) (s > TInt)
     f2 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"param")
+        # (roll "x0" # roll "x1" # roll "x2" # roll "param")
         # (opAdd # opAdd # opAdd)
     f3 :: FN (Append s (Append Args3 '[Param])) (s > TInt)
     f3 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"x3")
-        # roll @"param"
+        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
+        # roll "param"
         # (opAdd # opAdd # opAdd # opAdd)
     f4 :: FN (Append s (Append Args4 '[Param])) (s > TInt)
     f4 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"x3")
-        # (roll @"x4" # roll @"param")
+        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
+        # (roll "x4" # roll "param")
         # (opAdd # opAdd # opAdd # opAdd # opAdd)
     f5 :: FN (Append s (Append Args5 '[Param])) (s > TInt)
     f5 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"x3")
-        # (roll @"x4" # roll @"x5" # roll @"param")
+        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
+        # (roll "x4" # roll "x5" # roll "param")
         # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
     f6 :: FN (Append s (Append Args6 '[Param])) (s > TInt)
     f6 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"x3")
-        # (roll @"x4" # roll @"x5" # roll @"x6" # roll @"param")
+        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
+        # (roll "x4" # roll "x5" # roll "x6" # roll "param")
         # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
     f7 =
       begin
-        # (roll @"x0" # roll @"x1" # roll @"x2" # roll @"x3")
-        # (roll @"x4" # roll @"x5" # roll @"x6" # roll @"x7")
-        # roll @"param"
+        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
+        # (roll "x4" # roll "x5" # roll "x6" # roll "x7")
+        # roll "param"
         # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)

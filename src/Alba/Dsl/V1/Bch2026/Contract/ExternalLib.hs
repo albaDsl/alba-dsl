@@ -51,22 +51,22 @@ importLibrary ::
 importLibrary =
   function
     ( begin
-        # ns6 @"fId" @"transform" @"startInput" @"numInputs" @"size" @"hash"
-        # (roll @"startInput" # roll @"numInputs" # n2i # bytes [])
+        # ns6 "fId" "transform" "startInput" "numInputs" "size" "hash"
+        # (roll "startInput" # roll "numInputs" # n2i # bytes [])
         # (opUntil loop # nip # nip)
-        # (roll @"size" # opSplit # drop # roll @"transform" # invoke1)
-        # (dup # opHash256 # roll @"hash" # opEqualVerify)
-        # (pick @"fId" # opDefine # roll @"fId" # opInvoke libInit)
+        # (roll "size" # opSplit # drop # roll "transform" # invoke1)
+        # (dup # opHash256 # roll "hash" # opEqualVerify)
+        # (pick "fId" # opDefine # roll "fId" # opInvoke libInit)
     )
   where
     loop :: Loop (s > TNat > TInt > TBytes)
     loop =
       begin
-        # ns3 @"input" @"cnt" @"acc"
-        # (pick @"input" # op1Add)
-        # name @"cnt'" (roll @"cnt" # op1Sub)
-        # (roll @"acc" # roll @"input" # opUtxoBytecode # simpleUnwrapProg)
-        # (opCat # pick @"cnt'" # int 0 # opEqual # un @"cnt'")
+        # ns3 "input" "cnt" "acc"
+        # (pick "input" # op1Add)
+        # name "cnt'" (roll "cnt" # op1Sub)
+        # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
+        # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
 
     libInit :: FN s s
     libInit = undefined
@@ -82,22 +82,22 @@ importLibrary' ::
 importLibrary' =
   function
     ( begin
-        # ns5 @"fId" @"startInput" @"numInputs" @"size" @"hash"
-        # (roll @"startInput" # roll @"numInputs" # n2i # bytes [])
+        # ns5 "fId" "startInput" "numInputs" "size" "hash"
+        # (roll "startInput" # roll "numInputs" # n2i # bytes [])
         # (opUntil loop # nip # nip)
-        # (roll @"size" # opSplit # drop)
-        # (dup # opHash256 # roll @"hash" # opEqualVerify)
-        # (pick @"fId" # opDefine # roll @"fId" # opInvoke libInit)
+        # (roll "size" # opSplit # drop)
+        # (dup # opHash256 # roll "hash" # opEqualVerify)
+        # (pick "fId" # opDefine # roll "fId" # opInvoke libInit)
     )
   where
     loop :: Loop (s > TNat > TInt > TBytes)
     loop =
       begin
-        # ns3 @"input" @"cnt" @"acc"
-        # (pick @"input" # op1Add)
-        # name @"cnt'" (roll @"cnt" # op1Sub)
-        # (roll @"acc" # roll @"input" # opUtxoBytecode # simpleUnwrapProg)
-        # (opCat # pick @"cnt'" # int 0 # opEqual # un @"cnt'")
+        # ns3 "input" "cnt" "acc"
+        # (pick "input" # op1Add)
+        # name "cnt'" (roll "cnt" # op1Sub)
+        # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
+        # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
 
     libInit :: FN s s
     libInit = undefined

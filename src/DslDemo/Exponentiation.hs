@@ -11,21 +11,21 @@ pow = function (powHelper opMul)
 powHelper ::
   (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
   FN (s > TInt > TNat) (s > TInt)
-powHelper mul = unname @2 (powHelper' mul)
+powHelper mul = unname 2 (powHelper' mul)
 
 powHelper' ::
   (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
   FN (s > N "b" TInt > N "n" TNat) (s > TInt)
 powHelper' mul =
   begin
-    # pick @"n"
+    # pick "n"
     # ifZero
-      (int 1 # del @"n" # del @"b")
+      (int 1 # del "n" # del "b")
       ( begin
-          # (pick @"n" # isEven)
+          # (pick "n" # isEven)
           # opIf
-            (roll @"b" # roll @"n" # nat 2 # opDiv # pow # square mul)
-            (pick @"b" # roll @"b" # roll @"n" # op1 # opSubUnsafe # pow # mul)
+            (roll "b" # roll "n" # nat 2 # opDiv # pow # square mul)
+            (pick "b" # roll "b" # roll "n" # op1 # opSubUnsafe # pow # mul)
       )
   where
     square ::

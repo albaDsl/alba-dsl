@@ -44,15 +44,15 @@ primeModulus :: FN s (s > TInt)
 primeModulus = function (int (fromIntegral p))
 
 modulo :: FN (s > TInt > TInt) (s > TInt)
-modulo = unname @2 modulo'
+modulo = unname 2 modulo'
   where
     modulo' :: FN (s > N "x1" TInt > N "x2" TInt) (s > TInt)
     modulo' =
       begin
-        # name @"res" (pick @"x1" # pick @"x2" # opMod)
-        # pick @"res"
+        # name "res" (pick "x1" # pick "x2" # opMod)
+        # pick "res"
         # int 0
         # opLessThan
         # opIf
-          (roll @"res" # roll @"x2" # opAdd # del @"x1")
-          (roll @"res" # del @"x2" # del @"x1")
+          (roll "res" # roll "x2" # opAdd # del "x1")
+          (roll "res" # del "x2" # del "x1")

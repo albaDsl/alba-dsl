@@ -87,51 +87,51 @@ decompress =
 decompressLoop :: Loop (s > TBytes > TNat > TNat > TNat > TBytes > TBytes)
 decompressLoop =
   begin
-    # ns6 @"bs" @"n" @"i" @"k" @"flag" @"out"
+    # ns6 "bs" "n" "i" "k" "flag" "out"
     # cond
-      [ ( pick @"i" # pick @"n" # opGreaterThanOrEqual,
-          opTrue # un6 @"bs" @"n" @"i" @"k" @"flag" @"out"
+      [ ( pick "i" # pick "n" # opGreaterThanOrEqual,
+          opTrue # un6 "bs" "n" "i" "k" "flag" "out"
         ),
-        ( pick @"k" # nat groupSize # opEqual,
+        ( pick "k" # nat groupSize # opEqual,
           begin
-            # (pick @"bs" # roll @"n" # pick @"i" # op1Add)
-            # (del @"k" # nat 0 # del @"flag" # roll @"bs")
-            # (roll @"i" # index # roll @"out" # opFalse)
+            # (pick "bs" # roll "n" # pick "i" # op1Add)
+            # (del "k" # nat 0 # del "flag" # roll "bs")
+            # (roll "i" # index # roll "out" # opFalse)
         ),
-        ( pick @"flag" # pick @"k" # testBit,
+        ( pick "flag" # pick "k" # testBit,
           begin
-            # (pick @"bs" # roll @"n" # pick @"i" # op1Add)
-            # (roll @"k" # op1Add # roll @"flag" # roll @"out")
-            # (roll @"bs" # roll @"i" # index # opCat # opFalse)
+            # (pick "bs" # roll "n" # pick "i" # op1Add)
+            # (roll "k" # op1Add # roll "flag" # roll "out")
+            # (roll "bs" # roll "i" # index # opCat # opFalse)
         )
       ]
       ( begin
-          # (pick @"i" # op1Add # pick @"n" # opGreaterThanOrEqual)
+          # (pick "i" # op1Add # pick "n" # opGreaterThanOrEqual)
           # opWhen (opFalse # opVerify # castStack)
-          # name2 @"off" @"len" (pick @"bs" # pick @"i" # indexRef # unpackRef)
-          # (roll @"bs" # roll @"n" # roll @"i" # nat refLen # opAdd)
-          # (roll @"k" # op1Add # roll @"flag")
-          # (roll @"out" # roll @"off" # roll @"len" # copyFromBack # opFalse)
+          # name2 "off" "len" (pick "bs" # pick "i" # indexRef # unpackRef)
+          # (roll "bs" # roll "n" # roll "i" # nat refLen # opAdd)
+          # (roll "k" # op1Add # roll "flag")
+          # (roll "out" # roll "off" # roll "len" # copyFromBack # opFalse)
       )
 
 copyFromBack :: FN (s > TBytes > TNat > TNat) (s > TBytes)
 copyFromBack =
   begin
-    # ns3 @"out" @"off" @"len"
-    # name2 @"out'" @"start" (roll @"out" # opSize # roll @"off" # opSubUnsafe)
-    # (roll @"start" # roll @"len" # nat 0 # roll @"out'")
+    # ns3 "out" "off" "len"
+    # name2 "out'" "start" (roll "out" # opSize # roll "off" # opSubUnsafe)
+    # (roll "start" # roll "len" # nat 0 # roll "out'")
     # (opUntil loop # nip # nip # nip)
   where
     loop :: Loop (s > TNat > TNat > TNat > TBytes) -- start len j acc
     loop =
       begin
-        # ns4 @"start" @"len" @"j" @"acc"
-        # (pick @"j" # pick @"len" # opGreaterThanOrEqual)
+        # ns4 "start" "len" "j" "acc"
+        # (pick "j" # pick "len" # opGreaterThanOrEqual)
         # opIf
-          (un4 @"start" @"len" @"j" @"acc" # opTrue)
+          (un4 "start" "len" "j" "acc" # opTrue)
           ( begin
-              # (pick @"start" # roll @"len" # pick @"j" # op1Add)
-              # (roll @"acc" # dup # roll @"start" # roll @"j" # opAdd)
+              # (pick "start" # roll "len" # pick "j" # op1Add)
+              # (roll "acc" # dup # roll "start" # roll "j" # opAdd)
               # (index # opCat # opFalse)
           )
 

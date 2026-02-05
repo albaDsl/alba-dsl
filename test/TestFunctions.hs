@@ -54,16 +54,16 @@ progNestedCalls1 =
     # opTrue
   where
     polynomial :: F (S (s > TInt) alt -> S (s > TInt) alt)
-    polynomial = function (unname @1 polynomial')
+    polynomial = function (unname 1 polynomial')
 
     -- When using "S -> S" syntax, surround it in an 'F' for VM functions.
     polynomial' :: F (S (s > N "x" TInt) alt -> S (s > TInt) alt)
     polynomial' =
       begin
-        # (pick @"x" # quartic)
-        # (pick @"x" # cube # int 10 # opMul)
-        # (pick @"x" # square # int 35 # opMul)
-        # (roll @"x" # int 50 # opMul)
+        # (pick "x" # quartic)
+        # (pick "x" # cube # int 10 # opMul)
+        # (pick "x" # square # int 35 # opMul)
+        # (roll "x" # int 50 # opMul)
         # int 24
         # (opAdd # opAdd # opAdd # opAdd)
 
@@ -92,15 +92,15 @@ progFactorial =
     # (opBoolAnd # opBoolAnd # opBoolAnd)
   where
     fac :: FN (s > TNat) (s > TNat)
-    fac = function (unname @1 fac')
+    fac = function (unname 1 fac')
 
     fac' :: FN (s > N "n" TNat) (s > TNat)
     fac' =
       begin
-        # pick @"n"
+        # pick "n"
         # ifZero
-          (nat 1 # del @"n")
-          (pick @"n" # roll @"n" # op1SubUnsafe # fac # opMul)
+          (nat 1 # del "n")
+          (pick "n" # roll "n" # op1SubUnsafe # fac # opMul)
 
 progSort :: FN s (s > TBool)
 progSort =

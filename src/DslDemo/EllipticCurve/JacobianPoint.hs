@@ -22,15 +22,15 @@ instance StackEntry TPointJ
 -- Byte layout for the PointJ record:
 -- <tag:1><x:33><y:33><z:33>
 makePoint :: FN (s > TInt > TInt > TInt) (s > TPointJ)
-makePoint = function (unname @3 makePoint')
+makePoint = function (unname 3 makePoint')
   where
     makePoint' :: FN (s > N "x" TInt > N "y" TInt > N "z" TInt) (s > TPointJ)
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
-        # (roll @"x" # nat coordSize # opNum2Bin)
-        # (roll @"y" # nat coordSize # opNum2Bin)
-        # (roll @"z" # nat coordSize # opNum2Bin)
+        # (roll "x" # nat coordSize # opNum2Bin)
+        # (roll "y" # nat coordSize # opNum2Bin)
+        # (roll "z" # nat coordSize # opNum2Bin)
         # assemble
 
 assemble :: FN (s > TBytes > TBytes > TBytes > TBytes) (s > TPointJ)
@@ -73,7 +73,7 @@ getZ = function (pointToBytes # offset # opSplit # opNip # opBin2Num)
     offset = nat (tagSize + 2 * coordSize)
 
 getField :: FN (s > TBytes > TNat > TNat) (s > TBytes)
-getField = function (unname @3 getField')
+getField = function (unname 3 getField')
   where
     getField' ::
       FN
@@ -81,9 +81,9 @@ getField = function (unname @3 getField')
         (s > TBytes)
     getField' =
       begin
-        # (roll @"bytes" # roll @"offset" # opSplit)
+        # (roll "bytes" # roll "offset" # opSplit)
         # opNip
-        # roll @"size"
+        # roll "size"
         # opSplit
         # opDrop
 

@@ -50,25 +50,25 @@ progFactorial2 :: FN s (s > TBool)
 progFactorial2 = progFacTest fac
   where
     fac :: Natural -> FN s (s > TNat)
-    fac n = nat 1 # nat n # iterate n (unname @2 fn) # opDrop
+    fac n = nat 1 # nat n # iterate n (unname 2 fn) # opDrop
 
     fn :: FN (s > N "product" TNat > N "n" TNat) (s > TNat > TNat)
     fn =
       begin
-        # (pick @"n" # roll @"product" # opMul)
-        # (roll @"n" # op1SubUnsafe)
+        # (pick "n" # roll "product" # opMul)
+        # (roll "n" # op1SubUnsafe)
 
 progFactorial3 :: FN s (s > TBool)
 progFactorial3 = progFacTest fac
   where
     fac :: Natural -> FN s (s > TNat)
-    fac n = nat 1 # iterate n (unname @1 fn)
+    fac n = nat 1 # iterate n (unname 1 fn)
 
     fn :: FNA (s > N "product" TNat) (alt > TNat) (s > TNat) (alt > TNat)
     fn =
       begin
         # (opFromAltStack # opDup # opToAltStack)
-        # (roll @"product" # opMul)
+        # (roll "product" # opMul)
 
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/

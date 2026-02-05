@@ -1,4 +1,5 @@
 -- Copyright (c) 2025 albaDsl
+{-# LANGUAGE RequiredTypeArguments #-}
 
 module Alba.Dsl.V1.Bch2025.LangArgs
   ( pick,
@@ -28,10 +29,11 @@ import Data.Proxy (Proxy (..))
 import GHC.TypeLits (KnownNat, natVal)
 
 pick ::
-  forall argName arg idx s.
+  forall s arg idx.
+  forall argName ->
   (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
   FN s (s > UnName arg)
-pick = let idx = natVal (Proxy :: Proxy idx) :: Integer in pick' idx
+pick _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 pick' :: Integer -> S s alt -> S s' alt
 pick' idx (S c fs) =
@@ -41,20 +43,22 @@ pick' idx (S c fs) =
     _ -> S (aops c [integerToDataOp idx, OP_PICK]) fs
 
 pickN ::
-  forall argName arg idx s.
+  forall s arg idx.
+  forall argName ->
   (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
   FN s (s > arg)
-pickN = let idx = natVal (Proxy :: Proxy idx) :: Integer in pick' idx
+pickN _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 roll ::
-  forall argName arg idx s s'.
+  forall s s' arg idx.
+  forall argName ->
   ( KnownNat idx,
     FindName argName s 0 ~ 'Just idx,
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
   FN s (s' > UnName arg)
-roll = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll' idx
+roll _argName = roll' (natVal (Proxy :: Proxy idx))
 
 roll' :: Integer -> S s alt -> S s' alt
 roll' idx (S c fs) =
@@ -65,17 +69,19 @@ roll' idx (S c fs) =
     _ -> S (aops c [integerToDataOp idx, OP_ROLL]) fs
 
 rollN ::
-  forall argName arg idx s s'.
+  forall s s' arg idx.
+  forall argName ->
   ( KnownNat idx,
     FindName argName s 0 ~ 'Just idx,
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
   FN s (s' > arg)
-rollN = let idx = natVal (Proxy :: Proxy idx) :: Integer in roll' idx
+rollN _argName = roll' (natVal (Proxy :: Proxy idx) :: Integer)
 
 del ::
-  forall argName arg idx s s'.
+  forall s s' arg idx.
+  forall argName ->
   ( KnownNat idx,
     StackEntry (UnName arg),
     FindName argName s 0 ~ 'Just idx,
@@ -83,16 +89,17 @@ del ::
     Remove s idx ~ s'
   ) =>
   FN s s'
-del = roll @argName # opDrop
+del argName = roll argName # opDrop
 
 delCount ::
-  forall argCount idxs s s'.
+  forall s s' idxs.
+  forall count ->
   ( Term idxs,
-    FindNamedArgs s argCount 0 '[] ~ idxs,
-    RemoveNamedArgs s argCount ~ s'
+    FindNamedArgs s count 0 '[] ~ idxs,
+    RemoveNamedArgs s count ~ s'
   ) =>
   FN s s'
-delCount (S c fs) =
+delCount _count (S c fs) =
   let idxs = term @idxs :: [Integer]
       idxs' = fixIndices idxs
    in foldl (flip remove) (S c fs) idxs'

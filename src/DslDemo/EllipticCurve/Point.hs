@@ -22,14 +22,14 @@ instance StackEntry TPoint
 -- Byte layout for the Point record:
 -- <tag:1><x:33><y:33>
 makePoint :: FN (s > TInt > TInt) (s > TPoint)
-makePoint = function (unname @2 makePoint')
+makePoint = function (unname 2 makePoint')
   where
     makePoint' :: FN (s > N "x" TInt > N "y" TInt) (s > TPoint)
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
-        # (roll @"x" # nat coordSize # opNum2Bin)
-        # (roll @"y" # nat coordSize # opNum2Bin)
+        # (roll "x" # nat coordSize # opNum2Bin)
+        # (roll "y" # nat coordSize # opNum2Bin)
         # opCat
         # opCat
         # cast
@@ -55,24 +55,27 @@ isIdentity :: FN (s > TPoint) (s > TBool)
 isIdentity = function (getTag # int tagIdentity # opNumEqual)
 
 isEqual :: FN (s > TPoint > TPoint) (s > TBool)
-isEqual = function (unname @2 isEqual')
+isEqual = function (unname 2 isEqual')
   where
     isEqual' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TBool)
     isEqual' =
       begin
-        # (pick @"p" # isIdentity # pick @"q" # isIdentity # opBoolAnd)
+        # (pick "p" # isIdentity # pick "q" # isIdentity # opBoolAnd)
         # opIf
-          (opTrue # del @"q" # del @"p")
+          (opTrue # del "q" # del "p")
           ( begin
-              # name @"equalTag"
-                (pick @"p" # getTag # pick @"q" # getTag # opNumEqual)
-              # name @"equalX"
-                (pick @"p" # getX # pick @"q" # getX # opNumEqual)
-              # name @"equalY"
-                (roll @"p" # getY # roll @"q" # getY # opNumEqual)
-              # roll @"equalTag"
-              # roll @"equalX"
-              # roll @"equalY"
+              # name
+                "equalTag"
+                (pick "p" # getTag # pick "q" # getTag # opNumEqual)
+              # name
+                "equalX"
+                (pick "p" # getX # pick "q" # getX # opNumEqual)
+              # name
+                "equalY"
+                (roll "p" # getY # roll "q" # getY # opNumEqual)
+              # roll "equalTag"
+              # roll "equalX"
+              # roll "equalY"
               # opBoolAnd
               # opBoolAnd
           )

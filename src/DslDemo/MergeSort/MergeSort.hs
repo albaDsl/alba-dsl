@@ -55,26 +55,26 @@ sortF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
 sortF =
   function
     ( begin
-        # ns2 @"pfs" @"vec"
-        # (pick @"pfs" # pick @"vec" # lengthF # nat 1 # opGreaterThan)
+        # ns2 "pfs" "vec"
+        # (pick "pfs" # pick "vec" # lengthF # nat 1 # opGreaterThan)
         # opIf
           ( begin
-              # (pick @"pfs" # roll @"vec" # halveF)
-              # (pick @"pfs" # opSwap # sortF # opSwap)
-              # (pick @"pfs" # opSwap # sortF # opSwap)
-              # (pick @"pfs" # opRot # opRot # mergeF)
+              # (pick "pfs" # roll "vec" # halveF)
+              # (pick "pfs" # opSwap # sortF # opSwap)
+              # (pick "pfs" # opSwap # sortF # opSwap)
+              # (pick "pfs" # opRot # opRot # mergeF)
           )
-          (roll @"vec")
-        # del @"pfs"
+          (roll "vec")
+        # del "pfs"
     )
 
 halveF :: FN (s > TPackFs a > TVector a) (s > TVector a > TVector a)
 halveF =
   function
     ( begin
-        # ns2 @"pfs" @"vec"
-        # (pick @"pfs" # pick @"vec" # lengthF # nat 2 # opDiv)
-        # (roll @"pfs" # opSwap # roll @"vec" # splitAtF)
+        # ns2 "pfs" "vec"
+        # (pick "pfs" # pick "vec" # lengthF # nat 2 # opDiv)
+        # (roll "pfs" # opSwap # roll "vec" # splitAtF)
     )
 
 mergeF ::
@@ -83,29 +83,29 @@ mergeF ::
 mergeF =
   function
     ( begin
-        # (ns3 @"pfs" @"xs" @"ys" # pick @"xs" # pick @"ys" # baseCases)
+        # (ns3 "pfs" "xs" "ys" # pick "xs" # pick "ys" # baseCases)
         # opIf
           ( begin
               # opDrop
-              # name2 @"x" @"xRest" (pick @"pfs" # pick @"xs" # uncons')
-              # name2 @"y" @"yRest" (pick @"pfs" # pick @"ys" # uncons')
+              # name2 "x" "xRest" (pick "pfs" # pick "xs" # uncons')
+              # name2 "y" "yRest" (pick "pfs" # pick "ys" # uncons')
               # ( begin
-                    # (pick @"x" # toNum # pick @"y" # toNum)
+                    # (pick "x" # toNum # pick "y" # toNum)
                     # opLessThanOrEqual
                 )
               # opIf
                 ( begin
-                    # (roll @"x" # roll @"xRest" # roll @"ys")
-                    # (del @"yRest" # del @"y" # del @"xs")
+                    # (roll "x" # roll "xRest" # roll "ys")
+                    # (del "yRest" # del "y" # del "xs")
                 )
                 ( begin
-                    # (roll @"y" # roll @"xs" # roll @"yRest")
-                    # (del @"ys" # del @"xRest" # del @"x")
+                    # (roll "y" # roll "xs" # roll "yRest")
+                    # (del "ys" # del "xRest" # del "x")
                 )
-              # (pick @"pfs" # opRot # opRot # mergeF)
-              # (roll @"pfs" # opRot # opRot # nipHide # consF)
+              # (pick "pfs" # opRot # opRot # mergeF)
+              # (roll "pfs" # opRot # opRot # nipHide # consF)
           )
-          (del @"pfs" # del @"xs" # del @"ys")
+          (del "pfs" # del "xs" # del "ys")
     )
   where
     uncons' ::
@@ -119,14 +119,14 @@ mergeF =
     baseCases :: FN (s' > TVector a > TVector a) (s' > TVector a > TBool)
     baseCases =
       begin
-        # (ns2 @"xs" @"ys" # pick @"xs" # null)
+        # (ns2 "xs" "ys" # pick "xs" # null)
         # opIf
-          (roll @"ys" # del @"xs" # opFalse)
+          (roll "ys" # del "xs" # opFalse)
           ( begin
-              # (pick @"ys" # null)
+              # (pick "ys" # null)
               # opIf
-                (del @"ys" # roll @"xs" # opFalse)
-                (del @"xs" # del @"ys" # empty # opTrue)
+                (del "ys" # roll "xs" # opFalse)
+                (del "xs" # del "ys" # empty # opTrue)
           )
 
 -- Used from contexts where it is expected to never fail.

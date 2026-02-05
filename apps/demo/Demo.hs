@@ -68,12 +68,12 @@ prop2 x = (ev (c f2) x >= 0) === True
 f3 :: S (s > N "x" TInt) alt -> S (s > TInt) alt
 f3 =
   begin
-    # pick @"x"
+    # pick "x"
     # cube
-    # pick @"x"
+    # pick "x"
     # square
     # coeff (-1)
-    # roll @"x"
+    # roll "x"
     # coeff 2
     # opAdd
     # opAdd
@@ -87,11 +87,11 @@ prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 4. Demo of the recursive pow function.
 f4 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f4 = int 2 # roll @"x" # Exp.pow
+f4 = int 2 # roll "x" # Exp.pow
 
 -- Example 5. Demo of the loops based pow function.
 f5 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f5 = int 2 # roll @"x" # pow
+f5 = int 2 # roll "x" # pow
 
 -- Example 6. Secp256k1 point multiplication. Calculates n * G and returns the
 -- x-coordinate. Try with e.g. test vectors from:

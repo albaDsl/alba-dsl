@@ -92,7 +92,7 @@ tcPick ::
     UnName arg ~ TPackFs a
   ) =>
   FN s (s > TPackFs a)
-tcPick = pick @"packFs"
+tcPick = pick "packFs"
 
 tcRoll ::
   forall arg idx s s' a.
@@ -103,7 +103,7 @@ tcRoll ::
     UnName arg ~ TPackFs a
   ) =>
   FN s (s' > TPackFs a)
-tcRoll = roll @"packFs"
+tcRoll = roll "packFs"
 
 tcDrop ::
   forall arg idx s s'.
@@ -114,7 +114,7 @@ tcDrop ::
     Remove s idx ~ s'
   ) =>
   FN s s'
-tcDrop = del @"packFs"
+tcDrop = del "packFs"
 
 tcSize ::
   forall arg idx s a.
@@ -124,7 +124,7 @@ tcSize ::
     UnName arg ~ TPackFs a
   ) =>
   FN s (s > TNat)
-tcSize = pick @"packFs" # getSize
+tcSize = pick "packFs" # getSize
 
 tcPack ::
   forall s a arg idx.
@@ -135,7 +135,7 @@ tcPack ::
     UnName arg ~ TPackFs a
   ) =>
   FN (s > a) (s > TBytes)
-tcPack = pick @"packFs" # getPack # invoke1
+tcPack = pick "packFs" # getPack # invoke1
 
 tcUnpack ::
   forall s a arg idx.
@@ -146,4 +146,4 @@ tcUnpack ::
     UnName arg ~ TPackFs a
   ) =>
   FN (s > TBytes) (s > a)
-tcUnpack = pick @"packFs" # getUnpack # invoke1
+tcUnpack = pick "packFs" # getUnpack # invoke1

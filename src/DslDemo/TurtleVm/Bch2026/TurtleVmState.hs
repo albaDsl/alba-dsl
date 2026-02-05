@@ -73,14 +73,14 @@ getOp =
 getOpBytes :: FN (s > TBytes) (s > TBytes > TBytes)
 getOpBytes =
   begin
-    # name2 @"op" @"rest" (nat 1 # opSplit)
-    # (pick @"op" # isOpDataOp)
+    # name2 "op" "rest" (nat 1 # opSplit)
+    # (pick "op" # isOpDataOp)
     # opIf
       ( begin
-          # (roll @"rest" # pick @"op" # bytesToNat # opSplit) -- oprest rest
-          # (roll @"op" # opRot # opCat # opSwap)
+          # (roll "rest" # pick "op" # bytesToNat # opSplit) -- oprest rest
+          # (roll "op" # opRot # opCat # opSwap)
       )
-      (roll @"op" # roll @"rest")
+      (roll "op" # roll "rest")
   where
     bytesToNat :: FN (s > TBytes) (s > TNat)
     bytesToNat = cast

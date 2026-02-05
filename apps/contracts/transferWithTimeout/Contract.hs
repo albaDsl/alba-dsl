@@ -19,13 +19,13 @@ contract = MkContract $ entry2 recipientWithdraw senderWithdraw
   where
     recipientWithdraw =
       begin
-        # (roll @"sig" # roll @"recipientPub" # opCheckSigVerify)
-        # (del @"timeout" # del @"senderPub")
+        # (roll "sig" # roll "recipientPub" # opCheckSigVerify)
+        # (del "timeout" # del "senderPub")
         # opTrue
 
     senderWithdraw =
       begin
-        # (roll @"sig" # roll @"senderPub" # opCheckSigVerify)
-        # (roll @"timeout" # opCheckLockTimeVerify # opDrop)
-        # del @"recipientPub"
+        # (roll "sig" # roll "senderPub" # opCheckSigVerify)
+        # (roll "timeout" # opCheckLockTimeVerify # opDrop)
+        # del "recipientPub"
         # opTrue

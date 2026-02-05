@@ -48,7 +48,7 @@ tuple = function tupleM
 tupleM :: (StackEntry a, StackEntry b) => FN (s > a > b) (s > TTuple a b)
 tupleM =
   begin
-    # (ns2 @"fst" @"snd" # roll @"fst" # toBytes # addSizeTag # roll @"snd")
+    # (ns2 "fst" "snd" # roll "fst" # toBytes # addSizeTag # roll "snd")
     # (toBytes # opCat # cast)
   where
     addSizeTag :: FN (s > TBytes) (s > TBytes)

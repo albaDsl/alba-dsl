@@ -28,7 +28,7 @@ progUnnamedArgsAtCallSite =
   begin
     # nat 2
     # nat 3
-    # unname @2 calculateProperties
+    # unname 2 calculateProperties
     # (nat 6 # opNumEqual)
     # opSwap
     # (nat 10 # opNumEqual)
@@ -39,11 +39,11 @@ progUnnamedArgsAtCallSite =
 progNamedArgsAtCallSite :: FN s (s > TBool)
 progNamedArgsAtCallSite =
   begin
-    # name @"does-not-interfere" (nat 2)
-    # name @"w" (nat 1 # nat 1 # opAdd)
-    # name @"h" (nat 3)
+    # name "does-not-interfere" (nat 2)
+    # name "w" (nat 1 # nat 1 # opAdd)
+    # name "h" (nat 3)
     # calculateProperties
-    # del @"does-not-interfere"
+    # del "does-not-interfere"
     # (nat 6 # opNumEqual)
     # opSwap
     # (nat 10 # opNumEqual)
@@ -57,11 +57,11 @@ calculateProperties ::
     (s > TNat > TNat)
 calculateProperties =
   begin
-    # (pickN @"w" # pickN @"h")
+    # (pickN "w" # pickN "h")
     # perimeter
-    # (pick @"w" # pick @"h")
+    # (pick "w" # pick "h")
     # area
-    # (del @"h" # del @"w")
+    # (del "h" # del "w")
   where
     area :: FN (s > TNat > TNat) (s > TNat)
     area = opMul
@@ -69,8 +69,8 @@ calculateProperties =
     perimeter :: FN (s > N "w" TNat > N "h" TNat) (s > TNat)
     perimeter =
       begin
-        # (pick @"w" # roll @"w" # opAdd)
-        # (pick @"h" # roll @"h" # opAdd)
+        # (pick "w" # roll "w" # opAdd)
+        # (pick "h" # roll "h" # opAdd)
         # opAdd
 
 type MiscArgs s =
@@ -78,29 +78,29 @@ type MiscArgs s =
 
 -- Exercising pick inside if statement.
 progIfArgPick :: FN s (s > TBool)
-progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
+progIfArgPick = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname 5 f
   where
     f :: FN (MiscArgs s) (s > TBool)
     f =
       begin
         # opTrue
         # opIf
-          (pick @"x2" # pick @"x5")
-          (pick @"x1" # pick @"x2")
+          (pick "x2" # pick "x5")
+          (pick "x1" # pick "x2")
         # opAdd
-        # delCount @5
+        # delCount 5
         # nat 10
         # opNumEqual
 
 -- Exercising del / roll with various types on the stack.
 progArgRollDrop :: FN s (s > TBool)
-progArgRollDrop = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname @5 f
+progArgRollDrop = nat 2 # nat 4 # opTrue # opFalse # nat 6 # unname 5 f
   where
     f :: FN (MiscArgs s) (s > TBool)
     f =
       begin
-        # (del @"x3" # del @"x4" # del @"x1")
-        # (roll @"x2" # roll @"x5")
+        # (del "x3" # del "x4" # del "x1")
+        # (roll "x2" # roll "x5")
         # opAdd
         # nat 10
         # opNumEqual
@@ -110,19 +110,20 @@ namingStackItems :: FN s (s > TBool)
 namingStackItems =
   begin
     # momentum
-    # pick @"momentum"
-    # del @"momentum"
+    # pick "momentum"
+    # del "momentum"
     # int 1250
     # opNumEqual
   where
     momentum :: FN s (s > N "momentum" TInt)
     momentum =
       begin
-        # name @"mass" (int 100)
-        # name @"v" (int 5)
-        # name @"v^2" (pick @"v" # roll @"v" # opMul)
-        # name @"momentum"
-          (roll @"mass" # roll @"v^2" # opMul # int 2 # opDiv)
+        # name "mass" (int 100)
+        # name "v" (int 5)
+        # name "v^2" (pick "v" # roll "v" # opMul)
+        # name
+          "momentum"
+          (roll "mass" # roll "v^2" # opMul # int 2 # opDiv)
 
 -- Currently possible to have the same name in scope for more than one stack
 -- item. Avoid.
@@ -131,7 +132,7 @@ duplicateName =
   begin
     # nat 10
     # nat 5
-    # unname @2 divide
+    # unname 2 divide
     # nat 2
     # opNumEqual
   where
@@ -141,8 +142,8 @@ duplicateName =
         (s > TNat)
     divide =
       begin
-        # (roll @"n1")
-        # (roll @"n1")
+        # (roll "n1")
+        # (roll "n1")
         # opSwap
         # opDiv
 
@@ -153,7 +154,7 @@ duplicateName =
 --     (s > TNat)
 -- accessNamedArg =
 --   begin
---     # opRoll @0
---     # opRoll @1
---     # (del @"x2" # del @"x1")
+--     # opRoll 0
+--     # opRoll 1
+--     # (del "x2" # del "x1")
 --     # op1

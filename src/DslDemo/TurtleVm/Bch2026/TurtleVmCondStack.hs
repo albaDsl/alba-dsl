@@ -43,19 +43,19 @@ executeP ::
     (s > TBytes > TBool)
 executeP =
   begin
-    # (roll @"op")
+    # (roll "op")
     # ifJust
       ( begin
           # isSingleByteOp
           # opIf
             ( begin
                 # (opDup # isConditionalOp)
-                # (roll @"condStack" # condStackExecuteP)
+                # (roll "condStack" # condStackExecuteP)
                 # opBoolOr
             )
-            (roll @"condStack" # condStackExecuteP)
+            (roll "condStack" # condStackExecuteP)
       )
-      (del @"condStack" # bytes [] # opFalse)
+      (del "condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
 condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)

@@ -76,18 +76,18 @@ verifyBytecode = opDup # bytes [255] # opSwap # toTyped checkAll
         (s > TBytes > TBytes)
     check =
       begin
-        # (pick @"ops" # isNotEmpty)
+        # (pick "ops" # isNotEmpty)
         # opIf
           ( begin
-              # name2 @"op" @"ops'" (roll @"ops" # nat 1 # opSplit)
-              # (pick @"lastOp" # pick @"op" # verifyNotEqual)
+              # name2 "op" "ops'" (roll "ops" # nat 1 # opSplit)
+              # (pick "lastOp" # pick "op" # verifyNotEqual)
               # ( begin
-                    # (roll @"lastOp" # mul # opEqual)
-                    # opWhen (pick @"op" # add1 # verifyNotEqual)
+                    # (roll "lastOp" # mul # opEqual)
+                    # opWhen (pick "op" # add1 # verifyNotEqual)
                 )
-              # (roll @"op" # roll @"ops'")
+              # (roll "op" # roll "ops'")
           )
-          (roll @"lastOp" # roll @"ops")
+          (roll "lastOp" # roll "ops")
 
     mul = bytes [0x95]
 

@@ -10,11 +10,11 @@ data TTuple
 instance StackEntry TTuple
 
 tuple :: FN (s > TBytes > TBytes) (s > TTuple)
-tuple = unname @2 tuple'
+tuple = unname 2 tuple'
   where
     tuple' :: FN (s > N "fst" TBytes > N "snd" TBytes) (s > TTuple)
     tuple' =
-      roll @"fst" # opSize # box # opSwap # roll @"snd" # opCat # opCat # cast
+      roll "fst" # opSize # box # opSwap # roll "snd" # opCat # opCat # cast
       where
         box :: FN (s > TNat) (s > TBytes)
         box = natToInt # nat 2 # opNum2Bin
