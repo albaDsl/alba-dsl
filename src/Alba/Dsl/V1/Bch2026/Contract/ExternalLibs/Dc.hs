@@ -44,4 +44,4 @@ showCase = bytes "0341421300" # LZ.decompress # drop
 
 decompress :: FN (s > TBytes) (s > TBytes)
 decompress =
-  invokeExt lib (Standard "Alba.Dsl.V1.Bch2026.Contract.Lzss" 80 3 "decompress")
+  invokeExt lib (Standard "Alba.Dsl.V1.Bch2026.Contract.Lzss" 72 3 "decompress")

@@ -58,19 +58,11 @@ type TLen = TNat
 
 type TOff = TNat
 
-groupSize :: Natural
+groupSize, minMatchLen, lenBits, refLen :: Natural
 groupSize = 8
-
-minMatchLen :: Natural
 minMatchLen = 3
-
--- Number of bits used to store the match length in the reference.
-lengthBits :: Natural
-lengthBits = 4
-
--- Size in bytes of a reference.
-refLen :: Natural
-refLen = 2
+lenBits = 4 -- Number of bits used to store the match length in the ref.
+refLen = 2 -- Byte size of a reference.
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
@@ -150,7 +142,7 @@ testBit = opRShiftBin # bytes [0x01] # opAnd # opBin2Num # op0 # opEqual # opNot
 unpackRef :: FN (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
-    # (dup # toSigned # nat lengthBits # opRShiftNum # i2n # op1Add)
+    # (dup # toSigned # nat lenBits # opRShiftNum # i2n # op1Add)
     # (swap # nat 1 # opSplit # drop # bytes [0xf] # opAnd # opBin2Num # i2n)
     # (nat minMatchLen # opAdd)
   where
