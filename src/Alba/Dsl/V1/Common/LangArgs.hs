@@ -30,6 +30,7 @@ module Alba.Dsl.V1.Common.LangArgs
   )
 where
 
+import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (castStack)
 import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), type (:|))
@@ -45,6 +46,8 @@ import GHC.TypeLits
   )
 
 data N (n :: Symbol) (t :: Type)
+
+instance (StackEntry a) => StackEntry (N n a)
 
 -- ## "Name stack" (ns) functions.
 ns :: forall s x1. forall n1 -> FN (s > x1) (s > N n1 x1)
