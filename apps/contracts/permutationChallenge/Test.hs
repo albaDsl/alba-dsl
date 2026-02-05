@@ -19,7 +19,7 @@ import ContractApi (instantiate)
 import Crypto.Secp256k1 (Ctx)
 import Data.Either (isRight)
 import Data.Maybe (fromJust)
-import Spend (withdrawTx)
+import Spend (withdrawTx')
 import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 
@@ -31,12 +31,10 @@ contractTests ctx =
       [ testCase "Can withdraw" $ do
           let contractOutpoint = OutPoint mockTxId 0
               tx =
-                withdrawTx
+                withdrawTx'
                   ctx
+                  contractUtxo
                   contractOutpoint
-                  contractUtxo.value
-                  mockTxId
-                  mockTxId
                   mockAddr
               coins =
                 Dc.deployTx.outputs <> Vc.deployTx.outputs <> [contractUtxo]

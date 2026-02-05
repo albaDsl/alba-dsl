@@ -27,14 +27,10 @@ import Options.Applicative
     command,
     execParser,
     fullDesc,
-    help,
     helper,
     hsubparser,
     info,
-    long,
-    metavar,
     progDesc,
-    strOption,
   )
 
 newtype Opts = Opts {command :: Command}
@@ -58,9 +54,6 @@ data DeployOpts = DeployOpts
 
 data SpendOpts = SpendOpts
   { txId :: String,
-    utxoIndex :: Int,
-    dcTxId :: String,
-    vcTxId :: String,
     recipient :: String,
     sim :: Bool,
     showMetrics :: Bool,
@@ -98,7 +91,12 @@ wallet = Wallet . WalletOpts <$> mainNetSwitch
 
 deploy :: Parser Command
 deploy =
-  Deploy <$> (DeployOpts <$> mainNetSwitch <*> txOption <*> utxoIndexOption)
+  Deploy
+    <$> ( DeployOpts
+            <$> mainNetSwitch
+            <*> txOption
+            <*> utxoIndexOption
+        )
 
 spend :: Parser Command
 spend =
@@ -114,29 +112,10 @@ spend =
     spendOpts =
       SpendOpts
         <$> txOption
-        <*> utxoIndexOption
-        <*> vcTxOption
-        <*> dcTxOption
         <*> recipientOption
         <*> simSwitch
         <*> metricsSwitch
         <*> mainNetSwitch
-
-vcTxOption :: Parser String
-vcTxOption =
-  strOption
-    ( long "vcTx"
-        <> metavar "TxId"
-        <> help "VC lib TxId."
-    )
-
-dcTxOption :: Parser String
-dcTxOption =
-  strOption
-    ( long "dcTx"
-        <> metavar "TxId"
-        <> help "DC lib TxId."
-    )
 
 test :: Parser Command
 test = pure Test

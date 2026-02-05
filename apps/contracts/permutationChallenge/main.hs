@@ -2,7 +2,8 @@
 
 module Main (main) where
 
-import Alba.Misc.Cmd (showTx)
+import Alba.Misc.Bchn (postTx)
+import Alba.Misc.Cmd (askUser, showTx)
 import Alba.Misc.Haskoin
   ( Network,
     addrToText,
@@ -31,7 +32,6 @@ import Opts
     cmdOpts,
     execParser,
   )
-import Params (contractAmount, deployAmount)
 import Spend (withdrawTx)
 import System.Environment (withArgs)
 import Test (contractTests)
@@ -55,12 +55,10 @@ main' opts ctx =
               canNotHappen
               (addrToText c.net (pubKeyAddr ctx (wrapPubKey False pubKey)))
       printf
-        ( "\nFund the wallet with exactly %d satoshis. 10K will go to the\n"
-            <> "permutation challenge contract. Rest to library UTXOs and\n"
-            <> "fees. Addr: \n\n"
-            <> "%s\n\n"
+        ( "\nFund the wallet with 35,000 satoshis or more. This covers\n"
+            <> "library UTXOs and fees. Excess funds go to the permutation\n"
+            <> "contract. Addr:\n\n%s\n\n"
         )
-        deployAmount
         recvAddr
       pure ()
     Deploy (DeployOpts {..}) -> do
@@ -68,16 +66,25 @@ main' opts ctx =
       let outPoint = OutPoint (fromString txId) (fromIntegral utxoIndex)
       tx <- deployTx ctx c.net outPoint
       showTx tx
+      txId' <-
+        askUser "Deploy the contract using this transaction?" >>= \case
+          True -> postTx c.net tx
+          False -> pure $ Left "Aborted."
+      either print print txId'
+      pure ()
     Spend (Withdraw (SpendOpts {..})) -> do
       c <- cmdContext ctx mainNet
       let recvAddr = case textToAddr c.net (pack recipient) of
             Just x -> x
             Nothing -> error "Invalid recipient."
-          outPoint = OutPoint (fromString txId) (fromIntegral utxoIndex)
-          dcTxId' = fromString dcTxId
-          vcTxId' = fromString vcTxId
-          tx = withdrawTx ctx outPoint contractAmount dcTxId' vcTxId' recvAddr
+      tx <- withdrawTx ctx c.net (fromString txId) recvAddr
       showTx tx
+      txId' <-
+        askUser "Spend the contract funds using this transaction?" >>= \case
+          True -> postTx c.net tx
+          False -> pure $ Left "Aborted."
+      either print print txId'
+      pure ()
     Test -> withArgs [] $ contractTests ctx
   where
     err = error "Failed to load keys."

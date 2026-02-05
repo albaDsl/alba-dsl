@@ -5,6 +5,10 @@ module Alba.Misc.Cmd
     barcodeShowInTerminal,
     showTx,
     runInVm,
+    askUser,
+    cmdConfig,
+    CmdConfig (..),
+    BchnConfig (..),
   )
 where
 
@@ -25,10 +29,30 @@ import Data.Maybe (fromMaybe, isJust)
 import Data.Text (Text, pack)
 import Data.Text.Encoding qualified as T
 import Data.Word (Word64)
+import Dhall (FromDhall, auto, input)
+import GHC.Generics (Generic)
+import System.IO (hFlush, stdout)
 import Text.Pretty.Simple (pPrintLightBg)
 import Text.Printf (printf)
 import Turtle.Bytes (shell)
 import Turtle.Prelude (which)
+
+data CmdConfig = CmdConfig
+  { mainnet :: BchnConfig,
+    chipnet :: BchnConfig
+  }
+  deriving (Generic, Show)
+
+data BchnConfig = BchnConfig
+  { url :: Text,
+    user :: Text,
+    password :: Text
+  }
+  deriving (Generic, Show)
+
+instance FromDhall BchnConfig
+
+instance FromDhall CmdConfig
 
 deployMsg :: Word64 -> Text -> Maybe Int -> IO ()
 deployMsg amount address size = do
@@ -68,3 +92,12 @@ runInVm displayOpts utxo tx = do
   dumpVerifyScriptResult
     displayOpts
     (verifyScript utxo.scriptPubKey context vmParamsStandard)
+
+askUser :: String -> IO Bool
+askUser msg = do
+  printf "%s [yes/no]? " msg
+  hFlush stdout
+  getLine >>= \res -> pure $ res == ("yes" :: String)
+
+cmdConfig :: IO CmdConfig
+cmdConfig = input auto "~/.alba/cmd.dhall"

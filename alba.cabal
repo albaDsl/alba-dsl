@@ -49,6 +49,7 @@ common shared-properties
       bytestring,
       containers,
       crypton,
+      dhall,
       directory,
       entropy,
       file-embed,
@@ -58,6 +59,7 @@ common shared-properties
       haskoin-core-bch-lite,
       here,
       -- liquidhaskell == 0.9.8.2, -- Disable for now.
+      http-conduit,
       bchn-secp256k1,
       memory,
       microlens,
@@ -139,6 +141,7 @@ library
       Alba.Dsl.V1.Common.ThUtils,
       Alba.Dsl.V1.Common.TypeFamilies,
       Alba.Dsl.V1.Common.Version,
+      Alba.Misc.Bchn,
       Alba.Misc.Cmd,
       Alba.Misc.Debug,
       Alba.Misc.Haskoin,

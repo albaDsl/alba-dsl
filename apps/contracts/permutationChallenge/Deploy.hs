@@ -10,7 +10,6 @@ import Alba.Dsl.V1.Bch2025
     TSig,
     bytes',
     compile,
-    outputScript,
     setScriptSig,
     signAll,
     (#),
@@ -18,52 +17,49 @@ import Alba.Dsl.V1.Bch2025
   )
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
-import Alba.Misc.Haskoin (Network, marshal, pubKeyAddr, wrapPubKey)
+import Alba.Misc.Bchn (getTx)
+import Alba.Misc.Haskoin (Network, marshal, wrapPubKey)
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.Wallet (getWallet)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
 import ContractApi (instantiate)
-import Crypto.Secp256k1 (Ctx, PubKey)
+import Crypto.Secp256k1 (Ctx)
 import Data.Maybe (fromMaybe)
-import Params (contractAmount, deployAmount)
+import Data.Word (Word64)
+import Params (deployFee)
 
 -- outpoint: Points at the UTXO holding funds under alice's key.
 deployTx :: Ctx -> Network -> OutPoint -> IO Tx
 deployTx ctx net outpoint = do
-  alice@KeyPair {..} <- fromMaybe err <$> getWallet net "alice"
-  let tx = txTemplate outpoint
-      utxo = fundsSource pubKey
+  alice <- fromMaybe err1 <$> getWallet net "alice"
+  walletTx <- either err2 id <$> getTx net outpoint.txId
+  let utxo = walletTx.outputs !! (fromIntegral outpoint.index)
+      tx = txTemplate outpoint utxo.value
       pubKey' = marshal ctx (wrapPubKey False alice.pubKey)
       sig = marshal ctx (signAll ctx tx utxo.scriptPubKey utxo 0 alice.secKey)
   pure $ setScriptSig 0 (compile None (scriptSig sig pubKey')) tx
   where
-    err = error "Failed to load keys."
+    err1 = error "Failed to load keys."
 
-    fundsSource :: PubKey -> TxOut
-    fundsSource pubKey = do
-      let recvAddr = pubKeyAddr ctx (wrapPubKey False pubKey)
-      TxOut
-        { value = deployAmount,
-          scriptPubKey = outputScript recvAddr,
-          tokenData = Nothing
-        }
+    err2 = error "Couldn't load wallet funding Tx."
 
     scriptSig :: Bytes -> Bytes -> FN s (s > TPubKey > TSig)
     scriptSig pubKey sig = bytes' pubKey # bytes' sig
 
-txTemplate :: OutPoint -> Tx
-txTemplate outpoint =
-  Tx
-    { version = 2,
-      inputs = [TxIn {prevout = outpoint, scriptSig = [], sequence = 0}],
-      outputs =
-        Dc.deployTx.outputs
-          <> Vc.deployTx.outputs
-          <> [ TxOut
-                 { value = contractAmount,
-                   scriptPubKey = instantiate,
-                   tokenData = Nothing
-                 }
-             ],
-      lockTime = 0
-    }
+txTemplate :: OutPoint -> Word64 -> Tx
+txTemplate outpoint walletAmount =
+  let libOutputs = Dc.deployTx.outputs <> Vc.deployTx.outputs
+      contractAmount = walletAmount - sum ((.value) <$> libOutputs) - deployFee
+   in Tx
+        { version = 2,
+          inputs = [TxIn {prevout = outpoint, scriptSig = [], sequence = 0}],
+          outputs =
+            libOutputs
+              <> [ TxOut
+                     { value = contractAmount,
+                       scriptPubKey = instantiate,
+                       tokenData = Nothing
+                     }
+                 ],
+          lockTime = 0
+        }
