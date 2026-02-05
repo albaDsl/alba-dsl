@@ -19,7 +19,6 @@ import Alba.Dsl.V1.Bch2026
     name2,
     nat,
     ns3,
-    ns4,
     ns6,
     op0,
     op1Add,
@@ -32,6 +31,7 @@ import Alba.Dsl.V1.Bch2026
     opGreaterThanOrEqual,
     opIf,
     opNot,
+    opNumEqual,
     opRShiftBin,
     opRShiftNum,
     opSize,
@@ -43,12 +43,12 @@ import Alba.Dsl.V1.Bch2026
     opWhen,
     pick,
     roll,
-    un4,
+    un3,
     un6,
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, swap)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
 import Numeric.Natural (Natural)
 import Prelude ()
 
@@ -109,22 +109,18 @@ decompressLoop =
 copyFromBack :: FN (s > TBytes > TNat > TNat) (s > TBytes)
 copyFromBack =
   begin
-    # ns3 "out" "off" "len"
-    # name2 "out'" "start" (roll "out" # opSize # roll "off" # opSubUnsafe)
-    # (roll "start" # roll "len" # nat 0 # roll "out'")
-    # (opUntil loop # nip # nip # nip)
+    # (ns3 "bs" "off" "len" # roll "bs" # opSize # roll "off" # opSubUnsafe)
+    # (dup # roll "len" # opAdd # rot # opUntil loop # nip # nip)
   where
-    loop :: Loop (s > TNat > TNat > TNat > TBytes) -- start len j acc
+    loop :: Loop (s > TNat > TNat > TBytes) -- start end acc
     loop =
       begin
-        # ns4 "start" "len" "j" "acc"
-        # (pick "j" # pick "len" # opGreaterThanOrEqual)
+        # (ns3 "i" "end" "acc" # pick "i" # pick "end" # opNumEqual)
         # opIf
-          (un4 "start" "len" "j" "acc" # opTrue)
+          (un3 "i" "end" "acc" # opTrue)
           ( begin
-              # (pick "start" # roll "len" # pick "j" # op1Add)
-              # (roll "acc" # dup # roll "start" # roll "j" # opAdd)
-              # (index # opCat # opFalse)
+              # (pick "i" # op1Add # roll "end")
+              # (roll "acc" # dup # roll "i" # index # opCat # opFalse)
           )
 
 index :: FN (s > TBytes > TNat) (s > TBytes)
