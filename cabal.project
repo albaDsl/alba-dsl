@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-import: ./lts-23.28.config
+import: ./lts-24.29.config
 packages: alba.cabal bchn-secp256k1
 
 jobs: $ncpus
@@ -13,4 +13,4 @@ package *
 source-repository-package
     type: git
     location: https://github.com/albaDsl/haskoin-core-bch-lite.git
-    tag: 545422ad587a7dd37ad17062ecac4dec4315a047
+    tag: bd91417437636190803f6458755880b4969e2abe

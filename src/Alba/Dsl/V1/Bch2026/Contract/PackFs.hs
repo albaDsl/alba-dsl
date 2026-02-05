@@ -41,7 +41,7 @@ import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Data.Kind (Type)
 import GHC.TypeLits (KnownNat)
 import Numeric.Natural (Natural)
-import Prelude (Maybe (..))
+import Prelude (Maybe (..), type (~))
 
 data TPackFs (t :: Type)
 
