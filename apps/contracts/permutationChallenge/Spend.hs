@@ -6,7 +6,7 @@ import Alba.Dsl.V1.Bch2025.TxDsl (outputScript, setScriptSig)
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.TxDsl (libraryInputs)
-import Alba.Dsl.V1.Common.Lzss (compress)
+import Alba.Dsl.V1.Common.LzssBit (compress)
 import Alba.Misc.Bchn (getTx)
 import Alba.Misc.Haskoin (Address, Network)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxId, TxIn (..), TxOut (..))
@@ -20,7 +20,7 @@ import Params (spendFee)
 withdrawTx :: Ctx -> Network -> TxId -> Address -> IO Tx
 withdrawTx ctx net txId recvAddr = do
   deployTx <- either err id <$> getTx net txId
-  let contractUtxoIndex = 10 :: Int
+  let contractUtxoIndex = 9 :: Int
       contractUtxo = deployTx.outputs !! contractUtxoIndex
       outpoint = OutPoint txId (fromIntegral contractUtxoIndex)
   pure $ withdrawTx' ctx contractUtxo outpoint recvAddr

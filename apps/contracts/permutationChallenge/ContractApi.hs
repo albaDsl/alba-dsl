@@ -20,4 +20,4 @@ instantiate =
 withdraw :: Ctx -> Bytes -> CodeL1
 withdraw _ctx solution = compile None (bytes solution # bytes filler)
   where
-    filler = B.replicate 7500 0
+    filler = B.replicate 7000 0
