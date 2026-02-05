@@ -39,6 +39,14 @@ progBasic =
     # (int 0b101 # nat 1 # opRShiftNum # int 0b10 # opEqualVerify)
     # (int 0b101 # nat 1 # opLShiftNum # int 0b1010 # opEqualVerify)
     # (int 0b101 # nat 10 # opRShiftNum # int 0 # opEqualVerify)
+    # ( begin
+          # (int 0b111111110000000010000011 # nat 1 # opRShiftNum)
+          # (int 0b11111111000000001000001 # opEqualVerify)
+      )
+    # ( begin
+          # (int (-0b11111111_00000000_10000011) # nat 1 # opRShiftNum)
+          # (int (-0b1111111_10000000_01000010) # opEqualVerify)
+      )
     # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opEqualVerify)
     # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opEqualVerify)
     # (bytes [0b0000_0101] # opInvert # bytes [0b1111_1010] # opEqualVerify)
@@ -63,6 +71,23 @@ progBasic =
           # (nat 1 # opRShiftBin)
           # bytes [0b0000_0000, 0b1100_0000]
           # opEqualVerify
+      )
+    # ( begin
+          # (bytes [0b0000_0001, 0b0000_0011] # cast)
+          # (nat 1 # opRShiftNum # cast)
+          # bytes [0b1000_0000, 0b0000_0001]
+          # opEqualVerify
+          # (bytes [0b0000_0001, 0b0000_0001] # cast)
+          # (nat 1 # opRShiftNum # cast)
+          # bytes [0b1000_0000, 0b0000_0000]
+          # opEqualVerify
+          # (bytes [0b1000_0000, 0b0000_0000] # cast)
+          # (nat 1 # opRShiftNum # cast)
+          # bytes [0b0100_0000]
+          # opEqualVerify
+          # (bytes [0b1000_0011, 0b0000_0000, 0b1111_1111] # cast)
+          # (nat 1 # opRShiftNum # cast)
+          # (bytes [0b0100_0010, 0b1000_0000, 0b1011_1111] # opEqualVerify)
       )
     # opTrue
   where
