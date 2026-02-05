@@ -4,6 +4,7 @@ module TestUtils2026
   ( evaluateProg,
     evaluateProgWithStack,
     evaluateScript,
+    emptyStacks,
     isTrue,
     isTrue',
     isErr,
@@ -27,6 +28,7 @@ import Alba.Vm.Common
     VmStack,
     VmState (..),
   )
+import Data.Sequence (Seq)
 import Data.Sequence qualified as S
 import TestUtils
   ( TestResult (..),
@@ -43,7 +45,10 @@ import TestUtils
 evaluateProg ::
   FNA s '[] s' alt' ->
   Either (ScriptError, Maybe TestResult) TestResult
-evaluateProg prog = evaluateProgWithStack prog (S.empty, S.empty)
+evaluateProg prog = evaluateProgWithStack prog emptyStacks
+
+emptyStacks :: (Seq a1, Seq a2)
+emptyStacks = (S.empty, S.empty)
 
 evaluateProgWithStack ::
   FNA s '[] s' alt' ->

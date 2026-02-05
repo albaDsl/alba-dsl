@@ -29,8 +29,8 @@ import Numeric.Natural (Natural)
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
-import TestUtils (TestResult (..), showLog)
-import TestUtils2026 (evaluateProg)
+import TestUtils (TestResult (..), minimalContext, showLog)
+import TestUtils2026 (emptyStacks, evaluateProg, evaluateScript)
 import Prelude hiding (foldl, reverse, zipWith)
 
 testCodeMetrics :: TestTree
@@ -74,10 +74,10 @@ testCodeMetrics =
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            costOf windowedMul @?= 33_534_819,
-          testCase "Vector ops" $ costOf vectorOps @?= 18_577_985,
-          testCase "LZSS" $ costOf decompressTest @?= 20_140_960,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 12_948_025
+            costOf windowedMul @?= 32_715_291,
+          testCase "Vector ops" $ costOf vectorOps @?= 17_942_123,
+          testCase "LZSS" $ costOf decompressTest @?= 19_926_886,
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 12_700_639
         ]
     ]
 
@@ -90,17 +90,17 @@ ratio prog = compressibilityStr (fst $ compileL2 O1 prog)
 
 costOf :: forall s s' alt'. FNA s '[] s' alt' -> Int
 costOf prog =
-  case evaluateProg prog of
-    Right tr ->
-      -- unsafePerformIO $ do
-      --   ML.dumpLogToFile tr.compilationResult tr.logData "log.html"
-      --   case tr.compilationResult of
-      --     Just r -> writeFunctionTable r.code r.functionTable
-      --     Nothing -> pure ()
-      --   pure tr.metrics.cost
-      tr.metrics.cost
-    Left (err, Just tr) -> showLog tr (error ("costOf: " <> show err))
-    Left (err, Nothing) -> error ("costOf: " <> show err)
+  let cr = compile' O1 prog
+      res = evaluateScript cr.code emptyStacks minimalContext
+   in case res of
+        Right tr ->
+          unsafePerformIO $
+            do
+              -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
+              -- writeFunctionTable cr.code cr.functionTable
+              pure tr.metrics.cost
+        Left (err, Just tr) -> showLog tr (error ("costOf: " <> show err))
+        Left (err, Nothing) -> error ("costOf: " <> show err)
 
 windowedMul :: FN s s
 windowedMul =
