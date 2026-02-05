@@ -15,7 +15,7 @@ module Alba.Dsl.V1.Common.Compile
   )
 where
 
-import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as OR
+import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as CS
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
@@ -43,17 +43,14 @@ import Alba.Dsl.V1.Common.OpcodeL3
     isRtConstant,
     vmFunctionIdToByteString,
   )
+import Alba.Dsl.V1.Common.OptimizerRules qualified as OR
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 import Alba.Dsl.V1.Common.Stack (S (..))
 import Alba.Misc.Utils (encodeHex)
 import Alba.Vm.Bch2026 qualified as Bch2026
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL1 (CodeL1)
-import Alba.Vm.Common.OpcodeL2
-  ( CodeL2,
-    OpcodeL2 (..),
-    codeL2ToCodeL1,
-  )
+import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Alba.Vm.Common.VmState qualified as VmState
 import Control.Arrow ((>>>))
 import Control.Monad.State.Lazy (State, get, put, runState)
@@ -287,7 +284,13 @@ pass2 opts fs code = fromMaybe err (mapM (f fs) code)
     err = error "compile: internal error."
 
 optimize :: CodeL2 -> CodeL2
-optimize = fix (\f c -> let c' = OR.optimize c in if c' == c then c else f c')
+optimize =
+  fix
+    ( \f c ->
+        let c1 = CS.optimize c
+            c2 = OR.optimize c1
+         in if c2 == c then c else f c2
+    )
 
 writeFunctionTable :: CodeL1 -> FSR.FunctionTable -> IO ()
 writeFunctionTable code functions = do

@@ -51,7 +51,7 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
             sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "202 opcodes, 876 bytes.",
+            sizeOf vectorOps @?= "202 opcodes, 875 bytes.",
           testCase "LZSS" $ sizeOf decompress @?= "8 opcodes, 194 bytes."
         ],
       testGroup
@@ -65,14 +65,14 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
           testCase "Vector ops" $
-            ratio vectorOps @?= "876 byte to 731 bytes (saving 16.6%)"
+            ratio vectorOps @?= "875 byte to 730 bytes (saving 16.6%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 33_534_819,
           testCase "Vector ops" $ costOf vectorOps @?= 18_577_985,
-          testCase "LZSS" $ costOf decompressTest @?= 22_164_026
+          testCase "LZSS" $ costOf decompressTest @?= 22_104_866
         ]
     ]
 

@@ -117,6 +117,7 @@ library
       Alba.Dsl.V1.Bch2026.TxDsl,
       Alba.Dsl.V1.Bch2026.Stack,
       Alba.Dsl.V1.Common,
+      Alba.Dsl.V1.Common.OptimizerRules,
       Alba.Dsl.V1.Common.CashScriptOptimizerRules,
       Alba.Dsl.V1.Common.Compile,
       Alba.Dsl.V1.Common.CompilerUtils,
