@@ -21,11 +21,10 @@ import Alba.Dsl.V1.Bch2026
     opAnd,
     opBin2Num,
     opCat,
-    opEqual,
     opFalse,
-    opGreaterThanOrEqual,
     opIf,
     opLessThanOrEqual,
+    opMod,
     opNumEqual,
     opRShiftNum,
     opSize,
@@ -70,7 +69,7 @@ offBias = 1 -- Bias to add to the offset field.
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
--- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 111 bytes.\n"
+-- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 100 bytes.\n"
 decompress :: FN (s > TBytes) (s > TBytes)
 decompress = function (pad # bytes [] # opUntil decompressLoop # nip)
   where
@@ -83,28 +82,22 @@ decompressLoop =
     # (swap # opSize # nat padLen # opLessThanOrEqual)
     # opIf
       (swap # opTrue)
-      ( begin -- bs at least one byte.
+      ( begin
           # ns2 Acc Bs
-          # (pick Bs # lowBitSet # roll Bs # shiftLWithDropOff # swap)
-          # opIf -- flag set.
+          # (pick Bs # lowBitSet # roll Bs # dropLowBit # swap)
+          # opIf
             (getBits8 # roll Acc # rot # opCat # opFalse)
-            ( begin -- flag not set.
-                # (opSize # nat 1 # opGreaterThanOrEqual)
-                # opIf
-                  ( begin
-                      # (getBits16 # swap # unpackRef) -- <acc> bs off len
-                      # (roll Acc # rot # rot # copyFromBack # opFalse)
-                  )
-                  (roll Acc # opTrue)
+            ( begin
+                # (getBits16 # swap # unpackRef) -- <acc> bs off len
+                # (roll Acc # rot # rot # copyFromBack # opFalse)
             )
       )
   where
     lowBitSet :: FN (s > TBytes) (s > TBool)
-    lowBitSet =
-      nat 1 # opSplit # drop # bytes [0x1] # opAnd # bytes [0x1] # opEqual
+    lowBitSet = cast # nat 2 # opMod # nat 1 # opNumEqual
 
-    shiftLWithDropOff :: FN (s > TBytes) (s > TBytes)
-    shiftLWithDropOff = cast # nat 1 # opRShiftNum # cast
+    dropLowBit :: FN (s > TBytes) (s > TBytes)
+    dropLowBit = cast # nat 1 # opRShiftNum # cast
 
     getBits8 :: FN (s > TBytes) (s > TBytes > TBytes)
     getBits8 = nat 1 # opSplit
