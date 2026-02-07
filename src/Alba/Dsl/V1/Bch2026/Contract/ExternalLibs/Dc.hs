@@ -46,4 +46,4 @@ decompress :: FN (s > TBytes) (s > TBytes)
 decompress =
   invokeExt
     lib
-    (Standard "Alba.Dsl.V1.Bch2026.Contract.LzssBit" 74 14 "decompress")
+    (Standard "Alba.Dsl.V1.Bch2026.Contract.LzssBit" 75 14 "decompress")

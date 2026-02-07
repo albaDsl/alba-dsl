@@ -56,7 +56,7 @@ testCodeMetrics =
             sizeOf vectorOps @?= "202 opcodes, 875 bytes.",
           testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 188 bytes.",
           testCase "LZSS Bitstream" $
-            sizeOf CLZB.decompress @?= "5 opcodes, 100 bytes."
+            sizeOf CLZB.decompress @?= "5 opcodes, 92 bytes."
         ],
       testGroup
         "Code Compressibility"
@@ -77,7 +77,7 @@ testCodeMetrics =
             costOf windowedMul @?= 32_715_291,
           testCase "Vector ops" $ costOf vectorOps @?= 17_942_123,
           testCase "LZSS" $ costOf decompressTest @?= 19_926_886,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 12_019_780
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_051_421
         ]
     ]
 

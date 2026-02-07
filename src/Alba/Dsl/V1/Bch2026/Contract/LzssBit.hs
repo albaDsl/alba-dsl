@@ -17,6 +17,7 @@ import Alba.Dsl.V1.Bch2026
     ns2,
     ns3,
     op1Add,
+    op2Drop,
     opAdd,
     opAnd,
     opBin2Num,
@@ -69,28 +70,29 @@ offBias = 1 -- Bias to add to the offset field.
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
--- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 100 bytes.\n"
+-- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 92 bytes.\n"
 decompress :: FN (s > TBytes) (s > TBytes)
-decompress = function (pad # bytes [] # opUntil decompressLoop # nip)
+decompress = function (bytes [] # swap # pad # opUntil decompressLoop # drop)
   where
     -- Keeps the bytestring positive (when viewed as a number).
     pad = bytes [0xff, 0x00] # opCat
 
-decompressLoop :: Loop (s > TBytes > TBytes) -- bs acc
+decompressLoop :: Loop (s > TBytes > TBytes) -- acc bs
 decompressLoop =
   begin
-    # (swap # opSize # nat padLen # opLessThanOrEqual)
+    # (opSize # nat padLen # opLessThanOrEqual)
     # opIf
-      (swap # opTrue)
+      opTrue
       ( begin
           # ns2 Acc Bs
-          # (pick Bs # lowBitSet # roll Bs # dropLowBit # swap)
+          # (pick Bs # dropLowBit # roll Bs # lowBitSet)
           # opIf
-            (getBits8 # roll Acc # rot # opCat # opFalse)
+            (getBits8 # roll Acc # rot # opCat)
             ( begin
                 # (getBits16 # swap # unpackRef) -- <acc> bs off len
-                # (roll Acc # rot # rot # copyFromBack # opFalse)
+                # (roll Acc # rot # rot # copyFromBack)
             )
+          # (swap # opFalse)
       )
   where
     lowBitSet :: FN (s > TBytes) (s > TBool)
@@ -127,17 +129,17 @@ copyFromBack :: FN (s > TBytes > TNat > TNat) (s > TBytes) -- bs off len
 copyFromBack =
   begin
     # (ns3 Bs Off Len # roll Bs # opSize # roll Off # opSubUnsafe)
-    # (dup # roll Len # opAdd # rot # opUntil loop # nip # nip)
+    # (dup # roll Len # opAdd # opUntil loop # op2Drop)
   where
-    loop :: Loop (s > TNat > TNat > TBytes) -- start end acc
+    loop :: Loop (s > TBytes > TNat > TNat) -- acc start end
     loop =
       begin
-        # (ns3 I End Acc # pick I # pick End # opNumEqual)
+        # (ns3 Acc I End # pick I # pick End # opNumEqual)
         # opIf
-          (un3 I End Acc # opTrue)
+          (un3 Acc I End # opTrue)
           ( begin
-              # (pick I # op1Add # roll End)
-              # (roll Acc # dup # roll I # index # opCat # opFalse)
+              # (roll Acc # dup # pick I # index # opCat)
+              # (roll I # op1Add # roll End # opFalse)
           )
 
     index :: FN (s > TBytes > TNat) (s > TBytes)
