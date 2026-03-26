@@ -229,158 +229,169 @@ progSlicing =
 
 progConstruction :: FN s (s > TBool)
 progConstruction =
-  begin
-    # ( begin
-          # (nat 3 # int64 1 # V.replicate)
-          # (int64 1 # int64 1 # int64 1 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (nat 0 # int64 1 # V.replicate)
-          # V.empty
-          # opEqualVerify
-      )
-    # ( begin
-          # (nat 3 # lambda1 (op1Add # cast) # V.generate)
-          # (int64 1 # int64 2 # int64 3 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (nat 3 # lambda1 (int8 2 # mulInt8) # int8 2 # V.iterateN)
-          # (int8 2 # int8 4 # int8 8 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (nat 3 # int64 1 # V.replicate)
+              # (int64 1 # int64 1 # int64 1 # V.empty)
+              # (V.cons # V.cons # V.cons # opEqualVerify)
+          )
+        # ( begin
+              # (nat 0 # int64 1 # V.replicate)
+              # V.empty
+              # opEqualVerify
+          )
+        # ( begin
+              # (nat 3 # lambda1 (op1Add # cast) # V.generate)
+              # (int64 1 # int64 2 # int64 3 # V.empty)
+              # (V.cons # V.cons # V.cons # opEqualVerify)
+          )
+        # ( begin
+              # (nat 3 # lambda1 (int8 2 # mulInt8) # int8 2 # V.iterateN)
+              # (int8 2 # int8 4 # int8 8 # V.empty)
+              # (V.cons # V.cons # V.cons # opEqualVerify)
+          )
+        # opTrue
+    )
 
 progConcatenation :: FN s (s > TBool)
 progConcatenation =
-  begin
-    # ( begin
-          # (nat 3 # lambda1 (op1Add # cast) # V.generate)
-          # (int64 1 # V.empty # V.cons # int64 2 # V.snoc # int64 3 # V.snoc)
-          # opEqualVerify
-      )
-    # ( begin
-          # ( (nat 3 # lambda1 (op1Add # cast) # V.generate) ::
-                FN s (s > V.TVector TInt64)
-            )
-          # ( (nat 3 # lambda1 (id # cast) # V.generate) ::
-                FN s (s > V.TVector TInt64)
-            )
-          # V.append
-          # ( begin
-                # (int64 1 # int64 2 # int64 3 # int64 0 # int64 1 # int64 2)
-                # (V.empty # V.cons # V.cons # V.cons # V.cons # V.cons)
-                # V.cons
-            )
-          # opEqualVerify
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (nat 3 # lambda1 (op1Add # cast) # V.generate)
+              # (int64 1 # V.empty # V.cons # int64 2 # V.snoc # int64 3)
+              # (V.snoc # opEqualVerify)
+          )
+        # ( begin
+              # ( (nat 3 # lambda1 (op1Add # cast) # V.generate) ::
+                    ENV s (s > V.TVector TInt64)
+                )
+              # ( (nat 3 # lambda1 (id # cast) # V.generate) ::
+                    ENV s (s > V.TVector TInt64)
+                )
+              # V.append
+              # ( begin
+                    # (int64 1 # int64 2 # int64 3 # int64 0 # int64 1)
+                    # (int64 2 # V.empty # V.cons # V.cons # V.cons # V.cons)
+                    # (V.cons # V.cons)
+                )
+              # opEqualVerify
+          )
+        # opTrue
+    )
 
 progPermutation :: FN s (s > TBool)
 progPermutation =
-  begin
-    # ( begin
-          # (int8Vector # V.reverse)
-          # (int8 2 # int8 1 # int8 0 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (int64Vector # V.reverse)
-          # (int64 2 # int64 1 # int64 0 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (bytes128Vector # V.reverse)
-          # (bytes128 b2 # bytes128 b1 # bytes128 b0 # V.empty)
-          # (V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (int8Vector # V.reverse)
+              # (int8 2 # int8 1 # int8 0 # V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # (int64Vector # V.reverse)
+              # (int64 2 # int64 1 # int64 0 # V.empty)
+              # (V.cons # V.cons # V.cons # opEqualVerify)
+          )
+        # ( begin
+              # (bytes128Vector # V.reverse)
+              # (bytes128 b2 # bytes128 b1 # bytes128 b0 # V.empty)
+              # (V.cons # V.cons # V.cons # opEqualVerify)
+          )
+        # opTrue
+    )
 
 progMapping :: FN s (s > TBool)
 progMapping =
-  begin
-    # ( begin
-          # (lambda1 (int8 2 # mulInt8) # int8Vector # V.map)
-          # (int8 0 # int8 2 # int8 4 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (lambda1 (int64 2 # mulInt64) # int64Vector # V.map)
-          # (int64 0 # int64 2 # int64 4 # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (lambda1 addExclamation # bytes128Vector # V.map)
-          # (bytes128 (b0 <> "!") # bytes128 (b1 <> "!"))
-          # (bytes128 (b2 <> "!") # V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (lambda1 int8to64 # int8Vector # V.map)
-          # (int64Vector # opEqualVerify)
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (lambda1 (int8 2 # mulInt8) # int8Vector # V.map)
+              # (int8 0 # int8 2 # int8 4 # V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # (lambda1 (int64 2 # mulInt64) # int64Vector # V.map)
+              # (int64 0 # int64 2 # int64 4 # V.empty # V.cons # V.cons)
+              # (V.cons # opEqualVerify)
+          )
+        # ( begin
+              # (lambda1 addExclamation # bytes128Vector # V.map)
+              # (bytes128 (b0 <> "!") # bytes128 (b1 <> "!"))
+              # (bytes128 (b2 <> "!") # V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # (lambda1 int8to64 # int8Vector # V.map)
+              # (int64Vector # opEqualVerify)
+          )
+        # opTrue
+    )
   where
     int8to64 :: FN (s > TInt8) (s > TInt64)
     int8to64 = cast
 
 progZipping :: FN s (s > TBool)
 progZipping =
-  begin
-    # ( begin
-          # (int64Vector # int8Vector # V.zip)
-          # (int64 0 # int8 0 # TFS.tuple)
-          # (int64 1 # int8 1 # TFS.tuple)
-          # (int64 2 # int8 2 # TFS.tuple)
-          # (V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (int64Vector # bytes128Vector # V.zip)
-          # (int64 0 # bytes128 b0 # TFS.tuple)
-          # (int64 1 # bytes128 b1 # TFS.tuple)
-          # (int64 2 # bytes128 b2 # TFS.tuple)
-          # (V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # lambda2 (packFs @TInt64 # packFs @TInt8 # op2Swap # TFS.tupleF)
-          # (int64Vector # int8Vector # V.zipWith)
-          # (int64 0 # int8 0 # TFS.tuple)
-          # (int64 1 # int8 1 # TFS.tuple)
-          # (int64 2 # int8 2 # TFS.tuple)
-          # (V.empty # V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # ( begin
-          # (int64Vector # int8Vector # V.zip)
-          # V.unzip
-          # (int8Vector # opEqualVerify)
-          # (int64Vector # opEqualVerify)
-      )
-    # ( begin
-          # lambda2 addInt64
-          # int64Vector
-          # (opDup # lambda1 (int64 1 # addInt64) # opSwap # V.map)
-          # V.zipWith
-          # (int64 1 # int64 3 # int64 5 # V.empty)
-          # (V.cons # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (int64Vector # int8Vector # V.zip)
+              # (int64 0 # int8 0 # TFS.tuple)
+              # (int64 1 # int8 1 # TFS.tuple)
+              # (int64 2 # int8 2 # TFS.tuple)
+              # (V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # (int64Vector # bytes128Vector # V.zip)
+              # (int64 0 # bytes128 b0 # TFS.tuple)
+              # (int64 1 # bytes128 b1 # TFS.tuple)
+              # (int64 2 # bytes128 b2 # TFS.tuple)
+              # (V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # lambda2 (packFs @TInt64 # packFs @TInt8 # op2Swap # TFS.tupleF)
+              # (int64Vector # int8Vector # V.zipWith)
+              # (int64 0 # int8 0 # TFS.tuple)
+              # (int64 1 # int8 1 # TFS.tuple)
+              # (int64 2 # int8 2 # TFS.tuple)
+              # (V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # ( begin
+              # (int64Vector # int8Vector # V.zip)
+              # V.unzip
+              # (int8Vector # opEqualVerify)
+              # (int64Vector # opEqualVerify)
+          )
+        # ( begin
+              # lambda2 addInt64
+              # int64Vector
+              # (opDup # lambda1 (int64 1 # addInt64) # opSwap # V.map)
+              # V.zipWith
+              # (int64 1 # int64 3 # int64 5 # V.empty)
+              # (V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # opTrue
+    )
 
 progFiltering :: FN s (s > TBool)
 progFiltering =
-  begin
-    # ( begin
-          # (nat 10 # lambda1 (op1Add # cast) # V.generate)
-          # (lambda1 (int8 3 # int8LessThan) # opSwap # V.filter)
-          # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
-          # opEqualVerify
-      )
-    # opTrue
+  runEnv
+    ( begin
+        # ( begin
+              # (nat 10 # lambda1 (op1Add # cast) # V.generate)
+              # (lambda1 (int8 3 # int8LessThan) # opSwap # V.filter)
+              # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # opTrue
+    )
   where
     int8LessThan :: FN (s > TInt8 > TInt8) (s > TBool)
     int8LessThan = fixup # opLessThan
@@ -400,7 +411,8 @@ propReverse (BytesSize size) =
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
     prog :: Natural -> FN s (s > TBool)
-    prog len' = testVector len' # opDup # V.reverse # V.reverse # opEqual
+    prog len' =
+      runEnv (testVector len' # opDup # V.reverse # V.reverse # opEqual)
 
     overhead :: Integer
     overhead = 10
@@ -411,7 +423,7 @@ propLength (BytesSize size) =
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
     prog :: Natural -> FN s (s > TBool)
-    prog len' = nat len' # testVector len' # V.length # opEqual
+    prog len' = runEnv (nat len' # testVector len' # V.length # opEqual)
 
 propLookup :: BytesSize -> BytesSize -> Property
 propLookup (BytesSize size1) (BytesSize size2) =
@@ -422,9 +434,11 @@ propLookup (BytesSize size1) (BytesSize size2) =
   where
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len' idx' =
-      begin
-        # (testVector len' # nat idx' # V.lookup)
-        # (int64 (fromIntegral idx') # just # opEqual)
+      runEnv
+        ( begin
+            # (testVector len' # nat idx' # V.lookup)
+            # (int64 (fromIntegral idx') # just # opEqual)
+        )
 
 propConsSnocAppend :: BytesSize -> Bool
 propConsSnocAppend (BytesSize size) =
@@ -433,12 +447,14 @@ propConsSnocAppend (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # name "vec" (testVector len')
-        # (int64 1 # pick "vec" # V.cons # int64 2 # V.snoc)
-        # (int64 1 # V.singleton # roll "vec" # int64 2 # V.singleton)
-        # (V.append # V.append)
-        # opEqual
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (int64 1 # pick "vec" # V.cons # int64 2 # V.snoc)
+            # (int64 1 # V.singleton # roll "vec" # int64 2 # V.singleton)
+            # (V.append # V.append)
+            # opEqual
+        )
 
 propHeadTailUncons :: BytesSize -> Property
 propHeadTailUncons (BytesSize size) =
@@ -448,11 +464,13 @@ propHeadTailUncons (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # name "vec" (testVector len')
-        # (lambda2 tuple # pick "vec" # V.head)
-        # (pick "vec" # V.tail # liftA2Maybe)
-        # (roll "vec" # V.uncons # opEqual)
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (lambda2 tuple # pick "vec" # V.head)
+            # (pick "vec" # V.tail # liftA2Maybe)
+            # (roll "vec" # V.uncons # opEqual)
+        )
 
 propLastInitUnsnoc :: BytesSize -> Property
 propLastInitUnsnoc (BytesSize size) =
@@ -462,11 +480,13 @@ propLastInitUnsnoc (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # name "vec" (testVector len')
-        # (lambda2 tuple # pick "vec" # V.init)
-        # (pick "vec" # V.last # liftA2Maybe)
-        # (roll "vec" # V.unsnoc # opEqual)
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (lambda2 tuple # pick "vec" # V.init)
+            # (pick "vec" # V.last # liftA2Maybe)
+            # (roll "vec" # V.unsnoc # opEqual)
+        )
 
 -- 9998 is based on current 10K element limit and leaving room for the
 -- tuple size field.
@@ -479,11 +499,13 @@ propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
   where
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len' idx' =
-      begin
-        # name "vec" (testVector len')
-        # (nat idx' # pick "vec" # V.take)
-        # (nat idx' # pick "vec" # V.drop # tuple)
-        # (nat idx' # roll "vec" # V.splitAt # tuple # opEqual)
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (nat idx' # pick "vec" # V.take)
+            # (nat idx' # pick "vec" # V.drop # tuple)
+            # (nat idx' # roll "vec" # V.splitAt # tuple # opEqual)
+        )
 
 -- 4000 is based on current 10K element limit and leaving ample room for the
 -- tuple size field.
@@ -496,13 +518,15 @@ propZipUnzip (BytesSize size1) (BytesSize size2) =
   where
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len1' len2' =
-      begin
-        # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
-        # (pick "vec1" # pick "vec2" # V.zip # V.unzip # V.zip)
-        # name "minLen" (nat len1' # nat len2' # opMin)
-        # (pick "minLen" # roll "vec1" # V.take)
-        # (roll "minLen" # roll "vec2" # V.take)
-        # (V.zip # opEqual)
+      runEnv
+        ( begin
+            # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
+            # (pick "vec1" # pick "vec2" # V.zip # V.unzip # V.zip)
+            # name "minLen" (nat len1' # nat len2' # opMin)
+            # (pick "minLen" # roll "vec1" # V.take)
+            # (roll "minLen" # roll "vec2" # V.take)
+            # (V.zip # opEqual)
+        )
 
 propZipWithUnzip :: BytesSize -> BytesSize -> Property
 propZipWithUnzip (BytesSize size1) (BytesSize size2) =
@@ -513,14 +537,16 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
   where
     prog :: Natural -> Natural -> FN s (s > TBool)
     prog len1' len2' =
-      begin
-        # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
-        # (lambda2 TFS.tuple # opDup)
-        # (pick "vec1" # pick "vec2" # V.zipWith # V.unzip # V.zipWith)
-        # name "minLen" (nat len1' # nat len2' # opMin)
-        # (pick "minLen" # roll "vec1" # V.take)
-        # (roll "minLen" # roll "vec2" # V.take)
-        # (V.zip # opEqual)
+      runEnv
+        ( begin
+            # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
+            # (lambda2 TFS.tuple # opDup)
+            # (pick "vec1" # pick "vec2" # V.zipWith # V.unzip # V.zipWith)
+            # name "minLen" (nat len1' # nat len2' # opMin)
+            # (pick "minLen" # roll "vec1" # V.take)
+            # (roll "minLen" # roll "vec2" # V.take)
+            # (V.zip # opEqual)
+        )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
 propFilterKeepAll :: BytesSize -> Bool
@@ -530,9 +556,11 @@ propFilterKeepAll (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # (testVector len' # opDup)
-        # (lambda1 (opDrop # opTrue) # opSwap # V.filter # opEqual)
+      runEnv
+        ( begin
+            # (testVector len' # opDup)
+            # (lambda1 (opDrop # opTrue) # opSwap # V.filter # opEqual)
+        )
 
     overhead :: Integer
     overhead = 10
@@ -544,9 +572,11 @@ propFilterKeepNone (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # (V.empty # testVector len')
-        # (lambda1 (opDrop # opFalse) # opSwap # V.filter # opEqual)
+      runEnv
+        ( begin
+            # (V.empty # testVector len')
+            # (lambda1 (opDrop # opFalse) # opSwap # V.filter # opEqual)
+        )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
 propMapComposition :: BytesSize -> Bool
@@ -556,11 +586,13 @@ propMapComposition (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # name "vec" (testVector len')
-        # (lambda1 f # lambda1 g # pick "vec" # V.map # V.map)
-        # (lambda1 (g # f) # roll "vec" # V.map)
-        # opEqual
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (lambda1 f # lambda1 g # pick "vec" # V.map # V.map)
+            # (lambda1 (g # f) # roll "vec" # V.map)
+            # opEqual
+        )
 
     f :: FN (s > TInt64) (s > TInt64)
     f = int64 2 # addInt64
@@ -579,9 +611,11 @@ propMapIdentity (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # name "vec" (testVector len')
-        # (pick "vec" # lambda1 f # roll "vec" # V.map # opEqual)
+      runEnv
+        ( begin
+            # name "vec" (testVector len')
+            # (pick "vec" # lambda1 f # roll "vec" # V.map # opEqual)
+        )
 
     f :: FN (s > TInt64) (s > TInt64)
     f = cast
@@ -595,12 +629,14 @@ propFolding (BytesSize size) =
   where
     prog :: Natural -> FN s (s > TBool)
     prog len' =
-      begin
-        # (lambda2 addInt64 # int64 0 # testVector len' # V.foldl)
-        # (int64 sum # opEqualVerify)
-        # (lambda2 addInt64 # int64 0 # testVector len' # V.foldr)
-        # (int64 sum # opEqualVerify)
-        # opTrue
+      runEnv
+        ( begin
+            # (lambda2 addInt64 # int64 0 # testVector len' # V.foldl)
+            # (int64 sum # opEqualVerify)
+            # (lambda2 addInt64 # int64 0 # testVector len' # V.foldr)
+            # (int64 sum # opEqualVerify)
+            # opTrue
+        )
 
     len :: Integer
     len = size `div` testVectorElemSize
@@ -646,7 +682,7 @@ b1 = "a string that is a bit longer and keeps going"
 b2 :: Bytes
 b2 = ""
 
-testVector :: Natural -> FN s (s > V.TVector TInt64)
+testVector :: Natural -> ENV s (s > V.TVector TInt64)
 testVector len = nat len # lambda1 cast # V.generate
 
 testVectorElemSize :: Integer

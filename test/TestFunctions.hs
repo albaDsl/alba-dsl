@@ -108,9 +108,11 @@ progFactorial =
 
 progSort :: FN s (s > TBool)
 progSort =
-  begin
-    # (nat 10 # lambda1 (op1Add # cast # toInt64) # generate)
-    # (opDup # reverse # MS.sort # opEqual)
+  runEnv
+    ( begin
+        # (nat 10 # lambda1 (op1Add # cast # toInt64) # generate)
+        # (opDup # reverse # MS.sort # opEqual)
+    )
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =

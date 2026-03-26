@@ -25,12 +25,15 @@ module Alba.Dsl.V1.Bch2026.Contract.Vector
     unsnocF,
     empty,
     singleton,
+    singletonF,
     replicate,
     replicateF,
     generate,
     generateF,
     iterateN,
     iterateNF,
+    unfoldr,
+    unfoldrF,
     cons,
     consF,
     snoc,
@@ -56,7 +59,8 @@ module Alba.Dsl.V1.Bch2026.Contract.Vector
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( ENV,
+    FN,
     StackEntry,
     TBool,
     TBytes,
@@ -69,21 +73,23 @@ import Alba.Dsl.V1.Bch2026
     del,
     delCount,
     function,
+    ifZero,
     invoke1,
     invoke2,
     lambda0,
     lambda1,
     lambda2,
+    lambda3,
+    lambda4,
     name,
+    name2,
     nat,
     ns,
     ns2,
     ns3,
     ns4,
-    ns5,
     ns6,
     ns7,
-    op0NotEqual,
     op1Add,
     op1SubUnsafe,
     op2Drop,
@@ -94,11 +100,10 @@ import Alba.Dsl.V1.Bch2026
     opEqual,
     opFalse,
     opGreaterThan,
-    opGreaterThanOrEqual,
     opIf,
+    opLessThan,
     opMul,
     opNotIf,
-    opNumEqual,
     opRoll,
     opSize,
     opSplit,
@@ -113,7 +118,6 @@ import Alba.Dsl.V1.Bch2026
     un2,
     un3,
     un4,
-    un5,
     un6,
     (#),
     type (>),
@@ -140,16 +144,15 @@ import Alba.Dsl.V1.Bch2026.Contract.PackFs
     tcSize,
     tcUnpack,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand
-  ( dup,
-    fromAlt,
-    nip,
-    rot,
-    swap,
-    toAlt,
+import Alba.Dsl.V1.Bch2026.Contract.PartialApplication
+  ( apply2,
+    apply3,
+    apply3_2,
+    apply4_2,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup, nip, rot, swap)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, fst, snd, tuple, untuple)
-import Alba.Dsl.V1.Bch2026.Contract.TupleFs (TTupleFs, calcPackFs)
+import Alba.Dsl.V1.Bch2026.Contract.TupleFs (TTupleFs, calcPackFs, tupleF)
 import Alba.Dsl.V1.Bch2026.Contract.TupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
 import Data.Kind (Type)
@@ -334,95 +337,87 @@ singleton = pack # b2v
 singletonF :: (StackEntry a) => FN (s > TPackFs a > a) (s > TVector a)
 singletonF = function (swap # getPack # invoke1 # cast)
 
-replicate :: forall a s. (PackFs a) => FN (s > TNat > a) (s > TVector a)
+replicate :: forall a s. (PackFs a) => ENV (s > TNat > a) (s > TVector a)
 replicate = packFs @a # rot # rot # replicateF
 
-replicateF :: (StackEntry a) => FN (s > TPackFs a > TNat > a) (s > TVector a)
-replicateF =
-  function
-    ( begin
-        # (ns3 Pfs Cnt Val # pick Cnt # op0NotEqual)
-        # opIf
-          ( begin
-              # (roll Pfs # rollN Val # empty # roll Cnt)
-              # (un Val # opUntil loop # opDrop # nip # nip)
-          )
-          (delCount 3 # empty)
-    )
-  where
-    loop :: (StackEntry a) => Loop (s > TPackFs a > a > TVector a > TNat)
-    loop =
-      begin
-        # (ns4 Pfs Val Acc Cnt # tcPick # pickN Val # roll Acc # un Val # consF)
-        # (roll Cnt # op1SubUnsafe # dup # nat 0 # opNumEqual # un2 Pfs Val)
+replicateF :: (StackEntry a) => ENV (s > TPackFs a > TNat > a) (s > TVector a)
+replicateF = function (lambda2 nip # apply2 # generateF)
 
 generate ::
   forall a s.
-  (PackFs a) =>
-  FN (s > TNat > TLambda '[TNat] '[a]) (s > TVector a)
+  (PackFs a) => ENV (s > TNat > TLambda '[TNat] '[a]) (s > TVector a)
 generate = packFs @a # rot # rot # generateF
 
 generateF ::
   forall a s.
   (StackEntry a) =>
-  FN (s > TPackFs a > TNat > TLambda '[TNat] '[a]) (s > TVector a)
-generateF =
-  function
-    ( begin
-        # (ns3 Pfs Cnt Fn # pick Cnt # op0NotEqual)
+  ENV (s > TPackFs a > TNat > TLambda '[TNat] '[a]) (s > TVector a)
+generateF = function (lambda3 f # apply3_2 # nat 0 # unfoldrF)
+  where
+    f ::
+      (StackEntry a) =>
+      FN (s > TNat > TNat > TLambda '[TNat] '[a]) (s > TMaybe (TTuple a TNat))
+    f =
+      begin
+        # (ns3 Cnt Limit Fn # pick Cnt # roll Limit # opLessThan)
         # opIf
           ( begin
-              # (tcRoll # roll Fn # roll Cnt # empty # nat 0)
-              # (opUntil loop # opDrop # nip # nip # nip)
+              # name A (pick Cnt # roll Fn # invoke1)
+              # (roll Cnt # op1Add # un A # tuple # just)
           )
-          (delCount 3 # empty)
-    )
-  where
-    loop ::
-      (StackEntry a) =>
-      Loop (s > TPackFs a > TLambda '[TNat] '[a] > TNat > TVector a > TNat)
-    loop =
-      begin
-        # ns5 Pfs Fn Limit Acc Cnt
-        # (tcPick # roll Acc # pick Cnt # pick Fn # invoke1 # snocF)
-        # (roll Cnt # op1Add # dup # pick Limit # opGreaterThanOrEqual)
-        # (un3 Pfs Fn Limit)
+          (delCount 2 # nothing)
 
 iterateN ::
   forall a s.
-  (PackFs a) =>
-  FN (s > TNat > TLambda '[a] '[a] > a) (s > TVector a)
+  (PackFs a) => ENV (s > TNat > TLambda '[a] '[a] > a) (s > TVector a)
 iterateN =
-  begin
-    # ns3 Cnt Fn Val
-    # (packFs @a # roll Cnt # roll Fn # roll Val # iterateNF)
+  ns3 Cnt Fn Val # (packFs @a # roll Cnt # roll Fn # roll Val # iterateNF)
 
 iterateNF ::
   (StackEntry a) =>
-  FN (s > TPackFs a > TNat > TLambda '[a] '[a] > a) (s > TVector a)
-iterateNF =
-  function
-    ( begin
-        # (ns4 Pfs Cnt Fn Val # pick Cnt # op0NotEqual)
-        # opIf
+  ENV (s > TPackFs a > TNat > TLambda '[a] '[a] > a) (s > TVector a)
+iterateNF = function (swap # lambda2 f # apply2 # rot # rot # tuple # unfoldrF)
+  where
+    f ::
+      (StackEntry a) =>
+      FN
+        (s > TTuple TNat a > TLambda '[a] '[a])
+        (s > TMaybe (TTuple a (TTuple TNat a)))
+    f =
+      begin
+        # (swap # untuple # ns3 Fn Cnt Val # pick Cnt)
+        # ifZero
+          (delCount 3 # nothing)
           ( begin
-              # (pick Pfs # roll Fn # name Val' (roll Val) # roll Pfs)
-              # (pick Val' # singletonF # roll Cnt # op1SubUnsafe # un Val')
-              # (opUntil loop # opDrop # nip # nip # nip)
+              # (name Val' (pick Val) # roll Cnt # op1SubUnsafe # rollN Val)
+              # (roll Fn # un Val # invoke1 # tuple # un Val' # tuple # just)
           )
-          (delCount 4 # empty)
-    )
+
+unfoldr ::
+  forall a b s.
+  (PackFs a, StackEntry b) =>
+  FN (s > TLambda '[b] '[TMaybe (TTuple a b)] > b) (s > TVector a)
+unfoldr = ns2 Fn Val # packFs @a # roll Fn # roll Val # unfoldrF
+
+unfoldrF ::
+  forall a b s.
+  (StackEntry a, StackEntry b) =>
+  FN (s > TPackFs a > TLambda '[b] '[TMaybe (TTuple a b)] > b) (s > TVector a)
+unfoldrF = function (empty # opUntil loop # nip # nip # nip)
   where
     loop ::
-      (StackEntry a) =>
-      Loop (s > TPackFs a > TLambda '[a] '[a] > a > TVector a > TNat)
+      (StackEntry a, StackEntry b) =>
+      Loop (s > TPackFs a > TLambda '[b] '[TMaybe (TTuple a b)] > b > TVector a)
     loop =
       begin
-        # ns5 Pfs Fn Val Acc Cnt
-        # name Val' (pick Fn # roll Val # swap # invoke1)
-        # (tcPick # roll Acc # pick Val' # snocF)
-        # (roll Cnt # op1SubUnsafe # dup # nat 0 # opNumEqual)
-        # (un3 Pfs Fn Val')
+        # ns4 Pfs Fn Val Acc
+        # (pickN Val # pick Fn # un Val # invoke1)
+        # ifJust
+          ( begin
+              # (del Val # name2 A B untuple # rollN B # tcPick # roll Acc)
+              # (roll A # snocF # un3 Pfs Fn B # opFalse)
+          )
+          (un4 Pfs Fn Val Acc # opTrue)
 
 -- ## Concatenation.
 cons :: forall a s. (PackFs a) => FN (s > a > TVector a) (s > TVector a)
@@ -447,97 +442,71 @@ append = fixup # opCat # cast
     fixup = castStack
 
 -- ## Permutation.
-reverse :: forall a s. (PackFs a) => FN (s > TVector a) (s > TVector a)
+reverse :: forall a s. (PackFs a) => ENV (s > TVector a) (s > TVector a)
 reverse = packFs @a # swap # reverseF
 
-reverseF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
+reverseF :: (StackEntry a) => ENV (s > TPackFs a > TVector a) (s > TVector a)
 reverseF =
   function
     ( begin
-        # (ns2 Pfs Vec # pick Pfs)
-        # lambda2
-          ( begin
-              # (swap # untuple # swap # dup # toAlt # rot # rot # consF)
-              # (fromAlt # swap # tuple)
-          )
-        # (roll Pfs # empty # tuple # roll Vec # foldlF # untuple)
-        # nip
+        # (ns2 Pfs Vec # roll Pfs # dup # lambda3 (swap # rot # consF))
+        # (apply3 # empty # roll Vec # foldlF)
     )
 
 -- ## Mapping.
 map ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  FN (s > TLambda '[a] '[b] > TVector a) (s > TVector b)
+  ENV (s > TLambda '[a] '[b] > TVector a) (s > TVector b)
 map = packFs @a # packFs @b # opRoll 3 # opRoll 3 # mapF
 
 mapF ::
   forall a b s.
   (StackEntry a, StackEntry b) =>
-  FN (s > TPackFs a > TPackFs b > TLambda '[a] '[b] > TVector a) (s > TVector b)
+  ENV
+    (s > TPackFs a > TPackFs b > TLambda '[a] '[b] > TVector a)
+    (s > TVector b)
 mapF =
   function
     ( begin
-        # (ns4 PfsA PfsB Fn Vec # roll PfsA # lambda2 f)
-        # (empty # roll PfsB # roll Fn # tuple # tuple # roll Vec)
-        # (foldlF # untuple # opDrop)
+        # (ns4 PfsA PfsB Fn Vec # roll PfsA # roll PfsB # roll Fn # lambda4 f)
+        # (apply4_2 # empty # roll Vec # foldlF)
     )
   where
     f ::
       (StackEntry a, StackEntry b) =>
-      FN
-        (s > TTuple (TVector b) (TTuple (TPackFs b) (TLambda '[a] '[b])) > a)
-        (s > TTuple (TVector b) (TTuple (TPackFs b) (TLambda '[a] '[b])))
+      FN (s > TVector b > a > TPackFs b > TLambda '[a] '[b]) (s > TVector b)
     f =
       begin
-        # (swap # untuple # untuple # ns4 Val Acc Pfs Fn)
-        # (pick Pfs # roll Acc # rollN Val # pick Fn # un Val)
-        # (invoke1 # snocF # roll Pfs # roll Fn # tuple # tuple)
+        # (ns4 VecB A PfsB Fn # roll PfsB # roll VecB # rollN A # roll Fn)
+        # (un A # invoke1 # snocF)
 
 zip ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  FN (s > TVector a > TVector b) (s > TVector (TTupleFs a b))
+  ENV (s > TVector a > TVector b) (s > TVector (TTupleFs a b))
 zip = packFs @a # packFs @b # opRoll 3 # opRoll 3 # zipF
 
 zipF ::
   (StackEntry a, StackEntry b) =>
-  FN
+  ENV
     (s > TPackFs a > TPackFs b > TVector a > TVector b)
     (s > TVector (TTupleFs a b))
-zipF = function (empty # opUntil loop # nip # nip # nip # nip)
+zipF =
+  function
+    ( begin
+        # (ns4 PfsA PfsB VecA VecB # pick PfsA # pick PfsB # op2Dup)
+        # (calcPackFs # roll PfsA # roll PfsB # lambda4 f # apply4_2)
+        # (roll VecA # roll VecB # zipWithF)
+    )
   where
-    loop ::
+    f ::
       (StackEntry a, StackEntry b) =>
-      Loop
-        ( s
-            > TPackFs a
-            > TPackFs b
-            > TVector a
-            > TVector b
-            > TVector (TTupleFs a b)
-        )
-    loop =
+      FN (s > a > b > TPackFs a > TPackFs b) (s > TTupleFs a b)
+    f =
       begin
-        # ns5 PfsA PfsB VecA VecB Res
-        # (pick PfsA # pick VecA # unconsF)
-        # (pick PfsB # pick VecB # unconsF # op2Dup)
-        # (lambdaFst # swap # Maybe.map # swap)
-        # (lambdaFst # swap # Maybe.map # swap)
-        # (lambda2 tuple # rot # rot # liftA2Maybe)
-        # ifJust
-          ( begin
-              # (del VecA # del VecB)
-              # (rot # fromJust # snd # rot # fromJust # snd # rot)
-              # (pick PfsA # pick PfsB # rot # untuple # TFS.tupleF)
-              # (pick PfsA # pick PfsB # calcPackFs)
-              # (roll Res # rot # snocF)
-              # (opFalse # un2 PfsA PfsB)
-          )
-          ( begin
-              # (op2Drop # opTrue)
-              # un5 PfsA PfsB VecA VecB Res
-          )
+        # (ns4 A B PfsA PfsB # roll PfsA # roll PfsB # rollN A # rollN B)
+        # (un2 A B # tupleF)
 
 lambdaFst :: (StackEntry a) => FN s (s > TLambda '[TTuple a (TVector a)] '[a])
 lambdaFst = lambda1 fst
@@ -563,9 +532,7 @@ type ZipWithFArgs s a b c =
 zipWithF ::
   (StackEntry a, StackEntry b, StackEntry c) =>
   FN (ZipWithFArgs s a b c) (s > TVector c)
-zipWithF =
-  function
-    (empty # opUntil loop # toAlt # op2Drop # op2Drop # op2Drop # fromAlt)
+zipWithF = function (empty # opUntil loop # nip # nip # nip # nip # nip # nip)
   where
     loop ::
       (StackEntry a, StackEntry b, StackEntry c) =>
@@ -608,10 +575,7 @@ unzipF ::
   FN (UnzipFArgs s a b) (s > TVector a > TVector b)
 unzipF =
   function
-    ( begin
-        # (empty # empty # opUntil loop # toAlt # toAlt)
-        # (op2Drop # op2Drop # fromAlt # fromAlt)
-    )
+    (empty # empty # opUntil loop # rotDrop # rotDrop # rotDrop # rotDrop)
   where
     loop ::
       (StackEntry a, StackEntry b) =>
@@ -629,47 +593,40 @@ unzipF =
               # (pick PfsB # roll ResB # rot # un B # snocF)
               # (opFalse # un3 PfsA PfsB PfsTup)
           )
-          ( begin
-              # opTrue
-              # un6 PfsA PfsB PfsTup Vec ResA ResB
-          )
+          (opTrue # un6 PfsA PfsB PfsTup Vec ResA ResB)
+
+    rotDrop ::
+      (StackEntry a, StackEntry b, StackEntry c) =>
+      FN (s > a > b > c) (s > b > c)
+    rotDrop = rot # opDrop
 
 -- ## Filtering.
 filter ::
   forall a s.
   (PackFs a) =>
-  FN (s > TLambda '[a] '[TBool] > TVector a) (s > TVector a)
+  ENV (s > TLambda '[a] '[TBool] > TVector a) (s > TVector a)
 filter = packFs @a # rot # rot # filterF
 
 filterF ::
   forall a s.
   (StackEntry a) =>
-  FN (s > TPackFs a > TLambda '[a] '[TBool] > TVector a) (s > TVector a)
+  ENV (s > TPackFs a > TLambda '[a] '[TBool] > TVector a) (s > TVector a)
 filterF =
   function
     ( begin
-        # (ns3 Pfs Fn Vec # pick Pfs # lambda2 f)
-        # (empty # roll Pfs # roll Fn # tuple # tuple # roll Vec)
-        # (foldlF # untuple # opDrop)
+        # ns3 Pfs Fn Vec
+        # (pick Pfs # (roll Pfs # roll Fn # lambda4 f # apply4_2) # empty)
+        # (roll Vec # foldlF)
     )
   where
     f ::
       (StackEntry a) =>
-      FN
-        ( s
-            > TTuple (TVector a) (TTuple (TPackFs a) (TLambda '[a] '[TBool]))
-            > a
-        )
-        (s > TTuple (TVector a) (TTuple (TPackFs a) (TLambda '[a] '[TBool])))
+      FN (s > TVector a > a > TPackFs a > TLambda '[a] '[TBool]) (s > TVector a)
     f =
       begin
-        # (swap # untuple # dup # toAlt # untuple)
-        # ns4 Val Acc Pfs Fn
-        # (name Val' (pick Val) # roll Fn # un Val' # invoke1)
-        # opIf
-          (pick Pfs # roll Acc # pick Val # snocF)
-          (roll Acc)
-        # (del Val # del Pfs # fromAlt # tuple)
+        # (ns4 Acc Val Pfs Fn # pickN Val # roll Fn # un Val # invoke1)
+        # opIf (pick Pfs # roll Acc # pick Val # snocF) (roll Acc)
+        # (del Val # del Pfs)
 
 -- ## Folding.
 foldl ::

@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     opAdd,
     opLessThan,
     opSwap,
+    runEnv,
     simpleWrap,
     simpleWrapChunkSize,
     (#),
@@ -57,17 +58,19 @@ numUtxos = fromIntegral $ Prelude.length deployTx.outputs
 
 showCase :: FN s s
 showCase =
-  begin
-    # (int8Vector # V.head # drop)
-    # (int8Vector # V.last # drop)
-    # (int8Vector # V.length # drop)
-    # (lambda1 (drop # int8 2) # int8Vector # V.map # drop)
-    # (lambda2 addInt8 # int8 0 # int8Vector # V.foldl # drop)
-    # (int8Vector # int8Vector # V.zip # drop)
-    # (lambda2 addInt8 # int8Vector # int8Vector # V.zipWith # drop)
-    # (nat 10 # lambda1 (op1Add # cast) # V.generate)
-    # (lambda1 (int8 3 # int8LessThan) # swap # V.filter # drop)
-    # (int8Vector # MS.sort # drop)
+  runEnv
+    ( begin
+        # (int8Vector # V.head # drop)
+        # (int8Vector # V.last # drop)
+        # (int8Vector # V.length # drop)
+        # (lambda1 (drop # int8 2) # int8Vector # V.map # drop)
+        # (lambda2 addInt8 # int8 0 # int8Vector # V.foldl # drop)
+        # (int8Vector # int8Vector # V.zip # drop)
+        # (lambda2 addInt8 # int8Vector # int8Vector # V.zipWith # drop)
+        # (nat 10 # lambda1 (op1Add # cast) # V.generate)
+        # (lambda1 (int8 3 # int8LessThan) # swap # V.filter # drop)
+        # (int8Vector # MS.sort # drop)
+    )
   where
     int8Vector :: FN s (s > TVector TInt8)
     int8Vector = int8 0 # int8 1 # V.empty # V.cons # V.cons

@@ -134,9 +134,9 @@ f9 =
 -- >>> Dsl.progSize f10
 -- "18 opcodes, 18 bytes. Including function table: 66 opcodes, 220 bytes.\n"
 f10 :: FN (s > TInt) (s > TInt)
-f10 = opDrop # f
+f10 = runEnv (opDrop # f)
   where
-    f :: FN s (s > TInt)
+    f :: ENV s (s > TInt)
     f =
       begin
         # lambda2 add

@@ -58,7 +58,7 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
             sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "331 opcodes, 1343 bytes.",
+            sizeOf vectorOps @?= "356 opcodes, 1384 bytes.",
           testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 188 bytes.",
           testCase "LZSS Bitstream" $
             sizeOf CLZB.decompress @?= "5 opcodes, 92 bytes."
@@ -74,15 +74,15 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
           testCase "Vector ops" $
-            ratio vectorOps @?= "1343 byte to 1062 bytes (saving 20.9%)"
+            ratio vectorOps @?= "1384 byte to 1157 bytes (saving 16.4%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 32_715_291,
-          testCase "Vector ops" $ costOf vectorOps @?= 23_792_161,
-          testCase "LZSS" $ costOf decompressTest @?= 19_594_356,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 10_875_851
+          testCase "Vector ops" $ costOf vectorOps @?= 23_925_375,
+          testCase "LZSS" $ costOf decompressTest @?= 21_585_352,
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_640_395
         ],
       testGroup
         "TurtleVm efficiency"
@@ -155,47 +155,49 @@ windowedMul =
 
 vectorOps :: FNC
 vectorOps =
-  begin
-    # (nat n # lambda1 (op1Add # cast # toInt64) # V.generate)
-    # (nat n # lambda1 (cast # op1Add # toInt8) # int8 1 # V.iterateN)
-    # ns2 "vec64" "vec8"
-    # ( begin
-          # (lambda2 (cast # opAdd) # nat 0 # nat n # int8 1 # V.replicate)
-          # (V.foldl # nat n # opEqualVerify)
-      )
-    # (pick "vec64" # opDup # V.reverse # sort # opEqualVerify)
-    # (pick "vec8" # opDup # V.reverse # sort # opEqualVerify)
-    # ( begin
-          # lambda2 (untuple # castStack # opAdd # opAdd)
-          # int 0
-          # (pick "vec8" # pick "vec8" # V.zip)
-          # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
-      )
-    # ( begin
-          # lambda2 (castStack # opAdd)
-          # int 0
-          # ( begin
-                # lambda2 (castStack # opAdd # toInt64)
-                # (pick "vec64" # pick "vec8" # V.zipWith)
-            )
-          # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
-      )
-    # ( begin
-          # lambda2 (castStack # opAdd)
-          # int 0
-          # (lambda1 (cast # int 10 # opMul # toInt64) # pick "vec64" # V.map)
-          # (V.foldl # int (fromIntegral $ n * (n + 1) * 5) # opEqualVerify)
-      )
-    # ( begin
-          # lambda2 (castStack # opAdd)
-          # int 0
-          # ( begin
-                # lambda1 (cast # int 2 # opMod # int 0 # opEqual)
-                # (pick "vec64" # V.filter)
-            )
-          # (V.foldl # int 650 # opEqualVerify)
-      )
-    # delCount 2
+  runEnv
+    ( begin
+        # (nat n # lambda1 (op1Add # cast # toInt64) # V.generate)
+        # (nat n # lambda1 (cast # op1Add # toInt8) # int8 1 # V.iterateN)
+        # ns2 "vec64" "vec8"
+        # ( begin
+              # (lambda2 (cast # opAdd) # nat 0 # nat n # int8 1 # V.replicate)
+              # (V.foldl # nat n # opEqualVerify)
+          )
+        # (pick "vec64" # opDup # V.reverse # sort # opEqualVerify)
+        # (pick "vec8" # opDup # V.reverse # sort # opEqualVerify)
+        # ( begin
+              # lambda2 (untuple # castStack # opAdd # opAdd)
+              # int 0
+              # (pick "vec8" # pick "vec8" # V.zip)
+              # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
+          )
+        # ( begin
+              # lambda2 (castStack # opAdd)
+              # int 0
+              # ( begin
+                    # lambda2 (castStack # opAdd # toInt64)
+                    # (pick "vec64" # pick "vec8" # V.zipWith)
+                )
+              # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
+          )
+        # ( begin
+              # (lambda2 (castStack # opAdd) # int 0)
+              # lambda1 (cast # int 10 # opMul # toInt64)
+              # (pick "vec64" # V.map)
+              # (V.foldl # int (fromIntegral $ n * (n + 1) * 5) # opEqualVerify)
+          )
+        # ( begin
+              # lambda2 (castStack # opAdd)
+              # int 0
+              # ( begin
+                    # lambda1 (cast # int 2 # opMod # int 0 # opEqual)
+                    # (pick "vec64" # V.filter)
+                )
+              # (V.foldl # int 650 # opEqualVerify)
+          )
+        # delCount 2
+    )
   where
     n :: Natural
     n = 50
