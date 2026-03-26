@@ -15,6 +15,7 @@ import Alba.Dsl.V1.Common.FunctionState qualified as FS
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (..),
+    FunctionIdType,
     OpcodeL3 (FunctionIndexRef),
     VmFunctionId,
     mkVmFunctionId,
@@ -45,8 +46,8 @@ data Function = Function
 
 type FunctionTable = M.Map FunctionId Function
 
-toResolved :: VmFunctionId -> FS.FunctionState -> FunctionState
-toResolved prefix FS.FunctionState {functions} =
+toResolved :: FunctionIdType -> FS.FunctionState -> FunctionState
+toResolved fIdType FS.FunctionState {functions} =
   FunctionState
     { functions = M.map (fromMaybe (err functions) . convert) functions
     }
@@ -54,7 +55,7 @@ toResolved prefix FS.FunctionState {functions} =
     convert :: FS.Function -> Maybe Function
     convert FS.Function {..} = do
       idx <- index
-      pure $ Function {index = idx, vmFId = mkVmFunctionId prefix idx, ..}
+      pure $ Function {index = idx, vmFId = mkVmFunctionId fIdType idx, ..}
 
     err x =
       error

@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Common.OpcodeL3
   ( OpcodeL3 (..),
     CodeL3,
     FunctionId (..),
+    FunctionIdType (..),
     VmFunctionId,
     mkVmFunctionId,
     vmFunctionIdToByteString,
@@ -36,9 +37,6 @@ data FunctionId
   | Absolute Index
   deriving (Eq, Ord, Show)
 
-newtype VmFunctionId = VmFunctionId [Word8]
-  deriving (Eq)
-
 type ModuleName = String
 
 type LineNumber = Int
@@ -50,6 +48,11 @@ type FunctionName = String
 type CodeL3 = S.Seq OpcodeL3
 
 type Index = Int
+
+data FunctionIdType = Local | ThreeByte16_8 VmFunctionId
+
+newtype VmFunctionId = VmFunctionId [Word8]
+  deriving (Eq)
 
 instance Show VmFunctionId where
   show (VmFunctionId x) = show x
@@ -67,19 +70,32 @@ instance IsString VmFunctionId where
 vmFunctionIdToByteString :: VmFunctionId -> B.ByteString
 vmFunctionIdToByteString (VmFunctionId x) = B.pack x
 
--- If prefix is empty then use [] for index zero. Otherwise, use [0] for index
--- zero. Rationale: if we don't have a prefix we want to use [] since it is
--- cheap to push (using op0). When we have a prefix, we want the identifiers to
--- stay the same length. For contract local identifiers, which are unprefixed
--- and 0-2 bytes in size, certain identifiers don't get used, e.g.: [0] and
--- [*, 0].
--- FIXME: add padding support for prefixed identifiers.
-mkVmFunctionId :: VmFunctionId -> Int -> VmFunctionId
-mkVmFunctionId (VmFunctionId []) 0 = VmFunctionId []
-mkVmFunctionId prefix 0 = prefix <> VmFunctionId [0]
-mkVmFunctionId prefix x =
-  let bytes = integerToBytesUnsigned (fromIntegral x)
-   in prefix <> VmFunctionId (B.unpack bytes)
+-- 'Local': We consider 0-byte, 1-byte, and 2-byte identifiers as part of the
+-- local Function Identifier space for the contract. We use the VM bytestring
+-- representation of natural numbers (0, 1, 2, ...) as identifiers. Thus
+-- some identifiers such as [0] and [1, 0] won't get used.
+--
+-- 'ThreeByte16_8': Meant for external libraries that should not conflict with
+-- the local function space. These are three byte identifiers where two bytes
+-- (16-bits) are used as the library prefix.
+mkVmFunctionId :: FunctionIdType -> Int -> VmFunctionId
+mkVmFunctionId Local x
+  | x < 2 ^ (16 :: Int) =
+      let bytes = integerToBytesUnsigned (fromIntegral x)
+       in VmFunctionId (B.unpack bytes)
+  | otherwise = errIndexLimit
+mkVmFunctionId (ThreeByte16_8 prefix) x
+  | x == 0 && idLength prefix == 2 = (prefix <> VmFunctionId [0])
+  | x < 256 && idLength prefix == 2 =
+      let bytes = integerToBytesUnsigned (fromIntegral x)
+       in (prefix <> VmFunctionId (B.unpack bytes))
+  | otherwise = errIndexLimit
+  where
+    idLength (VmFunctionId str) = length str
+
+errIndexLimit :: a
+errIndexLimit =
+  error "mkVmFunctionId: function index limit exceeded or prefix out of range."
 
 isConstant :: FunctionId -> Bool
 isConstant (Constant _ _ _ _) = True

@@ -37,6 +37,7 @@ import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (..),
+    FunctionIdType (..),
     OpcodeL3 (..),
     VmFunctionId,
     isConstant,
@@ -70,8 +71,7 @@ import Prelude hiding (FilePath)
 
 data Options = Options
   { level :: !Optimize,
-    prefix :: !VmFunctionId,
-    maxFuns :: Int
+    fIdType :: FunctionIdType
   }
 
 data Optimize = None | O1
@@ -107,8 +107,7 @@ compileLibrary level prefix prog =
   let (_code, defs, fs) = compileL2WithDetails options prog
    in (fromMaybe err (codeL2ToCodeL1 defs), fs.functions)
   where
-    -- FIXME: hardcoded max.
-    options = Options {maxFuns = 256, ..}
+    options = Options {fIdType = ThreeByte16_8 prefix, ..}
     err = error "compileLibrary: internal error."
 
 compileL2 ::
@@ -120,10 +119,8 @@ compileL2 level prog =
   let (code, defs, fs) = compileL2WithDetails (defOpts level) prog
    in (defs <> code, fs)
 
--- We consider 0-byte, 1-byte, and 2-byte identifiers as part of the local
--- Function Identifier space for the contract.
 defOpts :: Optimize -> Options
-defOpts level = Options {prefix = mempty, maxFuns = 2 ^ (16 :: Int) - 1, ..}
+defOpts level = Options {fIdType = Local, ..}
 
 compileL2WithDetails ::
   forall s s' alt alt'.
@@ -180,7 +177,7 @@ assignIndices :: Options -> FunctionState -> FSR.FunctionState
 assignIndices opts fs@FunctionState {functions} =
   let functions' = functionsSortedBySites functions
       (functions'', _) = runState (mapM assign functions') 0
-   in FSR.toResolved opts.prefix (fs {functions = M.fromList functions''})
+   in FSR.toResolved opts.fIdType (fs {functions = M.fromList functions''})
   where
     assign :: (FunctionId, Function) -> State Int (FunctionId, Function)
     assign (fId@(Absolute _), fun) = pure (fId, fun)
@@ -188,7 +185,7 @@ assignIndices opts fs@FunctionState {functions} =
       idx <- get
       let idx' = nextFree idx
           next = succ idx'
-      put (if next >= opts.maxFuns then err else next)
+      put next
       pure (fId, (fun {index = Just idx'}))
 
     nextFree :: Int -> Int
@@ -196,8 +193,6 @@ assignIndices opts fs@FunctionState {functions} =
       case M.lookup (Absolute idx) functions of
         Just _ -> nextFree (succ idx)
         Nothing -> idx
-
-    err = error "assignIndices: function index limit exceeded."
 
 functionDefinitions :: FSR.FunctionState -> CodeL3
 functionDefinitions fs@FSR.FunctionState {functions} =
