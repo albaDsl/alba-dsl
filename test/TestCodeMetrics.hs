@@ -5,6 +5,8 @@
 
 module TestCodeMetrics (testCodeMetrics) where
 
+import Alba.Dsl.V1.Bch2025.LangUntyped qualified as UT
+import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
@@ -12,11 +14,14 @@ import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
 import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
+import Alba.Dsl.V1.Common.StackUntyped qualified as UT
 import Alba.Misc.Logging qualified as ML
-import Alba.Vm.Bch2026 (VmMetrics (..))
+import Alba.Vm.Bch2026 (VmMetrics (..), b2SeUnsafe)
+import Data.Sequence qualified as S
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
@@ -78,6 +83,11 @@ testCodeMetrics =
           testCase "Vector ops" $ costOf vectorOps @?= 17_942_123,
           testCase "LZSS" $ costOf decompressTest @?= 19_926_886,
           testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_051_421
+        ],
+      testGroup
+        "TurtleVm efficiency"
+        [ testCase "TurtleVm 2026" $
+            turtleVmCostOf arithmetic `div` costOf arithmetic @?= 196
         ]
     ]
 
@@ -99,10 +109,37 @@ costOf prog =
               -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
               -- writeFunctionTable cr.code cr.functionTable
               pure tr.metrics.cost
-        Left (err, Just tr) -> showLog tr (error ("costOf: " <> show err))
-        Left (err, Nothing) -> error ("costOf: " <> show err)
+        Left (err, Just tr) -> showLog tr (error (show err))
+        Left (err, Nothing) -> error (show err)
 
-windowedMul :: FN s s
+-- We evaluate 'prog' many times and calculate the average in order to amortize
+-- the cost of 'turtleVmInit' and reduce its effect on the cost number.
+turtleVmCostOf :: FNC -> Int
+turtleVmCostOf prog =
+  let count = 800
+      code = compile O1 prog
+      cr =
+        compile'
+          O1
+          (toTyped $ T2026.turtleVmInit 10 # consumeAll T2026.turtleVmEval)
+      stacks = (S.fromList $ replicate count (b2SeUnsafe code), S.empty)
+      res = evaluateScript cr.code stacks minimalContext
+   in case res of
+        Right tr ->
+          unsafePerformIO $
+            do
+              -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
+              -- writeFunctionTable cr.code cr.functionTable
+              pure $ tr.metrics.cost `div` count
+        Left (err, _) -> error (show err)
+  where
+    consumeAll :: UT.FNU -> UT.FNU
+    consumeAll prog' = UT.opUntil (prog' # UT.opDepth # UT.op0 # UT.opEqual)
+
+arithmetic :: FNC
+arithmetic = int 2 # int 3 # opAdd # int 4 # opSub # int 1 # opEqualVerify
+
+windowedMul :: FNC
 windowedMul =
   begin
     # (gTable # g # EJW.setupTable)
@@ -116,7 +153,7 @@ windowedMul =
   where
     gTable = nat 100
 
-vectorOps :: FN s s
+vectorOps :: FNC
 vectorOps = f
   where
     f :: FN s s
@@ -145,12 +182,12 @@ vectorOps = f
     add' :: FN (s > TInt64 > TInt8) (s > TInt64)
     add' = castStack # opAdd # toInt64
 
-decompressTest :: FN s s
+decompressTest :: FNC
 decompressTest =
   let code = Vc.lib.code
    in bytes (LZ.compress code) # CLZ.decompress # bytes code # opEqualVerify
 
-decompressTestBit :: FN s s
+decompressTestBit :: FNC
 decompressTestBit =
   let code = Vc.lib.code
    in bytes (LZB.compress code) # CLZB.decompress # bytes code # opEqualVerify

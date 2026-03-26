@@ -1,6 +1,11 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Bch2026.TurtleVm (turtleVm) where
+module DslDemo.TurtleVm.Bch2026.TurtleVm
+  ( turtleVm,
+    turtleVmInit,
+    turtleVmEval,
+  )
+where
 
 import Alba.Dsl.V1.Bch2025.LangUntyped (int)
 import Alba.Dsl.V1.Bch2025.OpsUntyped
@@ -32,11 +37,13 @@ import DslDemo.TurtleVm.Bch2026.TurtleVmUtils
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtilsUntyped (condOp, is, unsupportedOp)
 
 turtleVm :: Int -> FNU
-turtleVm maxCsDepth =
-  begin
-    # ft (initOpDispatch maxCsDepth)
-    # ft initState
-    # opUntil loop
+turtleVm maxCsDepth = turtleVmInit maxCsDepth # turtleVmEval
+
+turtleVmInit :: Int -> FNU
+turtleVmInit maxCsDepth = ft (initOpDispatch maxCsDepth)
+
+turtleVmEval :: FNU
+turtleVmEval = ft initState # opUntil loop
   where
     loop :: FNU
     loop =
