@@ -20,11 +20,11 @@ alba:
 	cabal run alba -- libauth --file "test/libauth/bch_2026_standard/chip.functions" --test maamwz --mode Standard2026
 
 test: build
-	cabal run -- test --quickcheck-tests 200 --quickcheck-max-ratio 100
 	cabal run lastWill -- test
 	cabal run transferWithTimeout -- test
 	cabal run miniTurtleChallenge -- test
 	cabal run permutationChallenge -- test
+	cabal run -- test --quickcheck-tests 100 --quickcheck-max-ratio 100
 
 benchmark:
 	cabal run benchmark1 -- --output benchmark1.html

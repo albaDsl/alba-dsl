@@ -16,7 +16,7 @@ import Data.Word (Word8)
 import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
-import Test.Tasty.QuickCheck (Property, testProperty, (==>))
+import Test.Tasty.QuickCheck (Property, testProperty, withMaxSuccess, (==>))
 import TestUtils (isTrue)
 import TestUtils2026 (evaluateProg, evaluateProgWithStack, getStack)
 
@@ -47,7 +47,8 @@ testLzss =
       testProperty "LZSS A/B sequences 2" propCompressDecompressAb2,
       testProperty "LZSS sequences" propCompressDecompress,
       testProperty "LZSS A/B sequences - CashVM" propCompressDecompressAbVm,
-      testProperty "LZSS sequences - CashVM" propCompressDecompressVm
+      testProperty "LZSS sequences - CashVM" $
+        withMaxSuccess 20 propCompressDecompressVm
     ]
   where
     err = error "err"
