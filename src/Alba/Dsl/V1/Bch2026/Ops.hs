@@ -2,6 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.Ops where
 
+import Alba.Dsl.V1.Bch2026.Stack (TCode)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops')
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState (addCallSite, registerFunction)
@@ -19,11 +20,11 @@ opUntil loopBody (S c fs) =
 -- Added for completeness. There are other better options to use. AlbaDsl does
 -- not offer a way for the user of this function to ensure the idx is not
 -- already in use.
-opDefine :: FN (s > TBytes > TBytes) s
+opDefine :: FN (s > TCode > TBytes) s
 opDefine (S c fs) = S (aop c OP_DEFINE) fs
 
 -- Define function at an index relative current namespace.
-opDefineIdx :: Int -> FN (s > TBytes) s
+opDefineIdx :: Int -> FN (s > TCode) s
 opDefineIdx idx (S c fs) =
   let fId = Absolute idx
       fs' = fromMaybe err (registerFunction fId fs)
@@ -31,7 +32,7 @@ opDefineIdx idx (S c fs) =
   where
     err = error "opDefineIdx: idx already defined."
 
-opDefineNamed :: String -> FN (s > TBytes) s
+opDefineNamed :: String -> FN (s > TCode) s
 opDefineNamed name (S c fs) =
   let fId = Named name
       fs' = fromMaybe err (registerFunction fId fs)

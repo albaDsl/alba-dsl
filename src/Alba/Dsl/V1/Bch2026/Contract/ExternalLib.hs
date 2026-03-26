@@ -7,16 +7,21 @@ module Alba.Dsl.V1.Bch2026.Contract.ExternalLib
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( FN,
+    Loop,
     TBytes,
+    TCode,
     THash256,
     TInt,
+    TLambda,
     TNat,
     begin,
     bytes,
     cast,
+    function,
     int,
+    invoke1,
     name,
     nat,
     ns3,
@@ -25,10 +30,13 @@ import Alba.Dsl.V1.Bch2025
     op1Add,
     op1Sub,
     opCat,
+    opDefine,
     opEqual,
     opEqualVerify,
     opHash256,
+    opInvoke,
     opSplit,
+    opUntil,
     opUtxoBytecode,
     pick,
     roll,
@@ -37,10 +45,6 @@ import Alba.Dsl.V1.Bch2025
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
-import Alba.Dsl.V1.Bch2026.Lang (function, invoke1)
-import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
-import Alba.Dsl.V1.Bch2026.Ops (opDefine, opInvoke, opUntil)
-import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Alba.Dsl.V1.Bch2026.TxDsl (simpleWrapChunkSize)
 import Prelude hiding (drop)
 
@@ -55,7 +59,7 @@ importLibrary =
         # (roll "startInput" # roll "numInputs" # n2i # bytes [])
         # (opUntil loop # nip # nip)
         # (roll "size" # opSplit # drop # roll "transform" # invoke1)
-        # (dup # opHash256 # roll "hash" # opEqualVerify)
+        # (dup # opHash256 # roll "hash" # opEqualVerify # b2c)
         # (pick "fId" # opDefine # roll "fId" # opInvoke libInit)
     )
   where
@@ -71,8 +75,11 @@ importLibrary =
     libInit :: FN s s
     libInit = undefined
 
-    n2i :: FN (s > TNat) (s > TInt)
-    n2i = cast
+b2c :: FN (s > TBytes) (s > TCode)
+b2c = cast
+
+n2i :: FN (s > TNat) (s > TInt)
+n2i = cast
 
 -- Without transform.
 importLibrary' ::
@@ -86,7 +93,7 @@ importLibrary' =
         # (roll "startInput" # roll "numInputs" # n2i # bytes [])
         # (opUntil loop # nip # nip)
         # (roll "size" # opSplit # drop)
-        # (dup # opHash256 # roll "hash" # opEqualVerify)
+        # (dup # opHash256 # roll "hash" # opEqualVerify # b2c)
         # (pick "fId" # opDefine # roll "fId" # opInvoke libInit)
     )
   where
@@ -101,9 +108,6 @@ importLibrary' =
 
     libInit :: FN s s
     libInit = undefined
-
-    n2i :: FN (s > TNat) (s > TInt)
-    n2i = cast
 
 -- Unwraps the 'simpleWrap' format from Bch2026.TxDsl. With simple wrapping the
 -- data chunk always starts at offset 2 and is 197 bytes long.

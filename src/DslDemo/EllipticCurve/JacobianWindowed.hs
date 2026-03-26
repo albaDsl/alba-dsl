@@ -57,7 +57,7 @@ setupTable =
     storePoint =
       begin
         # (opcode OP_PUSHDATA1 # size # opRot # opCat # opCat)
-        # (opSwap # n2b)
+        # (b2c # opSwap # n2b)
         # opDefine
       where
         size :: FN s (s > TBytes)
@@ -68,6 +68,9 @@ setupTable =
 
     opcode :: OpcodeL1 -> FN s (s > TBytes)
     opcode op = bytes [(fromIntegral . fromEnum) op]
+
+    b2c :: FN (s > TBytes) (s > TCode)
+    b2c = cast
 
 ecMul :: FN (s > TTab > TNat) (s > TPoint)
 ecMul = function (unname 2 ecMulJ # fromJacobian)

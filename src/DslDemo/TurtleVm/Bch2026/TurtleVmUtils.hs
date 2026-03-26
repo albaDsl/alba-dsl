@@ -20,6 +20,7 @@ import Alba.Dsl.V1.Bch2026
     S (S),
     TBool,
     TBytes,
+    TCode,
     TInt,
     bytes,
     cast,
@@ -37,7 +38,7 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     opWhen,
     opWithin,
-    progBytes,
+    progCode,
     (#),
     type (>),
   )
@@ -62,11 +63,11 @@ fromSigned =
     i2b :: FN (s > TInt) (s > TBytes)
     i2b = cast
 
-unsupportedOp :: FN s (s > TBytes)
+unsupportedOp :: FN s (s > TCode)
 unsupportedOp = function (vmError "E1")
 
-unsupportedOpBytes :: FN s (s > TBytes)
-unsupportedOpBytes = progBytes unsupportedOp
+unsupportedOpBytes :: FN s (s > TCode)
+unsupportedOpBytes = progCode unsupportedOp
 
 inRange :: Integer -> Integer -> FN (s > TInt) (s > TBool)
 inRange x y = int x # int y # opWithin

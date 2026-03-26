@@ -21,7 +21,7 @@ testFunctionsLowLevel =
 progAbsolute :: FN s (s > TBool)
 progAbsolute =
   begin
-    # bytes (compile None cube)
+    # progCode (cube)
     # opDefineIdx 0
     # int 3
     # opInvokeIdx 0 cube
@@ -34,7 +34,7 @@ cube = opDup # opDup # opMul # opMul
 progNamed :: FN s (s > TBool)
 progNamed =
   begin
-    # bytes (compile None cube)
+    # progCode cube
     # opDefineNamed "cube"
     # int 3
     # opInvokeNamed "cube" cube
@@ -44,7 +44,7 @@ progNamed =
 progRaw :: FN s (s > TBool)
 progRaw =
   begin
-    # bytes (compile None cube)
+    # progCode cube
     # bytes "cube"
     # opDefine
     # int 3
@@ -56,12 +56,12 @@ progRaw =
 progMixed :: FN s (s > TBool)
 progMixed =
   begin
-    # bytes (compile None add1)
+    # progCode add1
     # opDefineIdx 0
     # int 2
     # double
     # double
-    # bytes (compile None cube)
+    # progCode cube
     # opDefineNamed "cube"
     # opInvokeNamed "cube" cube
     # opInvokeIdx 0 add1

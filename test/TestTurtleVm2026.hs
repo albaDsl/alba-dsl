@@ -2,7 +2,7 @@
 
 module TestTurtleVm2026 (testTurtleVm2026) where
 
-import Alba.Dsl.V1.Bch2026 hiding (progBytes)
+import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.StackUntyped (FNU, toTyped)
 import Alba.Vm.Bch2026

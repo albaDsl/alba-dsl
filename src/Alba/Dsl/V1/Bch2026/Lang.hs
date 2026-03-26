@@ -14,14 +14,14 @@ module Alba.Dsl.V1.Bch2026.Lang
     invoke3,
     lambda,
     invoke,
-    progBytes,
+    progCode,
     emptyProg,
   )
 where
 
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
-import Alba.Dsl.V1.Bch2026.Stack (TLambda, TLambdaUntyped)
+import Alba.Dsl.V1.Bch2026.Stack (TCode, TLambda, TLambdaUntyped)
 import Alba.Dsl.V1.Common.Compile (pass1)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aop')
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
@@ -37,7 +37,7 @@ import Alba.Dsl.V1.Common.FunctionState
     registerFunction,
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId, OpcodeL3 (..))
-import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), TBytes)
+import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
@@ -142,8 +142,11 @@ invoke3 (S c fs) = S (aop c OP_INVOKE) fs
 invoke :: FNA s alt s' alt' -> FNA (s > TLambdaUntyped) alt s' alt'
 invoke _prog (S c fs) = S (aop c OP_INVOKE) fs
 
-progBytes :: FNA s alt s' alt' -> FN s (s > TBytes)
-progBytes prog (S c fs) =
+progCode ::
+  forall s s' s'' alt' alt''.
+  (FNA s' alt' s'' alt'') ->
+  (FN s (s > TCode))
+progCode prog (S c fs) =
   let (c', fs') = pass1 S.empty fs prog
    in S (aop' c (FunctionBody c')) fs'
 

@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Common.RuntimeLib (toPushOp) where
 
 import Alba.Dsl.V1.Bch2025.Lang
 import Alba.Dsl.V1.Bch2025.Ops
+import Alba.Dsl.V1.Bch2026.Stack (TCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang
 import Alba.Dsl.V1.Common.Stack (FN, TBool, TBytes, TNat)
@@ -12,7 +13,7 @@ import Numeric.Natural (Natural)
 
 -- Turns a byte value into an instruction for pushing that byte value. ToPushOp
 -- is 98 bytes in size.
-toPushOp :: FN (s > TBytes) (s > TBytes)
+toPushOp :: FN (s > TBytes) (s > TCode)
 toPushOp =
   begin
     # opSize
@@ -33,6 +34,7 @@ toPushOp =
         (lessOrEq 9997, n2b # opcode OP_PUSHDATA2 # assemblePushData)
       ]
       (opDrop # opFalse # opVerify)
+    # b2c
   where
     is :: Natural -> FN (s > TNat) (s > TBool)
     is x = nat x # opNumEqual
@@ -48,6 +50,9 @@ toPushOp =
 
     n2b :: FN (s > TNat) (s > TBytes)
     n2b = cast
+
+    b2c :: FN (s > TBytes) (s > TCode)
+    b2c = cast
 
     opcode :: OpcodeL1 -> FN s (s > TBytes)
     opcode op = bytes [(fromIntegral . fromEnum) op]
