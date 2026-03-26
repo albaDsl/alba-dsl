@@ -32,7 +32,6 @@ import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, swap)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
 import Alba.Dsl.V1.Bch2026.Lang (lambda1, lambda2)
-import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Standard))
 import Alba.Tx.Bch2025.Hash (hash256)
 import Alba.Tx.Bch2025.Tx (Tx (..))
 import Data.ByteString qualified as B
@@ -85,11 +84,10 @@ sort :: forall a s. (PackFs a) => FN (s > TVector a) (s > TVector a)
 sort = packFs @a # opSwap # sortF
 
 sortF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
-sortF = invokeExt lib (Standard "DslDemo.MergeSort.MergeSort" 56 3 "sortF")
+sortF = invokeExt lib "DslDemo.MergeSort.MergeSort" "sortF"
 
 length :: forall a s. (PackFs a) => FN (s > TVector a) (s > TNat)
 length = packFs @a # swap # lengthF
 
 lengthF :: FN (s > TPackFs a > TVector a) (s > TNat)
-lengthF =
-  invokeExt lib (Standard "Alba.Dsl.V1.Bch2026.Contract.Vector" 169 3 "lengthF")
+lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.Vector" "lengthF"

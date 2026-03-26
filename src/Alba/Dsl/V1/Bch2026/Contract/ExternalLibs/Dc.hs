@@ -18,7 +18,6 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as LZ
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop)
-import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Standard))
 import Alba.Tx.Bch2025 (Tx (..), hash256)
 import Data.ByteString qualified as B
 import Data.Word (Word32)
@@ -43,7 +42,4 @@ showCase :: FN s s
 showCase = bytes "0341421300" # LZ.decompress # drop
 
 decompress :: FN (s > TBytes) (s > TBytes)
-decompress =
-  invokeExt
-    lib
-    (Standard "Alba.Dsl.V1.Bch2026.Contract.LzssBit" 75 14 "decompress")
+decompress = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.LzssBit" "decompress"
