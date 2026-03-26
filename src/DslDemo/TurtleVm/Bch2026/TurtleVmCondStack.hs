@@ -8,6 +8,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( FN,
+    Loop,
     N,
     TBool,
     TBytes,
@@ -57,7 +58,7 @@ executeP =
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
 condStackExecuteP = function (opTrue # swap # opUntil loop # drop)
   where
-    loop :: FN (s > TBool > TBytes) (s > TBool > TBytes > TBool)
+    loop :: Loop (s > TBool > TBytes)
     loop =
       begin
         # (opSize # nat 1 # opGreaterThanOrEqual)
