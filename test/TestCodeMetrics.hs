@@ -58,7 +58,7 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
             sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "202 opcodes, 875 bytes.",
+            sizeOf vectorOps @?= "202 opcodes, 868 bytes.",
           testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 188 bytes.",
           testCase "LZSS Bitstream" $
             sizeOf CLZB.decompress @?= "5 opcodes, 92 bytes."
@@ -74,15 +74,15 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
           testCase "Vector ops" $
-            ratio vectorOps @?= "875 byte to 730 bytes (saving 16.6%)"
+            ratio vectorOps @?= "868 byte to 722 bytes (saving 16.8%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 32_715_291,
-          testCase "Vector ops" $ costOf vectorOps @?= 17_942_123,
-          testCase "LZSS" $ costOf decompressTest @?= 19_926_886,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_051_421
+          testCase "Vector ops" $ costOf vectorOps @?= 17_498_541,
+          testCase "LZSS" $ costOf decompressTest @?= 19_594_356,
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 10_875_851
         ],
       testGroup
         "TurtleVm efficiency"

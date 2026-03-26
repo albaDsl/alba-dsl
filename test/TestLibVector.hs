@@ -597,7 +597,10 @@ propFolding (BytesSize size) =
     prog len' =
       begin
         # (lambda2 addInt64 # int64 0 # testVector len' # V.foldl)
-        # (int64 sum # opEqual)
+        # (int64 sum # opEqualVerify)
+        # (lambda2 addInt64 # int64 0 # testVector len' # V.foldr)
+        # (int64 sum # opEqualVerify)
+        # opTrue
 
     len :: Integer
     len = size `div` testVectorElemSize
