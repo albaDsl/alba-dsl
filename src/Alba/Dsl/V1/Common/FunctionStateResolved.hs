@@ -6,6 +6,7 @@ module Alba.Dsl.V1.Common.FunctionStateResolved
     Function (..),
     toResolved,
     getVmFunctionId,
+    getBaseVmFunctionId,
     functionsSortedByIndex,
     functionsSortedByIndexTopological,
   )
@@ -15,7 +16,7 @@ import Alba.Dsl.V1.Common.FunctionState qualified as FS
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (..),
-    FunctionIdType,
+    FunctionIdType (..),
     OpcodeL3 (FunctionIndexRef),
     VmFunctionId,
     mkVmFunctionId,
@@ -66,6 +67,17 @@ getVmFunctionId fId FunctionState {functions} =
   case M.lookup fId functions of
     Just (Function {vmFId}) -> pure vmFId
     Nothing -> Nothing
+
+-- Base for runtime assigned function IDs.
+getBaseVmFunctionId :: FunctionIdType -> FunctionState -> VmFunctionId
+getBaseVmFunctionId Local FunctionState {functions} =
+  if M.null functions
+    then mkVmFunctionId Local 0
+    else
+      let maxIdx = maximum ((.index) <$> functions)
+       in mkVmFunctionId Local (succ maxIdx)
+getBaseVmFunctionId _ _ =
+  error "RuntimeState can't be initialized from libraries."
 
 functionsSortedByIndex :: FunctionTable -> [(FunctionId, Function)]
 functionsSortedByIndex = M.toList >>> sortBy (compare `on` ((.index) . snd))

@@ -20,15 +20,13 @@ import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
     FunctionState (..),
-    addFunctionBody,
     functionsSortedBySites,
-    registerFunction,
-    setCallSites,
     startState,
   )
 import Alba.Dsl.V1.Common.FunctionStateResolved
   ( functionsSortedByIndex,
     functionsSortedByIndexTopological,
+    getBaseVmFunctionId,
     getVmFunctionId,
   )
 import Alba.Dsl.V1.Common.FunctionStateResolved qualified as FSR
@@ -54,7 +52,17 @@ import Alba.Vm.Common.OpcodeL1 (CodeL1)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Alba.Vm.Common.VmState qualified as VmState
 import Control.Arrow ((>>>))
-import Control.Monad.State.Lazy (State, get, put, runState)
+import Control.Monad (unless)
+import Control.Monad.State
+  ( State,
+    StateT,
+    get,
+    modify,
+    put,
+    runState,
+    runStateT,
+  )
+import Control.Monad.Trans.Class (lift)
 import Crypto.Hash qualified as H
 import Data.ByteArray (convert)
 import Data.ByteString qualified as B
@@ -151,28 +159,13 @@ pass1 ::
   (CodeL3, FunctionState)
 pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
+-- Use of 'iterate' is to get the call site count correct.
 addSupportFunctions :: FunctionState -> FunctionState
 addSupportFunctions fs@FunctionState {functions} =
-  let n = numRtConstants in if n > 0 then addToPushOpFunction n else fs
+  iterate (\fs' -> snd (pass1 S.empty fs' toPushOp)) fs !! numRtConstants
   where
     numRtConstants :: Int
     numRtConstants = M.size $ M.filterWithKey (\k _ -> isRtConstant k) functions
-
-    addToPushOpFunction :: Int -> FunctionState
-    addToPushOpFunction n =
-      let (code, _ft) = compileL2 O1 toPushOp
-          codeL3 = Opcode <$> code
-          fId = toPushOpFunctionName
-       in fromMaybe
-            (error "addSupportFunctions: Internal error.")
-            ( do
-                fs1 <- registerFunction fId fs
-                fs2 <- addFunctionBody fId codeL3 fs1
-                setCallSites fId fs2 n
-            )
-
-toPushOpFunctionName :: FunctionId
-toPushOpFunctionName = Named "__toPushOp"
 
 assignIndices :: Options -> FunctionState -> FSR.FunctionState
 assignIndices opts fs@FunctionState {functions} =
@@ -211,11 +204,6 @@ functionDefinitions fs@FSR.FunctionState {functions} =
           (\(k, _) -> isRtConstant k)
           (functionsSortedByIndexTopological ft)
 
-    invokeToPushOp :: CodeL3
-    invokeToPushOp =
-      S.fromList
-        [(FunctionIndexRef {fId = toPushOpFunctionName}), Opcode OP_INVOKE]
-
     def :: (FunctionId, FSR.Function) -> CodeL3
     def (fId, FSR.Function {..}) =
       let res = do
@@ -228,7 +216,9 @@ functionDefinitions fs@FSR.FunctionState {functions} =
                         ( S.singleton . bytesToDataOp $
                             evaluateConstant fs fId code'
                         )
-              _ | isRtConstant fId -> pure $ code' <> invokeToPushOp
+              _
+                | isRtConstant fId ->
+                    pure $ code' <> (fst $ pass1 S.empty startState toPushOp)
               _ -> pure $ S.fromList [FunctionBody code']
             pure $
               code'' <> S.fromList [FunctionIndexDef {fId}, Opcode OP_DEFINE]
@@ -260,14 +250,14 @@ evaluateConstant fs fId code =
     err3 str = err ("error while evaluating constant" <> str)
 
 pass2 :: Options -> FSR.FunctionState -> CodeL3 -> CodeL2
-pass2 opts fs code = fromMaybe err (mapM (f fs) code)
+pass2 opts fs code = fst $ fromMaybe err (runStateT (mapM (f fs) code) 0)
   where
-    f :: FSR.FunctionState -> OpcodeL3 -> Maybe OpcodeL2
+    f :: FSR.FunctionState -> OpcodeL3 -> StateT Int Maybe OpcodeL2
     f fs' (FunctionIndexDef fId) = do
-      vmFId <- getVmFunctionId fId fs'
+      vmFId <- lift $ getVmFunctionId fId fs'
       pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
     f fs' (FunctionIndexRef fId) = do
-      vmFId <- getVmFunctionId fId fs'
+      vmFId <- lift $ getVmFunctionId fId fs'
       pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
     f fs' (FunctionBody body) = do
       let body' = pass2 opts fs' body
@@ -275,9 +265,15 @@ pass2 opts fs code = fromMaybe err (mapM (f fs) code)
             None -> body'
             O1 -> optimize body'
       pure $ bytesToDataOp (fromMaybe err (codeL2ToCodeL1 body''))
+    f fs' RuntimeState = do
+      count <- get
+      unless (count == 0) (error "Multiple 'runEnv' calls.")
+      modify succ
+      let base = getBaseVmFunctionId opts.fIdType fs'
+      pure $ bytesToDataOp (vmFunctionIdToByteString base)
     f _fs (Opcode op) = pure op
 
-    err = error "compile: internal error."
+    err = error "Internal error."
 
 optimize :: CodeL2 -> CodeL2
 optimize =

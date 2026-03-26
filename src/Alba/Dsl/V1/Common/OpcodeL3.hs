@@ -26,6 +26,7 @@ data OpcodeL3
   | FunctionIndexDef {fId :: FunctionId}
   | FunctionIndexRef {fId :: FunctionId}
   | FunctionBody {code :: CodeL3}
+  | RuntimeState
   deriving (Eq, Show)
 
 data FunctionId

@@ -5,6 +5,8 @@ module TestFunctions (testFunctions) where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.PartialApplication (apply2, apply3_2)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (swap)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector, generate, reverse)
 import Data.ByteString qualified as B
 import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)
@@ -28,7 +30,9 @@ testFunctions =
       testCase "Recursion - factorial" $ isTrue (evaluateProg progFactorial),
       testCase "Recursion - merge sort TInt64s" $
         isTrue (evaluateProg progSort),
-      testProperty "Recursion - merge sort" propSort
+      testProperty "Recursion - merge sort" propSort,
+      testCase "Runtime function definitions" $
+        isTrue (evaluateProg progRuntimeFunctions)
     ]
 
 progBasic :: FN s (s > TBool)
@@ -117,3 +121,22 @@ propSort (AsciiString xs) =
   where
     toVector :: FN (s > TBytes) (s > TVector TInt8)
     toVector = cast
+
+-- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
+-- >>> Dsl.progSize progRuntimeFunctions
+-- "37 opcodes, 37 bytes. Including function table: 55 opcodes, 196 bytes.\n"
+progRuntimeFunctions :: FNA s Base (s > TBool) Base
+progRuntimeFunctions =
+  runEnv
+    ( begin
+        # (int 1 # int 2 # opAdd # f # apply2)
+        # (int 5 # swap # invoke1 # int 2 # opEqualVerify)
+        # (int 3 # int 2 # opAdd # f # apply2)
+        # (int 9 # swap # invoke1 # int 4 # opEqualVerify)
+        # (int 3 # int 6 # g # apply3_2)
+        # (int 4 # swap # invoke1 # opTrue # opEqualVerify)
+        # opTrue
+    )
+  where
+    f = lambda2 opSub
+    g = lambda3 opWithin

@@ -18,14 +18,14 @@ module Alba.Dsl.V1.Bch2026.Lang
     invoke,
     progCode,
     emptyProg,
+    runEnv,
   )
 where
 
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
-import Alba.Dsl.V1.Bch2026.Stack (TCode, TLambda, TLambdaUntyped)
-import Alba.Dsl.V1.Common.Compile (pass1)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, aop')
+import Alba.Dsl.V1.Bch2026.Stack (ENV, TCode, TLambda, TLambdaUntyped)
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aop', aops, aops')
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState
   ( FunctionState (..),
@@ -38,7 +38,7 @@ import Alba.Dsl.V1.Common.FunctionState
     isRegistered,
     registerFunction,
   )
-import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId, OpcodeL3 (..))
+import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId, OpcodeL3 (..))
 import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Alba.Misc.Utils (canNotHappen)
@@ -68,6 +68,14 @@ register prog fId fs =
           (c', fs'') = pass1 S.empty fs' prog
        in fromMaybe canNotHappen (addFunctionBody fId c' fs'')
     else fromMaybe canNotHappen (addCallSite fId fs)
+
+pass1 ::
+  forall s s' alt alt'.
+  CodeL3 ->
+  FunctionState ->
+  (S s alt -> S s' alt') ->
+  (CodeL3, FunctionState)
+pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
 constant :: (HasCallStack) => FN s (s > a) -> FN s (s > a)
 constant prog (S c fs) =
@@ -174,3 +182,8 @@ progCode prog (S c fs) =
 
 emptyProg :: FN s s
 emptyProg (S c fs) = S c fs
+
+runEnv :: (ENV s s') -> FNA s alt s' alt'
+runEnv prog (S c fs) =
+  let (S c' fs') = prog (S (aops' c [RuntimeState, Opcode OP_TOALTSTACK]) fs)
+   in S (aops c' [OP_FROMALTSTACK, OP_DROP]) fs'
