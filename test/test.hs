@@ -18,6 +18,7 @@ import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
 import TestLambdas (testLambdas)
+import TestLibEither (testLibEither)
 import TestLibMaybe (testLibMaybe)
 import TestLibTuple (testLibTuple)
 import TestLibVector (testLibVector)
@@ -65,6 +66,7 @@ tests =
       testIntrospection,
       testInvalidStack,
       testLambdas,
+      testLibEither,
       testLibTuple,
       testLibMaybe,
       testLibVector,
