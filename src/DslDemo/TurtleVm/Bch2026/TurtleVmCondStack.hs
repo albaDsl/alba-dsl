@@ -17,16 +17,12 @@ import Alba.Dsl.V1.Bch2026
     function,
     nat,
     opBoolOr,
-    opDrop,
-    opDup,
     opEqual,
     opFalse,
     opGreaterThanOrEqual,
     opIf,
-    opRot,
     opSize,
     opSplit,
-    opSwap,
     opTrue,
     opUntil,
     roll,
@@ -34,8 +30,9 @@ import Alba.Dsl.V1.Bch2026
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, ifJust)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, rot, swap)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
-import Prelude hiding (and)
+import Prelude hiding (drop)
 
 executeP ::
   FN
@@ -49,7 +46,7 @@ executeP =
           # isSingleByteOp
           # opIf
             ( begin
-                # (opDup # isConditionalOp)
+                # (dup # isConditionalOp)
                 # (roll "condStack" # condStackExecuteP)
                 # opBoolOr
             )
@@ -58,7 +55,7 @@ executeP =
       (del "condStack" # bytes [] # opFalse)
 
 condStackExecuteP :: FN (s > TBytes) (s > TBool)
-condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)
+condStackExecuteP = function (opTrue # swap # opUntil loop # drop)
   where
     loop :: FN (s > TBool > TBytes) (s > TBool > TBytes > TBool)
     loop =
@@ -66,7 +63,7 @@ condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)
         # (opSize # nat 1 # opGreaterThanOrEqual)
         # opIf
           ( begin
-              # (nat 1 # opSplit # opSwap # bytes [1] # opEqual)
+              # (nat 1 # opSplit # swap # bytes [1] # opEqual)
               # opIf
                 (opTrue # replaceResult # opFalse)
                 (opFalse # replaceResult # opTrue)
@@ -74,4 +71,4 @@ condStackExecuteP = function (opTrue # opSwap # opUntil loop # opDrop)
           (opTrue # replaceResult # opTrue)
 
     replaceResult :: FN (s > TBool > TBytes > TBool) (s > TBool > TBytes)
-    replaceResult = opRot # opDrop # opSwap
+    replaceResult = rot # drop # swap

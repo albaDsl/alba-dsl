@@ -29,29 +29,25 @@ import Alba.Dsl.V1.Bch2026
     nat,
     op2Drop,
     opCat,
-    opDrop,
-    opDup,
     opEqual,
     opFromAltStack,
     opGreaterThanOrEqual,
     opIf,
     opLessThanOrEqual,
-    opNip,
     opNumEqual,
-    opRot,
     opSize,
     opSplit,
-    opSwap,
     opToAltStack,
-    opTuck,
     pick,
     roll,
     (#),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, just, nothing)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap, tuck)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isOpDataOp, vmError)
+import Prelude hiding (drop)
 
 type TurtleVmState = TTuple TBytes TBytes
 
@@ -62,10 +58,10 @@ getOp ::
   FNA s (alt > TurtleVmState) (s > TMaybe TBytes) (alt > TurtleVmState)
 getOp =
   begin
-    # (getState # untuple # opSwap # opSize)
+    # (getState # untuple # swap # opSize)
     # ifZero
-      (opSwap # tuple # putState # nothing)
-      (getOpBytes # opRot # tuple # putState # just)
+      (swap # tuple # putState # nothing)
+      (getOpBytes # rot # tuple # putState # just)
 
 getOpBytes :: FN (s > TBytes) (s > TBytes > TBytes)
 getOpBytes =
@@ -75,7 +71,7 @@ getOpBytes =
     # opIf
       ( begin
           # (roll "rest" # pick "op" # bytesToNat # opSplit) -- oprest rest
-          # (roll "op" # opRot # opCat # opSwap)
+          # (roll "op" # rot # opCat # swap)
       )
       (roll "op" # roll "rest")
   where
@@ -86,16 +82,16 @@ getOpAndCondStack ::
   FNA s (alt > TurtleVmState) (s > TMaybe TBytes > TBytes) (alt > TurtleVmState)
 getOpAndCondStack =
   begin
-    # (getState # untuple # opSwap # opSize)
+    # (getState # untuple # swap # opSize)
     # ifZero
-      (opSwap # opTuck # tuple # putState # nothing # opSwap)
+      (swap # tuck # tuple # putState # nothing # swap)
       ( begin
-          # (getOpBytes # opRot # opTuck # tuple # putState)
-          # (opSwap # just # opSwap)
+          # (getOpBytes # rot # tuck # tuple # putState)
+          # (swap # just # swap)
       )
 
 getCondStack :: FNA s (alt > TurtleVmState) (s > TBytes) (alt > TurtleVmState)
-getCondStack = getState # opDup # untuple # opNip # opSwap # putState
+getCondStack = getState # dup # untuple # nip # swap # putState
 
 putCondStack ::
   Int -> FNA (s > TBool) (alt > TurtleVmState) s (alt > TurtleVmState)
@@ -105,10 +101,10 @@ putCondStack maxCsDepth =
         # (getStateUnpackedWithSize # maxCsDepth' # opLessThanOrEqual)
         # opIf
           ( begin
-              # (opRot # opIf (bytes [1]) (bytes [0]))
-              # (opSwap # opCat # tuple # putState)
+              # (rot # opIf (bytes [1]) (bytes [0]))
+              # (swap # opCat # tuple # putState)
           )
-          (op2Drop # opDrop # vmError "E2") -- CondStack overflow
+          (op2Drop # drop # vmError "E2") -- CondStack overflow
     )
   where
     maxCsDepth' = nat (fromIntegral maxCsDepth)
@@ -123,9 +119,9 @@ toggleCondStack =
     # (getStateUnpackedWithSize # nat 1 # opGreaterThanOrEqual)
     # opIf
       ( begin
-          # (nat 1 # opSplit # opSwap # bytes [1] # opEqual)
+          # (nat 1 # opSplit # swap # bytes [1] # opEqual)
           # opIf (bytes [0]) (bytes [1])
-          # (opSwap # opCat # tuple # putState)
+          # (swap # opCat # tuple # putState)
       )
       (vmError "E3") -- CondStack underflow
 
@@ -134,7 +130,7 @@ dropCondStack =
   begin
     # (getStateUnpackedWithSize # nat 1 # opGreaterThanOrEqual)
     # opIf
-      (nat 1 # opSplit # opNip # tuple # putState)
+      (nat 1 # opSplit # nip # tuple # putState)
       (vmError "E4") -- CondStack underflow
 
 getState :: FNA s (alt > TurtleVmState) (s > TurtleVmState) alt
@@ -146,5 +142,5 @@ putState = opToAltStack
 isEndOfProgram :: FNA s (alt > TurtleVmState) (s > TBool) (alt > TurtleVmState)
 isEndOfProgram =
   begin
-    # (getState # opDup # putState)
-    # (untuple # opDrop # opSize # opNip # nat 0 # opNumEqual)
+    # (getState # dup # putState)
+    # (untuple # drop # opSize # nip # nat 0 # opNumEqual)

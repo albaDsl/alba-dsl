@@ -29,7 +29,6 @@ import Alba.Dsl.V1.Bch2026
     nat,
     opBin2Num,
     opCat,
-    opDrop,
     opFalse,
     opGreaterThan,
     opNumEqual,
@@ -42,6 +41,8 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop)
+import Prelude hiding (drop)
 
 vmError :: Bytes -> FNA s alt s' alt'
 vmError msg = bytes msg # opFalse # opVerify # castStack
@@ -58,7 +59,7 @@ toSigned = bytes [0] # opCat # opBin2Num
 -- single byte bytestring.
 fromSigned :: FN (s > TInt) (s > TBytes)
 fromSigned =
-  i2b # opSize # nat 1 # opGreaterThan # opWhen (nat 1 # opSplit # opDrop)
+  i2b # opSize # nat 1 # opGreaterThan # opWhen (nat 1 # opSplit # drop)
   where
     i2b :: FN (s > TInt) (s > TBytes)
     i2b = cast

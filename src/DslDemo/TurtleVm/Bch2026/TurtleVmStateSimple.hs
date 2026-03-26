@@ -23,19 +23,16 @@ import Alba.Dsl.V1.Bch2026
     nat,
     op2Dup,
     opCat,
-    opDrop,
-    opDup,
     opFromAltStack,
-    opNip,
-    opRot,
     opSize,
     opSplit,
-    opSwap,
     opToAltStack,
     (#),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, just, nothing)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
+import Prelude hiding (drop)
 
 data TCode
 
@@ -75,7 +72,7 @@ putFunction ::
 putFunction =
   begin
     # (opFromAltStack # opFromAltStack)
-    # (opDrop # opSwap # toFunction)
+    # (drop # swap # toFunction)
     # (opToAltStack # opToAltStack)
 
 getFunction ::
@@ -84,14 +81,14 @@ getFunction =
   begin
     # (opFromAltStack # opFromAltStack)
     # (op2Dup # opToAltStack # opToAltStack)
-    # (opNip # fromFunction)
+    # (nip # fromFunction)
 
 invokeFunction ::
   FNA s (alt > TFunction > TCode) s (alt > TFunction > TCode)
 invokeFunction =
   begin
     # (opFromAltStack # fromCode # opFromAltStack # fromFunction)
-    # (opDup # opRot # opCat # opSwap)
+    # (dup # rot # opCat # swap)
     # (toFunction # opToAltStack # toCode # opToAltStack)
 
 getCode :: FNA s (alt > TCode) (s > TBytes) alt
