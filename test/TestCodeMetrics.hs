@@ -10,10 +10,11 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
-import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate, reverse, zipWith)
+import Alba.Dsl.V1.Bch2026.Contract.TupleFs (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
@@ -36,7 +37,6 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 import TestUtils (TestResult (..), minimalContext, showLog)
 import TestUtils2026 (emptyStacks, evaluateProg, evaluateScript)
-import Prelude hiding (foldl, reverse, zipWith)
 
 testCodeMetrics :: TestTree
 testCodeMetrics =
@@ -58,7 +58,7 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
             sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 723 bytes.",
           testCase "Vector ops" $
-            sizeOf vectorOps @?= "202 opcodes, 868 bytes.",
+            sizeOf vectorOps @?= "331 opcodes, 1343 bytes.",
           testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 188 bytes.",
           testCase "LZSS Bitstream" $
             sizeOf CLZB.decompress @?= "5 opcodes, 92 bytes."
@@ -74,13 +74,13 @@ testCodeMetrics =
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
           testCase "Vector ops" $
-            ratio vectorOps @?= "868 byte to 722 bytes (saving 16.8%)"
+            ratio vectorOps @?= "1343 byte to 1062 bytes (saving 20.9%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             costOf windowedMul @?= 32_715_291,
-          testCase "Vector ops" $ costOf vectorOps @?= 17_498_541,
+          testCase "Vector ops" $ costOf vectorOps @?= 23_792_161,
           testCase "LZSS" $ costOf decompressTest @?= 19_594_356,
           testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 10_875_851
         ],
@@ -154,33 +154,51 @@ windowedMul =
     gTable = nat 100
 
 vectorOps :: FNC
-vectorOps = f
+vectorOps =
+  begin
+    # (nat n # lambda1 (op1Add # cast # toInt64) # V.generate)
+    # (nat n # lambda1 (cast # op1Add # toInt8) # int8 1 # V.iterateN)
+    # ns2 "vec64" "vec8"
+    # ( begin
+          # (lambda2 (cast # opAdd) # nat 0 # nat n # int8 1 # V.replicate)
+          # (V.foldl # nat n # opEqualVerify)
+      )
+    # (pick "vec64" # opDup # V.reverse # sort # opEqualVerify)
+    # (pick "vec8" # opDup # V.reverse # sort # opEqualVerify)
+    # ( begin
+          # lambda2 (untuple # castStack # opAdd # opAdd)
+          # int 0
+          # (pick "vec8" # pick "vec8" # V.zip)
+          # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
+      )
+    # ( begin
+          # lambda2 (castStack # opAdd)
+          # int 0
+          # ( begin
+                # lambda2 (castStack # opAdd # toInt64)
+                # (pick "vec64" # pick "vec8" # V.zipWith)
+            )
+          # (V.foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
+      )
+    # ( begin
+          # lambda2 (castStack # opAdd)
+          # int 0
+          # (lambda1 (cast # int 10 # opMul # toInt64) # pick "vec64" # V.map)
+          # (V.foldl # int (fromIntegral $ n * (n + 1) * 5) # opEqualVerify)
+      )
+    # ( begin
+          # lambda2 (castStack # opAdd)
+          # int 0
+          # ( begin
+                # lambda1 (cast # int 2 # opMod # int 0 # opEqual)
+                # (pick "vec64" # V.filter)
+            )
+          # (V.foldl # int 650 # opEqualVerify)
+      )
+    # delCount 2
   where
-    f :: FN s s
-    f =
-      begin
-        # (nat n # lambda1 (op1Add # cast # toInt64) # generate)
-        # (opDup # reverse # sort # opEqualVerify)
-        # (nat n # lambda1 (op1Add # cast # toInt8) # generate)
-        # (opDup # reverse # sort # opEqualVerify)
-        # lambda2 add
-        # int 0
-        # ( begin
-              # lambda2 add'
-              # (nat n # lambda1 (op1Add # cast # toInt64) # generate)
-              # (nat n # lambda1 (op1Add # cast # toInt8) # generate)
-              # zipWith
-          )
-        # (foldl # int (fromIntegral $ n * (n + 1)) # opEqualVerify)
-
     n :: Natural
     n = 50
-
-    add :: FN (s > TInt > TInt64) (s > TInt)
-    add = castStack # opAdd
-
-    add' :: FN (s > TInt64 > TInt8) (s > TInt64)
-    add' = castStack # opAdd # toInt64
 
 decompressTest :: FNC
 decompressTest =
