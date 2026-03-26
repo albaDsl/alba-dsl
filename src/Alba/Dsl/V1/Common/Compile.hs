@@ -102,10 +102,11 @@ compileLibrary ::
   Optimize ->
   VmFunctionId ->
   (S s alt -> S s' alt') ->
-  (CodeL1, FSR.FunctionTable)
+  CompilationResult
 compileLibrary level prefix prog =
   let (_code, defs, fs) = compileL2WithDetails options prog
-   in (fromMaybe err (codeL2ToCodeL1 defs), fs.functions)
+      functionTable = fs.functions
+   in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 defs), ..}
   where
     options = Options {fIdType = ThreeByte16_8 prefix, ..}
     err = error "compileLibrary: internal error."

@@ -3,7 +3,8 @@
 module Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( CompilationResult (..),
+    FN,
     LibData (..),
     Optimize (O1),
     StackEntry,
@@ -41,7 +42,7 @@ import Prelude hiding (drop)
 
 lib :: LibData
 lib =
-  let (code, functionTable) = compileLibrary O1 "vc" showCase
+  let CompilationResult {..} = compileLibrary O1 "vc" showCase
       size = B.length code
       deployCode = code
       deploySize = B.length deployCode
