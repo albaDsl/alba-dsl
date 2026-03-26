@@ -22,11 +22,15 @@ import Alba.Dsl.V1.Bch2026
     TBytes,
     TLambda,
     TNat,
+    begin,
+    bytes,
     cast,
+    constant,
     function,
     int,
     invoke0,
     invoke1,
+    lambda1,
     nat,
     opCat,
     opEqual,
@@ -35,13 +39,88 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (TBytes128)
+import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
+import Data.ByteString qualified as B
 import Data.Kind (Type)
-import Prelude (Integer)
+import Numeric.Natural
+import Prelude hiding (drop, map, maybe)
 
 data TMaybe (a :: Type)
 
 instance StackEntry (TMaybe a)
+
+instance PackFs (TMaybe TInt8) where
+  sizeConst = 1 + sizeConst @TInt8
+  size = nat (sizeConst @(TMaybe TInt8))
+  pack =
+    ifJust
+      (pack @TInt8 # just # cast)
+      (tagNothing # zeroes (sizeConst @TInt8) # opCat)
+    where
+      zeroes :: Natural -> FN s (s > TBytes)
+      zeroes count = bytes (B.replicate (fromIntegral count) 0)
+  unpack = cast # ifJust (unpack @TInt8 # just) nothing
+  record = maybeInt8PackFs
+
+maybeInt8PackFs :: FN s (s > TPackFs (TMaybe TInt8))
+maybeInt8PackFs =
+  constant
+    ( begin
+        # size @(TMaybe TInt8)
+        # lambda1 (pack @(TMaybe TInt8))
+        # lambda1 (unpack @(TMaybe TInt8))
+        # mkPackFsM
+    )
+
+instance PackFs (TMaybe TInt64) where
+  sizeConst = 1 + sizeConst @TInt64
+  size = nat (sizeConst @(TMaybe TInt64))
+  pack =
+    ifJust
+      (pack @TInt64 # just # cast)
+      (tagNothing # zeroes (sizeConst @TInt64) # opCat)
+    where
+      zeroes :: Natural -> FN s (s > TBytes)
+      zeroes count = bytes (B.replicate (fromIntegral count) 0)
+  unpack = cast # ifJust (unpack @TInt64 # just) nothing
+  record = maybeInt64PackFs
+
+maybeInt64PackFs :: FN s (s > TPackFs (TMaybe TInt64))
+maybeInt64PackFs =
+  constant
+    ( begin
+        # size @(TMaybe TInt64)
+        # lambda1 (pack @(TMaybe TInt64))
+        # lambda1 (unpack @(TMaybe TInt64))
+        # mkPackFsM
+    )
+
+instance PackFs (TMaybe TBytes128) where
+  sizeConst = 1 + sizeConst @TBytes128
+  size = nat (sizeConst @(TMaybe TBytes128))
+  pack =
+    ifJust
+      (pack @TBytes128 # just # cast)
+      (tagNothing # zeroes (sizeConst @TBytes128) # opCat)
+    where
+      zeroes :: Natural -> FN s (s > TBytes)
+      zeroes count = bytes (B.replicate (fromIntegral count) 0)
+  unpack = cast # ifJust (unpack @TBytes128 # just) nothing
+  record = maybeBytes128PackFs
+
+maybeBytes128PackFs :: FN s (s > TPackFs (TMaybe TBytes128))
+maybeBytes128PackFs =
+  constant
+    ( begin
+        # size @(TMaybe TBytes128)
+        # lambda1 (pack @(TMaybe TBytes128))
+        # lambda1 (unpack @(TMaybe TBytes128))
+        # mkPackFsM
+    )
 
 just :: FN (s > a) (s > TMaybe a)
 just = function (toBytes # tagJust # swap # opCat # cast)
