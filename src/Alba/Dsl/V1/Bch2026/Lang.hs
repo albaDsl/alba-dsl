@@ -8,10 +8,12 @@ module Alba.Dsl.V1.Bch2026.Lang
     lambda1,
     lambda2,
     lambda3,
+    lambda4,
     invoke0,
     invoke1,
     invoke2,
     invoke3,
+    invoke4,
     lambda,
     invoke,
     progCode,
@@ -113,6 +115,20 @@ lambda3 prog s =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog s
 
+lambda4 ::
+  ( HasCallStack,
+    StackEntry t1,
+    StackEntry t2,
+    StackEntry t3,
+    StackEntry t4,
+    StackEntry r1
+  ) =>
+  FN (s > t1 > t2 > t3 > t4) (s > r1) ->
+  FN s' (s' > TLambda '[t1, t2, t3, t4] '[r1])
+lambda4 prog s =
+  let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
+   in registerLambda fId prog s
+
 lambda :: (HasCallStack) => FNA s alt s' alt' -> FN s'' (s'' > TLambdaUntyped)
 lambda prog s =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
@@ -138,6 +154,12 @@ invoke2 (S c fs) = S (aop c OP_INVOKE) fs
 
 invoke3 :: FN (s > t1 > t2 > t3 > TLambda '[t1, t2, t3] ret) (Append s ret)
 invoke3 (S c fs) = S (aop c OP_INVOKE) fs
+
+invoke4 ::
+  FN
+    (s > t1 > t2 > t3 > t4 > TLambda '[t1, t2, t3, t4] ret)
+    (Append s ret)
+invoke4 (S c fs) = S (aop c OP_INVOKE) fs
 
 invoke :: FNA s alt s' alt' -> FNA (s > TLambdaUntyped) alt s' alt'
 invoke _prog (S c fs) = S (aop c OP_INVOKE) fs
