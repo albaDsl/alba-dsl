@@ -43,7 +43,7 @@ testCodeMetrics =
             sizeOf (toTyped (T2025.turtleVm 1 1))
               @?= "1462 opcodes, 1762 bytes.",
           testCase "turtleVm 2026" $
-            sizeOf (toTyped (T2026.turtleVm 1)) @?= "562 opcodes, 1026 bytes.",
+            sizeOf (toTyped (T2026.turtleVm 1)) @?= "564 opcodes, 1031 bytes.",
           testCase "EC scalar point multiply (Affine)" $
             sizeOf EA.ecMul @?= "38 opcodes, 452 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $
@@ -65,7 +65,7 @@ testCodeMetrics =
               @?= "1762 byte to 1050 bytes (saving 40.4%)",
           testCase "turtleVm 2026" $
             ratio (toTyped (T2026.turtleVm 1))
-              @?= "1026 byte to 986 bytes (saving 3.9%)",
+              @?= "1031 byte to 990 bytes (saving 4.0%)",
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
             ratio windowedMul @?= "993 byte to 808 bytes (saving 18.6%)",
           testCase "Vector ops" $

@@ -15,6 +15,7 @@ import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.Lang (begin, (#))
 import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (OP_DEFINE, OP_INVOKE))
+import DslDemo.TurtleVm.Bch2025.Maybe (ifJust)
 import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
   ( getOp,
     getOpBytes,
@@ -23,7 +24,6 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
     putFunction,
   )
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
-import DslDemo.TurtleVm.Common.Maybe (ifJust)
 
 miniTurtleVm101 :: FNU
 miniTurtleVm101 = ft initStateWithDefaultOpDefine # repeatProg 12 handleOp

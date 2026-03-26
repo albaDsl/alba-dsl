@@ -34,8 +34,8 @@ import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped)
+import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, ifJust)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isConditionalOp, isSingleByteOp)
-import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
 import Prelude hiding (and)
 
 executeP ::

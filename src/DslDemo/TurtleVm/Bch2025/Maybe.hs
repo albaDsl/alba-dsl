@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.TurtleVm.Common.Maybe
+module DslDemo.TurtleVm.Bch2025.Maybe
   ( TMaybe,
     just,
     nothing,

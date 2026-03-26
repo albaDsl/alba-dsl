@@ -35,7 +35,7 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
-import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
+import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 
 data TCode
 

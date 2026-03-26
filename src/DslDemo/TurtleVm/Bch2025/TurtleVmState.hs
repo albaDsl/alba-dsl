@@ -45,9 +45,9 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
+import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 import DslDemo.TurtleVm.Bch2025.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isOpDataOp, vmError)
-import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
 
 data TurtleVmState
 

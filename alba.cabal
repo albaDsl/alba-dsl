@@ -239,6 +239,7 @@ library
       DslDemo.EllipticCurve.LookupTable,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,
+      DslDemo.TurtleVm.Bch2025.Maybe,
       DslDemo.TurtleVm.Bch2025.MiniTurtleVm101,
       DslDemo.TurtleVm.Bch2025.Tuple,
       DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic,
@@ -255,7 +256,6 @@ library
       DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple,
       DslDemo.TurtleVm.Bch2025.TurtleVmUtils,
       DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped,
-      DslDemo.TurtleVm.Bch2026.Tuple,
       DslDemo.TurtleVm.Bch2026.TurtleOpAltStack,
       DslDemo.TurtleVm.Bch2026.TurtleOpIf,
       DslDemo.TurtleVm.Bch2026.TurtleVm,
@@ -265,7 +265,6 @@ library
       DslDemo.TurtleVm.Bch2026.TurtleVmStateSimple,
       DslDemo.TurtleVm.Bch2026.TurtleVmUtils,
       DslDemo.TurtleVm.Bch2026.TurtleVmUtilsUntyped,
-      DslDemo.TurtleVm.Common.Maybe,
   hs-source-dirs: src
 
 executable alba

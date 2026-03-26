@@ -17,7 +17,6 @@ where
 import Alba.Dsl.V1.Bch2026
   ( FN,
     FNA,
-    StackEntry,
     TBool,
     TBytes,
     TNat,
@@ -50,13 +49,11 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import DslDemo.TurtleVm.Bch2026.Tuple (TTuple, tuple, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, just, nothing)
+import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isOpDataOp, vmError)
-import DslDemo.TurtleVm.Common.Maybe (TMaybe, just, nothing)
 
-data TurtleVmState
-
-instance StackEntry TurtleVmState
+type TurtleVmState = TTuple TBytes TBytes
 
 initState :: FNA (s > TBytes) alt s (alt > TurtleVmState)
 initState = bytes [] # tuple # putState
@@ -140,17 +137,11 @@ dropCondStack =
       (nat 1 # opSplit # opNip # tuple # putState)
       (vmError "E4") -- CondStack underflow
 
-getState :: FNA s (alt > TurtleVmState) (s > TTuple) alt
-getState = opFromAltStack # toTuple
-  where
-    toTuple :: FN (s > TurtleVmState) (s > TTuple)
-    toTuple = cast
+getState :: FNA s (alt > TurtleVmState) (s > TurtleVmState) alt
+getState = opFromAltStack
 
-putState :: FNA (s > TTuple) alt s (alt > TurtleVmState)
-putState = fromTuple # opToAltStack
-  where
-    fromTuple :: FN (s > TTuple) (s > TurtleVmState)
-    fromTuple = cast
+putState :: FNA (s > TurtleVmState) alt s (alt > TurtleVmState)
+putState = opToAltStack
 
 isEndOfProgram :: FNA s (alt > TurtleVmState) (s > TBool) (alt > TurtleVmState)
 isEndOfProgram =

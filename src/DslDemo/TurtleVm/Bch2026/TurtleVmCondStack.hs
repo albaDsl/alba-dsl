@@ -33,8 +33,8 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, ifJust)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
-import DslDemo.TurtleVm.Common.Maybe (TMaybe, ifJust)
 import Prelude hiding (and)
 
 executeP ::
