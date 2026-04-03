@@ -73,17 +73,17 @@ testCodeMetrics =
             ratio (toTyped (T2026.turtleVm 1))
               @?= "1031 byte to 990 bytes (saving 4.0%)",
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            ratio windowedMul @?= "1002 byte to 861 bytes (saving 14.1%)",
+            ratio windowedMul @?= "1002 byte to 860 bytes (saving 14.2%)",
           testCase "Vector ops" $
-            ratio vectorOps @?= "1377 byte to 1152 bytes (saving 16.3%)"
+            ratio vectorOps @?= "1377 byte to 1156 bytes (saving 16.0%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            costOf windowedMul @?= 31_864_468,
+            costOf windowedMul @?= 31_864_470,
           testCase "Vector ops" $ costOf vectorOps @?= 23_924_857,
-          testCase "LZSS" $ costOf decompressTest @?= 21_203_641,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_509_754
+          testCase "LZSS" $ costOf decompressTest @?= 21_115_628,
+          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_498_968
         ],
       testGroup
         "TurtleVm efficiency"

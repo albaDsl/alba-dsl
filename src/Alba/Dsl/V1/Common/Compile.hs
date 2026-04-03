@@ -20,9 +20,12 @@ import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
     FunctionState (..),
-    functionsSortedBySites,
+    ftLookup,
+    getNumRtConstants,
+    mapFunctions,
     startState,
   )
+import Alba.Dsl.V1.Common.FunctionState qualified as FS
 import Alba.Dsl.V1.Common.FunctionStateResolved
   ( functionsSortedByIndex,
     functionsSortedByIndexTopological,
@@ -59,7 +62,6 @@ import Control.Monad.State
     get,
     modify,
     put,
-    runState,
     runStateT,
   )
 import Control.Monad.Trans.Class (lift)
@@ -100,7 +102,7 @@ compile' ::
   CompilationResult
 compile' level prog = do
   let (code, fs) = compileL2 level prog
-      functionTable = fs.functions
+      functionTable = fs.functionTable
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 code), ..}
   where
     err = error "compile': internal error."
@@ -113,7 +115,7 @@ compileLibrary ::
   CompilationResult
 compileLibrary level prefix prog =
   let (_code, defs, fs) = compileL2WithDetails options prog
-      functionTable = fs.functions
+      functionTable = fs.functionTable
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 defs), ..}
   where
     options = Options {fIdType = ThreeByte16_8 prefix, ..}
@@ -161,17 +163,16 @@ pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
 -- Use of 'iterate' is to get the call site count correct.
 addSupportFunctions :: FunctionState -> FunctionState
-addSupportFunctions fs@FunctionState {functions} =
-  iterate (\fs' -> snd (pass1 S.empty fs' toPushOp)) fs !! numRtConstants
-  where
-    numRtConstants :: Int
-    numRtConstants = M.size $ M.filterWithKey (\k _ -> isRtConstant k) functions
+addSupportFunctions fs@FunctionState {functionTable} =
+  iterate
+    (\fs' -> snd (pass1 S.empty fs' toPushOp))
+    fs
+    !! (getNumRtConstants functionTable)
 
 assignIndices :: Options -> FunctionState -> FSR.FunctionState
-assignIndices opts fs@FunctionState {functions} =
-  let functions' = functionsSortedBySites functions
-      (functions'', _) = runState (mapM assign functions') 0
-   in FSR.toResolved opts.fIdType (fs {functions = M.fromList functions''})
+assignIndices opts fs@FunctionState {functionTable} =
+  let ft = mapFunctions functionTable assign
+   in FSR.toResolved opts.fIdType (fs {FS.functionTable = ft})
   where
     assign :: (FunctionId, Function) -> State Int (FunctionId, Function)
     assign (fId@(Absolute _), fun) = pure (fId, fun)
@@ -184,25 +185,26 @@ assignIndices opts fs@FunctionState {functions} =
 
     nextFree :: Int -> Int
     nextFree idx =
-      case M.lookup (Absolute idx) functions of
+      case ftLookup (Absolute idx) functionTable of
         Just _ -> nextFree (succ idx)
         Nothing -> idx
 
 functionDefinitions :: FSR.FunctionState -> CodeL3
-functionDefinitions fs@FSR.FunctionState {functions} =
+functionDefinitions fs@FSR.FunctionState {functionTable} =
   ( order
       >>> filter (\(_, FSR.Function {code}) -> isJust code)
       >>> map def
       >>> foldr (S.><) S.empty
   )
-    functions
+    functionTable
   where
     order :: FSR.FunctionTable -> [(FunctionId, FSR.Function)]
     order ft =
-      functionsSortedByIndex (M.filterWithKey (\k _ -> not $ isRtConstant k) ft)
+      functionsSortedByIndex
+        (M.filterWithKey (\k _ -> not $ isRtConstant k) ft)
         <> filter
           (\(k, _) -> isRtConstant k)
-          (functionsSortedByIndexTopological ft)
+          (functionsSortedByIndexTopological functionTable)
 
     def :: (FunctionId, FSR.Function) -> CodeL3
     def (fId, FSR.Function {..}) =

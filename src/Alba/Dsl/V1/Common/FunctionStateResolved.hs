@@ -33,7 +33,7 @@ import Data.Sequence qualified as S
 import Text.Printf (printf)
 
 newtype FunctionState = FunctionState
-  { functions :: FunctionTable
+  { functionTable :: FunctionTable
   }
   deriving (Show)
 
@@ -48,9 +48,9 @@ data Function = Function
 type FunctionTable = M.Map FunctionId Function
 
 toResolved :: FunctionIdType -> FS.FunctionState -> FunctionState
-toResolved fIdType FS.FunctionState {functions} =
+toResolved fIdType FS.FunctionState {functionTable = ft} =
   FunctionState
-    { functions = M.map (fromMaybe (err functions) . convert) functions
+    { functionTable = M.map (fromMaybe (err ft) . convert) (FS.ftMapping ft)
     }
   where
     convert :: FS.Function -> Maybe Function
@@ -63,18 +63,18 @@ toResolved fIdType FS.FunctionState {functions} =
         (printf "toResolved: FunctionState has undefined index: %s" (show x))
 
 getVmFunctionId :: FunctionId -> FunctionState -> Maybe VmFunctionId
-getVmFunctionId fId FunctionState {functions} =
-  case M.lookup fId functions of
+getVmFunctionId fId FunctionState {functionTable} =
+  case M.lookup fId functionTable of
     Just (Function {vmFId}) -> pure vmFId
     Nothing -> Nothing
 
 -- Base for runtime assigned function IDs.
 getBaseVmFunctionId :: FunctionIdType -> FunctionState -> VmFunctionId
-getBaseVmFunctionId Local FunctionState {functions} =
-  if M.null functions
+getBaseVmFunctionId Local FunctionState {functionTable} =
+  if M.null functionTable
     then mkVmFunctionId Local 0
     else
-      let maxIdx = maximum ((.index) <$> functions)
+      let maxIdx = maximum ((.index) <$> functionTable)
        in mkVmFunctionId Local (succ maxIdx)
 getBaseVmFunctionId _ _ =
   error "RuntimeState can't be initialized from libraries."
