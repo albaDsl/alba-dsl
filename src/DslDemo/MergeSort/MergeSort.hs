@@ -34,7 +34,7 @@ import Alba.Dsl.V1.Bch2026
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe')
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, TPackFs, packFs)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.Vector
   ( TVector,
@@ -49,7 +49,7 @@ import Alba.Dsl.V1.Bch2026.Lang (fn, lambda0)
 import Prelude ()
 
 sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
-sort = packFs @a # opSwap # sortF
+sort = packFsRec @a # opSwap # sortF
 
 sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
 sortF =

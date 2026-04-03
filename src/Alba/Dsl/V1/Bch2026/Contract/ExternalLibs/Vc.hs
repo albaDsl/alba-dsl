@@ -20,7 +20,7 @@ import Alba.Dsl.V1.Bch2025
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, TPackFs, packFs)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (packFsRec), TPackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, swap)
 import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
@@ -73,13 +73,13 @@ showCase =
     int8Vector = int8 0 # int8 1 # V.empty # V.cons # V.cons
 
 sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
-sort = packFs @a # opSwap # sortF
+sort = packFsRec @a # opSwap # sortF
 
 sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
 sortF = invokeExt lib "DslDemo.MergeSort.MergeSort" "sortF"
 
 length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
-length = packFs @a # swap # lengthF
+length = packFsRec @a # swap # lengthF
 
 lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
 lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.Vector" "lengthF"

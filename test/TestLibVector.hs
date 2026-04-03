@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Bytes128
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe', just, nothing)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, packFs)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (packFsRec))
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (fst, snd, tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
@@ -367,7 +367,11 @@ progZipping =
               # equalVerify
           )
         # ( begin
-              # lambda2 (packFs @TInt64 # packFs @TInt8 # op2Swap # TFS.tupleF)
+              # lambda2
+                ( begin
+                    # (packFsRec @TInt64 # packFsRec @TInt8 # op2Swap)
+                    # TFS.tupleF
+                )
               # (int64Vector # int8Vector # V.zipWith)
               # (int64 0 # int8 0 # TFS.tuple)
               # (int64 1 # int8 1 # TFS.tuple)

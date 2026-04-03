@@ -48,7 +48,7 @@ instance PackFs TInt8 where
   size = nat (sizeConst @TInt8)
   pack = cast # size @TInt8 # opNum2Bin
   unpack = opBin2Num # cast
-  record = int8PackFs
+  packFsRec = int8PackFs
 
 int8PackFs :: Fn s (s > TPackFs TInt8)
 int8PackFs =

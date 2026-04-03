@@ -43,7 +43,7 @@ instance PackFs TInt64 where
   size = nat (sizeConst @TInt64)
   pack = cast # size @TInt64 # opNum2Bin
   unpack = opBin2Num # cast
-  record = int64PackFs
+  packFsRec = int64PackFs
 
 instance BlobEq TInt64 where
   equal = blobEqEqual

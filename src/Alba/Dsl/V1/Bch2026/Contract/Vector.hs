@@ -144,7 +144,6 @@ import Alba.Dsl.V1.Bch2026.Contract.PackFs
     TPackFs,
     getPack,
     getSize,
-    packFs,
     tcDrop,
     tcPick,
     tcRoll,
@@ -215,7 +214,7 @@ null = v2b # bytes [] # opEqual
 
 -- ## Indexing.
 lookup :: forall a s. (PackFs a) => Fn (s > TVector a > TNat) (s > TMaybe a)
-lookup = packFs @a # rot # rot # lookupF
+lookup = packFsRec @a # rot # rot # lookupF
 
 lookupF ::
   (StackEntry a) => Fn (s > TPackFs a > TVector a > TNat) (s > TMaybe a)
@@ -227,7 +226,7 @@ lookupF =
     )
 
 head :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TMaybe a)
-head = packFs @a # swap # headF
+head = packFsRec @a # swap # headF
 
 headF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TMaybe a)
 headF = fn (unconsF # nothing # fstJust # rot # maybe)
@@ -238,7 +237,7 @@ fstJust ::
 fstJust = lambda1 (fst # just)
 
 last :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TMaybe a)
-last = packFs @a # swap # lastF
+last = packFsRec @a # swap # lastF
 
 lastF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TMaybe a)
 lastF = fn (unsnocF # nothing # sndJust # rot # maybe)
@@ -249,14 +248,14 @@ sndJust = lambda1 (snd # just)
 
 -- ## Slicing.
 init :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TMaybe (TVector a))
-init = packFs @a # swap # initF
+init = packFsRec @a # swap # initF
 
 initF ::
   (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TMaybe (TVector a))
 initF = fn (unsnocF # nothing # fstJust # rot # maybe)
 
 tail :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TMaybe (TVector a))
-tail = packFs @a # swap # tailF
+tail = packFsRec @a # swap # tailF
 
 tailF ::
   (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TMaybe (TVector a))
@@ -272,7 +271,7 @@ splitAt ::
   forall a s.
   (PackFs a) =>
   Fn (s > TNat > TVector a) (s > TVector a > TVector a)
-splitAt = packFs @a # rot # rot # splitAtF
+splitAt = packFsRec @a # rot # rot # splitAtF
 
 splitAtF :: Fn (s > TPackFs a > TNat > TVector a) (s > TVector a > TVector a)
 splitAtF =
@@ -299,7 +298,7 @@ splitAtUnsafeF = fn (v2b # swap # rot # getSize # opMul # opSplit # fixup)
 uncons ::
   forall a s.
   (PackFs a) => Fn (s > TVector a) (s > TMaybe (TTuple a (TVector a)))
-uncons = packFs @a # swap # unconsF
+uncons = packFsRec @a # swap # unconsF
 
 unconsF ::
   (StackEntry a) =>
@@ -320,7 +319,7 @@ unconsF =
 unsnoc ::
   forall a s.
   (PackFs a) => Fn (s > TVector a) (s > TMaybe (TTuple (TVector a) a))
-unsnoc = packFs @a # swap # unsnocF
+unsnoc = packFsRec @a # swap # unsnocF
 
 unsnocF ::
   (StackEntry a) =>
@@ -350,7 +349,7 @@ singletonF :: (StackEntry a) => Fn (s > TPackFs a > a) (s > TVector a)
 singletonF = fn (swap # getPack # invoke1 # cast)
 
 replicate :: forall a s. (PackFs a) => Env (s > TNat > a) (s > TVector a)
-replicate = packFs @a # rot # rot # replicateF
+replicate = packFsRec @a # rot # rot # replicateF
 
 replicateF :: (StackEntry a) => Env (s > TPackFs a > TNat > a) (s > TVector a)
 replicateF = fn (lambda2 nip # apply2 # generateF)
@@ -358,7 +357,7 @@ replicateF = fn (lambda2 nip # apply2 # generateF)
 generate ::
   forall a s.
   (PackFs a) => Env (s > TNat > TLambda '[TNat] '[a]) (s > TVector a)
-generate = packFs @a # rot # rot # generateF
+generate = packFsRec @a # rot # rot # generateF
 
 generateF ::
   forall a s.
@@ -383,7 +382,7 @@ iterateN ::
   forall a s.
   (PackFs a) => Env (s > TNat > TLambda '[a] '[a] > a) (s > TVector a)
 iterateN =
-  ns3 Cnt F Val # (packFs @a # roll Cnt # roll F # roll Val # iterateNF)
+  ns3 Cnt F Val # (packFsRec @a # roll Cnt # roll F # roll Val # iterateNF)
 
 iterateNF ::
   (StackEntry a) =>
@@ -409,7 +408,7 @@ unfoldr ::
   forall a b s.
   (PackFs a, StackEntry b) =>
   Fn (s > TLambda '[b] '[TMaybe (TTuple a b)] > b) (s > TVector a)
-unfoldr = ns2 F Val # packFs @a # roll F # roll Val # unfoldrF
+unfoldr = ns2 F Val # packFsRec @a # roll F # roll Val # unfoldrF
 
 unfoldrF ::
   forall a b s.
@@ -433,13 +432,13 @@ unfoldrF = fn (empty # opUntil loop # nip # nip # nip)
 
 -- ## Concatenation.
 cons :: forall a s. (PackFs a) => Fn (s > a > TVector a) (s > TVector a)
-cons = packFs @a # rot # rot # consF
+cons = packFsRec @a # rot # rot # consF
 
 consF :: (StackEntry a) => Fn (s > TPackFs a > a > TVector a) (s > TVector a)
 consF = fn (swap # rot # getPack # invoke1 # swap # v2b # opCat # cast)
 
 snoc :: forall a s. (PackFs a) => Fn (s > TVector a > a) (s > TVector a)
-snoc = packFs @a # rot # rot # snocF
+snoc = packFsRec @a # rot # rot # snocF
 
 snocF :: (StackEntry a) => Fn (s > TPackFs a > TVector a > a) (s > TVector a)
 snocF = fn (fixup # rot # getPack # invoke1 # opCat # cast)
@@ -455,7 +454,7 @@ append = fixup # opCat # cast
 
 -- ## Permutation.
 reverse :: forall a s. (PackFs a) => Env (s > TVector a) (s > TVector a)
-reverse = packFs @a # swap # reverseF
+reverse = packFsRec @a # swap # reverseF
 
 reverseF :: (StackEntry a) => Env (s > TPackFs a > TVector a) (s > TVector a)
 reverseF =
@@ -470,7 +469,7 @@ map ::
   forall a b s.
   (PackFs a, PackFs b) =>
   Env (s > TLambda '[a] '[b] > TVector a) (s > TVector b)
-map = packFs @a # packFs @b # opRoll 3 # opRoll 3 # mapF
+map = packFsRec @a # packFsRec @b # opRoll 3 # opRoll 3 # mapF
 
 mapF ::
   forall a b s.
@@ -497,7 +496,7 @@ zip ::
   forall a b s.
   (PackFs a, PackFs b) =>
   Env (s > TVector a > TVector b) (s > TVector (TTupleFs a b))
-zip = packFs @a # packFs @b # opRoll 3 # opRoll 3 # zipF
+zip = packFsRec @a # packFsRec @b # opRoll 3 # opRoll 3 # zipF
 
 zipF ::
   (StackEntry a, StackEntry b) =>
@@ -529,7 +528,7 @@ zipWith ::
   Fn (s > TLambda '[a, b] '[c] > TVector a > TVector b) (s > TVector c)
 zipWith =
   begin
-    # (packFs @a # packFs @b # packFs @c)
+    # (packFsRec @a # packFsRec @b # packFsRec @c)
     # (opRoll 5 # opRoll 5 # opRoll 5 # zipWithF)
 
 type ZipWithFArgs s a b c =
@@ -573,7 +572,7 @@ unzip ::
   forall a b s.
   (PackFs a, PackFs b) =>
   Fn (s > TVector (TTupleFs a b)) (s > TVector a > TVector b)
-unzip = packFs @a # packFs @b # op2Dup # calcPackFs # opRoll 3 # unzipF
+unzip = packFsRec @a # packFsRec @b # op2Dup # calcPackFs # opRoll 3 # unzipF
 
 type UnzipFArgs s a b =
   s
@@ -617,7 +616,7 @@ filter ::
   forall a s.
   (PackFs a) =>
   Env (s > TLambda '[a] '[TBool] > TVector a) (s > TVector a)
-filter = packFs @a # rot # rot # filterF
+filter = packFsRec @a # rot # rot # filterF
 
 filterF ::
   forall a s.
@@ -646,7 +645,7 @@ foldl ::
   (StackEntry b, PackFs a) =>
   Fn (s > TLambda '[b, a] '[b] > b > TVector a) (s > b)
 foldl =
-  ns3 F Val Vec # packFs @a # roll F # rollN Val # roll Vec # un Val # foldlF
+  ns3 F Val Vec # packFsRec @a # roll F # rollN Val # roll Vec # un Val # foldlF
 
 foldlF ::
   (StackEntry a, StackEntry b) =>
@@ -672,7 +671,7 @@ foldr ::
   (StackEntry b, PackFs a) =>
   Fn (s > TLambda '[a, b] '[b] > b > TVector a) (s > b)
 foldr =
-  ns3 F Val Vec # packFs @a # roll F # rollN Val # roll Vec # un Val # foldrF
+  ns3 F Val Vec # packFsRec @a # roll F # rollN Val # roll Vec # un Val # foldrF
 
 foldrF ::
   (StackEntry a, StackEntry b) =>

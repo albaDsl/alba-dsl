@@ -65,7 +65,7 @@ instance PackFs TBytes128 where
   unpack = unpackTBytes128
   size = nat (sizeConst @TBytes128)
   sizeConst = fromIntegral packSize
-  record = bytes128PackFs
+  packFsRec = bytes128PackFs
 
 bytes128PackFs :: Fn s (s > TPackFs TBytes128)
 bytes128PackFs =

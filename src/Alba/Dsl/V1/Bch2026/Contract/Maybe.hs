@@ -75,7 +75,7 @@ instance PackFs (TMaybe TInt8) where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
   unpack = cast # ifJust (unpack @TInt8 # just) nothing
-  record = maybeInt8PackFs
+  packFsRec = maybeInt8PackFs
 
 maybeInt8PackFs :: Fn s (s > TPackFs (TMaybe TInt8))
 maybeInt8PackFs =
@@ -98,7 +98,7 @@ instance PackFs (TMaybe TInt64) where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
   unpack = cast # ifJust (unpack @TInt64 # just) nothing
-  record = maybeInt64PackFs
+  packFsRec = maybeInt64PackFs
 
 maybeInt64PackFs :: Fn s (s > TPackFs (TMaybe TInt64))
 maybeInt64PackFs =
@@ -121,7 +121,7 @@ instance PackFs (TMaybe TBytes128) where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
   unpack = cast # ifJust (unpack @TBytes128 # just) nothing
-  record = maybeBytes128PackFs
+  packFsRec = maybeBytes128PackFs
 
 maybeBytes128PackFs :: Fn s (s > TPackFs (TMaybe TBytes128))
 maybeBytes128PackFs =

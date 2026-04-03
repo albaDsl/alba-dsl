@@ -50,7 +50,6 @@ import Alba.Dsl.V1.Bch2026.Contract.PackFs
     getSize,
     getUnpack,
     mkPackFs,
-    packFs,
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, rot, swap)
 import Prelude ((+))
@@ -76,7 +75,7 @@ instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
 
   sizeConst = sizeConst @a + sizeConst @b
 
-  record = tuplePackFs
+  packFsRec = tuplePackFs
 
 tuplePackFs ::
   forall a b s.
@@ -95,7 +94,7 @@ tuple ::
   Fn (s > a > b) (s > TTupleFs a b)
 tuple =
   begin
-    # (ns2 "a" "b" # packFs @a # packFs @b # rollN "a" # rollN "b")
+    # (ns2 "a" "b" # packFsRec @a # packFsRec @b # rollN "a" # rollN "b")
     # (un2 "a" "b" # tupleF)
 
 tupleF ::

@@ -3,7 +3,6 @@
 module Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
-    packFs,
     mkPackFs,
     mkPackFsM,
     getSize,
@@ -52,10 +51,7 @@ class (StackEntry a) => PackFs a where
   size :: Fn s (s > TNat)
   pack :: (StackEntry a) => Fn (s > a) (s > TBytes)
   unpack :: (StackEntry a) => Fn (s > TBytes) (s > a)
-  record :: Fn s (s > TPackFs a)
-
-packFs :: forall a s. (PackFs a, StackEntry a) => Fn s (s > TPackFs a)
-packFs = record @a
+  packFsRec :: Fn s (s > TPackFs a)
 
 mkPackFs ::
   Fn
