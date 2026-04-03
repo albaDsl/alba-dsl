@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Vm.Bch2026.VmOpEval (evalOpEval) where
+module Alba.Vm.BchSpec.VmOpEval (evalOpEval) where
 
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Alba.Vm.Common.ScriptError (ScriptError (..))

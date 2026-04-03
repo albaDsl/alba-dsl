@@ -5,7 +5,6 @@ module Alba.Vm.Bch2026.VmOps (evalVmOp) where
 import Alba.Vm.Bch2025.VmOps qualified as Bch2025
 import Alba.Vm.Bch2026.VmOpBitwiseLogic (evalOpBitwiseLogic)
 import Alba.Vm.Bch2026.VmOpDefineInvoke (evalOpDefineInvoke)
-import Alba.Vm.Bch2026.VmOpEval (evalOpEval)
 import Alba.Vm.Bch2026.VmOpLoops (evalOpLoops)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2)
 import Alba.Vm.Common.ScriptError (ScriptError)
@@ -22,5 +21,4 @@ evalVmOp op txContext state =
   Bch2025.evalVmOp op txContext state
     <|> evalOpLoops op state
     <|> evalOpDefineInvoke op state
-    <|> evalOpEval op state
     <|> evalOpBitwiseLogic op state

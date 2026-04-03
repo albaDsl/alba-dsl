@@ -32,6 +32,7 @@ import Alba.Tx.Bch2025.TxIn (TxIn (..))
 import Alba.Tx.Bch2025.TxOut (TxOut (..))
 import Alba.Vm.Bch2025 qualified as Vm2025
 import Alba.Vm.Bch2026 qualified as Vm2026
+import Alba.Vm.BchSpec qualified as VmSpec
 import Alba.Vm.Common
   ( LogDisplayOpts (..),
     ScriptError (..),
@@ -68,7 +69,13 @@ import Test.Tasty.HUnit (assertBool, assertFailure, (@?=))
 import Text.Pretty.Simple (pPrintLightBg)
 import Text.Printf (printf)
 
-data TestMode = Standard2025 | Nonstandard2025 | Standard2026 | Nonstandard2026
+data TestMode
+  = Standard2025
+  | Nonstandard2025
+  | Standard2026
+  | Nonstandard2026
+  | StandardSpec
+  | NonstandardSpec
   deriving (Eq, Show, Read)
 
 data LibauthTest = LibauthTest
@@ -230,6 +237,10 @@ testModeToVmSetup Standard2026 =
   (Vm2026.verifyScript, Vm2026.vmParamsStandard, Standard)
 testModeToVmSetup Nonstandard2026 =
   (Vm2026.verifyScript, Vm2026.vmParamsNonStandard, Nonstandard)
+testModeToVmSetup StandardSpec =
+  (VmSpec.verifyScript, VmSpec.vmParamsStandard, Standard)
+testModeToVmSetup NonstandardSpec =
+  (VmSpec.verifyScript, VmSpec.vmParamsNonStandard, Nonstandard)
 
 testToTxAndUtxos :: LibauthTest -> Either LibauthSetupFailure (Tx, TxOuts)
 testToTxAndUtxos LibauthTest {..} = do
@@ -260,6 +271,8 @@ inStandardMode Standard2025 = True
 inStandardMode Nonstandard2025 = False
 inStandardMode Standard2026 = True
 inStandardMode Nonstandard2026 = False
+inStandardMode StandardSpec = True
+inStandardMode NonstandardSpec = False
 
 verifyTxApproved :: TestMode -> LibauthTest -> ResultOrSetupFailure -> IO ()
 verifyTxApproved testMode test res =

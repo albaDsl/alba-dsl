@@ -21,6 +21,7 @@ import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
 import Alba.Vm.Bch2025 qualified as Bch2025
 import Alba.Vm.Bch2026 qualified as Bch2026
+import Alba.Vm.BchSpec qualified as BchSpec
 import Alba.Vm.Common
   ( CodeL1,
     ScriptError,
@@ -141,7 +142,11 @@ evaluateScript code (s, alt) context = do
       res2026 =
         let state = (Bch2026.startState Bch2026.vmParamsStandard) {code, s, alt}
          in toTestResult $ Bch2026.evaluateScript context state
-  unless (res2025 == res2026) $ error "Bch2025 & Bch2026 results don't match."
+      resSpec =
+        let state = (BchSpec.startState BchSpec.vmParamsStandard) {code, s, alt}
+         in toTestResult $ BchSpec.evaluateScript context state
+  unless (res2025 == res2026 && res2026 == resSpec) $
+    error "Bch2025 / Bch2026 / BchSpec results don't match."
   res2026
 
 toTestResult ::

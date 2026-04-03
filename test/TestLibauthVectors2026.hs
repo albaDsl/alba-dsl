@@ -29,7 +29,7 @@ import Text.Printf (printf)
 testLibauthVectors2026 :: TestTree
 testLibauthVectors2026 =
   testGroup
-    "Libauth vectors 2026"
+    "Libauth vectors (Bch2026)"
     [ testCase "bch_2026_standard in standard-mode" $ do
         tests <- standardTests >>= filterTests (`notElem` excludeStandard)
         mapM_ (runAndVerify Standard2026) tests,

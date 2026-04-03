@@ -11,6 +11,7 @@ import TestConstants (testConstants)
 import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
+import TestEval (testEval)
 import TestFunctions (testFunctions)
 import TestFunctionsLowLevel (testFunctionsLowLevel)
 import TestIntPushing (testIntPushing)
@@ -24,6 +25,7 @@ import TestLibTuple (testLibTuple)
 import TestLibVector (testLibVector)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
+import TestLibauthVectorsSpec (testLibauthVectorsSpec)
 import TestLookupTables (testLookupTables)
 import TestLoops (testLoops)
 import TestLzss (testLzss)
@@ -58,6 +60,7 @@ tests =
       testCustomTypes,
       testDataPushing,
       testDataSig,
+      testEval,
       testLookupTables,
       testFunctions,
       testFunctionsLowLevel,
@@ -72,6 +75,7 @@ tests =
       testLibVector,
       testLibauthVectors2025,
       testLibauthVectors2026,
+      testLibauthVectorsSpec,
       testLoops,
       testLzss,
       testLzssBit,
