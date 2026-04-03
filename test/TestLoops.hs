@@ -6,9 +6,10 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Math (factorial, pow)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (iterate)
 import Data.Word (Word8)
+import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
-import DslDemo.EllipticCurve.Jacobian (ecAdd, ecMul)
-import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
+import DslDemo.EllipticCurve.Jacobian qualified as EJ
+import DslDemo.EllipticCurve.Point (TPoint, isEqual, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
@@ -23,11 +24,16 @@ testLoops =
     [ testCase "Loops - factorial 1" $ isTrue (evaluateProg progFactorial1),
       testCase "Loops - factorial 2" $ isTrue (evaluateProg progFactorial2),
       testCase "Loops - factorial 3" $ isTrue (evaluateProg progFactorial3),
-      testCase "Loops - elliptic curve - scalar multiply" $
-        isTrue (evaluateProg progEllipticCurve),
+      testCase "Loops - elliptic curve - scalar multiply (Affine)" $
+        isTrue (evaluateProg (progEllipticCurve EA.ecMul)),
+      testCase "Loops - elliptic curve - scalar multiply (Jacobian)" $
+        isTrue (evaluateProg (progEllipticCurve EJ.ecMul)),
       testProperty
-        "Loops — elliptic curve scalar multiply additivity"
-        propEllipticCurve,
+        "Loops — elliptic curve scalar multiply additivity (Affine)"
+        (propEllipticCurve EA.ecAdd EA.ecMul),
+      testProperty
+        "Loops — elliptic curve scalar multiply additivity (Jacobian)"
+        (propEllipticCurve EJ.ecAdd EJ.ecMul),
       testProperty "Loops — pow" propPow
     ]
 
@@ -73,8 +79,8 @@ progFactorial3 = progFacTest fac
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
-progEllipticCurve :: Fn s (s > TBool)
-progEllipticCurve =
+progEllipticCurve :: Fn (s > TNat > TPoint) (s > TPoint) -> Fn s (s > TBool)
+progEllipticCurve ecMul =
   begin
     # (nat 1 # g # ecMul)
     # pushPoint
@@ -122,15 +128,20 @@ progEllipticCurve =
     # (isEqual # opVerify)
     # opTrue
 
-propEllipticCurve :: NonNegative Int -> NonNegative Int -> Bool
-propEllipticCurve (NonNegative a) (NonNegative b) =
+propEllipticCurve ::
+  (forall s. Fn (s > TPoint > TPoint) (s > TPoint)) ->
+  (forall s. Fn (s > TNat > TPoint) (s > TPoint)) ->
+  NonNegative Int ->
+  NonNegative Int ->
+  Bool
+propEllipticCurve ecAdd ecMul (NonNegative a) (NonNegative b) =
   let prog =
         begin
           # (nat (fromIntegral a) # g # ecMul)
           # (nat (fromIntegral b) # g # ecMul)
           # ecAdd
           # (nat (fromIntegral (a + b)) # g # ecMul)
-          # opEqual
+          # isEqual
    in isTrue' $ evaluateProg prog
 
 propPow :: Int -> Word8 -> Bool
