@@ -50,13 +50,13 @@ testCodeMetrics =
           testCase "turtleVm 2026" $
             sizeOf (toTyped (T2026.turtleVm 1)) @?= "564 opcodes, 1031 bytes.",
           testCase "EC scalar point multiply (Affine)" $
-            sizeOf EA.ecMul @?= "38 opcodes, 444 bytes.",
+            sizeOf EA.ecMul @?= "68 opcodes, 539 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $
-            sizeOf EJ.ecMul @?= "62 opcodes, 622 bytes.",
+            sizeOf EJ.ecMul @?= "95 opcodes, 724 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian)" $
-            sizeOf EJW.ecMul @?= "56 opcodes, 618 bytes.",
+            sizeOf EJW.ecMul @?= "62 opcodes, 621 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            sizeOf (EJW.setupTable # EJW.ecMul) @?= "72 opcodes, 715 bytes.",
+            sizeOf (EJW.setupTable # EJW.ecMul) @?= "105 opcodes, 818 bytes.",
           testCase "Vector ops" $
             sizeOf vectorOps @?= "356 opcodes, 1377 bytes.",
           testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 188 bytes.",
@@ -72,14 +72,14 @@ testCodeMetrics =
             ratio (toTyped (T2026.turtleVm 1))
               @?= "1031 byte to 990 bytes (saving 4.0%)",
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            ratio windowedMul @?= "985 byte to 799 bytes (saving 18.9%)",
+            ratio windowedMul @?= "1054 byte to 894 bytes (saving 15.2%)",
           testCase "Vector ops" $
             ratio vectorOps @?= "1377 byte to 1150 bytes (saving 16.5%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            costOf windowedMul @?= 31_858_706,
+            costOf windowedMul @?= 31_879_895,
           testCase "Vector ops" $ costOf vectorOps @?= 23_924_857,
           testCase "LZSS" $ costOf decompressTest @?= 21_585_352,
           testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_640_395
