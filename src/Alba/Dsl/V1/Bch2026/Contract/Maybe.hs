@@ -150,8 +150,7 @@ fromMaybe :: (StackEntry a) => Fn (s > a > TMaybe a) (s > a)
 fromMaybe = fn (contentAndBool # opIf (nip # cast) drop)
 
 fromMaybe' :: (StackEntry a) => Fn (s > TLambda '[] '[a] > TMaybe a) (s > a)
-fromMaybe' =
-  fn (contentAndBool # opIf (nip # cast) (drop # invoke0))
+fromMaybe' = fn (contentAndBool # opIf (nip # cast) (drop # invoke0))
 
 contentAndBool :: (StackEntry a) => Fn (s > TMaybe a) (s > a > TBool)
 contentAndBool = split # cast # swap # tagJust # opEqual
