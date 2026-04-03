@@ -109,6 +109,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.Shorthand,
       Alba.Dsl.V1.Bch2026.Contract.Tuple,
       Alba.Dsl.V1.Bch2026.Contract.TupleFs,
+      Alba.Dsl.V1.Bch2026.Contract.Unit,
       Alba.Dsl.V1.Bch2026.Contract.Vector,
       Alba.Dsl.V1.Bch2026.Contract.ExternalLib,
       Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc,
