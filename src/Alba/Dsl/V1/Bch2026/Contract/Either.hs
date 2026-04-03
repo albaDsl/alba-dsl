@@ -15,6 +15,7 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     StackEntry,
+    StackEquatable,
     TBool,
     TBytes,
     TNat,
@@ -37,6 +38,9 @@ import Prelude hiding (drop, either, map)
 data TEither (a :: Type) (b :: Type)
 
 instance StackEntry (TEither a b)
+
+-- FIXME: temporary.
+instance StackEquatable (TEither a b)
 
 left :: Fn (s > a) (s > TEither a b)
 left = fn (toBytes # tagLeft # swap # opCat # cast)

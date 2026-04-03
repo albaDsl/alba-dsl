@@ -54,7 +54,7 @@ propReverseSize x =
         # opSwap -- s s br
         # opDrop -- s s
         # opDup -- s s s
-        # opEqualVerify -- s
+        # opNumEqualVerify -- s
 
 propCatAndSplit :: BytesHalf -> Bool
 propCatAndSplit (BytesHalf x) =

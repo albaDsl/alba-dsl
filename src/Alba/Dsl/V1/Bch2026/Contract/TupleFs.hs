@@ -15,6 +15,7 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     StackEntry,
+    StackEquatable,
     TBytes,
     TLambda,
     TNat,
@@ -52,6 +53,9 @@ import Prelude ((+))
 data TTupleFs a b
 
 instance StackEntry (TTupleFs a b)
+
+-- FIXME: temporary.
+instance StackEquatable (TTupleFs a b)
 
 instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
   pack :: Fn (s > TTupleFs a b) (s > TBytes)

@@ -35,7 +35,7 @@ setupTable =
     setupTable' =
       fn
         ( begin
-            # (pick "i" # op0 # opEqual)
+            # (pick "i" # op0 # opNumEqual)
             # opIf
               (del "fId" # del "p" # del "acc" # del "i")
               ( begin

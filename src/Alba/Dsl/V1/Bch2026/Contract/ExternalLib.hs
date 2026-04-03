@@ -31,10 +31,10 @@ import Alba.Dsl.V1.Bch2026
     op1Sub,
     opCat,
     opDefine,
-    opEqual,
     opEqualVerify,
     opHash256,
     opInvoke,
+    opNumEqual,
     opSplit,
     opUntil,
     opUtxoBytecode,
@@ -70,7 +70,7 @@ importLibrary =
         # (pick "input" # op1Add)
         # name "cnt'" (roll "cnt" # op1Sub)
         # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
-        # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
+        # (opCat # pick "cnt'" # int 0 # opNumEqual # un "cnt'")
 
     libInit :: Fn s s
     libInit = undefined
@@ -104,7 +104,7 @@ importLibrary' =
         # (pick "input" # op1Add)
         # name "cnt'" (roll "cnt" # op1Sub)
         # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
-        # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
+        # (opCat # pick "cnt'" # int 0 # opNumEqual # un "cnt'")
 
     libInit :: Fn s s
     libInit = undefined

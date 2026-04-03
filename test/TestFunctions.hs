@@ -132,9 +132,9 @@ progRuntimeFunctions =
   runEnv
     ( begin
         # (int 1 # int 2 # opAdd # f # apply2)
-        # (int 5 # swap # invoke1 # int 2 # opEqualVerify)
+        # (int 5 # swap # invoke1 # int 2 # opNumEqualVerify)
         # (int 3 # int 2 # opAdd # f # apply2)
-        # (int 9 # swap # invoke1 # int 4 # opEqualVerify)
+        # (int 9 # swap # invoke1 # int 4 # opNumEqualVerify)
         # (int 3 # int 6 # g # apply3_2)
         # (int 4 # swap # invoke1 # opTrue # opEqualVerify)
         # opTrue

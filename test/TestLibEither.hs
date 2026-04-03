@@ -78,7 +78,7 @@ progBasics =
         # (r # lambda1 (drop # int 1) # lambda1 (drop # int 2) # rot # either)
         # swap
         # (l # lambda1 (drop # int 2) # lambda1 (drop # int 1) # rot # either)
-        # (opAdd # int 4 # opEqualVerify)
+        # (opAdd # int 4 # opNumEqualVerify)
       where
         l :: Fn (s > a) (s > TEither a TInt8)
         l = left

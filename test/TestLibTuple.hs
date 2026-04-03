@@ -25,15 +25,15 @@ progBasics =
     # ( begin
           # ( begin
                 # (int8 1 # int64 2 # tuple)
-                # (untuple # opDrop # int8 1 # opEqualVerify)
+                # (untuple # opDrop # int8 1 # opNumEqualVerify)
             )
           # ( begin
                 # (int8 1 # int64 2 # tuple)
-                # (untuple # opNip # int64 2 # opEqualVerify)
+                # (untuple # opNip # int64 2 # opNumEqualVerify)
             )
           # ( begin
-                # (int8 1 # int64 2 # tuple # fst # int8 1 # opEqualVerify)
-                # (int8 1 # int64 2 # tuple # snd # int64 2 # opEqualVerify)
+                # (int8 1 # int64 2 # tuple # fst # int8 1 # opNumEqualVerify)
+                # (int8 1 # int64 2 # tuple # snd # int64 2 # opNumEqualVerify)
             )
       )
     # opTrue
@@ -44,7 +44,7 @@ progNested =
     # ( begin
           # ( begin
                 # (int64 1 # int8 2 # int64 3 # tuple # tuple)
-                # (snd # fst # int8 2 # opEqualVerify)
+                # (snd # fst # int8 2 # opNumEqualVerify)
             )
       )
     # opTrue

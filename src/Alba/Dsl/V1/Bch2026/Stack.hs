@@ -5,7 +5,7 @@ module Alba.Dsl.V1.Bch2026.Stack
     TLambda,
     TLambdaUntyped,
     TRuntimeState,
-    Env
+    Env,
   )
 where
 

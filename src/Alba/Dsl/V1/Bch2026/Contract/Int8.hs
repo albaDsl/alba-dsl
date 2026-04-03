@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8) where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     StackEntry,
+    StackNum,
     TInt,
     begin,
     cast,
@@ -26,6 +27,10 @@ import Control.Exception (assert)
 data TInt8
 
 instance StackEntry TInt8
+
+-- We currently allow for standard arithmetic ops. Overflow is caught on
+-- attempts to pack the datatype.
+instance StackNum TInt8
 
 instance PackFs TInt8 where
   sizeConst = 1

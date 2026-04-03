@@ -19,8 +19,8 @@ module Alba.Dsl.V1.Bch2026.Contract.PackFs
 where
 
 import Alba.Dsl.V1.Bch2025
-  ( Fn,
-    FindName,
+  ( FindName,
+    Fn,
     Ref,
     Remove,
     StackEntry,

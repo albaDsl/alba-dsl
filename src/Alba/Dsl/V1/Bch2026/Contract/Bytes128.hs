@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
     StackEntry,
+    StackEquatable,
     TBytes,
     TInt,
     TNat,
@@ -48,6 +49,8 @@ import Prelude (Int, Ord ((<=)), fromIntegral, (&&), (>=))
 data TBytes128
 
 instance StackEntry TBytes128
+
+instance StackEquatable TBytes128
 
 instance PackFs TBytes128 where
   pack = packTBytes128

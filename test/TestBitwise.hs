@@ -36,19 +36,19 @@ testBitwise =
 progBasic :: Fn s (s > TBool)
 progBasic =
   begin
-    # (int 0b101 # nat 1 # opRShiftNum # int 0b10 # opEqualVerify)
-    # (int 0b101 # nat 1 # opLShiftNum # int 0b1010 # opEqualVerify)
-    # (int 0b101 # nat 10 # opRShiftNum # int 0 # opEqualVerify)
+    # (int 0b101 # nat 1 # opRShiftNum # int 0b10 # opNumEqualVerify)
+    # (int 0b101 # nat 1 # opLShiftNum # int 0b1010 # opNumEqualVerify)
+    # (int 0b101 # nat 10 # opRShiftNum # int 0 # opNumEqualVerify)
     # ( begin
           # (int 0b111111110000000010000011 # nat 1 # opRShiftNum)
-          # (int 0b11111111000000001000001 # opEqualVerify)
+          # (int 0b11111111000000001000001 # opNumEqualVerify)
       )
     # ( begin
           # (int (-0b11111111_00000000_10000011) # nat 1 # opRShiftNum)
-          # (int (-0b1111111_10000000_01000010) # opEqualVerify)
+          # (int (-0b1111111_10000000_01000010) # opNumEqualVerify)
       )
-    # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opEqualVerify)
-    # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opEqualVerify)
+    # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opNumEqualVerify)
+    # (int (-0b101) # nat 10 # opRShiftNum # int (-1) # opNumEqualVerify)
     # (bytes [0b0000_0101] # opInvert # bytes [0b1111_1010] # opEqualVerify)
     # ( begin
           # (bytes (fromJust $ decodeHex "deadbeef") # opInvert)
@@ -158,7 +158,7 @@ propLShiftNum (VmIntegerHalf x) =
   isTrue' $ evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
     prog :: Fn (s > TInt) (s > TBool)
-    prog = opDup # int 2 # opMul # opSwap # nat 1 # opLShiftNum # opEqual
+    prog = opDup # int 2 # opMul # opSwap # nat 1 # opLShiftNum # opNumEqual
 
 -- For positive integers, a numeric right shift by one is equal to division by
 -- 2.
@@ -169,4 +169,4 @@ propRShiftNum (VmInteger x) =
       evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
     prog :: Fn (s > TInt) (s > TBool)
-    prog = opDup # int 2 # opDiv # opSwap # nat 1 # opRShiftNum # opEqual
+    prog = opDup # int 2 # opDiv # opSwap # nat 1 # opRShiftNum # opNumEqual

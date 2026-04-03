@@ -7,6 +7,7 @@ import Alba.Dsl.V1.Bch2025.Stack
   ( StackBool,
     StackBytes,
     StackEntry,
+    StackEquatable,
     StackInt,
     StackNat,
     StackNum,
@@ -251,10 +252,10 @@ opXor (S c fs) = S (aop c OP_XOR) fs
 opReverseBytes :: (StackBytes x1) => Fn (s > x1) (s > TBytes)
 opReverseBytes (S c fs) = S (aop c OP_REVERSEBYTES) fs
 
-opEqual :: (StackEntry x1) => Fn (s > x1 > x1) (s > TBool)
+opEqual :: (StackEquatable x1) => Fn (s > x1 > x1) (s > TBool)
 opEqual (S c fs) = S (aop c OP_EQUAL) fs
 
-opEqualVerify :: (StackEntry x1) => Fn (s > x1 > x1) s
+opEqualVerify :: (StackEquatable x1) => Fn (s > x1 > x1) s
 opEqualVerify (S c fs) = S (aop c OP_EQUALVERIFY) fs
 
 op1Add :: (StackNum x1) => Fn (s > x1) (s > x1)

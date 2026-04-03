@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2025.Stack
   ( StackBool,
     StackBytes,
     StackEntry,
+    StackEquatable,
     StackInt,
     StackNat,
     StackNum,
@@ -38,6 +39,7 @@ class StackEntry a => StackInt a
 class StackEntry a => StackNat a
 class StackEntry a => StackBool a
 class StackEntry a => StackBytes a
+class StackEntry a => StackEquatable a
 
 instance StackEntry TUnknown
 instance StackEntry TInt
@@ -69,4 +71,14 @@ instance StackBytes THash256
 instance StackBytes THash160
 instance StackBytes TSig
 instance StackBytes TPubKey
+
+instance StackEquatable TBool
+instance StackEquatable TBytes
+instance StackEquatable TRipemd160
+instance StackEquatable TSha1
+instance StackEquatable TSha256
+instance StackEquatable THash256
+instance StackEquatable THash160
+instance StackEquatable TSig
+instance StackEquatable TPubKey
 {- ORMOLU_ENABLE -}

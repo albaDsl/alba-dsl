@@ -18,6 +18,7 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     StackEntry,
+    StackEquatable,
     TBool,
     TBytes,
     TLambda,
@@ -52,6 +53,9 @@ import Prelude hiding (drop, map, maybe)
 data TMaybe (a :: Type)
 
 instance StackEntry (TMaybe a)
+
+-- FIXME: temporary.
+instance StackEquatable (TMaybe a)
 
 instance PackFs (TMaybe TInt8) where
   sizeConst = 1 + sizeConst @TInt8

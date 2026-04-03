@@ -46,7 +46,7 @@ refresh =
       begin
         # (opInputIndex # opUtxoValue # subMinerFee fee)
         # (nat (fromIntegral outputIndex) # opOutputValue)
-        # opEqualVerify
+        # opNumEqualVerify
 
     subMinerFee :: Word64 -> Fn (s > TNat) (s > TNat)
     subMinerFee minerFee = nat (fromIntegral minerFee) # natSub

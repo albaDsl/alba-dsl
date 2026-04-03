@@ -10,8 +10,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Bytes128
     toBytes,
     toBytes128,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64, toInt64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64)
+import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe', just, nothing)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs, packFs)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (fst, snd, tuple)
@@ -68,19 +68,19 @@ progLength =
 progIndexing :: Fn s (s > TBool)
 progIndexing =
   begin
-    # (int64Vector # V.last # fromJust # int64 2 # opEqualVerify)
-    # (int8Vector # V.last # fromJust # int8 2 # opEqualVerify)
+    # (int64Vector # V.last # fromJust # int64 2 # opNumEqualVerify)
+    # (int8Vector # V.last # fromJust # int8 2 # opNumEqualVerify)
     # (bytes128Vector # V.last # fromJust # bytes128 b2 # opEqualVerify)
-    # (int64Vector # V.head # fromJust # int64 0 # opEqualVerify)
-    # (int8Vector # V.head # fromJust # int8 0 # opEqualVerify)
+    # (int64Vector # V.head # fromJust # int64 0 # opNumEqualVerify)
+    # (int8Vector # V.head # fromJust # int8 0 # opNumEqualVerify)
     # (bytes128Vector # V.head # fromJust # bytes128 b0 # opEqualVerify)
-    # (int64Vector # nat 0 # V.lookup # fromJust # int64 0 # opEqualVerify)
-    # (int64Vector # nat 1 # V.lookup # fromJust # int64 1 # opEqualVerify)
-    # (int64Vector # nat 2 # V.lookup # fromJust # int64 2 # opEqualVerify)
+    # (int64Vector # nat 0 # V.lookup # fromJust # int64 0 # opNumEqualVerify)
+    # (int64Vector # nat 1 # V.lookup # fromJust # int64 1 # opNumEqualVerify)
+    # (int64Vector # nat 2 # V.lookup # fromJust # int64 2 # opNumEqualVerify)
     # (int64Vector # nat 3 # V.lookup # nothing # opEqualVerify)
-    # (int8Vector # nat 0 # V.lookup # fromJust # int8 0 # opEqualVerify)
-    # (int8Vector # nat 1 # V.lookup # fromJust # int8 1 # opEqualVerify)
-    # (int8Vector # nat 2 # V.lookup # fromJust # int8 2 # opEqualVerify)
+    # (int8Vector # nat 0 # V.lookup # fromJust # int8 0 # opNumEqualVerify)
+    # (int8Vector # nat 1 # V.lookup # fromJust # int8 1 # opNumEqualVerify)
+    # (int8Vector # nat 2 # V.lookup # fromJust # int8 2 # opNumEqualVerify)
     # (int8Vector # nat 3 # V.lookup # nothing # opEqualVerify)
     # ( begin
           # (bytes128Vector # nat 0 # V.lookup # fromJust # bytes128 b0)
@@ -105,12 +105,12 @@ progSlicing =
     # ( begin
           # (int64Vector # V.unsnoc # fromJust # snd)
           # int64 2
-          # opEqualVerify
+          # opNumEqualVerify
       )
     # ( begin
           # (int8Vector # V.unsnoc # fromJust # snd)
           # int8 2
-          # opEqualVerify
+          # opNumEqualVerify
       )
     # ( begin
           # (bytes128Vector # V.unsnoc # fromJust # snd)
@@ -219,13 +219,13 @@ progSlicing =
     # opTrue
   where
     testUncons ::
-      (PackFs a) =>
+      (StackNum a, PackFs a) =>
       (forall s'. Integer -> Fn s' (s' > a)) ->
       Fn (s > V.TVector a) s
     testUncons val =
       begin
         # (V.uncons # fromJust # snd)
-        # (V.uncons # fromJust # fst # val 1 # opEqualVerify)
+        # (V.uncons # fromJust # fst # val 1 # opNumEqualVerify)
 
 progConstruction :: Fn s (s > TBool)
 progConstruction =
@@ -247,7 +247,7 @@ progConstruction =
               # (V.cons # V.cons # V.cons # opEqualVerify)
           )
         # ( begin
-              # (nat 3 # lambda1 (int8 2 # mulInt8) # int8 2 # V.iterateN)
+              # (nat 3 # lambda1 (int8 2 # opMul) # int8 2 # V.iterateN)
               # (int8 2 # int8 4 # int8 8 # V.empty)
               # (V.cons # V.cons # V.cons # opEqualVerify)
           )
@@ -308,12 +308,12 @@ progMapping =
   runEnv
     ( begin
         # ( begin
-              # (lambda1 (int8 2 # mulInt8) # int8Vector # V.map)
+              # (lambda1 (int8 2 # opMul) # int8Vector # V.map)
               # (int8 0 # int8 2 # int8 4 # V.empty # V.cons # V.cons # V.cons)
               # opEqualVerify
           )
         # ( begin
-              # (lambda1 (int64 2 # mulInt64) # int64Vector # V.map)
+              # (lambda1 (int64 2 # opMul) # int64Vector # V.map)
               # (int64 0 # int64 2 # int64 4 # V.empty # V.cons # V.cons)
               # (V.cons # opEqualVerify)
           )
@@ -381,9 +381,9 @@ progZipping =
               # (int64Vector # opEqualVerify)
           )
         # ( begin
-              # lambda2 addInt64
+              # lambda2 opAdd
               # int64Vector
-              # (opDup # lambda1 (int64 1 # addInt64) # opSwap # V.map)
+              # (opDup # lambda1 (int64 1 # opAdd) # opSwap # V.map)
               # V.zipWith
               # (int64 1 # int64 3 # int64 5 # V.empty)
               # (V.cons # V.cons # V.cons)
@@ -435,7 +435,7 @@ propLength (BytesSize size) =
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
     prog :: Natural -> Fn s (s > TBool)
-    prog len' = runEnv (nat len' # testVector len' # V.length # opEqual)
+    prog len' = runEnv (nat len' # testVector len' # V.length # opNumEqual)
 
 propLookup :: BytesSize -> BytesSize -> Property
 propLookup (BytesSize size1) (BytesSize size2) =
@@ -607,10 +607,10 @@ propMapComposition (BytesSize size) =
         )
 
     f :: Fn (s > TInt64) (s > TInt64)
-    f = int64 2 # addInt64
+    f = int64 2 # opAdd
 
     g :: Fn (s > TInt64) (s > TInt64)
-    g = int64 2 # mulInt64
+    g = int64 2 # opMul
 
     overhead :: Integer
     overhead = 10
@@ -643,10 +643,10 @@ propFolding (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # (lambda2 addInt64 # int64 0 # testVector len' # V.foldl)
-            # (int64 sum # opEqualVerify)
-            # (lambda2 addInt64 # int64 0 # testVector len' # V.foldr)
-            # (int64 sum # opEqualVerify)
+            # (lambda2 opAdd # int64 0 # testVector len' # V.foldl)
+            # (int64 sum # opNumEqualVerify)
+            # (lambda2 opAdd # int64 0 # testVector len' # V.foldr)
+            # (int64 sum # opNumEqualVerify)
             # opTrue
         )
 
@@ -699,25 +699,6 @@ testVector len = nat len # lambda1 cast # V.generate
 
 testVectorElemSize :: Integer
 testVectorElemSize = 8
-
--- ## Int8 & Int64 ops. No bounds checking.
-mulInt8 :: Fn (s > TInt8 > TInt8) (s > TInt8)
-mulInt8 = fixup # opMul # toInt8
-  where
-    fixup :: Fn (s > TInt8 > TInt8) (s > TInt > TInt)
-    fixup = castStack
-
-mulInt64 :: Fn (s > TInt64 > TInt64) (s > TInt64)
-mulInt64 = fixup # opMul # toInt64
-  where
-    fixup :: Fn (s > TInt64 > TInt64) (s > TInt > TInt)
-    fixup = castStack
-
-addInt64 :: Fn (s > TInt64 > TInt64) (s > TInt64)
-addInt64 = fixup # opAdd # toInt64
-  where
-    fixup :: Fn (s > TInt64 > TInt64) (s > TInt > TInt)
-    fixup = castStack
 
 -- ## bytes128Vector ops.
 addExclamation :: Fn (s > TBytes128) (s > TBytes128)

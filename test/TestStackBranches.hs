@@ -79,23 +79,11 @@ progSimpleStackBranch ::
     (s > TInt)
 progSimpleStackBranch =
   begin
-    # roll "bytes"
-    # opSize
-    # op5
-    # opEqualVerify
-    # opDrop
-    # roll "choice"
-    # op1
-    # opEqual
+    # (roll "bytes" # opSize # op5 # opNumEqualVerify # opDrop)
+    # (roll "choice" # op1 # opNumEqual)
     # opIf
       (branch1 # del "b1" # int 2)
-      ( branch2
-          # del "b2"
-          # del "b3"
-          # roll "int"
-          # int 29
-          # opSub
-      )
+      (branch2 # del "b2" # del "b3" # roll "int" # int 29 # opSub)
 
 {- ORMOLU_DISABLE -}
 type Args0 = '[N "x0" TInt]

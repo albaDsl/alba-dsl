@@ -62,6 +62,7 @@ import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
     StackEntry,
+    StackEquatable,
     TBool,
     TBytes,
     TLambda,
@@ -104,6 +105,7 @@ import Alba.Dsl.V1.Bch2026
     opLessThan,
     opMul,
     opNotIf,
+    opNumEqual,
     opRoll,
     opSize,
     opSplit,
@@ -161,6 +163,9 @@ import Prelude ()
 data TVector (a :: Type)
 
 instance StackEntry (TVector a)
+
+-- FIXME: temporary.
+instance StackEquatable (TVector a)
 
 {- ORMOLU_DISABLE -}
 type Acc = "acc"
@@ -266,7 +271,7 @@ splitAtF :: Fn (s > TPackFs a > TNat > TVector a) (s > TVector a > TVector a)
 splitAtF =
   fn
     ( begin
-        # (ns3 Pfs Idx Vec # pick Idx # nat 0 # opEqual)
+        # (ns3 Pfs Idx Vec # pick Idx # nat 0 # opNumEqual)
         # opNotIf
           ( begin
               # (tcPick # pick Vec # lengthF # pick Idx # opGreaterThan)

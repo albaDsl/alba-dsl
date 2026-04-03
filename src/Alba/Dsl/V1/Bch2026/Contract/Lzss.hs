@@ -26,7 +26,6 @@ import Alba.Dsl.V1.Bch2026
     opAnd,
     opBin2Num,
     opCat,
-    opEqual,
     opFalse,
     opGreaterThanOrEqual,
     opIf,
@@ -84,7 +83,7 @@ decompressLoop =
       [ ( pick "i" # pick "n" # opGreaterThanOrEqual,
           opTrue # un6 "bs" "n" "i" "k" "flag" "out"
         ),
-        ( pick "k" # nat groupSize # opEqual,
+        ( pick "k" # nat groupSize # opNumEqual,
           begin
             # (pick "bs" # roll "n" # pick "i" # op1Add)
             # (del "k" # nat 0 # del "flag" # roll "bs")
@@ -132,7 +131,8 @@ indexRef = opSplit # nip # nat refLen # opSplit # drop
 
 -- TBytes is expected to be a single byte.
 testBit :: Fn (s > TBytes > TNat) (s > TBool)
-testBit = opRShiftBin # bytes [0x01] # opAnd # opBin2Num # op0 # opEqual # opNot
+testBit =
+  opRShiftBin # bytes [0x01] # opAnd # opBin2Num # op0 # opNumEqual # opNot
 
 -- Reference format: |offset:12|len:4|
 unpackRef :: Fn (s > TBytes) (s > TOff > TLen)

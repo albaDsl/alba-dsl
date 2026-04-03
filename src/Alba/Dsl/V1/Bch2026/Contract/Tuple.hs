@@ -10,37 +10,39 @@ module Alba.Dsl.V1.Bch2026.Contract.Tuple
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Lang (nat)
-import Alba.Dsl.V1.Bch2025.LangArgs (roll)
-import Alba.Dsl.V1.Bch2025.Ops
-  ( opBin2Num,
-    opCat,
-    opNum2Bin,
-    opSize,
-    opSplit,
-  )
-import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
-import Alba.Dsl.V1.Bch2026.Lang (fn)
-import Alba.Dsl.V1.Common
+import Alba.Dsl.V1.Bch2026
   ( Fn,
+    StackEntry,
+    StackEquatable,
     TBytes,
     TInt,
     TNat,
     begin,
     cast,
     castStack,
+    fn,
+    nat,
     natToInt,
     ns2,
+    opBin2Num,
+    opCat,
+    opNum2Bin,
+    opSize,
+    opSplit,
+    roll,
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Data.Kind (Type)
 import Prelude ()
 
 data TTuple (a :: Type) (b :: Type)
 
 instance StackEntry (TTuple a b)
+
+-- FIXME: temporary.
+instance StackEquatable (TTuple a b)
 
 tuple :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
 tuple = fn tupleM
