@@ -23,8 +23,8 @@ module Demo
   )
 where
 
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
-import Alba.Dsl.V1.Bch2026.Contract.Vector (foldl, generate)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.TVector (foldl, generate)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DemoPrelude
 import DslDemo.EllipticCurve.Constants qualified as EC

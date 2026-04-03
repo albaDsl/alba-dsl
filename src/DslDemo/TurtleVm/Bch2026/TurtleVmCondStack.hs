@@ -30,8 +30,8 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, ifJust)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, ifJust)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import Prelude hiding (drop)
 

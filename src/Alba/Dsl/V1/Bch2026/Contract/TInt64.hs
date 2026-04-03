@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64, toInt64) where
+module Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64, toInt64) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,

@@ -4,10 +4,12 @@ module TestLibMaybe (testLibMaybe) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (bytes128)
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.Maybe
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
+import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (bytes128)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe
   ( TMaybe,
     fromMaybe,
     ifJust,
@@ -17,10 +19,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Maybe
     maybe,
     nothing,
   )
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (untuple)
-import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)

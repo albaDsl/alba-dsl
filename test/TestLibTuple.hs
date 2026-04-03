@@ -4,9 +4,9 @@ module TestLibTuple (testLibTuple) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (int64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (int8)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (fst, snd, tuple, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (int64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (int8)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (fst, snd, tuple, untuple)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)

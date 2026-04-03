@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Tuple
+module Alba.Dsl.V1.Bch2026.Contract.TTuple
   ( TTuple,
     tuple,
     tupleM,

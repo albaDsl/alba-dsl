@@ -19,11 +19,11 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (packFsRec), TPackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, swap)
-import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector)
-import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
+import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
+import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt)
 import Alba.Dsl.V1.Bch2026.Lang (lambda1, lambda2, runEnv)
 import Alba.Dsl.V1.Bch2026.TxDsl
@@ -82,4 +82,4 @@ length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
 length = packFsRec @a # swap # lengthF
 
 lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
-lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.Vector" "lengthF"
+lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.TVector" "lengthF"

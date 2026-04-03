@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Bytes128
+module Alba.Dsl.V1.Bch2026.Contract.TBytes128
   ( TBytes128,
     toBytes128,
     bytes128,

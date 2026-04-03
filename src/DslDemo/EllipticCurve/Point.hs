@@ -18,17 +18,17 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Either
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TEither
   ( TEither,
     either,
     isLeft,
     left,
     right,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe', just, nothing)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, fst, snd, tuple)
-import Alba.Dsl.V1.Bch2026.Contract.Unit (TUnit, unit)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, fromMaybe', just, nothing)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tuple)
+import Alba.Dsl.V1.Bch2026.Contract.TUnit (TUnit, unit)
 import Prelude (Integer)
 
 data TPoint

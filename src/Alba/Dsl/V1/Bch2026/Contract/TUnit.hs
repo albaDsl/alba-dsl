@@ -1,6 +1,6 @@
 -- Copyright (c) 2026 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Unit (TUnit, unit) where
+module Alba.Dsl.V1.Bch2026.Contract.TUnit (TUnit, unit) where
 
 import Alba.Dsl.V1.Bch2025 (Fn, StackEntry, cast, int, (#), type (>))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))

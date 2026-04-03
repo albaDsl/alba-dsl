@@ -1,6 +1,6 @@
 -- Copyright (c) 2026 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Either
+module Alba.Dsl.V1.Bch2026.Contract.TEither
   ( TEither,
     left,
     right,

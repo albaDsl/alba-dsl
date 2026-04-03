@@ -10,12 +10,12 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
-import Alba.Dsl.V1.Bch2026.Contract.TupleFs (untuple)
-import Alba.Dsl.V1.Bch2026.Contract.Vector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, toInt64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB

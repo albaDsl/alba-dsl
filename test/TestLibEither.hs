@@ -4,8 +4,9 @@ module TestLibEither (testLibEither) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (bytes128)
-import Alba.Dsl.V1.Bch2026.Contract.Either
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (bytes128)
+import Alba.Dsl.V1.Bch2026.Contract.TEither
   ( TEither,
     either,
     ifLeft,
@@ -14,9 +15,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Either
     left,
     right,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (int64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (int64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)

@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8) where
+module Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8, toInt8) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,

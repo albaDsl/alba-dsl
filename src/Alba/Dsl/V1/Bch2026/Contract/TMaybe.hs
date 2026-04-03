@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Maybe
+module Alba.Dsl.V1.Bch2026.Contract.TMaybe
   ( TMaybe,
     just,
     nothing,
@@ -45,11 +45,11 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (TBytes128)
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (TBytes128)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
 import Data.ByteString qualified as B
 import Data.Kind (Type)
 import Numeric.Natural (Natural)

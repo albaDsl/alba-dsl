@@ -23,8 +23,8 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLib (importLibrary')
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
-import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Common.Contract (Contract (..))
 import Numeric.Natural (Natural)
 import Prelude hiding (drop)

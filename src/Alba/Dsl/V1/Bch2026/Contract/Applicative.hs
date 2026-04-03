@@ -24,14 +24,14 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe
   ( TMaybe,
     fromMaybe',
     isJust,
     just,
     nothing,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
 import Prelude ()
 
 liftA2Maybe ::

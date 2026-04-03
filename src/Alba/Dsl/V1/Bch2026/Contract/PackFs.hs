@@ -34,7 +34,7 @@ import Alba.Dsl.V1.Bch2025
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, fst, snd, tupleM, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tupleM, untuple)
 import Alba.Dsl.V1.Bch2026.Lang (fn, invoke1)
 import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Data.Kind (Type)

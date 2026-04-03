@@ -33,10 +33,10 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, fromMaybe')
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (untuple)
-import Alba.Dsl.V1.Bch2026.Contract.Vector
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, fromMaybe')
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TVector
   ( TVector,
     consF,
     empty,

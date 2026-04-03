@@ -43,9 +43,9 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, just, nothing)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap, tuck)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, tuple, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, just, nothing)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isOpDataOp, vmError)
 import Prelude hiding (drop)
 

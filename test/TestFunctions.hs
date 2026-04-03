@@ -4,11 +4,11 @@ module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Int64 (toInt64)
-import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.PartialApplication (apply2, apply3_2)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (swap)
-import Alba.Dsl.V1.Bch2026.Contract.Vector (TVector, generate, reverse)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (toInt64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector, generate, reverse)
 import Data.ByteString qualified as B
 import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)
 import DslDemo.MergeSort.MergeSort qualified as MS

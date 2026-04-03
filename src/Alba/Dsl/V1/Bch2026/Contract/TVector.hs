@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.Vector
+module Alba.Dsl.V1.Bch2026.Contract.TVector
   ( TVector,
     length,
     lengthF,
@@ -130,15 +130,6 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe
-  ( TMaybe,
-    fromMaybe',
-    ifJust,
-    just,
-    maybe,
-    nothing,
-  )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe qualified as Maybe
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
@@ -157,9 +148,18 @@ import Alba.Dsl.V1.Bch2026.Contract.PartialApplication
     apply4_2,
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup, nip, rot, swap)
-import Alba.Dsl.V1.Bch2026.Contract.Tuple (TTuple, fst, snd, tuple, untuple)
-import Alba.Dsl.V1.Bch2026.Contract.TupleFs (TTupleFs, calcPackFs, tupleF)
-import Alba.Dsl.V1.Bch2026.Contract.TupleFs qualified as TFS
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe
+  ( TMaybe,
+    fromMaybe',
+    ifJust,
+    just,
+    maybe,
+    nothing,
+  )
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe qualified as Maybe
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tuple, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (TTupleFs, calcPackFs, tupleF)
+import Alba.Dsl.V1.Bch2026.Contract.TTupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
 import Data.Kind (Type)
 import Prelude ()

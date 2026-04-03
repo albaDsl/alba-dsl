@@ -30,8 +30,8 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Maybe (TMaybe, just, nothing)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, just, nothing)
 import Prelude hiding (drop)
 
 data TCode
