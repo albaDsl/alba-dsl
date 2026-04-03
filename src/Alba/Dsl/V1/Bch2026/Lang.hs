@@ -7,6 +7,7 @@ module Alba.Dsl.V1.Bch2026.Lang
     lambda0,
     lambda1,
     lambda2,
+    lambda2_0,
     lambda3,
     lambda4,
     invoke0,
@@ -121,6 +122,14 @@ lambda2 ::
   Fn (s > t1 > t2) (s > r1) ->
   Fn s' (s' > TLambda '[t1, t2] '[r1])
 lambda2 prog s =
+  let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
+   in registerLambda fId prog s
+
+lambda2_0 ::
+  (HasCallStack, StackEntry t1, StackEntry t2) =>
+  Fn (s > t1 > t2) s ->
+  Fn s' (s' > TLambda '[t1, t2] '[])
+lambda2_0 prog s =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog s
 

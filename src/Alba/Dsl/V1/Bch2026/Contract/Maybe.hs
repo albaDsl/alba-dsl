@@ -18,7 +18,6 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     StackEntry,
-    StackEquatable,
     TBool,
     TBytes,
     TLambda,
@@ -40,6 +39,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (TBytes128)
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
@@ -47,15 +52,17 @@ import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Data.ByteString qualified as B
 import Data.Kind (Type)
-import Numeric.Natural
+import Numeric.Natural (Natural)
 import Prelude hiding (drop, map, maybe)
 
 data TMaybe (a :: Type)
 
 instance StackEntry (TMaybe a)
 
--- FIXME: temporary.
-instance StackEquatable (TMaybe a)
+instance (BlobEq a) => BlobEq (TMaybe a) where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 instance PackFs (TMaybe TInt8) where
   sizeConst = 1 + sizeConst @TInt8

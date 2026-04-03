@@ -62,7 +62,6 @@ import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
     StackEntry,
-    StackEquatable,
     TBool,
     TBytes,
     TLambda,
@@ -125,6 +124,12 @@ import Alba.Dsl.V1.Bch2026
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.Maybe
   ( TMaybe,
     fromMaybe',
@@ -164,8 +169,10 @@ data TVector (a :: Type)
 
 instance StackEntry (TVector a)
 
--- FIXME: temporary.
-instance StackEquatable (TVector a)
+instance (BlobEq a) => BlobEq (TVector a) where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 {- ORMOLU_DISABLE -}
 type Acc = "acc"

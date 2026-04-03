@@ -3,6 +3,7 @@
 module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.PartialApplication (apply2, apply3_2)
@@ -111,7 +112,7 @@ progSort =
   runEnv
     ( begin
         # (nat 10 # lambda1 (op1Add # cast # toInt64) # generate)
-        # (opDup # reverse # MS.sort # opEqual)
+        # (opDup # reverse # MS.sort # equal)
     )
 
 propSort :: AsciiString -> Property
@@ -119,7 +120,7 @@ propSort (AsciiString xs) =
   (B.length xs <= 47) ==> do
     isTrue' $
       evaluateProg
-        (bytes xs # toVector # MS.sort # bytes (B.sort xs) # toVector # opEqual)
+        (bytes xs # toVector # MS.sort # bytes (B.sort xs) # toVector # equal)
   where
     toVector :: Fn (s > TBytes) (s > TVector TInt8)
     toVector = cast

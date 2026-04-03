@@ -16,11 +16,10 @@ import Alba.Dsl.V1.Bch2026
     int,
     nat,
     opBin2Num,
-    opEqual,
-    opNumEqualVerify,
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLib (importLibrary')
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
@@ -48,10 +47,10 @@ contract = MkContract withdraw
 withdraw :: CFn (Base > TBytes > TBytes)
 withdraw =
   begin
-    # (opBin2Num # int 0 # opNumEqualVerify)
+    # (opBin2Num # int 0 # equalVerify)
     # loadDecompressionLib 0
     # loadVectorLib dcNumUtxos
-    # (Dc.decompress # b2v # Vc.sort # target # opEqual)
+    # (Dc.decompress # b2v # Vc.sort # target # equal)
   where
     dcNumUtxos = fromIntegral Dc.numUtxos
 

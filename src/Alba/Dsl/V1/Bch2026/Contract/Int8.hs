@@ -20,6 +20,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
@@ -31,6 +37,11 @@ instance StackEntry TInt8
 -- We currently allow for standard arithmetic ops. Overflow is caught on
 -- attempts to pack the datatype.
 instance StackNum TInt8
+
+instance BlobEq TInt8 where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 instance PackFs TInt8 where
   sizeConst = 1

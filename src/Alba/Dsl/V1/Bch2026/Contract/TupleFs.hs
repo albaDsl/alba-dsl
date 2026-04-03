@@ -15,7 +15,6 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     StackEntry,
-    StackEquatable,
     TBytes,
     TLambda,
     TNat,
@@ -38,6 +37,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
@@ -54,8 +59,10 @@ data TTupleFs a b
 
 instance StackEntry (TTupleFs a b)
 
--- FIXME: temporary.
-instance StackEquatable (TTupleFs a b)
+instance (BlobEq a, BlobEq b) => BlobEq (TTupleFs a b) where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
   pack :: Fn (s > TTupleFs a b) (s > TBytes)

@@ -13,7 +13,6 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     StackEntry,
-    StackEquatable,
     TBytes,
     TInt,
     TNat,
@@ -33,6 +32,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Data.Kind (Type)
 import Prelude ()
@@ -41,8 +46,10 @@ data TTuple (a :: Type) (b :: Type)
 
 instance StackEntry (TTuple a b)
 
--- FIXME: temporary.
-instance StackEquatable (TTuple a b)
+instance (BlobEq a, BlobEq b) => BlobEq (TTuple a b) where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 tuple :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
 tuple = fn tupleM

@@ -3,6 +3,7 @@
 module TestLibEither (testLibEither) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Bytes128 (bytes128)
 import Alba.Dsl.V1.Bch2026.Contract.Either
   ( TEither,
@@ -78,7 +79,7 @@ progBasics =
         # (r # lambda1 (drop # int 1) # lambda1 (drop # int 2) # rot # either)
         # swap
         # (l # lambda1 (drop # int 2) # lambda1 (drop # int 1) # rot # either)
-        # (opAdd # int 4 # opNumEqualVerify)
+        # (opAdd # int 4 # equalVerify)
       where
         l :: Fn (s > a) (s > TEither a TInt8)
         l = left

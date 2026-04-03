@@ -8,6 +8,7 @@ module TestCodeMetrics (testCodeMetrics) where
 import Alba.Dsl.V1.Bch2025.LangUntyped qualified as UT
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, toInt64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8)
@@ -164,8 +165,8 @@ vectorOps =
               # (lambda2 (cast # opAdd) # nat 0 # nat n # int8 1 # V.replicate)
               # (V.foldl # nat n # opNumEqualVerify)
           )
-        # (pick "vec64" # opDup # V.reverse # sort # opEqualVerify)
-        # (pick "vec8" # opDup # V.reverse # sort # opEqualVerify)
+        # (pick "vec64" # opDup # V.reverse # sort # equalVerify)
+        # (pick "vec8" # opDup # V.reverse # sort # equalVerify)
         # ( begin
               # lambda2 (untuple # castStack # opAdd # opAdd)
               # int 0

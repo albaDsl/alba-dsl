@@ -3,6 +3,7 @@
 module TestLibTuple (testLibTuple) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Int64 (int64)
 import Alba.Dsl.V1.Bch2026.Contract.Int8 (int8)
 import Alba.Dsl.V1.Bch2026.Contract.Tuple (fst, snd, tuple, untuple)
@@ -25,15 +26,15 @@ progBasics =
     # ( begin
           # ( begin
                 # (int8 1 # int64 2 # tuple)
-                # (untuple # opDrop # int8 1 # opNumEqualVerify)
+                # (untuple # opDrop # int8 1 # equalVerify)
             )
           # ( begin
                 # (int8 1 # int64 2 # tuple)
-                # (untuple # opNip # int64 2 # opNumEqualVerify)
+                # (untuple # opNip # int64 2 # equalVerify)
             )
           # ( begin
-                # (int8 1 # int64 2 # tuple # fst # int8 1 # opNumEqualVerify)
-                # (int8 1 # int64 2 # tuple # snd # int64 2 # opNumEqualVerify)
+                # (int8 1 # int64 2 # tuple # fst # int8 1 # equalVerify)
+                # (int8 1 # int64 2 # tuple # snd # int64 2 # equalVerify)
             )
       )
     # opTrue
@@ -44,7 +45,7 @@ progNested =
     # ( begin
           # ( begin
                 # (int64 1 # int8 2 # int64 3 # tuple # tuple)
-                # (snd # fst # int8 2 # opNumEqualVerify)
+                # (snd # fst # int8 2 # equalVerify)
             )
       )
     # opTrue

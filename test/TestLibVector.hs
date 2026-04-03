@@ -4,6 +4,7 @@ module TestLibVector (testLibVector) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Bytes128
   ( TBytes128,
     bytes128,
@@ -57,44 +58,44 @@ testLibVector =
 progLength :: Fn s (s > TBool)
 progLength =
   begin
-    # (int64Vector # V.length # nat 3 # opNumEqualVerify)
-    # (int8Vector # V.length # nat 3 # opNumEqualVerify)
-    # (bytes128Vector # V.length # nat 3 # opNumEqualVerify)
-    # (int64Vector # V.null # opFalse # opEqualVerify)
-    # (int8Vector # V.null # opFalse # opEqualVerify)
-    # (bytes128Vector # V.null # opFalse # opEqualVerify)
+    # (int64Vector # V.length # nat 3 # equalVerify)
+    # (int8Vector # V.length # nat 3 # equalVerify)
+    # (bytes128Vector # V.length # nat 3 # equalVerify)
+    # (int64Vector # V.null # opFalse # equalVerify)
+    # (int8Vector # V.null # opFalse # equalVerify)
+    # (bytes128Vector # V.null # opFalse # equalVerify)
     # opTrue
 
 progIndexing :: Fn s (s > TBool)
 progIndexing =
   begin
-    # (int64Vector # V.last # fromJust # int64 2 # opNumEqualVerify)
-    # (int8Vector # V.last # fromJust # int8 2 # opNumEqualVerify)
-    # (bytes128Vector # V.last # fromJust # bytes128 b2 # opEqualVerify)
-    # (int64Vector # V.head # fromJust # int64 0 # opNumEqualVerify)
-    # (int8Vector # V.head # fromJust # int8 0 # opNumEqualVerify)
-    # (bytes128Vector # V.head # fromJust # bytes128 b0 # opEqualVerify)
-    # (int64Vector # nat 0 # V.lookup # fromJust # int64 0 # opNumEqualVerify)
-    # (int64Vector # nat 1 # V.lookup # fromJust # int64 1 # opNumEqualVerify)
-    # (int64Vector # nat 2 # V.lookup # fromJust # int64 2 # opNumEqualVerify)
-    # (int64Vector # nat 3 # V.lookup # nothing # opEqualVerify)
-    # (int8Vector # nat 0 # V.lookup # fromJust # int8 0 # opNumEqualVerify)
-    # (int8Vector # nat 1 # V.lookup # fromJust # int8 1 # opNumEqualVerify)
-    # (int8Vector # nat 2 # V.lookup # fromJust # int8 2 # opNumEqualVerify)
-    # (int8Vector # nat 3 # V.lookup # nothing # opEqualVerify)
+    # (int64Vector # V.last # fromJust # int64 2 # equalVerify)
+    # (int8Vector # V.last # fromJust # int8 2 # equalVerify)
+    # (bytes128Vector # V.last # fromJust # bytes128 b2 # equalVerify)
+    # (int64Vector # V.head # fromJust # int64 0 # equalVerify)
+    # (int8Vector # V.head # fromJust # int8 0 # equalVerify)
+    # (bytes128Vector # V.head # fromJust # bytes128 b0 # equalVerify)
+    # (int64Vector # nat 0 # V.lookup # fromJust # int64 0 # equalVerify)
+    # (int64Vector # nat 1 # V.lookup # fromJust # int64 1 # equalVerify)
+    # (int64Vector # nat 2 # V.lookup # fromJust # int64 2 # equalVerify)
+    # (int64Vector # nat 3 # V.lookup # nothing # equalVerify)
+    # (int8Vector # nat 0 # V.lookup # fromJust # int8 0 # equalVerify)
+    # (int8Vector # nat 1 # V.lookup # fromJust # int8 1 # equalVerify)
+    # (int8Vector # nat 2 # V.lookup # fromJust # int8 2 # equalVerify)
+    # (int8Vector # nat 3 # V.lookup # nothing # equalVerify)
     # ( begin
           # (bytes128Vector # nat 0 # V.lookup # fromJust # bytes128 b0)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (bytes128Vector # nat 1 # V.lookup # fromJust # bytes128 b1)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (bytes128Vector # nat 2 # V.lookup # fromJust # bytes128 b2)
-          # opEqualVerify
+          # equalVerify
       )
-    # (bytes128Vector # nat 3 # V.lookup # nothing # opEqualVerify)
+    # (bytes128Vector # nat 3 # V.lookup # nothing # equalVerify)
     # opTrue
 
 progSlicing :: Fn s (s > TBool)
@@ -105,127 +106,127 @@ progSlicing =
     # ( begin
           # (int64Vector # V.unsnoc # fromJust # snd)
           # int64 2
-          # opNumEqualVerify
+          # equalVerify
       )
     # ( begin
           # (int8Vector # V.unsnoc # fromJust # snd)
           # int8 2
-          # opNumEqualVerify
+          # equalVerify
       )
     # ( begin
           # (bytes128Vector # V.unsnoc # fromJust # snd)
           # bytes128 b2
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (int64Vector # V.init # fromJust)
           # (int64 0 # int64 1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (int8Vector # V.init # fromJust)
           # (int8 0 # int8 1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (bytes128Vector # V.init # fromJust)
           # (bytes128 b0 # bytes128 b1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (int64Vector # V.tail # fromJust)
           # (int64 1 # int64 2 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (int8Vector # V.tail # fromJust)
           # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (bytes128Vector # V.tail # fromJust)
           # (bytes128 b1 # bytes128 b2 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int64Vector # V.take)
           # (int64 0 # int64 1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int8Vector # V.take)
           # (int8 0 # int8 1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # bytes128Vector # V.take)
           # (bytes128 b0 # bytes128 b1 # V.empty # V.cons # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int64Vector # V.drop)
           # (int64 2 # V.empty # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int8Vector # V.drop)
           # (int8 2 # V.empty # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # bytes128Vector # V.drop)
           # (bytes128 b2 # V.empty # V.cons)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int64Vector # V.splitAt)
           # (opNip # int64 2 # V.singleton)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # int8Vector # V.splitAt)
           # (opNip # int8 2 # V.singleton)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 2 # bytes128Vector # V.splitAt)
           # (opNip # bytes128 b2 # V.singleton)
-          # opEqualVerify
+          # equalVerify
       )
     # ( begin
           # (nat 10 # int64Vector # V.splitAt)
-          # (opDrop # int64Vector # opEqualVerify)
+          # (opDrop # int64Vector # equalVerify)
       )
     # ( begin
           # (nat 10 # int8Vector # V.splitAt)
-          # (opDrop # int8Vector # opEqualVerify)
+          # (opDrop # int8Vector # equalVerify)
       )
     # ( begin
           # (nat 10 # bytes128Vector # V.splitAt)
-          # (opDrop # bytes128Vector # opEqualVerify)
+          # (opDrop # bytes128Vector # equalVerify)
       )
     # ( begin
           # (nat 0 # int64Vector # V.splitAt)
-          # (opNip # int64Vector # opEqualVerify)
+          # (opNip # int64Vector # equalVerify)
       )
     # ( begin
           # (nat 0 # int8Vector # V.splitAt)
-          # (opNip # int8Vector # opEqualVerify)
+          # (opNip # int8Vector # equalVerify)
       )
     # ( begin
           # (nat 0 # bytes128Vector # V.splitAt)
-          # (opNip # bytes128Vector # opEqualVerify)
+          # (opNip # bytes128Vector # equalVerify)
       )
     # opTrue
   where
     testUncons ::
-      (StackNum a, PackFs a) =>
+      (BlobEq a, StackNum a, PackFs a) =>
       (forall s'. Integer -> Fn s' (s' > a)) ->
       Fn (s > V.TVector a) s
     testUncons val =
       begin
         # (V.uncons # fromJust # snd)
-        # (V.uncons # fromJust # fst # val 1 # opNumEqualVerify)
+        # (V.uncons # fromJust # fst # val 1 # equalVerify)
 
 progConstruction :: Fn s (s > TBool)
 progConstruction =
@@ -234,22 +235,22 @@ progConstruction =
         # ( begin
               # (nat 3 # int64 1 # V.replicate)
               # (int64 1 # int64 1 # int64 1 # V.empty)
-              # (V.cons # V.cons # V.cons # opEqualVerify)
+              # (V.cons # V.cons # V.cons # equalVerify)
           )
         # ( begin
               # (nat 0 # int64 1 # V.replicate)
               # V.empty
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (nat 3 # lambda1 (op1Add # cast) # V.generate)
               # (int64 1 # int64 2 # int64 3 # V.empty)
-              # (V.cons # V.cons # V.cons # opEqualVerify)
+              # (V.cons # V.cons # V.cons # equalVerify)
           )
         # ( begin
               # (nat 3 # lambda1 (int8 2 # opMul) # int8 2 # V.iterateN)
               # (int8 2 # int8 4 # int8 8 # V.empty)
-              # (V.cons # V.cons # V.cons # opEqualVerify)
+              # (V.cons # V.cons # V.cons # equalVerify)
           )
         # opTrue
     )
@@ -261,7 +262,7 @@ progConcatenation =
         # ( begin
               # (nat 3 # lambda1 (op1Add # cast) # V.generate)
               # (int64 1 # V.empty # V.cons # int64 2 # V.snoc # int64 3)
-              # (V.snoc # opEqualVerify)
+              # (V.snoc # equalVerify)
           )
         # ( begin
               # ( (nat 3 # lambda1 (op1Add # cast) # V.generate) ::
@@ -276,7 +277,7 @@ progConcatenation =
                     # (int64 2 # V.empty # V.cons # V.cons # V.cons # V.cons)
                     # (V.cons # V.cons)
                 )
-              # opEqualVerify
+              # equalVerify
           )
         # opTrue
     )
@@ -288,17 +289,17 @@ progPermutation =
         # ( begin
               # (int8Vector # V.reverse)
               # (int8 2 # int8 1 # int8 0 # V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (int64Vector # V.reverse)
               # (int64 2 # int64 1 # int64 0 # V.empty)
-              # (V.cons # V.cons # V.cons # opEqualVerify)
+              # (V.cons # V.cons # V.cons # equalVerify)
           )
         # ( begin
               # (bytes128Vector # V.reverse)
               # (bytes128 b2 # bytes128 b1 # bytes128 b0 # V.empty)
-              # (V.cons # V.cons # V.cons # opEqualVerify)
+              # (V.cons # V.cons # V.cons # equalVerify)
           )
         # opTrue
     )
@@ -310,22 +311,22 @@ progMapping =
         # ( begin
               # (lambda1 (int8 2 # opMul) # int8Vector # V.map)
               # (int8 0 # int8 2 # int8 4 # V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (lambda1 (int64 2 # opMul) # int64Vector # V.map)
               # (int64 0 # int64 2 # int64 4 # V.empty # V.cons # V.cons)
-              # (V.cons # opEqualVerify)
+              # (V.cons # equalVerify)
           )
         # ( begin
               # (lambda1 addExclamation # bytes128Vector # V.map)
               # (bytes128 (b0 <> "!") # bytes128 (b1 <> "!"))
               # (bytes128 (b2 <> "!") # V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (lambda1 int8to64 # int8Vector # V.map)
-              # (int64Vector # opEqualVerify)
+              # (int64Vector # equalVerify)
           )
         # opTrue
     )
@@ -343,13 +344,13 @@ progZipping =
               # (int64 1 # int8 1 # TFS.tuple)
               # (int64 2 # int8 2 # TFS.tuple)
               # (V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (int64Vector # int8Vector # V.zip)
               # (V.unsnoc # fromJust # snd)
               # (int64 2 # int8 2 # TFS.tuple)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (int64Vector # bytes128Vector # V.zip)
@@ -357,13 +358,13 @@ progZipping =
               # (int64 1 # bytes128 b1 # TFS.tuple)
               # (int64 2 # bytes128 b2 # TFS.tuple)
               # (V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (int64Vector # bytes128Vector # V.zip)
               # (V.unsnoc # fromJust # snd)
               # (int64 2 # bytes128 b2 # TFS.tuple)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # lambda2 (packFs @TInt64 # packFs @TInt8 # op2Swap # TFS.tupleF)
@@ -372,13 +373,13 @@ progZipping =
               # (int64 1 # int8 1 # TFS.tuple)
               # (int64 2 # int8 2 # TFS.tuple)
               # (V.empty # V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # ( begin
               # (int64Vector # int8Vector # V.zip)
               # V.unzip
-              # (int8Vector # opEqualVerify)
-              # (int64Vector # opEqualVerify)
+              # (int8Vector # equalVerify)
+              # (int64Vector # equalVerify)
           )
         # ( begin
               # lambda2 opAdd
@@ -387,7 +388,7 @@ progZipping =
               # V.zipWith
               # (int64 1 # int64 3 # int64 5 # V.empty)
               # (V.cons # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # opTrue
     )
@@ -400,7 +401,7 @@ progFiltering =
               # (nat 10 # lambda1 (op1Add # cast) # V.generate)
               # (lambda1 (int8 3 # int8LessThan) # opSwap # V.filter)
               # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
-              # opEqualVerify
+              # equalVerify
           )
         # opTrue
     )
@@ -424,7 +425,7 @@ propReverse (BytesSize size) =
   where
     prog :: Natural -> Fn s (s > TBool)
     prog len' =
-      runEnv (testVector len' # opDup # V.reverse # V.reverse # opEqual)
+      runEnv (testVector len' # opDup # V.reverse # V.reverse # equal)
 
     overhead :: Integer
     overhead = 10
@@ -449,7 +450,7 @@ propLookup (BytesSize size1) (BytesSize size2) =
       runEnv
         ( begin
             # (testVector len' # nat idx' # V.lookup)
-            # (int64 (fromIntegral idx') # just # opEqual)
+            # (int64 (fromIntegral idx') # just # equal)
         )
 
 propConsSnocAppend :: BytesSize -> Bool
@@ -465,7 +466,7 @@ propConsSnocAppend (BytesSize size) =
             # (int64 1 # pick "vec" # V.cons # int64 2 # V.snoc)
             # (int64 1 # V.singleton # roll "vec" # int64 2 # V.singleton)
             # (V.append # V.append)
-            # opEqual
+            # equal
         )
 
 propHeadTailUncons :: BytesSize -> Property
@@ -481,7 +482,7 @@ propHeadTailUncons (BytesSize size) =
             # name "vec" (testVector len')
             # (lambda2 tuple # pick "vec" # V.head)
             # (pick "vec" # V.tail # liftA2Maybe)
-            # (roll "vec" # V.uncons # opEqual)
+            # (roll "vec" # V.uncons # equal)
         )
 
 propLastInitUnsnoc :: BytesSize -> Property
@@ -497,7 +498,7 @@ propLastInitUnsnoc (BytesSize size) =
             # name "vec" (testVector len')
             # (lambda2 tuple # pick "vec" # V.init)
             # (pick "vec" # V.last # liftA2Maybe)
-            # (roll "vec" # V.unsnoc # opEqual)
+            # (roll "vec" # V.unsnoc # equal)
         )
 
 -- 9998 is based on current 10K element limit and leaving room for the
@@ -516,7 +517,7 @@ propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
             # name "vec" (testVector len')
             # (nat idx' # pick "vec" # V.take)
             # (nat idx' # pick "vec" # V.drop # tuple)
-            # (nat idx' # roll "vec" # V.splitAt # tuple # opEqual)
+            # (nat idx' # roll "vec" # V.splitAt # tuple # equal)
         )
 
 -- 4000 is based on current 10K element limit and leaving ample room for the
@@ -537,7 +538,7 @@ propZipUnzip (BytesSize size1) (BytesSize size2) =
             # name "minLen" (nat len1' # nat len2' # opMin)
             # (pick "minLen" # roll "vec1" # V.take)
             # (roll "minLen" # roll "vec2" # V.take)
-            # (V.zip # opEqual)
+            # (V.zip # equal)
         )
 
 propZipWithUnzip :: BytesSize -> BytesSize -> Property
@@ -557,7 +558,7 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
             # name "minLen" (nat len1' # nat len2' # opMin)
             # (pick "minLen" # roll "vec1" # V.take)
             # (roll "minLen" # roll "vec2" # V.take)
-            # (V.zip # opEqual)
+            # (V.zip # equal)
         )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -571,7 +572,7 @@ propFilterKeepAll (BytesSize size) =
       runEnv
         ( begin
             # (testVector len' # opDup)
-            # (lambda1 (opDrop # opTrue) # opSwap # V.filter # opEqual)
+            # (lambda1 (opDrop # opTrue) # opSwap # V.filter # equal)
         )
 
     overhead :: Integer
@@ -587,7 +588,7 @@ propFilterKeepNone (BytesSize size) =
       runEnv
         ( begin
             # (V.empty # testVector len')
-            # (lambda1 (opDrop # opFalse) # opSwap # V.filter # opEqual)
+            # (lambda1 (opDrop # opFalse) # opSwap # V.filter # equal)
         )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -603,7 +604,7 @@ propMapComposition (BytesSize size) =
             # name "vec" (testVector len')
             # (lambda1 f # lambda1 g # pick "vec" # V.map # V.map)
             # (lambda1 (g # f) # roll "vec" # V.map)
-            # opEqual
+            # equal
         )
 
     f :: Fn (s > TInt64) (s > TInt64)
@@ -626,7 +627,7 @@ propMapIdentity (BytesSize size) =
       runEnv
         ( begin
             # name "vec" (testVector len')
-            # (pick "vec" # lambda1 f # roll "vec" # V.map # opEqual)
+            # (pick "vec" # lambda1 f # roll "vec" # V.map # equal)
         )
 
     f :: Fn (s > TInt64) (s > TInt64)
@@ -644,9 +645,9 @@ propFolding (BytesSize size) =
       runEnv
         ( begin
             # (lambda2 opAdd # int64 0 # testVector len' # V.foldl)
-            # (int64 sum # opNumEqualVerify)
+            # (int64 sum # equalVerify)
             # (lambda2 opAdd # int64 0 # testVector len' # V.foldr)
-            # (int64 sum # opNumEqualVerify)
+            # (int64 sum # equalVerify)
             # opTrue
         )
 
@@ -662,7 +663,7 @@ int64Vector =
   fn
     ( begin
         # (int64 0 # int64 1 # int64 2 # V.empty # V.cons # V.cons # V.cons)
-        # (opDup # v2b # opSize # opNip # nat (8 * 3) # opNumEqualVerify)
+        # (opDup # v2b # opSize # opNip # nat (8 * 3) # equalVerify)
     )
 
 v2b :: Fn (s > V.TVector a) (s > TBytes)
@@ -673,7 +674,7 @@ int8Vector =
   fn
     ( begin
         # (int8 0 # int8 1 # int8 2 # V.empty # V.cons # V.cons # V.cons)
-        # (opDup # v2b # opSize # opNip # nat (1 * 3) # opNumEqualVerify)
+        # (opDup # v2b # opSize # opNip # nat (1 * 3) # equalVerify)
     )
 
 bytes128Vector :: Fn s (s > V.TVector TBytes128)
@@ -682,7 +683,7 @@ bytes128Vector =
     ( begin
         # (bytes128 b0 # bytes128 b1 # bytes128 b2 # V.empty)
         # (V.cons # V.cons # V.cons)
-        # (opDup # v2b # opSize # opNip # nat (130 * 3) # opNumEqualVerify)
+        # (opDup # v2b # opSize # opNip # nat (130 * 3) # equalVerify)
     )
 
 b0 :: Bytes

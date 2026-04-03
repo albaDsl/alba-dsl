@@ -12,7 +12,6 @@ import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
     StackEntry,
-    StackEquatable,
     TBytes,
     TInt,
     TNat,
@@ -39,6 +38,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Control.Exception (assert)
@@ -50,7 +55,10 @@ data TBytes128
 
 instance StackEntry TBytes128
 
-instance StackEquatable TBytes128
+instance BlobEq TBytes128 where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 instance PackFs TBytes128 where
   pack = packTBytes128

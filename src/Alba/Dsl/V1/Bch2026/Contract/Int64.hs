@@ -20,6 +20,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
@@ -38,6 +44,11 @@ instance PackFs TInt64 where
   pack = cast # size @TInt64 # opNum2Bin
   unpack = opBin2Num # cast
   record = int64PackFs
+
+instance BlobEq TInt64 where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 int64PackFs :: Fn s (s > TPackFs TInt64)
 int64PackFs =

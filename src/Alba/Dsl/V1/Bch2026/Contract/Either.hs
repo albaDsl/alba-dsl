@@ -15,7 +15,6 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     StackEntry,
-    StackEquatable,
     TBool,
     TBytes,
     TNat,
@@ -29,6 +28,12 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+  ( blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Alba.Dsl.V1.Bch2026.Lang (fn, invoke1)
 import Alba.Dsl.V1.Bch2026.Stack (TLambda)
@@ -39,8 +44,10 @@ data TEither (a :: Type) (b :: Type)
 
 instance StackEntry (TEither a b)
 
--- FIXME: temporary.
-instance StackEquatable (TEither a b)
+instance (BlobEq a, BlobEq b) => BlobEq (TEither a b) where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
 left :: Fn (s > a) (s > TEither a b)
 left = fn (toBytes # tagLeft # swap # opCat # cast)
