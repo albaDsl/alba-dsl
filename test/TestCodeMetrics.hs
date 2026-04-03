@@ -28,7 +28,7 @@ import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
-import DslDemo.EllipticCurve.Point (isEqual, pushPoint)
+import DslDemo.EllipticCurve.Point (pushPoint)
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
@@ -51,7 +51,7 @@ testCodeMetrics =
           testCase "turtleVm 2026" $
             sizeOf (toTyped (T2026.turtleVm 1)) @?= "564 opcodes, 1031 bytes.",
           testCase "EC scalar point multiply (Affine)" $
-            sizeOf EA.ecMul @?= "68 opcodes, 539 bytes.",
+            sizeOf EA.ecMul @?= "68 opcodes, 489 bytes.",
           testCase "EC scalar point multiply (Jacobian)" $
             sizeOf EJ.ecMul @?= "95 opcodes, 724 bytes.",
           testCase "EC scalar point multiply (Windowed Jacobian)" $
@@ -73,14 +73,14 @@ testCodeMetrics =
             ratio (toTyped (T2026.turtleVm 1))
               @?= "1031 byte to 990 bytes (saving 4.0%)",
           testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            ratio windowedMul @?= "1054 byte to 893 bytes (saving 15.3%)",
+            ratio windowedMul @?= "1002 byte to 861 bytes (saving 14.1%)",
           testCase "Vector ops" $
             ratio vectorOps @?= "1377 byte to 1152 bytes (saving 16.3%)"
         ],
       testGroup
         "Cost"
         [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            costOf windowedMul @?= 31_879_895,
+            costOf windowedMul @?= 31_864_468,
           testCase "Vector ops" $ costOf vectorOps @?= 23_924_857,
           testCase "LZSS" $ costOf decompressTest @?= 21_203_641,
           testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_509_754
@@ -150,7 +150,7 @@ windowedMul =
     # pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
       0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-    # (isEqual # opVerify)
+    # (equal # opVerify)
   where
     gTable = nat 100
 

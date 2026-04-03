@@ -3,12 +3,12 @@
 module DslDemo.EllipticCurve.AffineAdd (ecDouble, ecAdd) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
 import DslDemo.EllipticCurve.Point
   ( TPoint,
     getX,
     getY,
-    isEqual,
     isIdentity,
     makeIdentity,
     makePoint,
@@ -72,7 +72,7 @@ ecAdd' =
             )
       )
   where
-    pointsAreEqual = pick "p" # pick "q" # isEqual
+    pointsAreEqual = pick "p" # pick "q" # equal
 
     xCoordsEqual = pick "p" # getX # pick "q" # getX # opNumEqual
 
