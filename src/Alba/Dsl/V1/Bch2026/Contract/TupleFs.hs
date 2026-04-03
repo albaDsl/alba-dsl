@@ -20,7 +20,6 @@ import Alba.Dsl.V1.Bch2026
     TNat,
     begin,
     cast,
-    function,
     invoke1,
     lambda1,
     nat,
@@ -73,13 +72,11 @@ tuplePackFs ::
   (PackFs a, PackFs b) =>
   FN s (s > TPackFs (TTupleFs a b))
 tuplePackFs =
-  function
-    ( begin
-        # size @(TTupleFs a b)
-        # lambda1 (pack @(TTupleFs a b))
-        # lambda1 (unpack @(TTupleFs a b))
-        # mkPackFs
-    )
+  begin
+    # size @(TTupleFs a b)
+    # lambda1 (pack @(TTupleFs a b))
+    # lambda1 (unpack @(TTupleFs a b))
+    # mkPackFs
 
 tuple ::
   forall a b s.

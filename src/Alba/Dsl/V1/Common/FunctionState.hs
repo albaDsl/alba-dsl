@@ -7,6 +7,7 @@ module Alba.Dsl.V1.Common.FunctionState
     startState,
     registerFunction,
     addFunctionBody,
+    getFunctionBody,
     addCallSite,
     setCallSites,
     isRegistered,
@@ -72,6 +73,12 @@ addFunctionBody fId code fs@FunctionState {functions} =
         fs
           { functions = M.insert fId (f {code = Just code}) functions
           }
+    Nothing -> Nothing
+
+getFunctionBody :: FunctionId -> FunctionState -> Maybe CodeL3
+getFunctionBody fId FunctionState {functions} =
+  case M.lookup fId functions of
+    Just f -> f.code
     Nothing -> Nothing
 
 addCallSite :: FunctionId -> FunctionState -> Maybe FunctionState

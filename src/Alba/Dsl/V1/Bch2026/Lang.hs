@@ -35,6 +35,7 @@ import Alba.Dsl.V1.Common.FunctionState
     getCallerFunctionId,
     getCallerLambdaId,
     getCallerRtConstantId,
+    getFunctionBody,
     isRegistered,
     registerFunction,
   )
@@ -46,6 +47,7 @@ import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
 import GHC.Stack (HasCallStack, withFrozenCallStack)
+import Text.Printf (printf)
 
 function :: (HasCallStack) => FNA s alt s' alt' -> FNA s alt s' alt'
 function prog (S c fs) =
@@ -65,9 +67,16 @@ register prog fId fs =
   if not (isRegistered fId fs)
     then
       let fs' = fromMaybe canNotHappen (registerFunction fId fs)
-          (c', fs'') = pass1 S.empty fs' prog
-       in fromMaybe canNotHappen (addFunctionBody fId c' fs'')
-    else fromMaybe canNotHappen (addCallSite fId fs)
+          (c, fs'') = pass1 S.empty fs' prog
+       in fromMaybe canNotHappen (addFunctionBody fId c fs'')
+    else case getFunctionBody fId fs of
+      Just c ->
+        let (c', _) = pass1 S.empty fs prog
+         in if c == c'
+              then fromMaybe canNotHappen (addCallSite fId fs)
+              else error (printf "%s: code for body not constant." (show fId))
+      Nothing ->
+        fromMaybe canNotHappen (addCallSite fId fs)
 
 pass1 ::
   forall s s' alt alt'.

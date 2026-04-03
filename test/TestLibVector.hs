@@ -345,12 +345,24 @@ progZipping =
               # (V.empty # V.cons # V.cons # V.cons)
               # opEqualVerify
           )
+        # (begin
+              # (int64Vector # int8Vector # V.zip)
+              # (V.unsnoc # fromJust # snd)
+              # (int64 2 # int8 2 # TFS.tuple)
+              # opEqualVerify
+          )
         # ( begin
               # (int64Vector # bytes128Vector # V.zip)
               # (int64 0 # bytes128 b0 # TFS.tuple)
               # (int64 1 # bytes128 b1 # TFS.tuple)
               # (int64 2 # bytes128 b2 # TFS.tuple)
               # (V.empty # V.cons # V.cons # V.cons)
+              # opEqualVerify
+          )
+        # (begin
+              # (int64Vector # bytes128Vector # V.zip)
+              # (V.unsnoc # fromJust # snd)
+              # (int64 2 # bytes128 b2 # TFS.tuple)
               # opEqualVerify
           )
         # ( begin
