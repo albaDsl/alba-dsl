@@ -35,7 +35,7 @@ testFunctions =
         isTrue (evaluateProg progRuntimeFunctions)
     ]
 
-progBasic :: FN s (s > TBool)
+progBasic :: Fn s (s > TBool)
 progBasic =
   begin
     # op3
@@ -43,12 +43,12 @@ progBasic =
     # int 27
     # opNumEqual
   where
-    cube :: FN (s > TInt) (s > TInt)
-    cube = function (opDup # opDup # opMul # opMul)
+    cube :: Fn (s > TInt) (s > TInt)
+    cube = fn (opDup # opDup # opMul # opMul)
 
 -- Evaluate: polynomial(x) = x⁴ + 10x³ + 35x² + 50x + 24 for
 -- x = 1, 2, 3, and 4.
-progNestedCalls1 :: FN s (s > TBool)
+progNestedCalls1 :: Fn s (s > TBool)
 progNestedCalls1 =
   begin
     # (int 2 # polynomial # int 360 # opNumEqualVerify)
@@ -58,7 +58,7 @@ progNestedCalls1 =
     # opTrue
   where
     polynomial :: F (S (s > TInt) alt -> S (s > TInt) alt)
-    polynomial = function (unname 1 polynomial')
+    polynomial = fn (unname 1 polynomial')
 
     -- When using "S -> S" syntax, surround it in an 'F' for VM functions.
     polynomial' :: F (S (s > N "x" TInt) alt -> S (s > TInt) alt)
@@ -71,22 +71,22 @@ progNestedCalls1 =
         # int 24
         # (opAdd # opAdd # opAdd # opAdd)
 
-    quartic :: FN (s > TInt) (s > TInt)
-    quartic = function (square # square)
+    quartic :: Fn (s > TInt) (s > TInt)
+    quartic = fn (square # square)
 
-    cube :: FN (s > TInt) (s > TInt)
-    cube = function (opDup # opDup # opMul # opMul)
+    cube :: Fn (s > TInt) (s > TInt)
+    cube = fn (opDup # opDup # opMul # opMul)
 
-    square :: FN (s > TInt) (s > TInt)
-    square = function (opDup # opMul)
+    square :: Fn (s > TInt) (s > TInt)
+    square = fn (opDup # opMul)
 
-progNestedCalls2 :: FN s (s > TBool)
+progNestedCalls2 :: Fn s (s > TBool)
 progNestedCalls2 =
   begin
     # (int 3 # int 7 # feMul # int 1 # feAdd # int 12 # feSub # feCube)
     # (int 1000 # opNumEqual)
 
-progFactorial :: FN s (s > TBool)
+progFactorial :: Fn s (s > TBool)
 progFactorial =
   begin
     # (nat 0 # fac # nat 1 # opNumEqual)
@@ -95,10 +95,10 @@ progFactorial =
     # (nat 10 # fac # nat 3_628_800 # opNumEqual)
     # (opBoolAnd # opBoolAnd # opBoolAnd)
   where
-    fac :: FN (s > TNat) (s > TNat)
-    fac = function (unname 1 fac')
+    fac :: Fn (s > TNat) (s > TNat)
+    fac = fn (unname 1 fac')
 
-    fac' :: FN (s > N "n" TNat) (s > TNat)
+    fac' :: Fn (s > N "n" TNat) (s > TNat)
     fac' =
       begin
         # pick "n"
@@ -106,7 +106,7 @@ progFactorial =
           (nat 1 # del "n")
           (pick "n" # roll "n" # op1SubUnsafe # fac # opMul)
 
-progSort :: FN s (s > TBool)
+progSort :: Fn s (s > TBool)
 progSort =
   runEnv
     ( begin
@@ -121,13 +121,13 @@ propSort (AsciiString xs) =
       evaluateProg
         (bytes xs # toVector # MS.sort # bytes (B.sort xs) # toVector # opEqual)
   where
-    toVector :: FN (s > TBytes) (s > TVector TInt8)
+    toVector :: Fn (s > TBytes) (s > TVector TInt8)
     toVector = cast
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize progRuntimeFunctions
 -- "37 opcodes, 37 bytes. Including function table: 55 opcodes, 196 bytes.\n"
-progRuntimeFunctions :: FNA s Base (s > TBool) Base
+progRuntimeFunctions :: FnA s Base (s > TBool) Base
 progRuntimeFunctions =
   runEnv
     ( begin

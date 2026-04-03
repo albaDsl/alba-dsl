@@ -19,7 +19,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
 import Alba.Dsl.V1.Bch2026 qualified as TY
 import Alba.Dsl.V1.Bch2026.OpsUntyped (opInvoke, opUntil)
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (toSigned)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (inRange)
 import DslDemo.TurtleVm.Bch2026.TurtleVmCondStack (executeP)
@@ -36,26 +36,26 @@ import DslDemo.TurtleVm.Bch2026.TurtleVmUtils
   )
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtilsUntyped (condOp, is, unsupportedOp)
 
-turtleVm :: Int -> FNU
+turtleVm :: Int -> FnU
 turtleVm maxCsDepth = turtleVmInit maxCsDepth # turtleVmEval
 
-turtleVmInit :: Int -> FNU
+turtleVmInit :: Int -> FnU
 turtleVmInit maxCsDepth = ft (initOpDispatch maxCsDepth)
 
-turtleVmEval :: FNU
+turtleVmEval :: FnU
 turtleVmEval = ft initState # opUntil loop
   where
-    loop :: FNU
+    loop :: FnU
     loop =
       begin
         # (ft getOpAndCondStack # ft executeP)
         # opIf handleOp opDrop
         # ft isEndOfProgram
 
-ft :: TY.FNA s alt s' alt' -> FNU
+ft :: TY.FnA s alt s' alt' -> FnU
 ft = fromTyped
 
-handleOp :: FNU
+handleOp :: FnU
 handleOp =
   begin
     # ft isSingleByteOp

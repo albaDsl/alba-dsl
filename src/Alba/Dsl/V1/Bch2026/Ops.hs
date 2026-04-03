@@ -7,12 +7,12 @@ import Alba.Dsl.V1.Common.CompilerUtils (aop, aops')
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState (addCallSite, registerFunction)
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Absolute, Named), OpcodeL3 (..))
-import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), TBool, TBytes, TInt, TNat)
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), TBool, TBytes, TInt, TNat)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Maybe (fromMaybe)
 import Text.Printf (printf)
 
-opUntil :: FNA s alt (s > TBool) alt -> FNA s alt s alt
+opUntil :: FnA s alt (s > TBool) alt -> FnA s alt s alt
 opUntil loopBody (S c fs) =
   let (S c' fs') = loopBody (S (aop c OP_BEGIN) fs)
    in S (aop c' OP_UNTIL) fs'
@@ -20,11 +20,11 @@ opUntil loopBody (S c fs) =
 -- Added for completeness. There are other better options to use. AlbaDsl does
 -- not offer a way for the user of this function to ensure the idx is not
 -- already in use.
-opDefine :: FN (s > TCode > TBytes) s
+opDefine :: Fn (s > TCode > TBytes) s
 opDefine (S c fs) = S (aop c OP_DEFINE) fs
 
 -- Define function at an index relative current namespace.
-opDefineIdx :: Int -> FN (s > TCode) s
+opDefineIdx :: Int -> Fn (s > TCode) s
 opDefineIdx idx (S c fs) =
   let fId = Absolute idx
       fs' = fromMaybe err (registerFunction fId fs)
@@ -32,7 +32,7 @@ opDefineIdx idx (S c fs) =
   where
     err = error "opDefineIdx: idx already defined."
 
-opDefineNamed :: String -> FN (s > TCode) s
+opDefineNamed :: String -> Fn (s > TCode) s
 opDefineNamed name (S c fs) =
   let fId = Named name
       fs' = fromMaybe err (registerFunction fId fs)
@@ -41,10 +41,10 @@ opDefineNamed name (S c fs) =
     err = error "opDefineNamed: name already defined."
 
 -- See opDefine.
-opInvoke :: FNA s alt s' alt' -> FNA (s > TBytes) alt s' alt'
+opInvoke :: FnA s alt s' alt' -> FnA (s > TBytes) alt s' alt'
 opInvoke _prog (S c fs) = S (aop c OP_INVOKE) fs
 
-opInvokeIdx :: Int -> FNA s alt s' alt' -> FNA s alt s' alt'
+opInvokeIdx :: Int -> FnA s alt s' alt' -> FnA s alt s' alt'
 opInvokeIdx idx _prog (S c fs) =
   let fId = Absolute idx
       fs' = fromMaybe err (addCallSite fId fs)
@@ -52,7 +52,7 @@ opInvokeIdx idx _prog (S c fs) =
   where
     err = error (printf "opInvokeIdx: idx not defined: %s" idx)
 
-opInvokeNamed :: String -> FNA s alt s' alt' -> FNA s alt s' alt'
+opInvokeNamed :: String -> FnA s alt s' alt' -> FnA s alt s' alt'
 opInvokeNamed name _prog (S c fs) =
   let fId = Named name
       fs' = fromMaybe err (addCallSite fId fs)
@@ -60,17 +60,17 @@ opInvokeNamed name _prog (S c fs) =
   where
     err = error (printf "opInvokeNamed: name not defined: %s" name)
 
-opInvert :: FN (s > TBytes) (s > TBytes)
+opInvert :: Fn (s > TBytes) (s > TBytes)
 opInvert (S c fs) = S (aop c OP_INVERT) fs
 
-opLShiftNum :: FN (s > TInt > TNat) (s > TInt)
+opLShiftNum :: Fn (s > TInt > TNat) (s > TInt)
 opLShiftNum (S c fs) = S (aop c OP_LSHIFTNUM) fs
 
-opRShiftNum :: FN (s > TInt > TNat) (s > TInt)
+opRShiftNum :: Fn (s > TInt > TNat) (s > TInt)
 opRShiftNum (S c fs) = S (aop c OP_RSHIFTNUM) fs
 
-opLShiftBin :: FN (s > TBytes > TNat) (s > TBytes)
+opLShiftBin :: Fn (s > TBytes > TNat) (s > TBytes)
 opLShiftBin (S c fs) = S (aop c OP_LSHIFTBIN) fs
 
-opRShiftBin :: FN (s > TBytes > TNat) (s > TBytes)
+opRShiftBin :: Fn (s > TBytes > TNat) (s > TBytes)
 opRShiftBin (S c fs) = S (aop c OP_RSHIFTBIN) fs

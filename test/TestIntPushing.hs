@@ -5,7 +5,7 @@
 module TestIntPushing (testIntPushing) where
 
 import Alba.Dsl.V1.Bch2025
-  ( FN,
+  ( Fn,
     Optimize (None),
     TInt,
     begin,
@@ -53,7 +53,7 @@ testIntPushing =
       testProperty "Push arbitrary integers" propInt
     ]
 
-progConstants :: FN s (s > TInt)
+progConstants :: Fn s (s > TInt)
 progConstants =
   begin
     # $(TH.foldrInts 'fn 'id [1 .. 16])
@@ -84,7 +84,7 @@ progConstantsCode =
     ]
       <> replicate 15 OP_ADD
 
-progPushInt :: FN s (s > TInt)
+progPushInt :: Fn s (s > TInt)
 progPushInt =
   begin
     # int 0x0100000000000002

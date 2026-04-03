@@ -18,7 +18,7 @@ testCond =
       testCase "Cond - Nested" $ isTrue (evaluateProg progCondNested)
     ]
 
-progCondNats :: FN s (s > TBool)
+progCondNats :: Fn s (s > TBool)
 progCondNats =
   begin
     # nat 2
@@ -34,7 +34,7 @@ progCondNats =
   where
     is x = nat x # opNumEqual
 
-progCondStrings :: FN s (s > TBool)
+progCondStrings :: Fn s (s > TBool)
 progCondStrings =
   begin
     # bytes "orange"
@@ -51,7 +51,7 @@ progCondStrings =
   where
     is x = bytes x # opEqual
 
-progCondStringsDefault :: FN s (s > TBool)
+progCondStringsDefault :: Fn s (s > TBool)
 progCondStringsDefault =
   begin
     # bytes "strawberry"
@@ -68,7 +68,7 @@ progCondStringsDefault =
   where
     is x = bytes x # opEqual
 
-progCondNested :: FN s (s > TBool)
+progCondNested :: Fn s (s > TBool)
 progCondNested =
   begin
     # nat 75

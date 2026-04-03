@@ -21,7 +21,7 @@ module Alba.Dsl.V1.Common.Lang
 where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (FN, FNA, S (S), TInt, TNat, type (:|))
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), TInt, TNat, type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Data.Kind (Type)
 
@@ -32,47 +32,47 @@ begin :: a -> a
 begin = id
 
 -- An expression that does not modify the stack type.
-ex0 :: FNA s alt s alt -> FNA s alt s alt
+ex0 :: FnA s alt s alt -> FnA s alt s alt
 ex0 prog state = let (S c fs) = prog state in S c fs
 
 -- An expression that adds one element to the stack type.
-ex1 :: FNA s alt (s > t1) alt -> FNA s alt (s > t1) alt
+ex1 :: FnA s alt (s > t1) alt -> FnA s alt (s > t1) alt
 ex1 prog state = let (S c fs) = prog state in S c fs
 
-ex2 :: FNA s alt (s > t1 > t2) alt -> FNA s alt (s > t1 > t2) alt
+ex2 :: FnA s alt (s > t1 > t2) alt -> FnA s alt (s > t1 > t2) alt
 ex2 prog state = let (S c fs) = prog state in S c fs
 
-natToInt :: FN (s > TNat) (s > TInt)
+natToInt :: Fn (s > TNat) (s > TInt)
 natToInt = cast
 
-cast :: FN (s > t1) (s > t2)
+cast :: Fn (s > t1) (s > t2)
 cast (S c fs) = let state = S c fs in state
 
-castStack :: FNA s alt s' alt'
+castStack :: FnA s alt s' alt'
 castStack (S c fs) = let state = S c fs in state
 
-branch1 :: forall s. FN s (Branch1 s)
+branch1 :: forall s. Fn s (Branch1 s)
 branch1 (S c fs) = S c fs
 
-branch2 :: forall s. FN s (Branch2 s)
+branch2 :: forall s. Fn s (Branch2 s)
 branch2 (S c fs) = S c fs
 
-branch3 :: forall s. FN s (Branch3 s)
+branch3 :: forall s. Fn s (Branch3 s)
 branch3 (S c fs) = S c fs
 
-branch4 :: forall s. FN s (Branch4 s)
+branch4 :: forall s. Fn s (Branch4 s)
 branch4 (S c fs) = S c fs
 
-branch5 :: forall s. FN s (Branch5 s)
+branch5 :: forall s. Fn s (Branch5 s)
 branch5 (S c fs) = S c fs
 
-branch6 :: forall s. FN s (Branch6 s)
+branch6 :: forall s. Fn s (Branch6 s)
 branch6 (S c fs) = S c fs
 
-branch7 :: forall s. FN s (Branch7 s)
+branch7 :: forall s. Fn s (Branch7 s)
 branch7 (S c fs) = S c fs
 
-branch8 :: forall s. FN s (Branch8 s)
+branch8 :: forall s. Fn s (Branch8 s)
 branch8 (S c fs) = S c fs
 
 type family Branch1 (xs :: [Type]) :: [Type] where

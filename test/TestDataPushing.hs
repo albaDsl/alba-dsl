@@ -72,7 +72,7 @@ testDataPushing =
 
 -- We have a trailing opNop to ensure evaluator handles continued execution
 -- after the data.
-progPush :: FN s (s > TBytes)
+progPush :: Fn s (s > TBytes)
 progPush = bytes [1, 2, 3] # opNop
 
 progPushCodeL2 :: CodeL2
@@ -81,7 +81,7 @@ progPushCodeL2 = S.fromList [OP_DATA L1.OP_DATA_03 [1, 2, 3], OP_NOP]
 progPushCodeBin :: CodeL1
 progPushCodeBin = B.pack [0x03, 0x01, 0x02, 0x03, 0x61]
 
-progPush250 :: FN s (s > TBytes)
+progPush250 :: Fn s (s > TBytes)
 progPush250 = bytes (B.replicate 250 0xff) # opNop
 
 progPush250CodeL2 :: CodeL2
@@ -94,7 +94,7 @@ progPush250CodeBin =
     <> B.replicate 250 0xff
     <> B.pack [0x61]
 
-progPushLarge :: FN s (s > TBytes)
+progPushLarge :: Fn s (s > TBytes)
 progPushLarge = bytes (B.replicate largeElementSize 0xff) # opNop
 
 -- A little less than max to not run into SeScriptSize.
@@ -118,7 +118,7 @@ progPushLargeCodeBin =
     <> B.pack [0x61]
 
 -- Gives SeScriptSize rather than SePushSize.
-progPushMaxPlusOne :: FN s (s > TBytes)
+progPushMaxPlusOne :: Fn s (s > TBytes)
 progPushMaxPlusOne =
   begin
     # bytes (B.replicate (maxElementSize + 1) 0xff)

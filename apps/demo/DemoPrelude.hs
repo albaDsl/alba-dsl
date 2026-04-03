@@ -130,17 +130,17 @@ evm code x = dump $ evaluateScript txCtx startState'
       where
         budget = B.length code * vmParamsStandard.costBudgetPerInputByte
 
-progSize :: FNA s alt s' alt' -> IO ()
+progSize :: FnA s alt s' alt' -> IO ()
 progSize prog = putStrLn (Dsl.progSize prog)
 
-progList :: FNA s alt s' alt' -> IO ()
+progList :: FnA s alt s' alt' -> IO ()
 progList prog = putStrLn (Dsl.progList prog)
 
-progFt :: FNA s alt s' alt' -> IO ()
+progFt :: FnA s alt s' alt' -> IO ()
 progFt prog = putStrLn (Dsl.progFt prog)
 
 plot :: [Integer] -> IO ()
 plot = plotWith (options {height = 10})
 
-cube :: FN (s > TInt) (s > TInt)
+cube :: Fn (s > TInt) (s > TInt)
 cube = opDup # opDup # opMul # opMul

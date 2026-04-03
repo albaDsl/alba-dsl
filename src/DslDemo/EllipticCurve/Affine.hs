@@ -11,10 +11,10 @@ type LoopTypeN s = s > N "n" TNat > N "p" TPoint > N "r" TPoint
 
 type LoopType s = s > TNat > TPoint > TPoint
 
-ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul = function (unname 2 ecMul')
+ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
+ecMul = fn (unname 2 ecMul')
 
-ecMul' :: FN (s > N "n" TNat > N "p" TPoint) (s > TPoint)
+ecMul' :: Fn (s > N "n" TNat > N "p" TPoint) (s > TPoint)
 ecMul' =
   begin
     # pick "n"
@@ -30,7 +30,7 @@ ecMul' =
           # opNip
       )
   where
-    loop :: FN (LoopTypeN s) (LoopType s > TBool)
+    loop :: Fn (LoopTypeN s) (LoopType s > TBool)
     loop =
       begin
         # name

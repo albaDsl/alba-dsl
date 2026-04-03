@@ -3,7 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Contract.Int64 (TInt64, int64, toInt64) where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     StackEntry,
     TInt,
     begin,
@@ -34,7 +34,7 @@ instance PackFs TInt64 where
   unpack = opBin2Num # cast
   record = int64PackFs
 
-int64PackFs :: FN s (s > TPackFs TInt64)
+int64PackFs :: Fn s (s > TPackFs TInt64)
 int64PackFs =
   constant
     ( begin
@@ -50,8 +50,8 @@ int64Max = 9223372036854775807
 int64Min :: Integer
 int64Min = -int64Max
 
-int64 :: Integer -> FN s (s > TInt64)
+int64 :: Integer -> Fn s (s > TInt64)
 int64 x = assert (x >= int64Min && x <= int64Max) (int x # cast)
 
-toInt64 :: FN (s > TInt) (s > TInt64)
+toInt64 :: Fn (s > TInt) (s > TInt64)
 toInt64 = dup # int int64Min # int int64Max # opWithin # opVerify # cast

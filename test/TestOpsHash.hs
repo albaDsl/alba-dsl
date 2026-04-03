@@ -24,7 +24,7 @@ testOpsHash =
 
 propHash ::
   (StackBytes a) =>
-  FN (s > a) (s > a) ->
+  Fn (s > a) (s > a) ->
   (Bytes -> Bytes) ->
   BytesHalf ->
   Bool

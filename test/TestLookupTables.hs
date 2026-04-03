@@ -19,7 +19,7 @@ testLookupTables =
         isTrue (evaluateProg progEllipticCurve)
     ]
 
-progEllipticCurve :: FN s (s > TBool)
+progEllipticCurve :: Fn s (s > TBool)
 progEllipticCurve =
   begin
     # (gTable # g # setupTable)

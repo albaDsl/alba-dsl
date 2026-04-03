@@ -5,7 +5,7 @@ module ContractApi (instantiate, withdraw) where
 import Alba.Dsl.V1.Bch2025
   ( CodeL1,
     Contract (MkContract),
-    FN,
+    Fn,
     Optimize (None, O1),
     TBytes,
     bytes,
@@ -27,5 +27,5 @@ instantiate _ctx =
 withdraw :: Ctx -> CodeL1 -> CodeL1 -> CodeL1
 withdraw _ctx solution redeemScript = compile None args
   where
-    args :: FN s (s > TBytes > TBytes)
+    args :: Fn s (s > TBytes > TBytes)
     args = bytes solution # bytes redeemScript

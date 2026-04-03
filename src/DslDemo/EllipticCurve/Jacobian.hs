@@ -27,19 +27,19 @@ type LoopTypeN s = s > N "n" TNat > N "p" TPointJ > N "r" TPointJ
 
 type LoopType s = s > TNat > TPointJ > TPointJ
 
-ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
-ecAdd = function (toJacobian # opSwap # toJacobian # EC.ecAddJ # fromJacobian)
+ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
+ecAdd = fn (toJacobian # opSwap # toJacobian # EC.ecAddJ # fromJacobian)
 
-ecDouble :: FN (s > TPoint) (s > TPoint)
-ecDouble = function (toJacobian # EC.ecDoubleJ # fromJacobian)
+ecDouble :: Fn (s > TPoint) (s > TPoint)
+ecDouble = fn (toJacobian # EC.ecDoubleJ # fromJacobian)
 
-ecMul :: FN (s > TNat > TPoint) (s > TPoint)
-ecMul = function (toJacobian # ecMulJ # fromJacobian)
+ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
+ecMul = fn (toJacobian # ecMulJ # fromJacobian)
 
-ecMulJ :: FN (s > TNat > TPointJ) (s > TPointJ)
+ecMulJ :: Fn (s > TNat > TPointJ) (s > TPointJ)
 ecMulJ = unname 2 ecMulJ'
   where
-    ecMulJ' :: FN (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
+    ecMulJ' :: Fn (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
     ecMulJ' =
       begin
         # pick "n"
@@ -55,7 +55,7 @@ ecMulJ = unname 2 ecMulJ'
               # opNip
           )
 
-    loop :: FN (LoopTypeN s) (LoopType s > TBool)
+    loop :: Fn (LoopTypeN s) (LoopType s > TBool)
     loop =
       begin
         # name
@@ -66,10 +66,10 @@ ecMulJ = unname 2 ecMulJ'
         # roll "r2"
         # (roll "n" # half # isZero)
 
-toJacobian :: FN (s > TPoint) (s > TPointJ)
-toJacobian = function (unname 1 toJacobian')
+toJacobian :: Fn (s > TPoint) (s > TPointJ)
+toJacobian = fn (unname 1 toJacobian')
   where
-    toJacobian' :: FN (s > N "p" TPoint) (s > TPointJ)
+    toJacobian' :: Fn (s > N "p" TPoint) (s > TPointJ)
     toJacobian' =
       begin
         # ex1 (pick "p" # AP.isIdentity)
@@ -77,10 +77,10 @@ toJacobian = function (unname 1 toJacobian')
           (del "p" # makeIdentity)
           (pick "p" # AP.getX # roll "p" # AP.getY # int 1 # makePoint)
 
-fromJacobian :: FN (s > TPointJ) (s > TPoint)
-fromJacobian = function (unname 1 fromJacobian')
+fromJacobian :: Fn (s > TPointJ) (s > TPoint)
+fromJacobian = fn (unname 1 fromJacobian')
   where
-    fromJacobian' :: FN (s > N "p" TPointJ) (s > TPoint)
+    fromJacobian' :: Fn (s > N "p" TPointJ) (s > TPoint)
     fromJacobian' =
       begin
         # (pick "p" # isIdentity)

@@ -4,11 +4,11 @@ module Alba.Dsl.V1.Common.Stack
   ( S (..),
     Base,
     F,
-    FNA,
-    FN,
-    FNC,
-    CFN,
-    CFNA,
+    FnA,
+    Fn,
+    FnC,
+    CFn,
+    CFnA,
     (:|),
     CountStackBranches,
     Ref,
@@ -53,21 +53,21 @@ type Base = '[]
 type F a = (HasCallStack) => a
 
 -- Function with main and alt stack types.
-type FNA (s :: [Type]) (alt :: [Type]) (s' :: [Type]) (alt' :: [Type]) =
+type FnA (s :: [Type]) (alt :: [Type]) (s' :: [Type]) (alt' :: [Type]) =
   F (S s alt -> S s' alt')
 
 -- Function with alt stack constant.
-type FN (s :: [Type]) (s' :: [Type]) =
+type Fn (s :: [Type]) (s' :: [Type]) =
   forall alt. F (S s alt -> S s' alt)
 
 -- Function with both stacks constant.
-type FNC = forall s alt. F (S s alt -> S s alt)
+type FnC = forall s alt. F (S s alt -> S s alt)
 
--- Contract function with alt stack constant.
-type CFN s = F (S s Base -> S (Base > TBool) Base)
+-- Contract function (entry point). Allows for a non-clean alt stack.
+type CFnA s a = F (S s Base -> S (Base > TBool) a)
 
--- Contract function with main and alt stack types.
-type CFNA s a = F (S s Base -> S (Base > TBool) a)
+-- Contract function (entry point).
+type CFn s = F (S s Base -> S (Base > TBool) Base)
 
 data (a :: [Type]) :| b :: Type
 

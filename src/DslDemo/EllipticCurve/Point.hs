@@ -21,10 +21,10 @@ instance StackEntry TPoint
 
 -- Byte layout for the Point record:
 -- <tag:1><x:33><y:33>
-makePoint :: FN (s > TInt > TInt) (s > TPoint)
-makePoint = function (unname 2 makePoint')
+makePoint :: Fn (s > TInt > TInt) (s > TPoint)
+makePoint = fn (unname 2 makePoint')
   where
-    makePoint' :: FN (s > N "x" TInt > N "y" TInt) (s > TPoint)
+    makePoint' :: Fn (s > N "x" TInt > N "y" TInt) (s > TPoint)
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
@@ -34,30 +34,30 @@ makePoint = function (unname 2 makePoint')
         # opCat
         # cast
 
-pushPoint :: Integer -> Integer -> FN s (s > TPoint)
+pushPoint :: Integer -> Integer -> Fn s (s > TPoint)
 pushPoint x y =
   begin
     # (box tagSize tagNonIdentity # box coordSize x # box coordSize y)
     # (opCat # opCat # cast)
 
-makeIdentity :: FN s (s > TPoint)
+makeIdentity :: Fn s (s > TPoint)
 makeIdentity =
-  function
+  fn
     ( begin
         # (box 1 tagIdentity # box coordSize 0 # box coordSize 0)
         # (opCat # opCat # cast)
     )
 
-box :: Natural -> Integer -> FN s (s > TBytes)
+box :: Natural -> Integer -> Fn s (s > TBytes)
 box size i = int i # nat size # opNum2Bin
 
-isIdentity :: FN (s > TPoint) (s > TBool)
-isIdentity = function (getTag # int tagIdentity # opNumEqual)
+isIdentity :: Fn (s > TPoint) (s > TBool)
+isIdentity = fn (getTag # int tagIdentity # opNumEqual)
 
-isEqual :: FN (s > TPoint > TPoint) (s > TBool)
-isEqual = function (unname 2 isEqual')
+isEqual :: Fn (s > TPoint > TPoint) (s > TBool)
+isEqual = fn (unname 2 isEqual')
   where
-    isEqual' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TBool)
+    isEqual' :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TBool)
     isEqual' =
       begin
         # (pick "p" # isIdentity # pick "q" # isIdentity # opBoolAnd)
@@ -80,10 +80,10 @@ isEqual = function (unname 2 isEqual')
               # opBoolAnd
           )
 
-getTag :: FN (s > TPoint) (s > TInt)
+getTag :: Fn (s > TPoint) (s > TInt)
 getTag = pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num
 
-getX :: FN (s > TPoint) (s > TInt)
+getX :: Fn (s > TPoint) (s > TInt)
 getX =
   begin
     # pointToBytes
@@ -95,10 +95,10 @@ getX =
     # opDrop
     # opBin2Num
 
-getY :: FN (s > TPoint) (s > TInt)
+getY :: Fn (s > TPoint) (s > TInt)
 getY = pointToBytes # nat (tagSize + coordSize) # opSplit # opNip # opBin2Num
 
-pointToBytes :: FN (s > TPoint) (s > TBytes)
+pointToBytes :: Fn (s > TPoint) (s > TBytes)
 pointToBytes = cast
 
 tagIdentity :: Integer

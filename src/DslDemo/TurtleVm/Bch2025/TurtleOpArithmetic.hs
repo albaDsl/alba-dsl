@@ -27,7 +27,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSub,
     opWithin,
   )
-import Alba.Dsl.V1.Common.StackUntyped (FNU)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
   ( condOp,
     condOpLeaf,
@@ -35,7 +35,7 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
     is,
   )
 
-turtleOpArithmetic :: FNU
+turtleOpArithmetic :: FnU
 turtleOpArithmetic =
   condOp
     [ ( inRange 0x8b 0x98,

@@ -26,7 +26,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opUtxoTokenCommitment,
     opUtxoValue,
   )
-import Alba.Dsl.V1.Common.StackUntyped (FNU)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
   ( condOp,
     condOpLeaf,
@@ -34,7 +34,7 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
     is,
   )
 
-turtleOpIntrospection :: FNU
+turtleOpIntrospection :: FnU
 turtleOpIntrospection =
   condOp
     [ ( inRange 0xc0 0xca,

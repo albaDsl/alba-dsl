@@ -5,17 +5,17 @@ module DslDemo.Exponentiation (pow) where
 import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
 import Alba.Dsl.V1.Bch2026
 
-pow :: FN (s > TInt > TNat) (s > TInt)
-pow = function (powHelper opMul)
+pow :: Fn (s > TInt > TNat) (s > TInt)
+pow = fn (powHelper opMul)
 
 powHelper ::
-  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-  FN (s > TInt > TNat) (s > TInt)
+  (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
+  Fn (s > TInt > TNat) (s > TInt)
 powHelper mul = unname 2 (powHelper' mul)
 
 powHelper' ::
-  (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-  FN (s > N "b" TInt > N "n" TNat) (s > TInt)
+  (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
+  Fn (s > N "b" TInt > N "n" TNat) (s > TInt)
 powHelper' mul =
   begin
     # pick "n"
@@ -29,6 +29,6 @@ powHelper' mul =
       )
   where
     square ::
-      (forall s'. FN (s' > TInt > TInt) (s' > TInt)) ->
-      FN (s > TInt) (s > TInt)
+      (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
+      Fn (s > TInt) (s > TInt)
     square mul' = opDup # mul'

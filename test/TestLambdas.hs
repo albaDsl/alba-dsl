@@ -20,7 +20,7 @@ testLambdas =
       testCase "Nested lambdas" $ isTrue (evaluateProg progNested)
     ]
 
-progBasic1 :: FN s (s > TBool)
+progBasic1 :: Fn s (s > TBool)
 progBasic1 =
   begin
     # int 3
@@ -32,14 +32,14 @@ progBasic1 =
     # (invoke1 # int 125 # opNumEqual)
     # opBoolAnd
 
-progBasic2 :: FN s (s > TBool)
+progBasic2 :: Fn s (s > TBool)
 progBasic2 = int 3 # int 4 # lambda2 opMul # invoke2 # int 12 # opNumEqual
 
-progBasic3 :: FN s (s > TBool)
+progBasic3 :: Fn s (s > TBool)
 progBasic3 =
   int 6 # int 3 # int 7 # lambda3 opWithin # invoke3 # opTrue # opEqual
 
-progUntyped :: FN s (s > TBool)
+progUntyped :: Fn s (s > TBool)
 progUntyped =
   begin
     # int 3
@@ -51,10 +51,10 @@ progUntyped =
     # (invoke cube # int 125 # opNumEqual)
     # opBoolAnd
   where
-    cube :: FN (s > TInt) (s > TInt)
+    cube :: Fn (s > TInt) (s > TInt)
     cube = opDup # opDup # opMul # opMul
 
-progMapLambda :: FN s (s > TBool)
+progMapLambda :: Fn s (s > TBool)
 progMapLambda =
   begin
     # lambda1 double
@@ -63,19 +63,19 @@ progMapLambda =
     # bytes [0, 2, 4, 6]
     # opEqual
   where
-    double :: FN (s > TBytes) (s > TBytes)
+    double :: Fn (s > TBytes) (s > TBytes)
     double = opBin2Num # int 2 # opMul # nat 1 # opNum2Bin
 
     mapVec ::
       Natural ->
-      FN
+      Fn
         (s > TLambda '[TBytes] '[TBytes] > TBytes)
         (s > TBytes)
     mapVec elemSize = unname 2 (mapVec' elemSize)
 
     mapVec' ::
       Natural ->
-      FN
+      Fn
         (s > N "f" (TLambda '[TBytes] '[TBytes]) > N "vec" TBytes)
         (s > TBytes)
     mapVec' elemSize =
@@ -119,17 +119,17 @@ progMapLambda =
               # del "f"
           )
 
-    uncons :: Natural -> FN (s > TBytes) (s > TBytes > TBytes)
+    uncons :: Natural -> Fn (s > TBytes) (s > TBytes > TBytes)
     uncons elemSize = nat elemSize # opSplit
 
-    split :: Natural -> FN (s > TNat > TBytes) (s > TBytes > TBytes)
+    split :: Natural -> Fn (s > TNat > TBytes) (s > TBytes > TBytes)
     split elemSize =
       begin
         # opSwap
         # (nat elemSize # opMul)
         # opSplit
 
-progNested :: FN s (s > TBool)
+progNested :: Fn s (s > TBool)
 progNested =
   begin
     # int 5
@@ -138,8 +138,8 @@ progNested =
     # int 132
     # opNumEqual
   where
-    polynomial :: FN (s > TInt) (s > TInt)
+    polynomial :: Fn (s > TInt) (s > TInt)
     polynomial = lambda1 cube # invoke1 # int 7 # opAdd
 
-    cube :: FN (s > TInt) (s > TInt)
+    cube :: Fn (s > TInt) (s > TInt)
     cube = opDup # opDup # opMul # opMul

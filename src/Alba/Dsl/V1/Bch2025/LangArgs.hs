@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     UnName,
   )
-import Alba.Dsl.V1.Common.Stack (FN, Ref, Remove, S (..))
+import Alba.Dsl.V1.Common.Stack (Fn, Ref, Remove, S (..))
 import Alba.Dsl.V1.Common.TermClass (Term (..))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Proxy (Proxy (..))
@@ -32,7 +32,7 @@ pick ::
   forall s arg idx.
   forall argName ->
   (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
-  FN s (s > UnName arg)
+  Fn s (s > UnName arg)
 pick _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 pick' :: Integer -> S s alt -> S s' alt
@@ -46,7 +46,7 @@ pickN ::
   forall s arg idx.
   forall argName ->
   (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
-  FN s (s > arg)
+  Fn s (s > arg)
 pickN _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 roll ::
@@ -57,7 +57,7 @@ roll ::
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
-  FN s (s' > UnName arg)
+  Fn s (s' > UnName arg)
 roll _argName = roll' (natVal (Proxy :: Proxy idx))
 
 roll' :: Integer -> S s alt -> S s' alt
@@ -76,7 +76,7 @@ rollN ::
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
-  FN s (s' > arg)
+  Fn s (s' > arg)
 rollN _argName = roll' (natVal (Proxy :: Proxy idx) :: Integer)
 
 del ::
@@ -88,7 +88,7 @@ del ::
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
-  FN s s'
+  Fn s s'
 del argName = roll argName # opDrop
 
 delCount ::
@@ -98,7 +98,7 @@ delCount ::
     FindNamedArgs s count 0 '[] ~ idxs,
     RemoveNamedArgs s count ~ s'
   ) =>
-  FN s s'
+  Fn s s'
 delCount _count (S c fs) =
   let idxs = term @idxs :: [Integer]
       idxs' = fixIndices idxs

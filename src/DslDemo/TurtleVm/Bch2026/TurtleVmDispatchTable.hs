@@ -4,7 +4,7 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmDispatchTable (initOpDispatch) where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
-  ( FNC,
+  ( FnC,
     begin,
     bytes',
     opDefineIdx,
@@ -17,7 +17,7 @@ import DslDemo.TurtleVm.Bch2026.TurtleOpIf (ifOp)
 import DslDemo.TurtleVm.Bch2026.TurtleVmState (dropCondStack, toggleCondStack)
 import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (unsupportedOpBytes)
 
-initOpDispatch :: Int -> FNC
+initOpDispatch :: Int -> FnC
 initOpDispatch maxCsDepth =
   begin
     # (bytes' [0x4f] # opDefineIdx 0x4f) -- OP_1NEGATE

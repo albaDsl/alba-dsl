@@ -32,7 +32,7 @@ testLibMaybe =
     [ testCase "Basics" $ do isTrue (evaluateProg progBasics)
     ]
 
-progBasics :: FN s (s > TBool)
+progBasics :: Fn s (s > TBool)
 progBasics =
   begin
     # ( begin
@@ -70,20 +70,20 @@ progBasics =
       )
     # opTrue
   where
-    emptyInt8 :: FN s (s > TMaybe TInt8)
+    emptyInt8 :: Fn s (s > TMaybe TInt8)
     emptyInt8 = nothing
 
-    emptyInt64 :: FN s (s > TMaybe TInt64)
+    emptyInt64 :: Fn s (s > TMaybe TInt64)
     emptyInt64 = nothing
 
-    int64To8 :: FN (s > TInt64) (s > TInt8)
+    int64To8 :: Fn (s > TInt64) (s > TInt8)
     int64To8 = cast
 
-    testPacking :: (StackEntry a, PackFs (TMaybe a)) => FN (s > a) s
+    testPacking :: (StackEntry a, PackFs (TMaybe a)) => Fn (s > a) s
     testPacking =
       begin
         # (dup # just # dup # V.empty # V.cons # V.cons # V.uncons)
         # ifJust (untuple # opDrop # ifJust (opEqualVerify) fail) fail
 
-    fail :: FNA s alt s' alt'
+    fail :: FnA s alt s' alt'
     fail = opFalse # opVerify # castStack

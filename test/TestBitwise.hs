@@ -33,7 +33,7 @@ testBitwise =
       testProperty "RShiftNum" propRShiftNum
     ]
 
-progBasic :: FN s (s > TBool)
+progBasic :: Fn s (s > TBool)
 progBasic =
   begin
     # (int 0b101 # nat 1 # opRShiftNum # int 0b10 # opEqualVerify)
@@ -99,7 +99,7 @@ propInvert x =
       stack' = getStack $ evaluateProgWithStack prog (stack, S.empty)
    in stack' == stack
   where
-    prog :: FN (s > TBytes) (s > TBytes)
+    prog :: Fn (s > TBytes) (s > TBytes)
     prog = opInvert # opInvert
 
 -- Verifies that a stack element with the 'bitCount' left most bits cleared is
@@ -110,16 +110,16 @@ propShiftBinLeftAndBack x bitCount =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
-    prog :: FN (s > TBytes) (s > TBool)
+    prog :: Fn (s > TBytes) (s > TBool)
     prog =
       begin
         # (opDup # createMask # opAnd) -- clear leftmost bits.
         # (opDup # leftAndBack # opEqual)
 
-    createMask :: FN (s > TBytes) (s > TBytes)
+    createMask :: Fn (s > TBytes) (s > TBytes)
     createMask = opDup # opInvert # opOr # leftAndBack
 
-    leftAndBack :: FN (s > TBytes) (s > TBytes)
+    leftAndBack :: Fn (s > TBytes) (s > TBytes)
     leftAndBack =
       begin
         # nat (fromIntegral bitCount)
@@ -135,16 +135,16 @@ propShiftBinRightAndBack x bitCount =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
-    prog :: FN (s > TBytes) (s > TBool)
+    prog :: Fn (s > TBytes) (s > TBool)
     prog =
       begin
         # (opDup # createMask # opAnd) -- clear rightmost bits.
         # (opDup # rightAndBack # opEqual)
 
-    createMask :: FN (s > TBytes) (s > TBytes)
+    createMask :: Fn (s > TBytes) (s > TBytes)
     createMask = opDup # opInvert # opOr # rightAndBack
 
-    rightAndBack :: FN (s > TBytes) (s > TBytes)
+    rightAndBack :: Fn (s > TBytes) (s > TBytes)
     rightAndBack =
       begin
         # nat (fromIntegral bitCount)
@@ -157,7 +157,7 @@ propLShiftNum :: VmIntegerHalf -> Bool
 propLShiftNum (VmIntegerHalf x) =
   isTrue' $ evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
-    prog :: FN (s > TInt) (s > TBool)
+    prog :: Fn (s > TInt) (s > TBool)
     prog = opDup # int 2 # opMul # opSwap # nat 1 # opLShiftNum # opEqual
 
 -- For positive integers, a numeric right shift by one is equal to division by
@@ -168,5 +168,5 @@ propRShiftNum (VmInteger x) =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
-    prog :: FN (s > TInt) (s > TBool)
+    prog :: Fn (s > TInt) (s > TBool)
     prog = opDup # int 2 # opDiv # opSwap # nat 1 # opRShiftNum # opEqual

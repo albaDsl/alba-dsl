@@ -29,18 +29,18 @@ import Alba.Dsl.V1.Bch2025.Ops
 import Alba.Dsl.V1.Bch2025.Stack (StackNum, THash160)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.Stack (FN, FNA, TBool, TBytes, TNat, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, TBool, TBytes, TNat, TPubKey, TSig)
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Prelude hiding (null)
 
-p2shScriptPubKey :: Bytes -> FN (s > THash160) (s > TBool)
+p2shScriptPubKey :: Bytes -> Fn (s > THash160) (s > TBool)
 p2shScriptPubKey scriptHash =
   begin
     # opHash160
     # bytes' scriptHash
     # opEqual
 
-p2pkhScriptPubKey :: Bytes -> FN (s > TSig > TPubKey) (s > TBool)
+p2pkhScriptPubKey :: Bytes -> Fn (s > TSig > TPubKey) (s > TBool)
 p2pkhScriptPubKey pubKeyHash =
   begin
     # opDup
@@ -49,7 +49,7 @@ p2pkhScriptPubKey pubKeyHash =
     # opEqualVerify
     # opCheckSig
 
-natSub :: FN (s > TNat > TNat) (s > TNat)
+natSub :: Fn (s > TNat > TNat) (s > TNat)
 natSub =
   begin
     # opSubUnsafe
@@ -58,13 +58,13 @@ natSub =
 
 ifZero ::
   (StackNum x1) =>
-  FNA s alt s' alt' ->
-  FNA s alt s' alt' ->
-  FNA (s > x1) alt s' alt'
+  FnA s alt s' alt' ->
+  FnA s alt s' alt' ->
+  FnA (s > x1) alt s' alt'
 ifZero ifOps elseOps = isZero # opIf ifOps elseOps
 
-isZero :: (StackNum x1) => FN (s > x1) (s > TBool)
+isZero :: (StackNum x1) => Fn (s > x1) (s > TBool)
 isZero = op0 # opNumEqual
 
-null :: FN (s > TBytes) (s > TBool)
+null :: Fn (s > TBytes) (s > TBool)
 null = opSize # opNip # op0 # opNumEqual

@@ -18,7 +18,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opUnless,
   )
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic (turtleOpArithmetic)
 import DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic (turtleOpBitwiseLogic)
 import DslDemo.TurtleVm.Bch2025.TurtleOpBytes (turtleOpBytes)
@@ -42,20 +42,20 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
     unsupportedOp,
   )
 
-turtleVm :: Int -> Int -> FNU
+turtleVm :: Int -> Int -> FnU
 turtleVm maxOps maxCsDepth =
   ft initState # repeatProg maxOps (handleOp maxCsDepth)
 
-ft :: TY.FNA s alt s' alt' -> FNU
+ft :: TY.FnA s alt s' alt' -> FnU
 ft = fromTyped
 
-handleOp :: Int -> FNU
+handleOp :: Int -> FnU
 handleOp maxCsDepth =
   begin
     # (ft getOpAndCondStack # ft (executeP maxCsDepth))
     # opIf (handleOp' maxCsDepth) opDrop
 
-handleOp' :: Int -> FNU
+handleOp' :: Int -> FnU
 handleOp' maxCsDepth =
   begin
     # ft isSingleByteOp

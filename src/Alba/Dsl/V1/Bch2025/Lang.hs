@@ -20,7 +20,7 @@ import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, integerToDataOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.Stack
-  ( FN,
+  ( Fn,
     S (S),
     TBool,
     TBytes,
@@ -32,34 +32,34 @@ import Alba.Dsl.V1.Common.Stack
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Numeric.Natural (Natural)
 
-int :: Integer -> FN s (s > TInt)
+int :: Integer -> Fn s (s > TInt)
 int n (S c fs) = S (aop c (integerToDataOp n)) fs
 
 -- Push integer value. Which specific type (of class StackInt) it gets is given
 -- by the context.
-int' :: (StackInt x1) => Integer -> FN s (s > x1)
+int' :: (StackInt x1) => Integer -> Fn s (s > x1)
 int' n (S c fs) = S (aop c (integerToDataOp n)) fs
 
-nat :: Natural -> FN s (s > TNat)
+nat :: Natural -> Fn s (s > TNat)
 nat n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
 
 -- Push nat value. Which specific type (of class StackNat) it gets is given by
 -- the context.
-nat' :: (StackNat x1) => Natural -> FN s (s > x1)
+nat' :: (StackNat x1) => Natural -> Fn s (s > x1)
 nat' n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
 
-bytes :: Bytes -> FN s (s > TBytes)
+bytes :: Bytes -> Fn s (s > TBytes)
 bytes x (S c fs) = S (aop c (bytesToDataOp x)) fs
 
 -- Push bytes value. Which specific type (of class StackBytes) it gets is given
 -- by the context.
-bytes' :: (StackBytes x1) => Bytes -> FN s (s > x1)
+bytes' :: (StackBytes x1) => Bytes -> Fn s (s > x1)
 bytes' x (S c fs) = S (aop c (bytesToDataOp x)) fs
 
-sigBytes :: Bytes -> FN s (s > TSig)
+sigBytes :: Bytes -> Fn s (s > TSig)
 sigBytes x (S c fs) = bytes' x (S c fs)
 
-pubKeyBytes :: Bytes -> FN s (s > TPubKey)
+pubKeyBytes :: Bytes -> Fn s (s > TPubKey)
 pubKeyBytes x (S c fs) = bytes' x (S c fs)
 
 case' ::

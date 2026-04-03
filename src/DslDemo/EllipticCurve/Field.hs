@@ -16,37 +16,37 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Math (pow')
 import DslDemo.EllipticCurve.Constants (p)
 
-feAdd :: FN (s > TInt > TInt) (s > TInt)
-feAdd = function (opAdd # primeModulus # opMod)
+feAdd :: Fn (s > TInt > TInt) (s > TInt)
+feAdd = fn (opAdd # primeModulus # opMod)
 
-feSub :: FN (s > TInt > TInt) (s > TInt)
-feSub = function (opSub # primeModulus # modulo)
+feSub :: Fn (s > TInt > TInt) (s > TInt)
+feSub = fn (opSub # primeModulus # modulo)
 
-feMul :: FN (s > TInt > TInt) (s > TInt)
-feMul = function (opMul # primeModulus # opMod)
+feMul :: Fn (s > TInt > TInt) (s > TInt)
+feMul = fn (opMul # primeModulus # opMod)
 
-feSquare :: FN (s > TInt) (s > TInt)
+feSquare :: Fn (s > TInt) (s > TInt)
 feSquare = opDup # feMul
 
-feCube :: FN (s > TInt) (s > TInt)
-feCube = function (opDup # feSquare # feMul)
+feCube :: Fn (s > TInt) (s > TInt)
+feCube = fn (opDup # feSquare # feMul)
 
-feQuartic :: FN (s > TInt) (s > TInt)
+feQuartic :: Fn (s > TInt) (s > TInt)
 feQuartic = feSquare # feSquare
 
-feInv :: FN (s > TInt) (s > TInt)
-feInv = function (primeModulusMinus2 # pow' feMul)
+feInv :: Fn (s > TInt) (s > TInt)
+feInv = fn (primeModulusMinus2 # pow' feMul)
   where
-    primeModulusMinus2 :: FN s (s > TNat)
+    primeModulusMinus2 :: Fn s (s > TNat)
     primeModulusMinus2 = primeModulus # op2 # opSub # cast
 
-primeModulus :: FN s (s > TInt)
-primeModulus = function (int (fromIntegral p))
+primeModulus :: Fn s (s > TInt)
+primeModulus = fn (int (fromIntegral p))
 
-modulo :: FN (s > TInt > TInt) (s > TInt)
+modulo :: Fn (s > TInt > TInt) (s > TInt)
 modulo = unname 2 modulo'
   where
-    modulo' :: FN (s > N "x1" TInt > N "x2" TInt) (s > TInt)
+    modulo' :: Fn (s > N "x1" TInt > N "x2" TInt) (s > TInt)
     modulo' =
       begin
         # name "res" (pick "x1" # pick "x2" # opMod)

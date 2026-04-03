@@ -9,10 +9,10 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSize,
     opSplit,
   )
-import Alba.Dsl.V1.Common.StackUntyped (FNU)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
-turtleOpBytes :: FNU
+turtleOpBytes :: FnU
 turtleOpBytes =
   condOpLeaf
     [ (is 0x7e, opCat),

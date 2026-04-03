@@ -5,7 +5,7 @@ module Spend (withdrawTx) where
 
 import Alba.Dsl.V1.Bch2025
   ( CodeL1,
-    FN,
+    Fn,
     Optimize (..),
     TInt,
     begin,
@@ -40,7 +40,7 @@ withdrawTx ctx outpoint utxo redeemScript recvAddr =
 
 -- This solution is already public. There is a nice solution that is a fair
 -- amount shorter too.
-progSolution :: FN s (s > TInt)
+progSolution :: Fn s (s > TInt)
 progSolution =
   begin
     # bytes (compile None f)

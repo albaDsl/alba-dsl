@@ -12,8 +12,8 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
 where
 
 import Alba.Dsl.V1.Bch2025
-  ( FN,
-    FNA,
+  ( Fn,
+    FnA,
     StackEntry,
     TBytes,
     begin,
@@ -45,12 +45,12 @@ data TFunction
 
 instance StackEntry TFunction
 
-initState :: FNA (s > TBytes) alt s (alt > TFunction > TCode)
+initState :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
 initState = bytes [] # toFunction # opToAltStack # toCode # opToAltStack
 
 -- Make OP_INVOKE = op0 at startup. Should really be a VmError when invoking an
 -- undefined function but that currently makes MiniTurtleVm101 too large.
-initStateWithDefaultOpDefine :: FNA (s > TBytes) alt s (alt > TFunction > TCode)
+initStateWithDefaultOpDefine :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
 initStateWithDefaultOpDefine =
   begin
     # bytes [0x0]
@@ -60,18 +60,18 @@ initStateWithDefaultOpDefine =
     # opToAltStack
 
 getOp ::
-  FNA s (alt > TCode) (s > TMaybe TBytes) (alt > TCode)
+  FnA s (alt > TCode) (s > TMaybe TBytes) (alt > TCode)
 getOp =
   begin
     # (getCode # opSize)
     # ifZero (putCode # nothing) (nat 1 # opSplit # putCode # just)
 
 getOpBytes ::
-  Int -> FNA s (alt > TCode) (s > TBytes) (alt > TCode)
+  Int -> FnA s (alt > TCode) (s > TBytes) (alt > TCode)
 getOpBytes count = getCode # (nat (fromIntegral count) # opSplit # putCode)
 
 putFunction ::
-  FNA (s > TBytes) (alt > TFunction > TCode) s (alt > TFunction > TCode)
+  FnA (s > TBytes) (alt > TFunction > TCode) s (alt > TFunction > TCode)
 putFunction =
   begin
     # (opFromAltStack # opFromAltStack)
@@ -79,7 +79,7 @@ putFunction =
     # (opToAltStack # opToAltStack)
 
 getFunction ::
-  FNA s (alt > TFunction > TCode) (s > TBytes) (alt > TFunction > TCode)
+  FnA s (alt > TFunction > TCode) (s > TBytes) (alt > TFunction > TCode)
 getFunction =
   begin
     # (opFromAltStack # opFromAltStack)
@@ -87,27 +87,27 @@ getFunction =
     # (opNip # fromFunction)
 
 invokeFunction ::
-  FNA s (alt > TFunction > TCode) s (alt > TFunction > TCode)
+  FnA s (alt > TFunction > TCode) s (alt > TFunction > TCode)
 invokeFunction =
   begin
     # (opFromAltStack # fromCode # opFromAltStack # fromFunction)
     # (opDup # opRot # opCat # opSwap)
     # (toFunction # opToAltStack # toCode # opToAltStack)
 
-getCode :: FNA s (alt > TCode) (s > TBytes) alt
+getCode :: FnA s (alt > TCode) (s > TBytes) alt
 getCode = opFromAltStack # fromCode
 
-putCode :: FNA (s > TBytes) alt s (alt > TCode)
+putCode :: FnA (s > TBytes) alt s (alt > TCode)
 putCode = toCode # opToAltStack
 
-toCode :: FN (s > TBytes) (s > TCode)
+toCode :: Fn (s > TBytes) (s > TCode)
 toCode = cast
 
-fromCode :: FN (s > TCode) (s > TBytes)
+fromCode :: Fn (s > TCode) (s > TBytes)
 fromCode = cast
 
-toFunction :: FN (s > TBytes) (s > TFunction)
+toFunction :: Fn (s > TBytes) (s > TFunction)
 toFunction = cast
 
-fromFunction :: FN (s > TFunction) (s > TBytes)
+fromFunction :: Fn (s > TFunction) (s > TBytes)
 fromFunction = cast

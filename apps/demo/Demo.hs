@@ -103,7 +103,7 @@ f6 = EC.g # EC.ecMul # EC.getX
 
 -- Example 7. Evaluating =f3= using turtleVm (Bch2025).
 -- evl (c f7)
-f7 :: FN (s > TInt) (s > TInt)
+f7 :: Fn (s > TInt) (s > TInt)
 f7 = bytes (c f3) # toTyped (T25.turtleVm 20 5)
 
 prop4 :: Integer -> Property
@@ -111,7 +111,7 @@ prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 8. Evaluating =f3= using turtleVm (Bch2026).
 -- evl (c f8)
-f8 :: FN (s > TInt) (s > TInt)
+f8 :: Fn (s > TInt) (s > TInt)
 f8 = bytes (c f3) # toTyped (T26.turtleVm 5)
 
 prop5 :: Integer -> Property
@@ -120,7 +120,7 @@ prop5 x = ev (c f8) x === x ^ 3 - x ^ 2 + 2 * x
 -- Example 9. Evaluate one solution to the miniTurtleVm101 challenge on
 -- miniTurtleVm101 running on top of turtleVm Bch2026.
 -- ev (c f9) 0
-f9 :: FN (s > TInt) (s > TInt)
+f9 :: Fn (s > TInt) (s > TInt)
 f9 =
   begin
     # bytes solution
@@ -133,10 +133,10 @@ f9 =
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize f10
 -- "18 opcodes, 18 bytes. Including function table: 66 opcodes, 220 bytes.\n"
-f10 :: FN (s > TInt) (s > TInt)
+f10 :: Fn (s > TInt) (s > TInt)
 f10 = runEnv (opDrop # f)
   where
-    f :: ENV s (s > TInt)
+    f :: Env s (s > TInt)
     f =
       begin
         # lambda2 add
@@ -144,5 +144,5 @@ f10 = runEnv (opDrop # f)
         # (nat 10 # lambda1 (op1Add # cast) # generate)
         # foldl
 
-    add :: FN (s > TInt > TInt8) (s > TInt)
+    add :: Fn (s > TInt > TInt8) (s > TInt)
     add = cast # opAdd

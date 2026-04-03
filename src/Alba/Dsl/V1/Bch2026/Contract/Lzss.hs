@@ -3,7 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Contract.Lzss where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     Loop,
     TBool,
     TBytes,
@@ -15,7 +15,7 @@ import Alba.Dsl.V1.Bch2026
     castStack,
     cond,
     del,
-    function,
+    fn,
     name2,
     nat,
     ns3,
@@ -67,9 +67,9 @@ refLen = 2 -- Byte size of a reference.
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
 -- "2 opcodes, 2 bytes. Including function table: 8 opcodes, 194 bytes.\n"
-decompress :: FN (s > TBytes) (s > TBytes)
+decompress :: Fn (s > TBytes) (s > TBytes)
 decompress =
-  function
+  fn
     ( begin
         # (opSize # nat 0 # nat groupSize # bytes [] # bytes [])
         # opUntil decompressLoop
@@ -106,7 +106,7 @@ decompressLoop =
           # (roll "out" # roll "off" # roll "len" # copyFromBack # opFalse)
       )
 
-copyFromBack :: FN (s > TBytes > TNat > TNat) (s > TBytes)
+copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes)
 copyFromBack =
   begin
     # (ns3 "bs" "off" "len" # roll "bs" # opSize # roll "off" # opSubUnsafe)
@@ -123,27 +123,27 @@ copyFromBack =
               # (roll "acc" # dup # roll "i" # index # opCat # opFalse)
           )
 
-index :: FN (s > TBytes > TNat) (s > TBytes)
-index = function (opSplit # nip # nat 1 # opSplit # drop)
+index :: Fn (s > TBytes > TNat) (s > TBytes)
+index = fn (opSplit # nip # nat 1 # opSplit # drop)
 
 -- Shaves off a reference (two bytes) starting at the index.
-indexRef :: FN (s > TBytes > TNat) (s > TBytes)
+indexRef :: Fn (s > TBytes > TNat) (s > TBytes)
 indexRef = opSplit # nip # nat refLen # opSplit # drop
 
 -- TBytes is expected to be a single byte.
-testBit :: FN (s > TBytes > TNat) (s > TBool)
+testBit :: Fn (s > TBytes > TNat) (s > TBool)
 testBit = opRShiftBin # bytes [0x01] # opAnd # opBin2Num # op0 # opEqual # opNot
 
 -- Reference format: |offset:12|len:4|
-unpackRef :: FN (s > TBytes) (s > TOff > TLen)
+unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
     # (dup # toSigned # nat lenBits # opRShiftNum # i2n # op1Add)
     # (swap # nat 1 # opSplit # drop # bytes [0xf] # opAnd # opBin2Num # i2n)
     # (nat minMatchLen # opAdd)
   where
-    toSigned :: FN (s > TBytes) (s > TInt)
+    toSigned :: Fn (s > TBytes) (s > TInt)
     toSigned = bytes [0] # opCat # opBin2Num
 
-i2n :: FN (s > TInt) (s > TNat)
+i2n :: Fn (s > TInt) (s > TNat)
 i2n = cast

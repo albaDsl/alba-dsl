@@ -90,7 +90,7 @@ infixl 7 :&
 
 infixl 5 :|
 
-intExp :: IntExp -> FN s (s > TInt)
+intExp :: IntExp -> Fn s (s > TInt)
 intExp = \case
   Int x -> int x
   e1 :+ e2 -> intExp e1 # intExp e2 # opAdd
@@ -105,7 +105,7 @@ intExp = \case
   Min e1 e2 -> intExp e1 # intExp e2 # opMin
   Max e1 e2 -> intExp e1 # intExp e2 # opMax
 
-boolExp :: BoolExp -> FN s (s > TBool)
+boolExp :: BoolExp -> Fn s (s > TBool)
 boolExp = \case
   Bool x -> if x then opTrue else opFalse
   e1 :&& e2 -> boolExp e1 # boolExp e2 # opBoolAnd
@@ -120,7 +120,7 @@ boolExp = \case
   Within e1 e2 e3 -> intExp e1 # intExp e2 # intExp e3 # opWithin
   ZeroNotEqual e -> intExp e # op0NotEqual
 
-bitExp :: BitExp -> FN s (s > TBytes)
+bitExp :: BitExp -> Fn s (s > TBytes)
 bitExp = \case
   Bytes x -> bytes x
   e1 :& e2 -> bitExp e1 # bitExp e2 # opAnd

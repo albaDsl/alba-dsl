@@ -10,14 +10,14 @@ where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 
-defineConstant :: FN (s > TBytes > TNat) s
-defineConstant = function (n2b # opSwap # toPushOp # opSwap # opDefine)
+defineConstant :: Fn (s > TBytes > TNat) s
+defineConstant = fn (n2b # opSwap # toPushOp # opSwap # opDefine)
 
-n2b :: FN (s > TNat) (s > TBytes)
+n2b :: Fn (s > TNat) (s > TBytes)
 n2b = cast
 
-getConstant :: FN (s > TNat) (s > TBytes)
+getConstant :: Fn (s > TNat) (s > TBytes)
 getConstant = n2b # opInvoke get
   where
-    get :: FN s (s > TBytes)
+    get :: Fn s (s > TBytes)
     get = undefined

@@ -4,9 +4,9 @@ module Contract (MiniTurtleChallenge, contract) where
 
 import Alba.Dsl.V1.Bch2025
   ( Base,
-    CFN,
+    CFn,
     Contract (..),
-    FN,
+    Fn,
     N,
     TBool,
     TBytes,
@@ -36,7 +36,7 @@ import Alba.Dsl.V1.Bch2025
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped)
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
 import Prelude hiding (drop)
 
@@ -50,7 +50,7 @@ type MiniTurtleChallenge =
 contract :: MiniTurtleChallenge
 contract = MkContract withdraw
 
-withdraw :: CFN (Base > TBytes)
+withdraw :: CFn (Base > TBytes)
 withdraw =
   begin
     # verifyProgramSize
@@ -58,20 +58,20 @@ withdraw =
     # (toTyped miniTurtleVm101 # int 5 # opNumEqualVerify)
     # opTrue
 
-verifyProgramSize :: FN (s > TBytes) (s > TBytes)
+verifyProgramSize :: Fn (s > TBytes) (s > TBytes)
 verifyProgramSize =
   opSize # nat (fromIntegral progMaxSize) # opLessThanOrEqual # opVerify
 
 -- The same opcode/byte can not appear twice in a row. OP_1ADD may not follow
 -- OP_MUL.
-verifyBytecode :: FN (s > TBytes) (s > TBytes)
+verifyBytecode :: Fn (s > TBytes) (s > TBytes)
 verifyBytecode = opDup # bytes [255] # opSwap # toTyped checkAll
   where
-    checkAll :: FNU
+    checkAll :: FnU
     checkAll = repeatProg progMaxSize (fromTyped check) # UT.op2Drop
 
     check ::
-      FN
+      Fn
         (s > N "lastOp" TBytes > N "ops" TBytes)
         (s > TBytes > TBytes)
     check =
@@ -93,10 +93,10 @@ verifyBytecode = opDup # bytes [255] # opSwap # toTyped checkAll
 
     add1 = bytes [0x8B]
 
-    verifyNotEqual :: FN (s > TBytes > TBytes) s
+    verifyNotEqual :: Fn (s > TBytes > TBytes) s
     verifyNotEqual = opEqual # opNot # opVerify
 
-    isNotEmpty :: FN (s > TBytes) (s > TBool)
+    isNotEmpty :: Fn (s > TBytes) (s > TBool)
     isNotEmpty = opSize # nat 1 # opGreaterThanOrEqual # opNip
 
 progMaxSize :: Int

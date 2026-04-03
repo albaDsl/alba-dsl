@@ -12,24 +12,24 @@ where
 import Alba.Dsl.V1.Bch2025.LangUntyped (int)
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opDrop, opDup, opIf, opNumEqual)
 import Alba.Dsl.V1.Common.Lang ((#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, SU, fromTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, SU, fromTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils qualified as UT
 
-condOp :: [(SU -> SU, SU -> SU)] -> FNU
+condOp :: [(SU -> SU, SU -> SU)] -> FnU
 condOp [] st = unsupportedOp st
 condOp ((test, result) : rest) st =
   (opDup # test # opIf result (condOp rest)) st
 
-condOpLeaf :: [(SU -> SU, SU -> SU)] -> FNU
+condOpLeaf :: [(SU -> SU, SU -> SU)] -> FnU
 condOpLeaf [] st = unsupportedOp st
 condOpLeaf ((test, result) : rest) st =
   (opDup # test # opIf (opDrop # result) (condOpLeaf rest)) st
 
-unsupportedOp :: FNU
+unsupportedOp :: FnU
 unsupportedOp = fromTyped UT.unsupportedOp
 
-inRange :: Integer -> Integer -> FNU
+inRange :: Integer -> Integer -> FnU
 inRange x y = fromTyped (UT.inRange x y)
 
-is :: Integer -> FNU
+is :: Integer -> FnU
 is x = int x # opNumEqual

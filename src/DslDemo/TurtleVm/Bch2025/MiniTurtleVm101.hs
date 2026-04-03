@@ -7,13 +7,13 @@ module DslDemo.TurtleVm.Bch2025.MiniTurtleVm101
   )
 where
 
-import Alba.Dsl.V1.Bch2025 (FN, FNA, S (..), type (>))
+import Alba.Dsl.V1.Bch2025 (Fn, FnA, S (..), type (>))
 import Alba.Dsl.V1.Bch2025 qualified as TY
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped (op1, op1Add, opDrop, opIf, opMul)
 import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (OP_DEFINE, OP_INVOKE))
 import DslDemo.TurtleVm.Bch2025.Maybe (ifJust)
 import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
@@ -25,10 +25,10 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
   )
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
-miniTurtleVm101 :: FNU
+miniTurtleVm101 :: FnU
 miniTurtleVm101 = ft initStateWithDefaultOpDefine # repeatProg 12 handleOp
 
-handleOp :: FNU
+handleOp :: FnU
 handleOp =
   begin
     # ft getOp
@@ -37,7 +37,7 @@ handleOp =
   where
     toSigned = TY.bytes [0] # TY.opCat # TY.opBin2Num
 
-handleOp' :: FNU
+handleOp' :: FnU
 handleOp' =
   condOpLeaf
     [ (is 0x02, ft (getOpBytes 2)), -- OP_DATA_02
@@ -48,11 +48,11 @@ handleOp' =
       (is 0x95, opMul)
     ]
 
-ft :: TY.FNA s alt s' alt' -> FNU
+ft :: TY.FnA s alt s' alt' -> FnU
 ft = fromTyped
 
-turtleOpDefine :: FN (s > TY.TBytes) s
+turtleOpDefine :: Fn (s > TY.TBytes) s
 turtleOpDefine (S c fs) = S (aop c OP_DEFINE) fs
 
-turtleOpInvoke :: FNA s alt s' alt' -> FNA s alt s' alt'
+turtleOpInvoke :: FnA s alt s' alt' -> FnA s alt s' alt'
 turtleOpInvoke _prog (S c fs) = S (aop c OP_INVOKE) fs

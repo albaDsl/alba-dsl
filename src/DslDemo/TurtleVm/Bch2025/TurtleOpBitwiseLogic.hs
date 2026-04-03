@@ -12,10 +12,10 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opOr,
     opXor,
   )
-import Alba.Dsl.V1.Common.StackUntyped (FNU)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
-turtleOpBitwiseLogic :: FNU
+turtleOpBitwiseLogic :: FnU
 turtleOpBitwiseLogic =
   condOpLeaf
     [ -- 0x83: OP_INVERT, disabled op

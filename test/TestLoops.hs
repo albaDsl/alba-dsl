@@ -31,13 +31,13 @@ testLoops =
       testProperty "Loops — pow" propPow
     ]
 
-progFactorial1 :: FN s (s > TBool)
+progFactorial1 :: Fn s (s > TBool)
 progFactorial1 = progFacTest fac
   where
-    fac :: Natural -> FN s (s > TNat)
+    fac :: Natural -> Fn s (s > TNat)
     fac n = nat n # factorial
 
-progFacTest :: (forall s'. Natural -> FN s' (s' > TNat)) -> FN s (s > TBool)
+progFacTest :: (forall s'. Natural -> Fn s' (s' > TNat)) -> Fn s (s > TBool)
 progFacTest fac =
   begin
     # (fac 0 # nat 1 # opNumEqual)
@@ -46,26 +46,26 @@ progFacTest fac =
     # (fac 10 # nat 3_628_800 # opNumEqual)
     # (opBoolAnd # opBoolAnd # opBoolAnd)
 
-progFactorial2 :: FN s (s > TBool)
+progFactorial2 :: Fn s (s > TBool)
 progFactorial2 = progFacTest fac
   where
-    fac :: Natural -> FN s (s > TNat)
-    fac n = nat 1 # nat n # iterate n (unname 2 fn) # opDrop
+    fac :: Natural -> Fn s (s > TNat)
+    fac n = nat 1 # nat n # iterate n (unname 2 f) # opDrop
 
-    fn :: FN (s > N "product" TNat > N "n" TNat) (s > TNat > TNat)
-    fn =
+    f :: Fn (s > N "product" TNat > N "n" TNat) (s > TNat > TNat)
+    f =
       begin
         # (pick "n" # roll "product" # opMul)
         # (roll "n" # op1SubUnsafe)
 
-progFactorial3 :: FN s (s > TBool)
+progFactorial3 :: Fn s (s > TBool)
 progFactorial3 = progFacTest fac
   where
-    fac :: Natural -> FN s (s > TNat)
-    fac n = nat 1 # iterate n (unname 1 fn)
+    fac :: Natural -> Fn s (s > TNat)
+    fac n = nat 1 # iterate n (unname 1 f)
 
-    fn :: FNA (s > N "product" TNat) (alt > TNat) (s > TNat) (alt > TNat)
-    fn =
+    f :: FnA (s > N "product" TNat) (alt > TNat) (s > TNat) (alt > TNat)
+    f =
       begin
         # (opFromAltStack # opDup # opToAltStack)
         # (roll "product" # opMul)
@@ -73,7 +73,7 @@ progFactorial3 = progFacTest fac
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
-progEllipticCurve :: FN s (s > TBool)
+progEllipticCurve :: Fn s (s > TBool)
 progEllipticCurve =
   begin
     # (nat 1 # g # ecMul)

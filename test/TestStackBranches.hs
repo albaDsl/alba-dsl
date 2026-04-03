@@ -68,7 +68,7 @@ testStackBranches =
 -- "choice" has to be positioned above the stack branch. Otherwise it can't be
 -- fetched given that the stack branch depth is unknown.
 progSimpleStackBranch ::
-  FN
+  Fn
     ( s
         > ( (Base > N "b1" TBool)
               :| (Base > N "b2" TBool > N "b3" TBool > N "int" TInt)
@@ -110,7 +110,7 @@ type Param = N "param" TInt
 {- ORMOLU_ENABLE -}
 
 progEntry8 ::
-  FN
+  Fn
     ( s
         > (Args0 :| Args1 :| Args2 :| Args3 :| Args4 :| Args5 :| Args6 :| Args7)
         > N "_fIdx" TInt
@@ -119,40 +119,40 @@ progEntry8 ::
     (s > TInt)
 progEntry8 = entry8 f0 f1 f2 f3 f4 f5 f6 f7
   where
-    f0 :: FN (Append s (Append Args0 '[Param])) (s > TInt)
+    f0 :: Fn (Append s (Append Args0 '[Param])) (s > TInt)
     f0 =
       begin
         # (roll "x0" # roll "param")
         # opAdd
-    f1 :: FN (Append s (Append Args1 '[Param])) (s > TInt)
+    f1 :: Fn (Append s (Append Args1 '[Param])) (s > TInt)
     f1 =
       begin
         # (roll "x0" # roll "x1" # roll "param")
         # (opAdd # opAdd)
-    f2 :: FN (Append s (Append Args2 '[Param])) (s > TInt)
+    f2 :: Fn (Append s (Append Args2 '[Param])) (s > TInt)
     f2 =
       begin
         # (roll "x0" # roll "x1" # roll "x2" # roll "param")
         # (opAdd # opAdd # opAdd)
-    f3 :: FN (Append s (Append Args3 '[Param])) (s > TInt)
+    f3 :: Fn (Append s (Append Args3 '[Param])) (s > TInt)
     f3 =
       begin
         # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
         # roll "param"
         # (opAdd # opAdd # opAdd # opAdd)
-    f4 :: FN (Append s (Append Args4 '[Param])) (s > TInt)
+    f4 :: Fn (Append s (Append Args4 '[Param])) (s > TInt)
     f4 =
       begin
         # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
         # (roll "x4" # roll "param")
         # (opAdd # opAdd # opAdd # opAdd # opAdd)
-    f5 :: FN (Append s (Append Args5 '[Param])) (s > TInt)
+    f5 :: Fn (Append s (Append Args5 '[Param])) (s > TInt)
     f5 =
       begin
         # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
         # (roll "x4" # roll "x5" # roll "param")
         # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
-    f6 :: FN (Append s (Append Args6 '[Param])) (s > TInt)
+    f6 :: Fn (Append s (Append Args6 '[Param])) (s > TInt)
     f6 =
       begin
         # (roll "x0" # roll "x1" # roll "x2" # roll "x3")

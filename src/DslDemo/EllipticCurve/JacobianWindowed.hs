@@ -26,14 +26,14 @@ type TFId = TNat -- Function Id
 
 type TTab = TFId -- Lookup table (represented by the base Function Id)
 
-setupTable :: FN (s > TFId > TPoint) s
+setupTable :: Fn (s > TFId > TPoint) s
 setupTable =
   toJacobian # makeIdentity # nat numValues # unname 4 setupTable'
   where
     setupTable' ::
-      FN (s > N "fId" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
+      Fn (s > N "fId" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
     setupTable' =
-      function
+      fn
         ( begin
             # (pick "i" # op0 # opEqual)
             # opIf
@@ -48,34 +48,34 @@ setupTable =
               )
         )
 
-    p2b :: FN (s > TPointJ) (s > TBytes)
+    p2b :: Fn (s > TPointJ) (s > TBytes)
     p2b = cast
 
     -- Since the record size is fixed we can avoid using 'toPushOp' as an
     -- optimization.
-    storePoint :: FN (s > TNat > TBytes) s
+    storePoint :: Fn (s > TNat > TBytes) s
     storePoint =
       begin
         # (opcode OP_PUSHDATA1 # size # opRot # opCat # opCat)
         # (b2c # opSwap # n2b)
         # opDefine
       where
-        size :: FN s (s > TBytes)
+        size :: Fn s (s > TBytes)
         size = nat 100 # cast
 
-        n2b :: FN (s > TNat) (s > TBytes)
+        n2b :: Fn (s > TNat) (s > TBytes)
         n2b = cast
 
-    opcode :: OpcodeL1 -> FN s (s > TBytes)
+    opcode :: OpcodeL1 -> Fn s (s > TBytes)
     opcode op = bytes [(fromIntegral . fromEnum) op]
 
-    b2c :: FN (s > TBytes) (s > TCode)
+    b2c :: Fn (s > TBytes) (s > TCode)
     b2c = cast
 
-ecMul :: FN (s > TTab > TNat) (s > TPoint)
-ecMul = function (unname 2 ecMulJ # fromJacobian)
+ecMul :: Fn (s > TTab > TNat) (s > TPoint)
+ecMul = fn (unname 2 ecMulJ # fromJacobian)
 
-ecMulJ :: FN (s > N "tab" TTab > N "n" TNat) (s > TPointJ)
+ecMulJ :: Fn (s > N "tab" TTab > N "n" TNat) (s > TPointJ)
 ecMulJ =
   begin
     # (pick "n" # nat 0 # opNumEqual)
@@ -87,7 +87,7 @@ ecMulJ =
       )
 
 ecMulJLoop ::
-  FN
+  Fn
     (s > N "tab" TTab > N "arr" TBytes > N "q" TPointJ)
     (s > TTab > TBytes > TPointJ > TBool)
 ecMulJLoop =
@@ -111,16 +111,16 @@ ecMulJLoop =
           # (roll "tab" # roll "arr'" # opRot # opFalse)
       )
   where
-    tableLookup :: FN (s > TTab > TNat) (s > TPointJ)
+    tableLookup :: Fn (s > TTab > TNat) (s > TPointJ)
     tableLookup = opAdd # getConstant # b2p
 
-    i2n :: FN (s > TInt) (s > TNat)
+    i2n :: Fn (s > TInt) (s > TNat)
     i2n = cast
 
-    b2p :: FN (s > TBytes) (s > TPointJ)
+    b2p :: Fn (s > TBytes) (s > TPointJ)
     b2p = cast
 
-doubleN :: FN (s > TNat > TPointJ) (s > TPointJ)
+doubleN :: Fn (s > TNat > TPointJ) (s > TPointJ)
 doubleN =
   opUntil
     ( begin
@@ -131,10 +131,10 @@ doubleN =
     )
     # opNip
 
-digits :: FN (s > TNat) (s > TBytes)
+digits :: Fn (s > TNat) (s > TBytes)
 digits = bytes [] # opSwap # opUntil (unname 2 loop) # opDrop
   where
-    loop :: FN (s > N "arr" TBytes > N "n" TNat) (s > TBytes > TNat > TBool)
+    loop :: Fn (s > N "arr" TBytes > N "n" TNat) (s > TBytes > TNat > TBool)
     loop =
       begin
         # (pick "n" # winMod # n2i # nat 1 # opNum2Bin)
@@ -144,7 +144,7 @@ digits = bytes [] # opSwap # opUntil (unname 2 loop) # opDrop
     winMod = nat numValues # opMod
     winDiv = nat numValues # opDiv
 
-n2i :: FN (s > TNat) (s > TInt)
+n2i :: Fn (s > TNat) (s > TInt)
 n2i = cast
 
 windowSize :: Natural

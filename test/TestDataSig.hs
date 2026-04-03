@@ -23,7 +23,7 @@ testDataSig =
       testCase "opCheckDataSigVerify" $ test progCheckDataSigVerify
     ]
 
-test :: (forall s. Bytes -> Bytes -> Bytes -> FN s (s > TBool)) -> Assertion
+test :: (forall s. Bytes -> Bytes -> Bytes -> Fn s (s > TBool)) -> Assertion
 test prog = do
   KeyPair secKey pubKey <-
     fromMaybe (error "Failed to load keys.") <$> withContext genKey
@@ -34,7 +34,7 @@ test prog = do
   let (s, alt) = getStacks $ evaluateProg (prog sigData msg pubKey')
   (s, alt) @?= (S.singleton (i2SeUnsafe 1), S.empty)
 
-progCheckDataSig :: Bytes -> Bytes -> Bytes -> FN s (s > TBool)
+progCheckDataSig :: Bytes -> Bytes -> Bytes -> Fn s (s > TBool)
 progCheckDataSig sig msg pk =
   begin
     # sigBytes sig
@@ -42,7 +42,7 @@ progCheckDataSig sig msg pk =
     # pubKeyBytes pk
     # opCheckDataSig
 
-progCheckDataSigVerify :: Bytes -> Bytes -> Bytes -> FN s (s > TBool)
+progCheckDataSigVerify :: Bytes -> Bytes -> Bytes -> Fn s (s > TBool)
 progCheckDataSigVerify sig msg pk =
   begin
     # sigBytes sig

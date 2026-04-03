@@ -28,7 +28,7 @@ type Params =
 contract :: LastWill
 contract = MkContract $ entry3 refresh withdraw inherit
 
-refresh :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+refresh :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 refresh =
   begin
     # ( begin
@@ -41,24 +41,24 @@ refresh =
     # (del "withdrawHash" # del "inheritHash")
     # opTrue
   where
-    verifyOutputAmount :: Natural -> FNC
+    verifyOutputAmount :: Natural -> FnC
     verifyOutputAmount outputIndex =
       begin
         # (opInputIndex # opUtxoValue # subMinerFee fee)
         # (nat (fromIntegral outputIndex) # opOutputValue)
         # opEqualVerify
 
-    subMinerFee :: Word64 -> FN (s > TNat) (s > TNat)
+    subMinerFee :: Word64 -> Fn (s > TNat) (s > TNat)
     subMinerFee minerFee = nat (fromIntegral minerFee) # natSub
 
-    verifyOutputScript :: Natural -> FNC
+    verifyOutputScript :: Natural -> FnC
     verifyOutputScript outputIndex =
       begin
         # (opInputIndex # opUtxoBytecode)
         # (nat (fromIntegral outputIndex) # opOutputBytecode)
         # opEqualVerify
 
-withdraw :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+withdraw :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 withdraw =
   begin
     # ( begin
@@ -68,7 +68,7 @@ withdraw =
     # (del "refreshHash" # del "inheritHash")
     # opTrue
 
-inherit :: CFN (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+inherit :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 inherit =
   begin
     # ( begin
@@ -79,8 +79,8 @@ inherit =
     # (del "refreshHash" # del "withdrawHash")
     # opTrue
 
-verifyAuthorized :: FN (s > TSig > THash160 > TPubKey) s
+verifyAuthorized :: Fn (s > TSig > THash160 > TPubKey) s
 verifyAuthorized = opDup # opHash160 # opRot # opEqualVerify # opCheckSigVerify
 
-verifySequence :: Natural -> FNC
+verifySequence :: Natural -> FnC
 verifySequence t = nat (timeSequence t) # opCheckSequenceVerify # opDrop

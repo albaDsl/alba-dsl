@@ -29,7 +29,7 @@ test ::
     Bytes ->
     Bytes ->
     Bytes ->
-    FN
+    Fn
       (s > TNat > TSig > TSig > TNat)
       (s > TBool)
   ) ->
@@ -72,7 +72,7 @@ progCheckMultiSig2of3 ::
   Bytes ->
   Bytes ->
   Bytes ->
-  FN (s > TNat > TSig > TSig > TNat) (s > TBool)
+  Fn (s > TNat > TSig > TSig > TNat) (s > TBool)
 progCheckMultiSig2of3 key1 key2 key3 =
   begin
     # pubKeyBytes key1
@@ -85,7 +85,7 @@ progCheckMultiSigVerify2of3 ::
   Bytes ->
   Bytes ->
   Bytes ->
-  FN (s > TNat > TSig > TSig > TNat) (s > TBool)
+  Fn (s > TNat > TSig > TSig > TNat) (s > TBool)
 progCheckMultiSigVerify2of3 key1 key2 key3 =
   begin
     # pubKeyBytes key1

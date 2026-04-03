@@ -7,7 +7,7 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmCondStack
 where
 
 import Alba.Dsl.V1.Bch2025
-  ( FN,
+  ( Fn,
     N,
     TBool,
     TBytes,
@@ -40,7 +40,7 @@ import Prelude hiding (and)
 
 executeP ::
   Int ->
-  FN
+  Fn
     (s > N "op" (TMaybe TBytes) > N "condStack" TBytes)
     (s > TBytes > TBool)
 executeP maxCsDepth =
@@ -57,7 +57,7 @@ executeP maxCsDepth =
       )
       (del "condStack" # bytes [] # opFalse)
 
-condStackExecuteP :: Int -> FN (s > TBytes) (s > TBool)
+condStackExecuteP :: Int -> Fn (s > TBytes) (s > TBool)
 condStackExecuteP maxCsDepth =
   toTyped
     ( begin
@@ -66,7 +66,7 @@ condStackExecuteP maxCsDepth =
         # repeatProg (pred maxCsDepth) UT.opBoolAnd
     )
   where
-    check :: FN (s > TBytes) (s > TBool > TBytes)
+    check :: Fn (s > TBytes) (s > TBool > TBytes)
     check =
       begin
         # (opSize # nat 1 # opGreaterThanOrEqual)

@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opVerify,
   )
 import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (condStackExecuteP)
 import DslDemo.TurtleVm.Bch2025.TurtleVmState
   ( dropCondStack,
@@ -24,7 +24,7 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmState
   )
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
-turtleOpConditionals :: Int -> FNU
+turtleOpConditionals :: Int -> FnU
 turtleOpConditionals maxCsDepth =
   condOpLeaf
     [ (is 0x61, opNop),
@@ -41,7 +41,7 @@ turtleOpConditionals maxCsDepth =
   where
     ft = fromTyped
 
-    ifOp :: FNU -> FNU
+    ifOp :: FnU -> FnU
     ifOp op =
       begin
         # ft getCondStack

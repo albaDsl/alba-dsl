@@ -7,7 +7,7 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmCondStack
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     Loop,
     N,
     TBool,
@@ -15,7 +15,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     del,
-    function,
+    fn,
     nat,
     opBoolOr,
     opEqual,
@@ -36,7 +36,7 @@ import DslDemo.TurtleVm.Bch2026.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import Prelude hiding (drop)
 
 executeP ::
-  FN
+  Fn
     (s > N "op" (TMaybe TBytes) > N "condStack" TBytes)
     (s > TBytes > TBool)
 executeP =
@@ -55,8 +55,8 @@ executeP =
       )
       (del "condStack" # bytes [] # opFalse)
 
-condStackExecuteP :: FN (s > TBytes) (s > TBool)
-condStackExecuteP = function (opTrue # swap # opUntil loop # drop)
+condStackExecuteP :: Fn (s > TBytes) (s > TBool)
+condStackExecuteP = fn (opTrue # swap # opUntil loop # drop)
   where
     loop :: Loop (s > TBool > TBytes)
     loop =
@@ -71,5 +71,5 @@ condStackExecuteP = function (opTrue # swap # opUntil loop # drop)
           )
           (opTrue # replaceResult # opTrue)
 
-    replaceResult :: FN (s > TBool > TBytes > TBool) (s > TBool > TBytes)
+    replaceResult :: Fn (s > TBool > TBytes > TBool) (s > TBool > TBytes)
     replaceResult = rot # drop # swap

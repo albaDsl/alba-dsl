@@ -8,7 +8,7 @@ module Alba.Dsl.V1.Bch2026.Contract.ExternalLib
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     Loop,
     TBytes,
     TCode,
@@ -19,7 +19,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    function,
+    fn,
     int,
     invoke1,
     name,
@@ -49,11 +49,11 @@ import Alba.Dsl.V1.Bch2026.TxDsl (simpleWrapChunkSize)
 import Prelude hiding (drop)
 
 importLibrary ::
-  FN
+  Fn
     (s > TBytes > TLambda '[TBytes] '[TBytes] > TNat > TNat > TNat > THash256)
     s
 importLibrary =
-  function
+  fn
     ( begin
         # ns6 "fId" "transform" "startInput" "numInputs" "size" "hash"
         # (roll "startInput" # roll "numInputs" # n2i # bytes [])
@@ -72,22 +72,22 @@ importLibrary =
         # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
         # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
 
-    libInit :: FN s s
+    libInit :: Fn s s
     libInit = undefined
 
-b2c :: FN (s > TBytes) (s > TCode)
+b2c :: Fn (s > TBytes) (s > TCode)
 b2c = cast
 
-n2i :: FN (s > TNat) (s > TInt)
+n2i :: Fn (s > TNat) (s > TInt)
 n2i = cast
 
 -- Without transform.
 importLibrary' ::
-  FN
+  Fn
     (s > TBytes > TNat > TNat > TNat > THash256)
     s
 importLibrary' =
-  function
+  fn
     ( begin
         # ns5 "fId" "startInput" "numInputs" "size" "hash"
         # (roll "startInput" # roll "numInputs" # n2i # bytes [])
@@ -106,13 +106,13 @@ importLibrary' =
         # (roll "acc" # roll "input" # opUtxoBytecode # simpleUnwrapProg)
         # (opCat # pick "cnt'" # int 0 # opEqual # un "cnt'")
 
-    libInit :: FN s s
+    libInit :: Fn s s
     libInit = undefined
 
 -- Unwraps the 'simpleWrap' format from Bch2026.TxDsl. With simple wrapping the
 -- data chunk always starts at offset 2 and is 197 bytes long.
-simpleUnwrapProg :: FN (s > TBytes) (s > TBytes)
+simpleUnwrapProg :: Fn (s > TBytes) (s > TBytes)
 simpleUnwrapProg =
-  function (nat 2 # opSplit # nip # nat size # opSplit # drop)
+  fn (nat 2 # opSplit # nip # nat size # opSplit # drop)
   where
     size = fromIntegral simpleWrapChunkSize

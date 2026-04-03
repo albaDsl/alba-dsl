@@ -3,7 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Contract.Int8 (TInt8, int8, toInt8) where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     StackEntry,
     TInt,
     begin,
@@ -34,7 +34,7 @@ instance PackFs TInt8 where
   unpack = opBin2Num # cast
   record = int8PackFs
 
-int8PackFs :: FN s (s > TPackFs TInt8)
+int8PackFs :: Fn s (s > TPackFs TInt8)
 int8PackFs =
   constant
     ( begin
@@ -50,8 +50,8 @@ int8Max = 127
 int8Min :: Integer
 int8Min = -int8Max
 
-int8 :: Integer -> FN s (s > TInt8)
+int8 :: Integer -> Fn s (s > TInt8)
 int8 x = assert (x >= int8Min && x <= int8Max) (int x # cast)
 
-toInt8 :: FN (s > TInt) (s > TInt8)
+toInt8 :: Fn (s > TInt) (s > TInt8)
 toInt8 = dup # int int8Min # int int8Max # opWithin # opVerify # cast

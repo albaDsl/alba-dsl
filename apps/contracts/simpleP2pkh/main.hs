@@ -5,7 +5,7 @@ module Main (main) where
 
 import Alba.Dsl.V1.Bch2025
   ( Bytes,
-    FN,
+    Fn,
     Optimize (None),
     TPubKey,
     TSig,
@@ -122,5 +122,5 @@ txTemplate fundingTx recvAddr =
       lockTime = 0
     }
 
-scriptSig :: Bytes -> Bytes -> FN s (s > TPubKey > TSig)
+scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
 scriptSig pubKey sig = bytes' pubKey # bytes' sig

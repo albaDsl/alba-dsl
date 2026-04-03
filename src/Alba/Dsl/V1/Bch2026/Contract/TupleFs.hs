@@ -13,7 +13,7 @@ module Alba.Dsl.V1.Bch2026.Contract.TupleFs
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     StackEntry,
     TBytes,
     TLambda,
@@ -54,13 +54,13 @@ data TTupleFs a b
 instance StackEntry (TTupleFs a b)
 
 instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
-  pack :: FN (s > TTupleFs a b) (s > TBytes)
+  pack :: Fn (s > TTupleFs a b) (s > TBytes)
   pack = cast
 
-  unpack :: FN (s > TBytes) (s > TTupleFs a b)
+  unpack :: Fn (s > TBytes) (s > TTupleFs a b)
   unpack = cast
 
-  size :: FN s (s > TNat)
+  size :: Fn s (s > TNat)
   size = nat (sizeConst @(TTupleFs a b))
 
   sizeConst = sizeConst @a + sizeConst @b
@@ -70,7 +70,7 @@ instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
 tuplePackFs ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  FN s (s > TPackFs (TTupleFs a b))
+  Fn s (s > TPackFs (TTupleFs a b))
 tuplePackFs =
   begin
     # size @(TTupleFs a b)
@@ -81,7 +81,7 @@ tuplePackFs =
 tuple ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  FN (s > a > b) (s > TTupleFs a b)
+  Fn (s > a > b) (s > TTupleFs a b)
 tuple =
   begin
     # (ns2 "a" "b" # packFs @a # packFs @b # rollN "a" # rollN "b")
@@ -89,32 +89,32 @@ tuple =
 
 tupleF ::
   (StackEntry a, StackEntry b) =>
-  FN (s > TPackFs a > TPackFs b > a > b) (s > TTupleFs a b)
+  Fn (s > TPackFs a > TPackFs b > a > b) (s > TTupleFs a b)
 tupleF =
   begin
     # (rot # getPack # invoke1 # rot # swap # rot # rot # getPack # invoke1)
     # (swap # opCat # cast)
 
 calcPackFs ::
-  FN (s > TPackFs a > TPackFs b) (s > TPackFs (TTupleFs a b))
+  Fn (s > TPackFs a > TPackFs b) (s > TPackFs (TTupleFs a b))
 calcPackFs =
   begin
     # (getSize # swap # getSize # opAdd)
     # (emptyLambda # emptyLambda # mkPackFs)
 
-emptyLambda :: (StackEntry a, StackEntry b) => FN s (s > TLambda '[a] '[b])
+emptyLambda :: (StackEntry a, StackEntry b) => Fn s (s > TLambda '[a] '[b])
 emptyLambda = lambda1 cast
 
 untuple ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  FN (s > TTupleFs a b) (s > a > b)
+  Fn (s > TTupleFs a b) (s > a > b)
 untuple = toBytes # (size @a) # opSplit # unpack # swap # unpack # swap
 
 untupleF ::
   forall a b s.
   (StackEntry a, StackEntry b) =>
-  FN (s > TPackFs a > TPackFs b > TTupleFs a b) (s > a > b)
+  Fn (s > TPackFs a > TPackFs b > TTupleFs a b) (s > a > b)
 untupleF =
   begin
     # ns3 "pfsA" "pfsB" "tuple"
@@ -122,11 +122,11 @@ untupleF =
     # (roll "pfsB" # getUnpack # invoke1 # ns "b" # swap)
     # (roll "pfsA" # getUnpack # invoke1 # swap # un "b")
 
-toBytes :: FN (s > TTupleFs a b) (s > TBytes)
+toBytes :: Fn (s > TTupleFs a b) (s > TBytes)
 toBytes = cast
 
-fst :: (PackFs a, PackFs b) => FN (s > TTupleFs a b) (s > a)
+fst :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > a)
 fst = untuple # drop
 
-snd :: (PackFs a, PackFs b) => FN (s > TTupleFs a b) (s > b)
+snd :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > b)
 snd = untuple # nip

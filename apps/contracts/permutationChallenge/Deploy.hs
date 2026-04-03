@@ -4,7 +4,7 @@ module Deploy (deployTx) where
 
 import Alba.Dsl.V1.Bch2025
   ( Bytes,
-    FN,
+    Fn,
     Optimize (None),
     TPubKey,
     TSig,
@@ -43,7 +43,7 @@ deployTx ctx net outpoint = do
 
     err2 = error "Couldn't load wallet funding Tx."
 
-    scriptSig :: Bytes -> Bytes -> FN s (s > TPubKey > TSig)
+    scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
     scriptSig pubKey sig = bytes' pubKey # bytes' sig
 
 txTemplate :: OutPoint -> Word64 -> Tx

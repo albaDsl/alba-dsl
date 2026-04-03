@@ -14,10 +14,10 @@ import DslDemo.EllipticCurve.Point
     makePoint,
   )
 
-ecDouble :: FN (s > TPoint) (s > TPoint)
-ecDouble = function (unname 1 ecDouble')
+ecDouble :: Fn (s > TPoint) (s > TPoint)
+ecDouble = fn (unname 1 ecDouble')
 
-ecDouble' :: FN (s > N "p" TPoint) (s > TPoint)
+ecDouble' :: Fn (s > N "p" TPoint) (s > TPoint)
 ecDouble' =
   begin
     # name "px" (pick "p" # getX)
@@ -49,10 +49,10 @@ ecDouble' =
     # roll "ry"
     # makePoint
 
-ecAdd :: FN (s > TPoint > TPoint) (s > TPoint)
-ecAdd = function (unname 2 ecAdd')
+ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
+ecAdd = fn (unname 2 ecAdd')
 
-ecAdd' :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
+ecAdd' :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
 ecAdd' =
   begin
     # (pick "p" # isIdentity)
@@ -76,7 +76,7 @@ ecAdd' =
 
     xCoordsEqual = pick "p" # getX # pick "q" # getX # opNumEqual
 
-    doAdd :: FN (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
+    doAdd :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
     doAdd =
       begin
         # name "px" (pick "p" # getX)

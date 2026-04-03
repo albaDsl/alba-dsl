@@ -16,26 +16,26 @@ testConstants =
       testCase "Runtime constants" $ isTrue (evaluateProg progRuntime)
     ]
 
-progCompileTime :: FN s (s > TBool)
+progCompileTime :: Fn s (s > TBool)
 progCompileTime =
   begin
     # (c1 # int 3_628_800 # opNumEqualVerify)
     # (c2 # int 3 # opNumEqualVerify)
     # opTrue
   where
-    c1 :: FN s (s > TInt)
+    c1 :: Fn s (s > TInt)
     c1 = constant (int (fac 10))
 
     fac :: Integer -> Integer
     fac 0 = 1
     fac n = n * fac (pred n)
 
-    c2 :: FN s (s > TInt)
+    c2 :: Fn s (s > TInt)
     c2 = constant (int 2 # int 3 # opMul # int 2 # opDiv)
 
 -- Constants that reference eachother. Tests topological ordering of runtime
 -- initialization of constants.
-progRuntime :: FN s (s > TBool)
+progRuntime :: Fn s (s > TBool)
 progRuntime =
   begin
     # (c3 # int 36 # opNumEqualVerify)
@@ -53,20 +53,20 @@ progRuntime =
     # (c4 # int 24 # opNumEqualVerify)
     # opTrue
   where
-    c1 :: FN s (s > TInt)
+    c1 :: Fn s (s > TInt)
     c1 = runtimeConstant (staticConstant # int 2 # square # opMul)
 
-    c2 :: FN s (s > TInt)
+    c2 :: Fn s (s > TInt)
     c2 = runtimeConstant (c1 # int 2 # opMul)
 
-    c3 :: FN s (s > TInt)
+    c3 :: Fn s (s > TInt)
     c3 = runtimeConstant (c1 # c2 # opAdd)
 
-    c4 :: FN s (s > TInt)
+    c4 :: Fn s (s > TInt)
     c4 = runtimeConstant (c1 # c1 # opAdd)
 
-    square :: FN (s > TInt) (s > TInt)
-    square = function (opDup # opMul)
+    square :: Fn (s > TInt) (s > TInt)
+    square = fn (opDup # opMul)
 
-    staticConstant :: FN s (s > TInt)
+    staticConstant :: Fn s (s > TInt)
     staticConstant = int 2 # int 3 # opMul # int 2 # opDiv

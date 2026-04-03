@@ -14,10 +14,10 @@ import DslDemo.EllipticCurve.JacobianPoint
     makePoint,
   )
 
-ecDoubleJ :: FN (s > TPointJ) (s > TPointJ)
-ecDoubleJ = function (unname 1 ecDoubleJ')
+ecDoubleJ :: Fn (s > TPointJ) (s > TPointJ)
+ecDoubleJ = fn (unname 1 ecDoubleJ')
 
-ecDoubleJ' :: FN (s > N "p" TPointJ) (s > TPointJ)
+ecDoubleJ' :: Fn (s > N "p" TPointJ) (s > TPointJ)
 ecDoubleJ' =
   begin
     # (pick "p" # isIdentity)
@@ -43,10 +43,10 @@ ecDoubleJ' =
           # (roll "x'" # roll "y'" # roll "z'" # makePoint)
       )
 
-ecAddJ :: FN (s > TPointJ > TPointJ) (s > TPointJ)
-ecAddJ = function (unname 2 ecAddJ')
+ecAddJ :: Fn (s > TPointJ > TPointJ) (s > TPointJ)
+ecAddJ = fn (unname 2 ecAddJ')
 
-ecAddJ' :: FN (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
+ecAddJ' :: Fn (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
 ecAddJ' =
   begin
     # (pick "p1" # isIdentity)
@@ -54,7 +54,7 @@ ecAddJ' =
       (roll "p2" # del "p1")
       (pick "p2" # isIdentity # opIf (roll "p1" # del "p2") doAdd)
 
-doAdd :: FN (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
+doAdd :: Fn (s > N "p1" TPointJ > N "p2" TPointJ) (s > TPointJ)
 doAdd =
   begin
     # name "x1" (pick "p1" # getX)
@@ -102,11 +102,11 @@ doAdd =
           # del "p1"
       )
 
-term2 :: FN (s > TInt > TInt) (s > TInt)
+term2 :: Fn (s > TInt > TInt) (s > TInt)
 term2 = feSquare # feMul
 
-term3 :: FN (s > TInt > TInt) (s > TInt)
+term3 :: Fn (s > TInt > TInt) (s > TInt)
 term3 = feCube # feMul
 
-term4 :: FN (s > TInt > TInt) (s > TInt)
+term4 :: Fn (s > TInt > TInt) (s > TInt)
 term4 = feQuartic # feMul

@@ -21,7 +21,7 @@ instantiate ctx senderPub recipientPub timeout =
       addr = scriptAddress script'
    in (script', addr)
   where
-    params :: FN Base Params
+    params :: Fn Base Params
     params =
       let senderPub' = marshal ctx (wrapPubKey False senderPub)
           recipientPub' = marshal ctx (wrapPubKey False recipientPub)
@@ -39,7 +39,7 @@ senderWithdraw = scriptSig 1
 scriptSig :: Natural -> Ctx -> CodeL1 -> TxSignature -> CodeL1
 scriptSig fn ctx redeemScript sig = compile None args
   where
-    args :: FN s (s > TBytes > TNat > TBytes)
+    args :: Fn s (s > TBytes > TNat > TBytes)
     args =
       let s = marshal ctx sig
        in bytes s # nat fn # bytes redeemScript

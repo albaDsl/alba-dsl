@@ -95,10 +95,10 @@ testCodeMetrics =
 sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
 sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 
-ratio :: FNA s alt s' alt' -> String
+ratio :: FnA s alt s' alt' -> String
 ratio prog = compressibilityStr (fst $ compileL2 O1 prog)
 
-costOf :: forall s s' alt'. FNA s '[] s' alt' -> Int
+costOf :: forall s s' alt'. FnA s '[] s' alt' -> Int
 costOf prog =
   let cr = compile' O1 prog
       res = evaluateScript cr.code emptyStacks minimalContext
@@ -114,7 +114,7 @@ costOf prog =
 
 -- We evaluate 'prog' many times and calculate the average in order to amortize
 -- the cost of 'turtleVmInit' and reduce its effect on the cost number.
-turtleVmCostOf :: FNC -> Int
+turtleVmCostOf :: FnC -> Int
 turtleVmCostOf prog =
   let count = 800
       code = compile O1 prog
@@ -133,13 +133,13 @@ turtleVmCostOf prog =
               pure $ tr.metrics.cost `div` count
         Left (err, _) -> error (show err)
   where
-    consumeAll :: UT.FNU -> UT.FNU
+    consumeAll :: UT.FnU -> UT.FnU
     consumeAll prog' = UT.opUntil (prog' # UT.opDepth # UT.op0 # UT.opEqual)
 
-arithmetic :: FNC
+arithmetic :: FnC
 arithmetic = int 2 # int 3 # opAdd # int 4 # opSub # int 1 # opEqualVerify
 
-windowedMul :: FNC
+windowedMul :: FnC
 windowedMul =
   begin
     # (gTable # g # EJW.setupTable)
@@ -153,7 +153,7 @@ windowedMul =
   where
     gTable = nat 100
 
-vectorOps :: FNC
+vectorOps :: FnC
 vectorOps =
   runEnv
     ( begin
@@ -202,12 +202,12 @@ vectorOps =
     n :: Natural
     n = 50
 
-decompressTest :: FNC
+decompressTest :: FnC
 decompressTest =
   let code = Vc.lib.code
    in bytes (LZ.compress code) # CLZ.decompress # bytes code # opEqualVerify
 
-decompressTestBit :: FNC
+decompressTestBit :: FnC
 decompressTestBit =
   let code = Vc.lib.code
    in bytes (LZB.compress code) # CLZB.decompress # bytes code # opEqualVerify

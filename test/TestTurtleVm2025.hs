@@ -3,7 +3,7 @@
 module TestTurtleVm2025 (testTurtleVm2025) where
 
 import Alba.Dsl.V1.Bch2025
-import Alba.Dsl.V1.Common.StackUntyped (FNU, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, toTyped)
 import Alba.Vm.Bch2025
   ( ScriptError,
     VmParams (..),
@@ -59,7 +59,7 @@ testTurtleVm2025 =
             assertFailure (show err)
     ]
 
-progDataPush :: FN s (s > TBool)
+progDataPush :: Fn s (s > TBool)
 progDataPush =
   begin
     # (bytes [1, 2, 3] # bytes [1, 2] # bytes [3] # opCat # opEqual)
@@ -69,7 +69,7 @@ progDataPush =
 -- Use multi-byte strings inside conditionals. If multi-byte opcodes are not
 -- handled correctly by the VM, then it could start interpreting the data as
 -- opcodes.
-progConditionals :: FN s (s > TBool)
+progConditionals :: Fn s (s > TBool)
 progConditionals =
   begin
     # opTrue
@@ -87,17 +87,17 @@ progConditionals =
     # expectedBytes
     # opEqual
   where
-    expectedBytes :: FN s (s > TBytes)
+    expectedBytes :: Fn s (s > TBytes)
     expectedBytes = bytes [opEndif, opEndif, opEndif]
 
-    someBytes :: FN s (s > TBytes)
+    someBytes :: Fn s (s > TBytes)
     someBytes = bytes [opElse, opElse, opElse]
 
     opElse = 0x67
 
     opEndif = 0x68
 
-progArithmetic1 :: FN s (s > TBool)
+progArithmetic1 :: Fn s (s > TBool)
 progArithmetic1 =
   begin
     # (int 2 # int 3 # opMul # int 4 # opAdd # int 2 # opDiv)
@@ -105,7 +105,7 @@ progArithmetic1 =
     # opSub
     # (int 3 # opNumEqual)
 
-progArithmetic2 :: FN s (s > TBool)
+progArithmetic2 :: Fn s (s > TBool)
 progArithmetic2 =
   begin
     # (int 2 # int 3 # opLessThan)
@@ -114,17 +114,17 @@ progArithmetic2 =
     # (int 3 # int 1 # int 5 # opWithin)
     # (opBoolAnd # opBoolAnd # opBoolAnd)
 
-progIntrospection :: FN s (s > TBool)
+progIntrospection :: Fn s (s > TBool)
 progIntrospection =
   begin
     # (opTxVersion # nat 2 # opNumEqual)
     # (opTxInputCount # nat 1 # opNumEqual)
     # opBoolAnd
 
-progStack1 :: FN s (s > TBool)
+progStack1 :: Fn s (s > TBool)
 progStack1 = nat 2 # opTrue # opNip # opDup # opDrop
 
-progStack2 :: FN s (s > TBool)
+progStack2 :: Fn s (s > TBool)
 progStack2 =
   begin
     # name "x4" (int 4)
@@ -135,7 +135,7 @@ progStack2 =
     # (pick "x4" # roll "x3" # opMul # int 12 # opNumEqual)
     # (del "x0" # del "x1" # del "x2" # del "x4")
 
-progBytes :: FN s (s > TBool)
+progBytes :: Fn s (s > TBool)
 progBytes =
   begin
     # startBytes -- b
@@ -149,20 +149,20 @@ progBytes =
     # opReverseBytes -- b b
     # opEqual -- t
   where
-    startBytes :: FN s (s > TBytes)
+    startBytes :: Fn s (s > TBytes)
     startBytes = int 1 # toBytes # int 2 # toBytes # opCat
 
-    toBytes :: FN (s > TInt) (s > TBytes)
+    toBytes :: Fn (s > TInt) (s > TBytes)
     toBytes = cast
 
-progBitwise :: FN s (s > TBool)
+progBitwise :: Fn s (s > TBool)
 progBitwise =
   int 1 # toBytes # int 2 # toBytes # opOr # int 3 # toBytes # opEqual
   where
-    toBytes :: FN (s > TInt) (s > TBytes)
+    toBytes :: Fn (s > TInt) (s > TBytes)
     toBytes = cast
 
-progMiniTurtle :: FN s (s > TInt)
+progMiniTurtle :: Fn s (s > TInt)
 progMiniTurtle =
   begin
     # bytes (compile None f)
@@ -173,7 +173,7 @@ progMiniTurtle =
     f = int 1 # opMul
 
 evaluateOnTurtleVm ::
-  FNA s '[] s' alt' ->
+  FnA s '[] s' alt' ->
   Either (ScriptError, Maybe VmState) VmState
 evaluateOnTurtleVm =
   evaluate (turtleVm maxOps maxCondStackDepth) largerLimits
@@ -190,15 +190,15 @@ evaluateOnTurtleVm =
         }
 
 evaluateOnMiniTurtleVm ::
-  FNA s '[] s' alt' ->
+  FnA s '[] s' alt' ->
   Either (ScriptError, Maybe VmState) VmState
 evaluateOnMiniTurtleVm = evaluate miniTurtleVm101 id
 
 {-# INLINE evaluate #-}
 evaluate ::
-  FNU ->
+  FnU ->
   (VmParams -> VmParams) ->
-  FNA s '[] s' alt' ->
+  FnA s '[] s' alt' ->
   Either (ScriptError, Maybe VmState) VmState
 evaluate vm updateParams prog =
   let prog' = compile None prog

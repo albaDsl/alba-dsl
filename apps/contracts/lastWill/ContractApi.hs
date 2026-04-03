@@ -22,7 +22,7 @@ instantiate ctx refreshPk withdrawPk inheritPk =
       addr = scriptAddress script'
    in (script', addr)
   where
-    params :: FN Base Params
+    params :: Fn Base Params
     params =
       let marshalPk pk = marshal ctx (wrapPubKey False pk)
           refreshHash = (hash160 . marshalPk) refreshPk
@@ -45,7 +45,7 @@ inherit = scriptSig 2
 scriptSig :: Natural -> Ctx -> CodeL1 -> PubKey -> TxSignature -> CodeL1
 scriptSig fn ctx redeemScript pubKey sig = compile None args
   where
-    args :: FN s (s > TPubKey > TSig > TNat > TBytes)
+    args :: Fn s (s > TPubKey > TSig > TNat > TBytes)
     args =
       let pk = marshal ctx (wrapPubKey False pubKey)
           s = marshal ctx sig

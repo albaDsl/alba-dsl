@@ -7,15 +7,15 @@ module DslDemo.TurtleVm.Bch2026.TurtleOpAltStack
 where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opFromAltStack, opSwap, opToAltStack)
-import Alba.Dsl.V1.Bch2026 (FNA, (#))
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped)
+import Alba.Dsl.V1.Bch2026 (FnA, (#))
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import DslDemo.TurtleVm.Bch2026.TurtleVmState (getState, putState)
 
-toAltStack :: FNU
+toAltStack :: FnU
 toAltStack = ft getState # opSwap # opToAltStack # ft putState
 
-fromAltStack :: FNU
+fromAltStack :: FnU
 fromAltStack = ft getState # opFromAltStack # opSwap # ft putState
 
-ft :: FNA s alt s' alt' -> FNU
+ft :: FnA s alt s' alt' -> FnU
 ft = fromTyped

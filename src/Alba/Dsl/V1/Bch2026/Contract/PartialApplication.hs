@@ -13,8 +13,8 @@ where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
-  ( ENV,
-    FN,
+  ( Env,
+    Fn,
     StackEntry,
     TBytes,
     TInt,
@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Bch2026
     TRuntimeState,
     begin,
     cast,
-    function,
+    fn,
     op1Add,
     opDup,
     opFromAltStack,
@@ -33,17 +33,17 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
-import Alba.Dsl.V1.Common.StackUntyped (FNU, fromTyped, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped)
 
 apply1 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  ENV (s > t2 > TLambda '[t1] '[r1]) (s > TLambda '[] '[r1])
+  Env (s > t2 > TLambda '[t1] '[r1]) (s > TLambda '[] '[r1])
 apply1 = toTyped applyTop
 
-applyTop :: FNU -- <arg> <lambda> -- <lambda'>
-applyTop = fromTyped $ function (toTyped f)
+applyTop :: FnU -- <arg> <lambda> -- <lambda'>
+applyTop = fromTyped $ fn (toTyped f)
   where
-    f :: FNU
+    f :: FnU
     f =
       begin
         # (fromTyped toPushOp # UT.opSwap # fromTyped toPushOp # UT.opSwap)
@@ -52,18 +52,18 @@ applyTop = fromTyped $ function (toTyped f)
 
 apply2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  ENV (s > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[t1] '[r1])
+  Env (s > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[t1] '[r1])
 apply2 = toTyped applyTop
 
 apply2_2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  ENV (s > t1 > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[] '[r1])
+  Env (s > t1 > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[] '[r1])
 apply2_2 = toTyped applyTop2
 
-applyTop2 :: FNU -- <argN-1> <argN> <lambda> -- <lambda'>
-applyTop2 = fromTyped $ function (toTyped f)
+applyTop2 :: FnU -- <argN-1> <argN> <lambda> -- <lambda'>
+applyTop2 = fromTyped $ fn (toTyped f)
   where
-    f :: FNU
+    f :: FnU
     f =
       begin
         # (fromTyped toPushOp # UT.opRot # fromTyped toPushOp # UT.opRot)
@@ -74,36 +74,36 @@ applyTop2 = fromTyped $ function (toTyped f)
 
 apply3 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  ENV (s > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1, t2] '[r1])
+  Env (s > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1, t2] '[r1])
 apply3 = toTyped applyTop
 
 apply3_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  ENV (s > t2 > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1] '[r1])
+  Env (s > t2 > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1] '[r1])
 apply3_2 = toTyped applyTop2
 
 apply4 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
-  ENV
+  Env
     (s > t4 > TLambda '[t1, t2, t3, t4] '[r1])
     (s > TLambda '[t1, t2, t3] '[r1])
 apply4 = toTyped applyTop
 
 apply4_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
-  ENV
+  Env
     (s > t3 > t4 > TLambda '[t1, t2, t3, t4] '[r1])
     (s > TLambda '[t1, t2] '[r1])
 apply4_2 = toTyped applyTop2
 
-freshId :: ENV s (s > TBytes)
-freshId = function (opFromAltStack # opDup # increment # opToAltStack # rt2b)
+freshId :: Env s (s > TBytes)
+freshId = fn (opFromAltStack # opDup # increment # opToAltStack # rt2b)
   where
-    increment :: FN (s > TRuntimeState) (s > TRuntimeState)
+    increment :: Fn (s > TRuntimeState) (s > TRuntimeState)
     increment = rt2i # op1Add # cast
 
-    rt2i :: FN (s > TRuntimeState) (s > TInt)
+    rt2i :: Fn (s > TRuntimeState) (s > TInt)
     rt2i = cast
 
-    rt2b :: FN (s > TRuntimeState) (s > TBytes)
+    rt2b :: Fn (s > TRuntimeState) (s > TBytes)
     rt2b = cast

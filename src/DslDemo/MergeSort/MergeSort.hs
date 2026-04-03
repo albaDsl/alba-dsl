@@ -3,7 +3,7 @@
 module DslDemo.MergeSort.MergeSort where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     StackEntry,
     TBool,
     TInt,
@@ -45,15 +45,15 @@ import Alba.Dsl.V1.Bch2026.Contract.Vector
     splitAtF,
     unconsF,
   )
-import Alba.Dsl.V1.Bch2026.Lang (function, lambda0)
+import Alba.Dsl.V1.Bch2026.Lang (fn, lambda0)
 import Prelude ()
 
-sort :: forall a s. (PackFs a) => FN (s > TVector a) (s > TVector a)
+sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
 sort = packFs @a # opSwap # sortF
 
-sortF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
+sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
 sortF =
-  function
+  fn
     ( begin
         # ns2 "pfs" "vec"
         # (pick "pfs" # pick "vec" # lengthF # nat 1 # opGreaterThan)
@@ -68,9 +68,9 @@ sortF =
         # del "pfs"
     )
 
-halveF :: FN (s > TPackFs a > TVector a) (s > TVector a > TVector a)
+halveF :: Fn (s > TPackFs a > TVector a) (s > TVector a > TVector a)
 halveF =
-  function
+  fn
     ( begin
         # ns2 "pfs" "vec"
         # (pick "pfs" # pick "vec" # lengthF # nat 2 # opDiv)
@@ -79,9 +79,9 @@ halveF =
 
 mergeF ::
   (StackEntry a) =>
-  FN (s > TPackFs a > TVector a > TVector a) (s > TVector a)
+  Fn (s > TPackFs a > TVector a > TVector a) (s > TVector a)
 mergeF =
-  function
+  fn
     ( begin
         # (ns3 "pfs" "xs" "ys" # pick "xs" # pick "ys" # baseCases)
         # opIf
@@ -110,13 +110,13 @@ mergeF =
   where
     uncons' ::
       (StackEntry a) =>
-      FN (s' > TPackFs a > TVector a) (s' > a > TVector a)
+      Fn (s' > TPackFs a > TVector a) (s' > a > TVector a)
     uncons' = unconsF # fromJust # untuple
 
-    toNum :: FN (s' > a) (s' > TInt)
+    toNum :: Fn (s' > a) (s' > TInt)
     toNum = cast # opBin2Num
 
-    baseCases :: FN (s' > TVector a > TVector a) (s' > TVector a > TBool)
+    baseCases :: Fn (s' > TVector a > TVector a) (s' > TVector a > TBool)
     baseCases =
       begin
         # (ns2 "xs" "ys" # pick "xs" # null)
@@ -130,7 +130,7 @@ mergeF =
           )
 
 -- Used from contexts where it is expected to never fail.
-fromJust :: (StackEntry a) => FN (s > TMaybe a) (s > a)
+fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
 fromJust = err # opSwap # fromMaybe'
   where
     err = lambda0 (bytes "E0" # opFalse # opVerify # cast)

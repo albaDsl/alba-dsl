@@ -12,7 +12,7 @@ where
 import Alba.Dsl.V1.Bch2025
   ( Bytes,
     CodeL1,
-    FN,
+    Fn,
     Optimize (None),
     TBool,
     bytes,
@@ -78,5 +78,5 @@ simpleWrapChunkSize = 201 - headerSize - trailerSize
     headerSize = 2 -- OP_PUSHDATA1 <len>
     trailerSize = 2 -- OP_DROP OP_TRUE
 
-simpleWrapProg :: CodeL1 -> FN s (s > TBool)
+simpleWrapProg :: CodeL1 -> Fn s (s > TBool)
 simpleWrapProg chunk = bytes chunk # opDrop # opTrue

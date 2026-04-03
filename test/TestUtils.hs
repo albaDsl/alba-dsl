@@ -5,7 +5,7 @@ module TestUtils where
 
 import Alba.Dsl.V1.Bch2025
   ( CompilationResult (..),
-    FNA,
+    FnA,
     FunctionTable,
     Optimize (..),
     compile,
@@ -119,12 +119,12 @@ dumpLogToFile TestResult {..} =
   ML.dumpLogToFile compilationResult logData "log.html"
 
 evaluateProg ::
-  FNA s '[] s' alt' ->
+  FnA s '[] s' alt' ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProg prog = evaluateProgWithStack prog (S.empty, S.empty)
 
 evaluateProgWithStack ::
-  FNA s '[] s' alt' ->
+  FnA s '[] s' alt' ->
   (VmStack, VmStack) ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProgWithStack prog (s, alt) =

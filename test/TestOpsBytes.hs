@@ -35,7 +35,7 @@ propReverse x =
       s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (b2SeUnsafe x)
   where
-    prog :: FN (s > TBytes) (s > TBytes)
+    prog :: Fn (s > TBytes) (s > TBytes)
     prog = opReverseBytes # opReverseBytes
 
 propReverseSize :: Bytes -> Bool
@@ -44,7 +44,7 @@ propReverseSize x =
       s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (i2SeUnsafe $ fromIntegral (B.length x))
   where
-    prog :: FN (s > TBytes) (s > TNat)
+    prog :: Fn (s > TBytes) (s > TNat)
     prog =
       begin
         # opSize -- b s
@@ -62,7 +62,7 @@ propCatAndSplit (BytesHalf x) =
       s = getStack $ evaluateProgWithStack prog stack
    in s == S.singleton (boolToStackElement True)
   where
-    prog :: FN (s > TBytes) (s > TBool)
+    prog :: Fn (s > TBytes) (s > TBool)
     prog =
       begin -- b
         # opSize -- b s
@@ -73,7 +73,7 @@ propCatAndSplit (BytesHalf x) =
         # opSplit -- b b
         # opEqual -- t
 
-progPushSize :: FN s (s > TBytes)
+progPushSize :: Fn s (s > TBytes)
 progPushSize =
   begin
     # bytes (B.replicate (maxBytes `div` 2) 0)

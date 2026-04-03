@@ -24,7 +24,7 @@ testCheckSig =
       testCase "OpCheckSigVerify" $ test progCheckSigVerify
     ]
 
-test :: (forall s. Bytes -> FN (s > TSig) (s > TBool)) -> Assertion
+test :: (forall s. Bytes -> Fn (s > TSig) (s > TBool)) -> Assertion
 test prog = do
   KeyPair secKey pubKey <-
     fromMaybe (error "Failed to load keys.") <$> withContext genKey
@@ -49,8 +49,8 @@ signTx utxo secKey = do
           marshal ctx (signAll ctx TU.tx utxo.scriptPubKey utxo 0 secKey)
     )
 
-progCheckSig :: Bytes -> FN (s > TSig) (s > TBool)
+progCheckSig :: Bytes -> Fn (s > TSig) (s > TBool)
 progCheckSig pk = pubKeyBytes pk # opCheckSig
 
-progCheckSigVerify :: Bytes -> FN (s > TSig) (s > TBool)
+progCheckSigVerify :: Bytes -> Fn (s > TSig) (s > TBool)
 progCheckSigVerify pk = pubKeyBytes pk # opCheckSigVerify # opTrue

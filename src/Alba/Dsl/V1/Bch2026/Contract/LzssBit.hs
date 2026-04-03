@@ -3,7 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Contract.LzssBit where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     Loop,
     TBool,
     TBytes,
@@ -12,7 +12,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    function,
+    fn,
     nat,
     ns2,
     ns3,
@@ -71,8 +71,8 @@ offBias = 1 -- Bias to add to the offset field.
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
 -- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 92 bytes.\n"
-decompress :: FN (s > TBytes) (s > TBytes)
-decompress = function (bytes [] # swap # pad # opUntil decompressLoop # drop)
+decompress :: Fn (s > TBytes) (s > TBytes)
+decompress = fn (bytes [] # swap # pad # opUntil decompressLoop # drop)
   where
     -- Keeps the bytestring positive (when viewed as a number).
     pad = bytes [0xff, 0x00] # opCat
@@ -95,28 +95,28 @@ decompressLoop =
           # (swap # opFalse)
       )
   where
-    lowBitSet :: FN (s > TBytes) (s > TBool)
+    lowBitSet :: Fn (s > TBytes) (s > TBool)
     lowBitSet = cast # nat 2 # opMod # nat 1 # opNumEqual
 
-    dropLowBit :: FN (s > TBytes) (s > TBytes)
+    dropLowBit :: Fn (s > TBytes) (s > TBytes)
     dropLowBit = cast # nat 1 # opRShiftNum # cast
 
-    getBits8 :: FN (s > TBytes) (s > TBytes > TBytes)
+    getBits8 :: Fn (s > TBytes) (s > TBytes > TBytes)
     getBits8 = nat 1 # opSplit
 
-    getBits16 :: FN (s > TBytes) (s > TBytes > TBytes)
+    getBits16 :: Fn (s > TBytes) (s > TBytes > TBytes)
     getBits16 = nat 2 # opSplit
 
-unpackRef :: FN (s > TBytes) (s > TOff > TLen)
+unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
     # (dup # toSigned # nat lenBits # opRShiftNum # i2n # nat offBias # opAdd)
     # (swap # maskLen # opAnd # opBin2Num # i2n # nat lenBias # opAdd)
   where
-    toSigned :: FN (s > TBytes) (s > TInt)
+    toSigned :: Fn (s > TBytes) (s > TInt)
     toSigned = bytes [0] # opCat # opBin2Num
 
-    i2n :: FN (s > TInt) (s > TNat)
+    i2n :: Fn (s > TInt) (s > TNat)
     i2n = cast
 
     maskLen = bytes [0x0f, 0x00]
@@ -125,7 +125,7 @@ unpackRef =
 -- version of it gave a 23% reduction in cost at a 27% increase in decompressor
 -- size. We have kept the cost inefficient version to prioritize code size and
 -- simplicity.
-copyFromBack :: FN (s > TBytes > TNat > TNat) (s > TBytes) -- bs off len
+copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes) -- bs off len
 copyFromBack =
   begin
     # (ns3 Bs Off Len # roll Bs # opSize # roll Off # opSubUnsafe)
@@ -142,5 +142,5 @@ copyFromBack =
               # (roll I # op1Add # roll End # opFalse)
           )
 
-    index :: FN (s > TBytes > TNat) (s > TBytes)
+    index :: Fn (s > TBytes > TNat) (s > TBytes)
     index = opSplit # nip # nat 1 # opSplit # drop

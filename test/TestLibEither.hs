@@ -28,7 +28,7 @@ testLibEither =
     [ testCase "Basics" $ do isTrue (evaluateProg progBasics)
     ]
 
-progBasics :: FN s (s > TBool)
+progBasics :: Fn s (s > TBool)
 progBasics =
   begin
     # ( begin
@@ -48,7 +48,7 @@ progBasics =
       )
     # opTrue
   where
-    testIsLeftIsRight :: (StackEntry a) => FN (s > a) s
+    testIsLeftIsRight :: (StackEntry a) => Fn (s > a) s
     testIsLeftIsRight =
       begin
         # (dup # left # isLeft # opVerify)
@@ -56,22 +56,22 @@ progBasics =
         # (dup # left # isRight # opNot # opVerify)
         # (right # isRight # opVerify)
 
-    testIfLeft :: (StackEntry a) => FN (s > a) s
+    testIfLeft :: (StackEntry a) => Fn (s > a) s
     testIfLeft =
       begin
         # (dup # r # ifLeft fail drop)
         # (l # ifLeft drop fail)
       where
-        l :: FN (s > a) (s > TEither a TInt8)
+        l :: Fn (s > a) (s > TEither a TInt8)
         l = left
 
-        r :: FN (s > a) (s > TEither TInt8 a)
+        r :: Fn (s > a) (s > TEither TInt8 a)
         r = right
 
-    fail :: FNA s alt s' alt'
+    fail :: FnA s alt s' alt'
     fail = opFalse # opVerify # castStack
 
-    testEither :: (StackEntry a) => FN (s > a) s
+    testEither :: (StackEntry a) => Fn (s > a) s
     testEither =
       begin
         # dup
@@ -80,8 +80,8 @@ progBasics =
         # (l # lambda1 (drop # int 2) # lambda1 (drop # int 1) # rot # either)
         # (opAdd # int 4 # opEqualVerify)
       where
-        l :: FN (s > a) (s > TEither a TInt8)
+        l :: Fn (s > a) (s > TEither a TInt8)
         l = left
 
-        r :: FN (s > a) (s > TEither TInt8 a)
+        r :: Fn (s > a) (s > TEither TInt8 a)
         r = right

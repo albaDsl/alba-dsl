@@ -10,7 +10,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Bytes,
-    FN,
+    Fn,
     StackEntry,
     TBytes,
     TInt,
@@ -56,7 +56,7 @@ instance PackFs TBytes128 where
   sizeConst = fromIntegral packSize
   record = bytes128PackFs
 
-bytes128PackFs :: FN s (s > TPackFs TBytes128)
+bytes128PackFs :: Fn s (s > TPackFs TBytes128)
 bytes128PackFs =
   constant
     ( begin
@@ -75,7 +75,7 @@ packSize = 130
 sizeFieldSize :: Natural
 sizeFieldSize = 2
 
-packTBytes128 :: FN (s > TBytes128) (s > TBytes)
+packTBytes128 :: Fn (s > TBytes128) (s > TBytes)
 packTBytes128 =
   begin
     # ns "b128"
@@ -84,25 +84,25 @@ packTBytes128 =
     # (roll "b128" # toBytes # int 0 # nat (fromIntegral maxPayloadSize))
     # (roll "size" # opSubUnsafe # opNum2Bin # opCat # opCat)
 
-unpackTBytes128 :: FN (s > TBytes) (s > TBytes128)
+unpackTBytes128 :: Fn (s > TBytes) (s > TBytes128)
 unpackTBytes128 =
   begin
     # ns "bytes"
     # name2 "size" "rest" (roll "bytes" # nat 2 # opSplit)
     # (roll "rest" # roll "size" # opBin2Num # i2n # opSplit # drop # cast)
 
-bytes128 :: Bytes -> FN s (s > TBytes128)
+bytes128 :: Bytes -> Fn s (s > TBytes128)
 bytes128 x =
   assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x # cast)
 
-toBytes128 :: FN (s > TBytes) (s > TBytes128)
+toBytes128 :: Fn (s > TBytes) (s > TBytes128)
 toBytes128 =
   begin
     # (dup # opSize # nip # nat (fromIntegral maxPayloadSize))
     # (opLessThanOrEqual # opVerify # cast)
 
-i2n :: FN (s > TInt) (s > TNat)
+i2n :: Fn (s > TInt) (s > TNat)
 i2n = cast
 
-toBytes :: FN (s > TBytes128) (s > TBytes)
+toBytes :: Fn (s > TBytes128) (s > TBytes)
 toBytes = cast

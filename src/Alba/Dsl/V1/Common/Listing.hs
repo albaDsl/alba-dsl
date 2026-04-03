@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Common.Compile
   )
 import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Dsl.V1.Common.LzssBit (compress)
-import Alba.Dsl.V1.Common.Stack (FNA)
+import Alba.Dsl.V1.Common.Stack (FnA)
 import Alba.Vm.Common.OpcodeL2 (CodeL2, OpcodeL2 (..), codeL2ToCodeL1)
 import Data.ByteString qualified as B
 import Data.Maybe (fromMaybe)
@@ -31,7 +31,7 @@ import Data.Sequence qualified as S
 import Data.Text qualified as T
 import Text.Printf (printf)
 
-progSize :: FNA s alt s' alt' -> String
+progSize :: FnA s alt s' alt' -> String
 progSize prog =
   let (code, defs, _) = compileL2WithDetails (defOpts O1) prog
    in printf
@@ -39,10 +39,10 @@ progSize prog =
         (sizeStr code)
         (sizeStr (defs <> code))
 
-progList :: FNA s alt s' alt' -> String
+progList :: FnA s alt s' alt' -> String
 progList prog = listStr (fst $ compileL2 O1 prog)
 
-progFt :: FNA s alt s' alt' -> String
+progFt :: FnA s alt s' alt' -> String
 progFt prog =
   let cr = compile' O1 prog
    in T.unpack $ FTT.generateTable cr.functionTable

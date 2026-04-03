@@ -21,10 +21,10 @@ instance StackEntry TPointJ
 
 -- Byte layout for the PointJ record:
 -- <tag:1><x:33><y:33><z:33>
-makePoint :: FN (s > TInt > TInt > TInt) (s > TPointJ)
-makePoint = function (unname 3 makePoint')
+makePoint :: Fn (s > TInt > TInt > TInt) (s > TPointJ)
+makePoint = fn (unname 3 makePoint')
   where
-    makePoint' :: FN (s > N "x" TInt > N "y" TInt > N "z" TInt) (s > TPointJ)
+    makePoint' :: Fn (s > N "x" TInt > N "y" TInt > N "z" TInt) (s > TPointJ)
     makePoint' =
       begin
         # (int tagNonIdentity # nat tagSize # opNum2Bin)
@@ -33,50 +33,50 @@ makePoint = function (unname 3 makePoint')
         # (roll "z" # nat coordSize # opNum2Bin)
         # assemble
 
-assemble :: FN (s > TBytes > TBytes > TBytes > TBytes) (s > TPointJ)
+assemble :: Fn (s > TBytes > TBytes > TBytes > TBytes) (s > TPointJ)
 assemble = opCat # opCat # opCat # cast
 
-pushPoint :: Integer -> Integer -> Integer -> FN s (s > TPointJ)
+pushPoint :: Integer -> Integer -> Integer -> Fn s (s > TPointJ)
 pushPoint x y z =
   box tagSize tagNonIdentity # boxCoord x # boxCoord y # boxCoord z # assemble
 
-makeIdentity :: FN s (s > TPointJ)
-makeIdentity = function (box 1 tagIdentity # zero # zero # zero # assemble)
+makeIdentity :: Fn s (s > TPointJ)
+makeIdentity = fn (box 1 tagIdentity # zero # zero # zero # assemble)
   where
     zero = boxCoord 0
 
-boxCoord :: Integer -> FN s (s > TBytes)
+boxCoord :: Integer -> Fn s (s > TBytes)
 boxCoord = box coordSize
 
-box :: Natural -> Integer -> FN s (s > TBytes)
+box :: Natural -> Integer -> Fn s (s > TBytes)
 box size i = int i # nat size # opNum2Bin
 
-isIdentity :: FN (s > TPointJ) (s > TBool)
+isIdentity :: Fn (s > TPointJ) (s > TBool)
 isIdentity = getTag # int tagIdentity # opNumEqual
 
-getTag :: FN (s > TPointJ) (s > TInt)
-getTag = function (pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num)
+getTag :: Fn (s > TPointJ) (s > TInt)
+getTag = fn (pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num)
 
-getX :: FN (s > TPointJ) (s > TInt)
-getX = function (pointToBytes # offset # nat coordSize # getField # opBin2Num)
+getX :: Fn (s > TPointJ) (s > TInt)
+getX = fn (pointToBytes # offset # nat coordSize # getField # opBin2Num)
   where
     offset = nat tagSize
 
-getY :: FN (s > TPointJ) (s > TInt)
-getY = function (pointToBytes # offset # nat coordSize # getField # opBin2Num)
+getY :: Fn (s > TPointJ) (s > TInt)
+getY = fn (pointToBytes # offset # nat coordSize # getField # opBin2Num)
   where
     offset = nat (tagSize + coordSize)
 
-getZ :: FN (s > TPointJ) (s > TInt)
-getZ = function (pointToBytes # offset # opSplit # opNip # opBin2Num)
+getZ :: Fn (s > TPointJ) (s > TInt)
+getZ = fn (pointToBytes # offset # opSplit # opNip # opBin2Num)
   where
     offset = nat (tagSize + 2 * coordSize)
 
-getField :: FN (s > TBytes > TNat > TNat) (s > TBytes)
-getField = function (unname 3 getField')
+getField :: Fn (s > TBytes > TNat > TNat) (s > TBytes)
+getField = fn (unname 3 getField')
   where
     getField' ::
-      FN
+      Fn
         (s > N "bytes" TBytes > N "offset" TNat > N "size" TNat)
         (s > TBytes)
     getField' =
@@ -87,7 +87,7 @@ getField = function (unname 3 getField')
         # opSplit
         # opDrop
 
-pointToBytes :: FN (s > TPointJ) (s > TBytes)
+pointToBytes :: Fn (s > TPointJ) (s > TBytes)
 pointToBytes = cast
 
 tagIdentity :: Integer

@@ -4,9 +4,9 @@ module Contract (PermutationChallenge, contract) where
 
 import Alba.Dsl.V1.Bch2026
   ( Base,
-    CFN,
-    FN,
-    FNC,
+    CFn,
+    Fn,
+    FnC,
     LibData (..),
     TBytes,
     THash256,
@@ -45,7 +45,7 @@ contract = MkContract withdraw
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize withdraw
 -- "26 opcodes, 137 bytes. Including function table: 41 opcodes, 201 bytes.\n"
-withdraw :: CFN (Base > TBytes > TBytes)
+withdraw :: CFn (Base > TBytes > TBytes)
 withdraw =
   begin
     # (opBin2Num # int 0 # opNumEqualVerify)
@@ -55,13 +55,13 @@ withdraw =
   where
     dcNumUtxos = fromIntegral Dc.numUtxos
 
-    target :: FN s (s > TVector TInt8)
+    target :: Fn s (s > TVector TInt8)
     target = bytes "     Saabeeeeeeehhhhllllorsssssssty" # b2v
 
-    b2v :: FN (s > TBytes) (s > TVector TInt8)
+    b2v :: Fn (s > TBytes) (s > TVector TInt8)
     b2v = cast
 
-loadDecompressionLib :: Natural -> FNC
+loadDecompressionLib :: Natural -> FnC
 loadDecompressionLib startInput =
   begin
     # (bytes [254] # nat startInput # nat numUtxos)
@@ -70,10 +70,10 @@ loadDecompressionLib startInput =
     numUtxos = fromIntegral Dc.numUtxos
     size = fromIntegral Dc.lib.deploySize
 
-b2h :: FN (s > TBytes) (s > THash256)
+b2h :: Fn (s > TBytes) (s > THash256)
 b2h = cast
 
-loadVectorLib :: Natural -> FNC
+loadVectorLib :: Natural -> FnC
 loadVectorLib startInput =
   begin
     # (bytes [255] # nat startInput # nat numUtxos)

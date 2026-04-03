@@ -4,7 +4,7 @@ module Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc where
 
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (..),
-    FN,
+    Fn,
     LibData (..),
     Optimize (O1),
     StackEntry,
@@ -56,7 +56,7 @@ deployTx = libraryToTx lib.deployCode simpleWrapChunkSize simpleWrap
 numUtxos :: Word32
 numUtxos = fromIntegral $ Prelude.length deployTx.outputs
 
-showCase :: FN s s
+showCase :: Fn s s
 showCase =
   runEnv
     ( begin
@@ -72,26 +72,26 @@ showCase =
         # (int8Vector # MS.sort # drop)
     )
   where
-    int8Vector :: FN s (s > TVector TInt8)
+    int8Vector :: Fn s (s > TVector TInt8)
     int8Vector = int8 0 # int8 1 # V.empty # V.cons # V.cons
 
-    addInt8 :: FN (s > TInt8 > TInt8) (s > TInt8)
+    addInt8 :: Fn (s > TInt8 > TInt8) (s > TInt8)
     addInt8 = fixup # opAdd # toInt8
 
-    int8LessThan :: FN (s > TInt8 > TInt8) (s > TBool)
+    int8LessThan :: Fn (s > TInt8 > TInt8) (s > TBool)
     int8LessThan = fixup # opLessThan
 
-    fixup :: FN (s > TInt8 > TInt8) (s > TInt > TInt)
+    fixup :: Fn (s > TInt8 > TInt8) (s > TInt > TInt)
     fixup = castStack
 
-sort :: forall a s. (PackFs a) => FN (s > TVector a) (s > TVector a)
+sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
 sort = packFs @a # opSwap # sortF
 
-sortF :: (StackEntry a) => FN (s > TPackFs a > TVector a) (s > TVector a)
+sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
 sortF = invokeExt lib "DslDemo.MergeSort.MergeSort" "sortF"
 
-length :: forall a s. (PackFs a) => FN (s > TVector a) (s > TNat)
+length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
 length = packFs @a # swap # lengthF
 
-lengthF :: FN (s > TPackFs a > TVector a) (s > TNat)
+lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
 lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.Vector" "lengthF"

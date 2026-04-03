@@ -6,13 +6,13 @@ module Alba.Dsl.V1.Bch2026.Contract.Applicative
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( FN,
+  ( Fn,
     StackEntry,
     TLambda,
     begin,
     bytes,
     cast,
-    function,
+    fn,
     invoke2,
     lambda0,
     op2Drop,
@@ -36,9 +36,9 @@ import Prelude ()
 
 liftA2Maybe ::
   (StackEntry a, StackEntry b) =>
-  FN (s > TLambda '[a, b] '[c] > TMaybe a > TMaybe b) (s > TMaybe c)
+  Fn (s > TLambda '[a, b] '[c] > TMaybe a > TMaybe b) (s > TMaybe c)
 liftA2Maybe =
-  function
+  fn
     ( begin
         # (op2Dup # isJust # swap # isJust # opBoolAnd)
         # opIf
@@ -47,7 +47,7 @@ liftA2Maybe =
     )
 
 -- Used from contexts where it is expected to never fail.
-fromJust :: (StackEntry a) => FN (s > TMaybe a) (s > a)
+fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
 fromJust = err # swap # fromMaybe'
   where
     err = lambda0 (bytes "E0" # opFalse # opVerify # cast)

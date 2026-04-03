@@ -16,10 +16,10 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSha1,
     opSha256,
   )
-import Alba.Dsl.V1.Common.StackUntyped (FNU)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
 
-turtleOpCryptography :: FNU
+turtleOpCryptography :: FnU
 turtleOpCryptography =
   condOpLeaf
     [ (is 0xa6, opRipemd160),

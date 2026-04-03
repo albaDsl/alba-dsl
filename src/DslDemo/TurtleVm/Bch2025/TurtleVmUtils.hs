@@ -13,8 +13,8 @@ where
 
 import Alba.Dsl.V1.Bch2025
   ( Bytes,
-    FN,
-    FNA,
+    Fn,
+    FnA,
     S (S),
     TBool,
     TBytes,
@@ -33,28 +33,28 @@ import Alba.Dsl.V1.Bch2025
     type (>),
   )
 
-vmError :: Bytes -> FNA s alt s' alt'
+vmError :: Bytes -> FnA s alt s' alt'
 vmError msg = bytes msg # opFalse # opVerify # castStack
 
-castStack :: FNA s alt s' alt'
+castStack :: FnA s alt s' alt'
 castStack (S c fs) = let state = S c fs in state
 
 -- Convert a positive value [0, 255] represented as a single byte to a positive
 -- CashVm integer.
-toSigned :: FN (s > TBytes) (s > TInt)
+toSigned :: Fn (s > TBytes) (s > TInt)
 toSigned = bytes [0] # opCat # opBin2Num
 
-unsupportedOp :: FN s (s > TBytes)
+unsupportedOp :: Fn s (s > TBytes)
 unsupportedOp = vmError "E1"
 
-inRange :: Integer -> Integer -> FN (s > TInt) (s > TBool)
+inRange :: Integer -> Integer -> Fn (s > TInt) (s > TBool)
 inRange x y = int x # int y # opWithin
 
-isSingleByteOp :: FN (s > TBytes) (s > TBytes > TBool)
+isSingleByteOp :: Fn (s > TBytes) (s > TBytes > TBool)
 isSingleByteOp = opSize # nat 1 # opNumEqual
 
-isConditionalOp :: FN (s > TBytes) (s > TBool)
+isConditionalOp :: Fn (s > TBytes) (s > TBool)
 isConditionalOp = toSigned # int 0x63 # int 0x69 # opWithin
 
-isOpDataOp :: FN (s > TBytes) (s > TBool)
+isOpDataOp :: Fn (s > TBytes) (s > TBool)
 isOpDataOp = toSigned # inRange 0x01 0x4c

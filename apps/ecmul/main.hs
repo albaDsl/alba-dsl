@@ -22,7 +22,7 @@ ecMultiply code =
       dumpMetrics state
     Left err -> error ("err: " <> show err)
 
-progMul :: Natural -> FN s (s > TInt)
+progMul :: Natural -> Fn s (s > TInt)
 progMul scalar = nat scalar # g # ecMul # getX
 
 vmEval :: CodeL1 -> Either ScriptError VmState
