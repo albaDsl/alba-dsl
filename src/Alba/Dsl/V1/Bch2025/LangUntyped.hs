@@ -10,16 +10,17 @@ module Alba.Dsl.V1.Bch2025.LangUntyped
 where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opDup, opIf)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, integerToDataOp)
+import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp, integerToDataOp)
+import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
 import Alba.Dsl.V1.Common.Lang ((#))
-import Alba.Dsl.V1.Common.StackUntyped (FnU, SU (SU))
+import Alba.Dsl.V1.Common.StackUntyped (FnU, SU)
 import Alba.Vm.Common.BasicTypes (Bytes)
 
 int :: Integer -> FnU
-int n (SU c fs) = SU (aop c (integerToDataOp (fromIntegral n))) fs
+int n = aop (integerToDataOp n)
 
 bytes :: Bytes -> FnU
-bytes x (SU c fs) = SU (aop c (bytesToDataOp x)) fs
+bytes x = aop (bytesToDataOp x)
 
 cond :: [(SU -> SU, SU -> SU)] -> FnU -> FnU
 cond [] def st = def st

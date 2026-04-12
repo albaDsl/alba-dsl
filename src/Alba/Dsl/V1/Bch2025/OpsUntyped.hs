@@ -2,366 +2,353 @@
 
 module Alba.Dsl.V1.Bch2025.OpsUntyped where
 
-import Alba.Dsl.V1.Common.CompilerUtils (aop)
-import Alba.Dsl.V1.Common.StackUntyped (FnU, SU (SU))
+import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
+import Alba.Dsl.V1.Common.StackUntyped
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
+import Control.Arrow ((>>>))
 
 opTrue :: FnU
-opTrue (SU c fs) = SU (aop c OP_1) fs
+opTrue = aop OP_1
 
 opFalse :: FnU
-opFalse (SU c fs) = SU (aop c OP_0) fs
+opFalse = aop OP_0
 
 op0 :: FnU
-op0 (SU c fs) = SU (aop c OP_0) fs
+op0 = aop OP_0
 
 op1 :: FnU
-op1 (SU c fs) = SU (aop c OP_1) fs
+op1 = aop OP_1
 
 op2 :: FnU
-op2 (SU c fs) = SU (aop c OP_2) fs
+op2 = aop OP_2
 
 op3 :: FnU
-op3 (SU c fs) = SU (aop c OP_3) fs
+op3 = aop OP_3
 
 op4 :: FnU
-op4 (SU c fs) = SU (aop c OP_4) fs
+op4 = aop OP_4
 
 op5 :: FnU
-op5 (SU c fs) = SU (aop c OP_5) fs
+op5 = aop OP_5
 
 op6 :: FnU
-op6 (SU c fs) = SU (aop c OP_6) fs
+op6 = aop OP_6
 
 op7 :: FnU
-op7 (SU c fs) = SU (aop c OP_7) fs
+op7 = aop OP_7
 
 op8 :: FnU
-op8 (SU c fs) = SU (aop c OP_8) fs
+op8 = aop OP_8
 
 op9 :: FnU
-op9 (SU c fs) = SU (aop c OP_9) fs
+op9 = aop OP_9
 
 op10 :: FnU
-op10 (SU c fs) = SU (aop c OP_10) fs
+op10 = aop OP_10
 
 op11 :: FnU
-op11 (SU c fs) = SU (aop c OP_11) fs
+op11 = aop OP_11
 
 op12 :: FnU
-op12 (SU c fs) = SU (aop c OP_12) fs
+op12 = aop OP_12
 
 op13 :: FnU
-op13 (SU c fs) = SU (aop c OP_13) fs
+op13 = aop OP_13
 
 op14 :: FnU
-op14 (SU c fs) = SU (aop c OP_14) fs
+op14 = aop OP_14
 
 op15 :: FnU
-op15 (SU c fs) = SU (aop c OP_15) fs
+op15 = aop OP_15
 
 op16 :: FnU
-op16 (SU c fs) = SU (aop c OP_16) fs
+op16 = aop OP_16
 
 op1Negate :: FnU
-op1Negate (SU c fs) = SU (aop c OP_1NEGATE) fs
+op1Negate = aop OP_1NEGATE
 
 opNop :: FnU
-opNop (SU c fs) = SU (aop c OP_NOP) fs
+opNop = aop OP_NOP
 
 opIf :: FnU -> FnU -> FnU
-opIf ifOps elseOps (SU c fs) =
-  let (SU c' fs') = ifOps (SU (aop c OP_IF) fs)
-      (SU c'' fs'') = elseOps (SU (aop c' OP_ELSE) fs')
-   in SU (aop c'' OP_ENDIF) fs''
+opIf ifOps elseOps =
+  aop OP_IF >>> ifOps >>> aop OP_ELSE >>> elseOps >>> aop OP_ENDIF
 
 -- Version of opIf without the else clause.
 opWhen :: FnU -> FnU
-opWhen body (SU c fs) =
-  let (SU c' fs') = body (SU (aop c OP_IF) fs)
-   in SU (aop c' OP_ENDIF) fs'
+opWhen body = aop OP_IF >>> body >>> aop OP_ENDIF
 
 opNotIf :: FnU -> FnU -> FnU
-opNotIf ifOps elseOps (SU c fs) =
-  let (SU c' fs') = ifOps (SU (aop c OP_NOTIF) fs)
-      (SU c'' fs'') = elseOps (SU (aop c' OP_ELSE) fs')
-   in SU (aop c'' OP_ENDIF) fs''
+opNotIf ifOps elseOps =
+  aop OP_NOTIF >>> ifOps >>> aop OP_ELSE >>> elseOps >>> aop OP_ENDIF
 
 -- Version of opNotIf without the else clause.
 opUnless :: FnU -> FnU
-opUnless body (SU c fs) =
-  let (SU c' fs') = body (SU (aop c OP_NOTIF) fs)
-   in SU (aop c' OP_ENDIF) fs'
+opUnless body = aop OP_NOTIF >>> body >>> aop OP_ENDIF
 
 opVerify :: FnU
-opVerify (SU c fs) = SU (aop c OP_VERIFY) fs
+opVerify = aop OP_VERIFY
 
 opReturn :: FnU
-opReturn (SU c fs) = SU (aop c OP_RETURN) fs
+opReturn = aop OP_RETURN
 
 opToAltStack :: FnU
-opToAltStack (SU c fs) = SU (aop c OP_TOALTSTACK) fs
+opToAltStack = aop OP_TOALTSTACK
 
 opFromAltStack :: FnU
-opFromAltStack (SU c fs) = SU (aop c OP_FROMALTSTACK) fs
+opFromAltStack = aop OP_FROMALTSTACK
 
 opDepth :: FnU
-opDepth (SU c fs) = SU (aop c OP_DEPTH) fs
+opDepth = aop OP_DEPTH
 
 opDrop :: FnU
-opDrop (SU c fs) = SU (aop c OP_DROP) fs
+opDrop = aop OP_DROP
 
 opDup :: FnU
-opDup (SU c fs) = SU (aop c OP_DUP) fs
+opDup = aop OP_DUP
 
 opNip :: FnU
-opNip (SU c fs) = SU (aop c OP_NIP) fs
+opNip = aop OP_NIP
 
 opOver :: FnU
-opOver (SU c fs) = SU (aop c OP_OVER) fs
+opOver = aop OP_OVER
 
 opPick :: FnU
-opPick (SU c fs) = SU (aop c OP_PICK) fs
+opPick = aop OP_PICK
 
 opRoll :: FnU
-opRoll (SU c fs) = SU (aop c OP_ROLL) fs
+opRoll = aop OP_ROLL
 
 opRot :: FnU
-opRot (SU c fs) = SU (aop c OP_ROT) fs
+opRot = aop OP_ROT
 
 opSwap :: FnU
-opSwap (SU c fs) = SU (aop c OP_SWAP) fs
+opSwap = aop OP_SWAP
 
 opTuck :: FnU
-opTuck (SU c fs) = SU (aop c OP_TUCK) fs
+opTuck = aop OP_TUCK
 
 op2Drop :: FnU
-op2Drop (SU c fs) = SU (aop c OP_2DROP) fs
+op2Drop = aop OP_2DROP
 
 op2Dup :: FnU
-op2Dup (SU c fs) = SU (aop c OP_2DUP) fs
+op2Dup = aop OP_2DUP
 
 op3Dup :: FnU
-op3Dup (SU c fs) = SU (aop c OP_3DUP) fs
+op3Dup = aop OP_3DUP
 
 op2Over :: FnU
-op2Over (SU c fs) = SU (aop c OP_2OVER) fs
+op2Over = aop OP_2OVER
 
 op2Rot :: FnU
-op2Rot (SU c fs) = SU (aop c OP_2ROT) fs
+op2Rot = aop OP_2ROT
 
 op2Swap :: FnU
-op2Swap (SU c fs) = SU (aop c OP_2SWAP) fs
+op2Swap = aop OP_2SWAP
 
 opIfDup :: FnU
-opIfDup (SU c fs) = SU (aop c OP_IFDUP) fs
+opIfDup = aop OP_IFDUP
 
 opCat :: FnU
-opCat (SU c fs) = SU (aop c OP_CAT) fs
+opCat = aop OP_CAT
 
 opSplit :: FnU
-opSplit (SU c fs) = SU (aop c OP_SPLIT) fs
+opSplit = aop OP_SPLIT
 
 opNum2Bin :: FnU
-opNum2Bin (SU c fs) = SU (aop c OP_NUM2BIN) fs
+opNum2Bin = aop OP_NUM2BIN
 
 opBin2Num :: FnU
-opBin2Num (SU c fs) = SU (aop c OP_BIN2NUM) fs
+opBin2Num = aop OP_BIN2NUM
 
 opSize :: FnU
-opSize (SU c fs) = SU (aop c OP_SIZE) fs
+opSize = aop OP_SIZE
 
 opAnd :: FnU
-opAnd (SU c fs) = SU (aop c OP_AND) fs
+opAnd = aop OP_AND
 
 opOr :: FnU
-opOr (SU c fs) = SU (aop c OP_OR) fs
+opOr = aop OP_OR
 
 opXor :: FnU
-opXor (SU c fs) = SU (aop c OP_XOR) fs
+opXor = aop OP_XOR
 
 opReverseBytes :: FnU
-opReverseBytes (SU c fs) = SU (aop c OP_REVERSEBYTES) fs
+opReverseBytes = aop OP_REVERSEBYTES
 
 opEqual :: FnU
-opEqual (SU c fs) = SU (aop c OP_EQUAL) fs
+opEqual = aop OP_EQUAL
 
 opEqualVerify :: FnU
-opEqualVerify (SU c fs) = SU (aop c OP_EQUALVERIFY) fs
+opEqualVerify = aop OP_EQUALVERIFY
 
 op1Add :: FnU
-op1Add (SU c fs) = SU (aop c OP_1ADD) fs
+op1Add = aop OP_1ADD
 
 op1Sub :: FnU
-op1Sub (SU c fs) = SU (aop c OP_1SUB) fs
-
-op1SubUnsafe :: FnU
-op1SubUnsafe (SU c fs) = SU (aop c OP_1SUB) fs
+op1Sub = aop OP_1SUB
 
 opNegate :: FnU
-opNegate (SU c fs) = SU (aop c OP_NEGATE) fs
+opNegate = aop OP_NEGATE
 
 opAbs :: FnU
-opAbs (SU c fs) = SU (aop c OP_ABS) fs
+opAbs = aop OP_ABS
 
 opNot :: FnU
-opNot (SU c fs) = SU (aop c OP_NOT) fs
+opNot = aop OP_NOT
 
 op0NotEqual :: FnU
-op0NotEqual (SU c fs) = SU (aop c OP_0NOTEQUAL) fs
+op0NotEqual = aop OP_0NOTEQUAL
 
 opAdd :: FnU
-opAdd (SU c fs) = SU (aop c OP_ADD) fs
+opAdd = aop OP_ADD
 
 opSub :: FnU
-opSub (SU c fs) = SU (aop c OP_SUB) fs
-
-opSubUnsafe :: FnU
-opSubUnsafe (SU c fs) = SU (aop c OP_SUB) fs
+opSub = aop OP_SUB
 
 opMul :: FnU
-opMul (SU c fs) = SU (aop c OP_MUL) fs
+opMul = aop OP_MUL
 
 opDiv :: FnU
-opDiv (SU c fs) = SU (aop c OP_DIV) fs
+opDiv = aop OP_DIV
 
 opMod :: FnU
-opMod (SU c fs) = SU (aop c OP_MOD) fs
+opMod = aop OP_MOD
 
 opBoolAnd :: FnU
-opBoolAnd (SU c fs) = SU (aop c OP_BOOLAND) fs
+opBoolAnd = aop OP_BOOLAND
 
 opBoolOr :: FnU
-opBoolOr (SU c fs) = SU (aop c OP_BOOLOR) fs
+opBoolOr = aop OP_BOOLOR
 
 opNumEqual :: FnU
-opNumEqual (SU c fs) = SU (aop c OP_NUMEQUAL) fs
+opNumEqual = aop OP_NUMEQUAL
 
 opNumEqualVerify :: FnU
-opNumEqualVerify (SU c fs) = SU (aop c OP_NUMEQUALVERIFY) fs
+opNumEqualVerify = aop OP_NUMEQUALVERIFY
 
 opNumNotEqual :: FnU
-opNumNotEqual (SU c fs) = SU (aop c OP_NUMNOTEQUAL) fs
+opNumNotEqual = aop OP_NUMNOTEQUAL
 
 opLessThan :: FnU
-opLessThan (SU c fs) = SU (aop c OP_LESSTHAN) fs
+opLessThan = aop OP_LESSTHAN
 
 opGreaterThan :: FnU
-opGreaterThan (SU c fs) = SU (aop c OP_GREATERTHAN) fs
+opGreaterThan = aop OP_GREATERTHAN
 
 opLessThanOrEqual :: FnU
-opLessThanOrEqual (SU c fs) = SU (aop c OP_LESSTHANOREQUAL) fs
+opLessThanOrEqual = aop OP_LESSTHANOREQUAL
 
 opGreaterThanOrEqual :: FnU
-opGreaterThanOrEqual (SU c fs) = SU (aop c OP_GREATERTHANOREQUAL) fs
+opGreaterThanOrEqual = aop OP_GREATERTHANOREQUAL
 
 opMin :: FnU
-opMin (SU c fs) = SU (aop c OP_MIN) fs
+opMin = aop OP_MIN
 
 opMax :: FnU
-opMax (SU c fs) = SU (aop c OP_MAX) fs
+opMax = aop OP_MAX
 
 opWithin :: FnU
-opWithin (SU c fs) = SU (aop c OP_WITHIN) fs
+opWithin = aop OP_WITHIN
 
 opRipemd160 :: FnU
-opRipemd160 (SU c fs) = SU (aop c OP_RIPEMD160) fs
+opRipemd160 = aop OP_RIPEMD160
 
 opSha1 :: FnU
-opSha1 (SU c fs) = SU (aop c OP_SHA1) fs
+opSha1 = aop OP_SHA1
 
 opSha256 :: FnU
-opSha256 (SU c fs) = SU (aop c OP_SHA256) fs
+opSha256 = aop OP_SHA256
 
 opHash160 :: FnU
-opHash160 (SU c fs) = SU (aop c OP_HASH160) fs
+opHash160 = aop OP_HASH160
 
 opHash256 :: FnU
-opHash256 (SU c fs) = SU (aop c OP_HASH256) fs
+opHash256 = aop OP_HASH256
 
 opCodeSeparator :: FnU
-opCodeSeparator (SU c fs) = SU (aop c OP_CODESEPARATOR) fs
+opCodeSeparator = aop OP_CODESEPARATOR
 
 opCheckSig :: FnU
-opCheckSig (SU c fs) = SU (aop c OP_CHECKSIG) fs
+opCheckSig = aop OP_CHECKSIG
 
 opCheckSigVerify :: FnU
-opCheckSigVerify (SU c fs) = SU (aop c OP_CHECKSIGVERIFY) fs
+opCheckSigVerify = aop OP_CHECKSIGVERIFY
 
 opCheckMultiSig :: FnU
-opCheckMultiSig (SU c fs) = SU (aop c OP_CHECKMULTISIG) fs
+opCheckMultiSig = aop OP_CHECKMULTISIG
 
 opCheckMultiSigVerify :: FnU
-opCheckMultiSigVerify (SU c fs) = SU (aop c OP_CHECKMULTISIGVERIFY) fs
+opCheckMultiSigVerify = aop OP_CHECKMULTISIGVERIFY
 
 opCheckDataSig :: FnU
-opCheckDataSig (SU c fs) = SU (aop c OP_CHECKDATASIG) fs
+opCheckDataSig = aop OP_CHECKDATASIG
 
 opCheckDataSigVerify :: FnU
-opCheckDataSigVerify (SU c fs) = SU (aop c OP_CHECKDATASIGVERIFY) fs
+opCheckDataSigVerify = aop OP_CHECKDATASIGVERIFY
 
 opCheckLockTimeVerify :: FnU
-opCheckLockTimeVerify (SU c fs) = SU (aop c OP_CHECKLOCKTIMEVERIFY) fs
+opCheckLockTimeVerify = aop OP_CHECKLOCKTIMEVERIFY
 
 opCheckSequenceVerify :: FnU
-opCheckSequenceVerify (SU c fs) = SU (aop c OP_CHECKSEQUENCEVERIFY) fs
+opCheckSequenceVerify = aop OP_CHECKSEQUENCEVERIFY
 
 opInputIndex :: FnU
-opInputIndex (SU c fs) = SU (aop c OP_INPUTINDEX) fs
+opInputIndex = aop OP_INPUTINDEX
 
 opActiveBytecode :: FnU
-opActiveBytecode (SU c fs) = SU (aop c OP_ACTIVEBYTECODE) fs
+opActiveBytecode = aop OP_ACTIVEBYTECODE
 
 opTxVersion :: FnU
-opTxVersion (SU c fs) = SU (aop c OP_TXVERSION) fs
+opTxVersion = aop OP_TXVERSION
 
 opTxInputCount :: FnU
-opTxInputCount (SU c fs) = SU (aop c OP_TXINPUTCOUNT) fs
+opTxInputCount = aop OP_TXINPUTCOUNT
 
 opTxOutputCount :: FnU
-opTxOutputCount (SU c fs) = SU (aop c OP_TXOUTPUTCOUNT) fs
+opTxOutputCount = aop OP_TXOUTPUTCOUNT
 
 opTxLockTime :: FnU
-opTxLockTime (SU c fs) = SU (aop c OP_TXLOCKTIME) fs
+opTxLockTime = aop OP_TXLOCKTIME
 
 opUtxoValue :: FnU
-opUtxoValue (SU c fs) = SU (aop c OP_UTXOVALUE) fs
+opUtxoValue = aop OP_UTXOVALUE
 
 opUtxoBytecode :: FnU
-opUtxoBytecode (SU c fs) = SU (aop c OP_UTXOBYTECODE) fs
+opUtxoBytecode = aop OP_UTXOBYTECODE
 
 opUtxoTokenCategory :: FnU
-opUtxoTokenCategory (SU c fs) = SU (aop c OP_UTXOTOKENCATEGORY) fs
+opUtxoTokenCategory = aop OP_UTXOTOKENCATEGORY
 
 opUtxoTokenCommitment :: FnU
-opUtxoTokenCommitment (SU c fs) = SU (aop c OP_UTXOTOKENCOMMITMENT) fs
+opUtxoTokenCommitment = aop OP_UTXOTOKENCOMMITMENT
 
 opUtxoTokenAmount :: FnU
-opUtxoTokenAmount (SU c fs) = SU (aop c OP_UTXOTOKENAMOUNT) fs
+opUtxoTokenAmount = aop OP_UTXOTOKENAMOUNT
 
 opOutPointTxHash :: FnU
-opOutPointTxHash (SU c fs) = SU (aop c OP_OUTPOINTTXHASH) fs
+opOutPointTxHash = aop OP_OUTPOINTTXHASH
 
 opOutPointIndex :: FnU
-opOutPointIndex (SU c fs) = SU (aop c OP_OUTPOINTINDEX) fs
+opOutPointIndex = aop OP_OUTPOINTINDEX
 
 opInputBytecode :: FnU
-opInputBytecode (SU c fs) = SU (aop c OP_INPUTBYTECODE) fs
+opInputBytecode = aop OP_INPUTBYTECODE
 
 opInputSequenceNumber :: FnU
-opInputSequenceNumber (SU c fs) = SU (aop c OP_INPUTSEQUENCENUMBER) fs
+opInputSequenceNumber = aop OP_INPUTSEQUENCENUMBER
 
 opOutputValue :: FnU
-opOutputValue (SU c fs) = SU (aop c OP_OUTPUTVALUE) fs
+opOutputValue = aop OP_OUTPUTVALUE
 
 opOutputBytecode :: FnU
-opOutputBytecode (SU c fs) = SU (aop c OP_OUTPUTBYTECODE) fs
+opOutputBytecode = aop OP_OUTPUTBYTECODE
 
 opOutputTokenCategory :: FnU
-opOutputTokenCategory (SU c fs) = SU (aop c OP_OUTPUTTOKENCATEGORY) fs
+opOutputTokenCategory = aop OP_OUTPUTTOKENCATEGORY
 
 opOutputTokenCommitment :: FnU
-opOutputTokenCommitment (SU c fs) = SU (aop c OP_OUTPUTTOKENCOMMITMENT) fs
+opOutputTokenCommitment = aop OP_OUTPUTTOKENCOMMITMENT
 
 opOutputTokenAmount :: FnU
-opOutputTokenAmount (SU c fs) = SU (aop c OP_OUTPUTTOKENAMOUNT) fs
+opOutputTokenAmount = aop OP_OUTPUTTOKENAMOUNT

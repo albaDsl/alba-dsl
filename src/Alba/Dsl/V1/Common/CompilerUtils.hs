@@ -10,7 +10,8 @@ module Alba.Dsl.V1.Common.CompilerUtils
   )
 where
 
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, OpcodeL3 (..))
+import Alba.Dsl.V1.Common.OpcodeL3 (OpcodeL3 (..))
+import Alba.Dsl.V1.Common.Stack (S (..))
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Alba.Vm.Common.OpcodeL1 qualified as L1
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
@@ -20,18 +21,18 @@ import Data.Sequence qualified as S
 import Data.Word (Word16, Word32, Word8)
 
 -- Add op. Adds an operation to the end of the code.
-aop :: CodeL3 -> OpcodeL2 -> CodeL3
-aop ops op = ops S.:|> Opcode op
+aop :: OpcodeL2 -> S s alt -> S s' alt'
+aop op st = st {c = st.c S.:|> Opcode op}
 
-aop' :: CodeL3 -> OpcodeL3 -> CodeL3
-aop' ops op = ops S.:|> op
+aop' :: OpcodeL3 -> S s alt -> S s' alt'
+aop' op st = st {c = st.c S.:|> op}
 
 -- Add ops. Adds several operations to the end of the code.
-aops :: CodeL3 -> [OpcodeL2] -> CodeL3
-aops code ops = code <> (Opcode <$> S.fromList ops)
+aops :: [OpcodeL2] -> S s alt -> S s' alt'
+aops ops st = st {c = st.c <> (Opcode <$> S.fromList ops)}
 
-aops' :: CodeL3 -> [OpcodeL3] -> CodeL3
-aops' code ops = code <> S.fromList ops
+aops' :: [OpcodeL3] -> S s alt -> S s' alt'
+aops' ops st = st {c = st.c <> (S.fromList ops)}
 
 integerToDataOp :: Integer -> OpcodeL2
 integerToDataOp n = bytesToDataOp (integerToBytes n)

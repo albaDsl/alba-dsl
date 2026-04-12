@@ -7,7 +7,7 @@ module DslDemo.TurtleVm.Bch2025.MiniTurtleVm101
   )
 where
 
-import Alba.Dsl.V1.Bch2025 (Fn, FnA, S (..), type (>))
+import Alba.Dsl.V1.Bch2025 (Fn, FnA, type (>))
 import Alba.Dsl.V1.Bch2025 qualified as TY
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped (op1, op1Add, opDrop, opIf, opMul)
@@ -52,7 +52,7 @@ ft :: TY.FnA s alt s' alt' -> FnU
 ft = fromTyped
 
 turtleOpDefine :: Fn (s > TY.TBytes) s
-turtleOpDefine (S c fs) = S (aop c OP_DEFINE) fs
+turtleOpDefine = aop OP_DEFINE
 
 turtleOpInvoke :: FnA s alt s' alt' -> FnA s alt s' alt'
-turtleOpInvoke _prog (S c fs) = S (aop c OP_INVOKE) fs
+turtleOpInvoke _prog = aop OP_INVOKE

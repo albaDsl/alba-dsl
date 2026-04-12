@@ -182,7 +182,7 @@ progOpActiveBytecode :: Fn s s
 progOpActiveBytecode = insertOpCode OP_ACTIVEBYTECODE
 
 insertOpCode :: OpcodeL2 -> Fn s s
-insertOpCode op (S c fs) = S (aop c op) fs
+insertOpCode op = aop op
 
 evaluateOnTurtleVm ::
   FnA s '[] s' alt' ->

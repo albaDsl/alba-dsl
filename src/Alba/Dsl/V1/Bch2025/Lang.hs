@@ -21,7 +21,7 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((#))
 import Alba.Dsl.V1.Common.Stack
   ( Fn,
-    S (S),
+    S,
     TBool,
     TBytes,
     TInt,
@@ -33,34 +33,34 @@ import Alba.Vm.Common.BasicTypes (Bytes)
 import Numeric.Natural (Natural)
 
 int :: Integer -> Fn s (s > TInt)
-int n (S c fs) = S (aop c (integerToDataOp n)) fs
+int n = aop (integerToDataOp n)
 
 -- Push integer value. Which specific type (of class StackInt) it gets is given
 -- by the context.
 int' :: (StackInt x1) => Integer -> Fn s (s > x1)
-int' n (S c fs) = S (aop c (integerToDataOp n)) fs
+int' n = aop (integerToDataOp n)
 
 nat :: Natural -> Fn s (s > TNat)
-nat n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
+nat n = aop (integerToDataOp (fromIntegral n))
 
 -- Push nat value. Which specific type (of class StackNat) it gets is given by
 -- the context.
 nat' :: (StackNat x1) => Natural -> Fn s (s > x1)
-nat' n (S c fs) = S (aop c (integerToDataOp (fromIntegral n))) fs
+nat' n = aop (integerToDataOp (fromIntegral n))
 
 bytes :: Bytes -> Fn s (s > TBytes)
-bytes x (S c fs) = S (aop c (bytesToDataOp x)) fs
+bytes x = aop (bytesToDataOp x)
 
 -- Push bytes value. Which specific type (of class StackBytes) it gets is given
 -- by the context.
 bytes' :: (StackBytes x1) => Bytes -> Fn s (s > x1)
-bytes' x (S c fs) = S (aop c (bytesToDataOp x)) fs
+bytes' x = aop (bytesToDataOp x)
 
 sigBytes :: Bytes -> Fn s (s > TSig)
-sigBytes x (S c fs) = bytes' x (S c fs)
+sigBytes x = aop (bytesToDataOp x)
 
 pubKeyBytes :: Bytes -> Fn s (s > TPubKey)
-pubKeyBytes x (S c fs) = bytes' x (S c fs)
+pubKeyBytes x = aop (bytesToDataOp x)
 
 case' ::
   forall s t alt s' alt'.

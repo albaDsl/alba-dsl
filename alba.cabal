@@ -134,6 +134,7 @@ library
       Alba.Dsl.V1.Common.CashScriptOptimizerRules,
       Alba.Dsl.V1.Common.Compile,
       Alba.Dsl.V1.Common.CompilerUtils,
+      Alba.Dsl.V1.Common.CompilerUtilsUntyped,
       Alba.Dsl.V1.Common.Contract,
       Alba.Dsl.V1.Common.ContractCashScriptArtifact,
       Alba.Dsl.V1.Common.ContractDoc,

@@ -36,11 +36,11 @@ pick ::
 pick _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 pick' :: Integer -> S s alt -> S s' alt
-pick' idx (S c fs) =
+pick' idx =
   case idx of
-    0 -> S (aop c OP_DUP) fs
-    1 -> S (aop c OP_OVER) fs
-    _ -> S (aops c [integerToDataOp idx, OP_PICK]) fs
+    0 -> aop OP_DUP
+    1 -> aop OP_OVER
+    _ -> aops [integerToDataOp idx, OP_PICK]
 
 pickN ::
   forall s arg idx.
@@ -61,12 +61,12 @@ roll ::
 roll _argName = roll' (natVal (Proxy :: Proxy idx))
 
 roll' :: Integer -> S s alt -> S s' alt
-roll' idx (S c fs) =
+roll' idx st@(S c fs) =
   case idx of
-    0 -> S c fs
-    1 -> S (aop c OP_SWAP) fs
-    2 -> S (aop c OP_ROT) fs
-    _ -> S (aops c [integerToDataOp idx, OP_ROLL]) fs
+    0 -> (S c fs)
+    1 -> aop OP_SWAP st
+    2 -> aop OP_ROT st
+    _ -> aops [integerToDataOp idx, OP_ROLL] st
 
 rollN ::
   forall s s' arg idx.
@@ -108,9 +108,9 @@ delCount _count (S c fs) =
     fixIndices xs = zipWith (-) xs [0 ..]
 
 remove :: Integer -> S s alt -> S s' alt
-remove idx (S c fs) =
+remove idx =
   case idx of
-    0 -> S (aop c OP_DROP) fs
-    1 -> S (aop c OP_NIP) fs
-    2 -> S (aop (aop c OP_ROT) OP_DROP) fs
-    _ -> S (aops c [integerToDataOp idx, OP_ROLL, OP_DROP]) fs
+    0 -> aop OP_DROP
+    1 -> aop OP_NIP
+    2 -> aops [OP_ROT, OP_DROP]
+    _ -> aops [integerToDataOp idx, OP_ROLL, OP_DROP]

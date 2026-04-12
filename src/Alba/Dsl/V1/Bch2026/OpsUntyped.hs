@@ -2,17 +2,16 @@
 
 module Alba.Dsl.V1.Bch2026.OpsUntyped where
 
-import Alba.Dsl.V1.Common.CompilerUtils (aop)
-import Alba.Dsl.V1.Common.StackUntyped (FnU, SU (SU))
+import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
+import Alba.Dsl.V1.Common.StackUntyped (FnU)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
+import Control.Arrow ((>>>))
 
 opUntil :: FnU -> FnU
-opUntil loopBody (SU c fs) =
-  let (SU c' fs') = loopBody (SU (aop c OP_BEGIN) fs)
-   in SU (aop c' OP_UNTIL) fs'
+opUntil loopBody = aop OP_BEGIN >>> loopBody >>> aop OP_UNTIL
 
 opDefine :: FnU
-opDefine (SU c fs) = SU (aop c OP_DEFINE) fs
+opDefine = aop OP_DEFINE
 
 opInvoke :: FnU
-opInvoke (SU c fs) = SU (aop c OP_INVOKE) fs
+opInvoke = aop OP_INVOKE
