@@ -11,22 +11,19 @@ import Alba.Dsl.V1.Bch2026
     TNat,
     begin,
     bytes,
-    cast,
     cond,
     del,
     fn,
+    i2nUnsafe,
     name2,
     nat,
     ns3,
     ns6,
     op0,
-    op1Add,
-    opAdd,
     opAnd,
     opBin2Num,
     opCat,
     opFalse,
-    opGreaterThanOrEqual,
     opIf,
     opNot,
     opNumEqual,
@@ -34,7 +31,6 @@ import Alba.Dsl.V1.Bch2026
     opRShiftNum,
     opSize,
     opSplit,
-    opSubUnsafe,
     opTrue,
     opUntil,
     opWhen,
@@ -46,6 +42,9 @@ import Alba.Dsl.V1.Bch2026
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Error (error')
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
 import Numeric.Natural (Natural)
 import Prelude ()
@@ -79,36 +78,36 @@ decompressLoop =
   begin
     # ns6 "bs" "n" "i" "k" "flag" "out"
     # cond
-      [ ( pick "i" # pick "n" # opGreaterThanOrEqual,
+      [ ( pick "i" # pick "n" # greaterThanOrEqual,
           opTrue # un6 "bs" "n" "i" "k" "flag" "out"
         ),
         ( pick "k" # nat groupSize # opNumEqual,
           begin
-            # (pick "bs" # roll "n" # pick "i" # op1Add)
+            # (pick "bs" # roll "n" # pick "i" # add1)
             # (del "k" # nat 0 # del "flag" # roll "bs")
             # (roll "i" # index # roll "out" # opFalse)
         ),
         ( pick "flag" # pick "k" # testBit,
           begin
-            # (pick "bs" # roll "n" # pick "i" # op1Add)
-            # (roll "k" # op1Add # roll "flag" # roll "out")
+            # (pick "bs" # roll "n" # pick "i" # add1)
+            # (roll "k" # add1 # roll "flag" # roll "out")
             # (roll "bs" # roll "i" # index # opCat # opFalse)
         )
       ]
       ( begin
-          # (pick "i" # op1Add # pick "n" # opGreaterThanOrEqual)
+          # (pick "i" # add1 # pick "n" # greaterThanOrEqual)
           # opWhen error'
           # name2 "off" "len" (pick "bs" # pick "i" # indexRef # unpackRef)
-          # (roll "bs" # roll "n" # roll "i" # nat refLen # opAdd)
-          # (roll "k" # op1Add # roll "flag")
+          # (roll "bs" # roll "n" # roll "i" # nat refLen # add)
+          # (roll "k" # add1 # roll "flag")
           # (roll "out" # roll "off" # roll "len" # copyFromBack # opFalse)
       )
 
 copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes)
 copyFromBack =
   begin
-    # (ns3 "bs" "off" "len" # roll "bs" # opSize # roll "off" # opSubUnsafe)
-    # (dup # roll "len" # opAdd # rot # opUntil loop # nip # nip)
+    # (ns3 "bs" "off" "len" # roll "bs" # opSize # roll "off" # natSubUnsafe)
+    # (dup # roll "len" # add # rot # opUntil loop # nip # nip)
   where
     loop :: Loop (s > TNat > TNat > TBytes) -- start end acc
     loop =
@@ -117,7 +116,7 @@ copyFromBack =
         # opIf
           (un3 "i" "end" "acc" # opTrue)
           ( begin
-              # (pick "i" # op1Add # roll "end")
+              # (pick "i" # add1 # roll "end")
               # (roll "acc" # dup # roll "i" # index # opCat # opFalse)
           )
 
@@ -137,12 +136,9 @@ testBit =
 unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
-    # (dup # toSigned # nat lenBits # opRShiftNum # i2n # op1Add)
-    # (swap # nat 1 # opSplit # drop # bytes [0xf] # opAnd # opBin2Num # i2n)
-    # (nat minMatchLen # opAdd)
+    # (dup # toSigned # nat lenBits # opRShiftNum # i2nUnsafe # add1)
+    # (swap # nat 1 # opSplit # drop # bytes [0xf] # opAnd # opBin2Num)
+    # (i2nUnsafe # nat minMatchLen # add)
   where
     toSigned :: Fn (s > TBytes) (s > TInt)
     toSigned = bytes [0] # opCat # opBin2Num
-
-i2n :: Fn (s > TInt) (s > TNat)
-i2n = cast

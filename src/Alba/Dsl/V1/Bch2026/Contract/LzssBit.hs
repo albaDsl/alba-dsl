@@ -13,10 +13,10 @@ import Alba.Dsl.V1.Bch2026
     bytes,
     cast,
     fn,
+    i2nUnsafe,
     nat,
     ns2,
     ns3,
-    op1Add,
     op2Drop,
     opAdd,
     opAnd,
@@ -24,13 +24,9 @@ import Alba.Dsl.V1.Bch2026
     opCat,
     opFalse,
     opIf,
-    opLessThanOrEqual,
-    opMod,
-    opNumEqual,
     opRShiftNum,
     opSize,
     opSplit,
-    opSubUnsafe,
     opTrue,
     opUntil,
     pick,
@@ -39,11 +35,13 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (natSubUnsafe)
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
 import Numeric.Natural (Natural)
 import Prelude ()
-
-type TRef = TBytes
 
 type TLen = TNat
 
@@ -53,17 +51,14 @@ type TOff = TNat
 {- ORMOLU_DISABLE -}
 type Acc = "acc"
 type Bs = "bs"
-type Bs' = "bs'"
 type End = "end"
 type I = "i"
 type Len = "len"
 type Off = "off"
-type Start = "start"
 {- ORMOLU_ENABLE -}
 
-padLen, refLen, lenBits, lenBias, offBias :: Natural
+padLen, lenBits, lenBias, offBias :: Natural
 padLen = 2 -- Byte size of padding.
-refLen = 2 -- Byte size of a reference.
 lenBits = 4 -- Number of bits used to store the match length in the ref.
 lenBias = 3 -- Bias to add to the length field.
 offBias = 1 -- Bias to add to the offset field.
@@ -80,7 +75,7 @@ decompress = fn (bytes [] # swap # pad # opUntil decompressLoop # drop)
 decompressLoop :: Loop (s > TBytes > TBytes) -- acc bs
 decompressLoop =
   begin
-    # (opSize # nat padLen # opLessThanOrEqual)
+    # (opSize # nat padLen # lessThanOrEqual)
     # opIf
       opTrue
       ( begin
@@ -96,7 +91,7 @@ decompressLoop =
       )
   where
     lowBitSet :: Fn (s > TBytes) (s > TBool)
-    lowBitSet = b2n # nat 2 # opMod # nat 1 # opNumEqual
+    lowBitSet = b2n # nat 2 # mod # nat 1 # equal
 
     b2n :: Fn (s > TBytes) (s > TNat)
     b2n = cast
@@ -116,14 +111,12 @@ decompressLoop =
 unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
-    # (dup # toSigned # nat lenBits # opRShiftNum # i2n # nat offBias # opAdd)
-    # (swap # maskLen # opAnd # opBin2Num # i2n # nat lenBias # opAdd)
+    # (dup # toSigned # nat lenBits # opRShiftNum # i2nUnsafe # nat offBias)
+    # (opAdd # swap # maskLen # opAnd # opBin2Num # i2nUnsafe # nat lenBias)
+    # opAdd
   where
     toSigned :: Fn (s > TBytes) (s > TInt)
     toSigned = bytes [0] # opCat # opBin2Num
-
-    i2n :: Fn (s > TInt) (s > TNat)
-    i2n = cast
 
     maskLen = bytes [0x0f, 0x00]
 
@@ -134,18 +127,18 @@ unpackRef =
 copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes) -- bs off len
 copyFromBack =
   begin
-    # (ns3 Bs Off Len # roll Bs # opSize # roll Off # opSubUnsafe)
-    # (dup # roll Len # opAdd # opUntil loop # op2Drop)
+    # (ns3 Bs Off Len # roll Bs # opSize # roll Off # natSubUnsafe)
+    # (dup # roll Len # add # opUntil loop # op2Drop)
   where
     loop :: Loop (s > TBytes > TNat > TNat) -- acc start end
     loop =
       begin
-        # (ns3 Acc I End # pick I # pick End # opNumEqual)
+        # (ns3 Acc I End # pick I # pick End # equal)
         # opIf
           (un3 Acc I End # opTrue)
           ( begin
               # (roll Acc # dup # pick I # index # opCat)
-              # (roll I # op1Add # roll End # opFalse)
+              # (roll I # add1 # roll End # opFalse)
           )
 
     index :: Fn (s > TBytes > TNat) (s > TBytes)

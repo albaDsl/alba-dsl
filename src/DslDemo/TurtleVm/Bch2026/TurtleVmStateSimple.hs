@@ -11,6 +11,7 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmStateSimple
   )
 where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
@@ -19,7 +20,6 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    ifZero,
     nat,
     op2Dup,
     opCat,

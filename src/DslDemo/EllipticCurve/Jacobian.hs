@@ -10,6 +10,7 @@ module DslDemo.EllipticCurve.Jacobian
 where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (isZero)
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC

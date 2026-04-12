@@ -5,7 +5,7 @@ module TestLoops (testLoops) where
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Math (factorial, pow)
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (iterate)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (iterate, nat1SubUnsafe)
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
@@ -63,7 +63,7 @@ progFactorial2 = progFacTest fac
     f =
       begin
         # (pick "n" # roll "product" # opMul)
-        # (roll "n" # op1SubUnsafe)
+        # (roll "n" # nat1SubUnsafe)
 
 progFactorial3 :: Fn s (s > TBool)
 progFactorial3 = progFacTest fac

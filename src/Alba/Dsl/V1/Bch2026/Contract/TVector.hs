@@ -58,6 +58,7 @@ module Alba.Dsl.V1.Bch2026.Contract.TVector
   )
 where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
@@ -72,7 +73,6 @@ import Alba.Dsl.V1.Bch2026
     del,
     delCount,
     fn,
-    ifZero,
     invoke1,
     invoke2,
     lambda0,
@@ -90,7 +90,6 @@ import Alba.Dsl.V1.Bch2026
     ns6,
     ns7,
     op1Add,
-    op1SubUnsafe,
     op2Drop,
     op2Dup,
     opCat,
@@ -330,7 +329,7 @@ unsnocF =
         # (ns2 Pfs Vec # un Vec # dup # null)
         # opNotIf
           ( begin
-              # (dup # tcPick # swap # lengthF # op1SubUnsafe # swap)
+              # (dup # tcPick # swap # lengthF # nat1SubUnsafe # swap)
               # (tcPick # rot # rot # splitAtUnsafeF # toRaw # tcUnpack # tuple)
               # just
           )
@@ -400,7 +399,7 @@ iterateNF = fn (swap # lambda2 f # apply2 # rot # rot # tuple # unfoldrF)
         # ifZero
           (delCount 3 # nothing)
           ( begin
-              # (name Val' (pick Val) # roll Cnt # op1SubUnsafe # rollN Val)
+              # (name Val' (pick Val) # roll Cnt # nat1SubUnsafe # rollN Val)
               # (roll F # un Val # invoke1 # tuple # un Val' # tuple # just)
           )
 

@@ -19,7 +19,6 @@ import Alba.Dsl.V1.Bch2025
     begin,
     bytes,
     cast,
-    ifZero,
     nat,
     op2Dup,
     opCat,
@@ -35,6 +34,7 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 
 data TCode

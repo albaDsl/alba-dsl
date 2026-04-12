@@ -22,7 +22,6 @@ module Alba.Dsl.V1.Common.Stack
     TPubKey,
     cast,
     castStack,
-    n2i,
   )
 where
 
@@ -98,6 +97,3 @@ cast (S c fs) = let state = S c fs in state
 
 castStack :: FnA s alt s' alt'
 castStack (S c fs) = let state = S c fs in state
-
-n2i :: Fn (s > TNat) (s > TInt)
-n2i = cast

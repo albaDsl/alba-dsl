@@ -10,16 +10,14 @@ module Alba.Dsl.V1.Bch2026.Contract.TTuple
   )
 where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
   ( Fn,
     StackEntry,
     TBytes,
-    TInt,
     TNat,
     begin,
     cast,
-    castStack,
-    fn,
+    i2nUnsafe,
     n2i,
     nat,
     ns2,
@@ -39,6 +37,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqRecord,
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
+import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Data.Kind (Type)
 import Prelude ()
 
@@ -71,13 +70,14 @@ tagSize = nat 2
 
 untuple :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a > b)
 untuple =
-  fn (toRaw # tagSize # opSplit # swap # opBin2Num # i2n # opSplit # fixup)
+  fn
+    ( begin
+        # (toRaw # tagSize # opSplit # swap # opBin2Num # i2nUnsafe # opSplit)
+        # (bytesToVal # swap # bytesToVal # swap)
+    )
   where
-    i2n :: Fn (s > TInt) (s > TNat)
-    i2n = cast
-
-    fixup :: Fn (s > TBytes > TBytes) (s > a > b)
-    fixup = castStack
+    bytesToVal :: Fn (s > TBytes) (s > a)
+    bytesToVal = cast
 
 fst :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a)
 fst = untuple # drop

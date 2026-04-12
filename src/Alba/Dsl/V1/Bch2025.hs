@@ -1,7 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Bch2025
-  ( module Alba.Dsl.V1.Bch2025.Contract.Prelude,
+  ( module Alba.Dsl.V1.Bch2025.Conversion,
     module Alba.Dsl.V1.Bch2025.Infix,
     module Alba.Dsl.V1.Bch2025.Lang,
     module Alba.Dsl.V1.Bch2025.LangArgs,
@@ -21,7 +21,7 @@ module Alba.Dsl.V1.Bch2025
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude
+import Alba.Dsl.V1.Bch2025.Conversion
 import Alba.Dsl.V1.Bch2025.Infix
 import Alba.Dsl.V1.Bch2025.Lang
 import Alba.Dsl.V1.Bch2025.LangArgs

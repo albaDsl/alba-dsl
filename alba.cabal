@@ -85,6 +85,7 @@ library
       Alba.Dsl.V1.Bch2025,
       Alba.Dsl.V1.Bch2025.Contract.Math,
       Alba.Dsl.V1.Bch2025.Contract.Prelude,
+      Alba.Dsl.V1.Bch2025.Conversion,
       Alba.Dsl.V1.Bch2025.Infix,
       Alba.Dsl.V1.Bch2025.Lang,
       Alba.Dsl.V1.Bch2025.LangArgs,

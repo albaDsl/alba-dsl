@@ -9,7 +9,6 @@ where
 import Alba.Dsl.V1.Bch2025
   ( TNat,
     nat,
-    op1SubUnsafe,
     opDrop,
     opFromAltStack,
     opNop,
@@ -29,7 +28,7 @@ iterate ::
   Natural ->
   FnA s (alt > TNat) s (alt > TNat) ->
   FnA s alt s alt
-iterate n fn =
+iterate n f =
   if n > 0
     then nat (fromIntegral n) # opUntil body # opDrop
     else opNop
@@ -38,6 +37,6 @@ iterate n fn =
     body =
       begin
         # opToAltStack
-        # fn
-        # (opFromAltStack # op1SubUnsafe)
+        # f
+        # (opFromAltStack # nat1SubUnsafe)
         # (opDup # nat 0 # opNumEqual)

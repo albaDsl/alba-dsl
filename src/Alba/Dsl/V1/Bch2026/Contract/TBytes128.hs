@@ -8,18 +8,18 @@ module Alba.Dsl.V1.Bch2026.Contract.TBytes128
   )
 where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
     StackEntry,
     TBytes,
-    TInt,
-    TNat,
     begin,
     bytes,
     cast,
     constant,
     fn,
+    i2nUnsafe,
     int,
     lambda1,
     n2i,
@@ -33,7 +33,6 @@ import Alba.Dsl.V1.Bch2026
     opNum2Bin,
     opSize,
     opSplit,
-    opSubUnsafe,
     opVerify,
     pick,
     roll,
@@ -96,7 +95,7 @@ packTBytes128 =
         # name "size" (pick "b128" # toRaw # opSize # nip)
         # (pick "size" # n2i # nat sizeFieldSize # opNum2Bin)
         # (roll "b128" # toRaw # int 0 # nat (fromIntegral maxPayloadSize))
-        # (roll "size" # opSubUnsafe # opNum2Bin # opCat # opCat)
+        # (roll "size" # natSubUnsafe # opNum2Bin # opCat # opCat)
     )
 
 unpackTBytes128 :: Fn (s > TBytes) (s > TBytes128)
@@ -105,12 +104,9 @@ unpackTBytes128 =
     ( begin
         # ns "bytes"
         # name2 "size" "rest" (roll "bytes" # nat sizeFieldSize # opSplit)
-        # (roll "rest" # roll "size" # opBin2Num # i2n # opSplit # drop)
+        # (roll "rest" # roll "size" # opBin2Num # i2nUnsafe # opSplit # drop)
         # fromRaw
     )
-  where
-    i2n :: Fn (s > TInt) (s > TNat)
-    i2n = cast
 
 bytes128 :: Bytes -> Fn s (s > TBytes128)
 bytes128 x =

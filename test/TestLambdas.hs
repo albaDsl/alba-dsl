@@ -2,6 +2,7 @@
 
 module TestLambdas (testLambdas) where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
 import Alba.Dsl.V1.Bch2026
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)

@@ -3,6 +3,7 @@
 module DslDemo.EllipticCurve.Affine (ecDouble, ecAdd, ecMul) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (isZero)
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)

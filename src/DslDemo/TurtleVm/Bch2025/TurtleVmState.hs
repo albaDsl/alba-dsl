@@ -21,7 +21,6 @@ import Alba.Dsl.V1.Bch2025
     begin,
     bytes,
     cast,
-    ifZero,
     name2,
     nat,
     op2Drop,
@@ -45,6 +44,7 @@ import Alba.Dsl.V1.Bch2025
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 import DslDemo.TurtleVm.Bch2025.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isOpDataOp, vmError)

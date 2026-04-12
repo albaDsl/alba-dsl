@@ -2,6 +2,7 @@
 
 module TestFunctions (testFunctions) where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
@@ -106,7 +107,7 @@ progFactorial =
         # pick "n"
         # ifZero
           (nat 1 # del "n")
-          (pick "n" # roll "n" # op1SubUnsafe # fac # opMul)
+          (pick "n" # roll "n" # nat1SubUnsafe # fac # opMul)
 
 progSort :: Fn s (s > TBool)
 progSort =

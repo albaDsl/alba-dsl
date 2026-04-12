@@ -3,6 +3,7 @@
 module DslDemo.Exponentiation (pow) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
 
 pow :: Fn (s > TInt > TNat) (s > TInt)
@@ -25,7 +26,7 @@ powHelper' mul =
           # (pick "n" # isEven)
           # opIf
             (roll "b" # roll "n" # nat 2 # opDiv # pow # square mul)
-            (pick "b" # roll "b" # roll "n" # op1 # opSubUnsafe # pow # mul)
+            (pick "b" # roll "b" # roll "n" # nat1SubUnsafe # pow # mul)
       )
   where
     square ::

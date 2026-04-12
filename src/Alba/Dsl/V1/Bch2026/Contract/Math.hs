@@ -18,7 +18,6 @@ import Alba.Dsl.V1.Bch2025
     int,
     nat,
     op1,
-    op1SubUnsafe,
     op2Drop,
     opDrop,
     opMul,
@@ -34,6 +33,7 @@ import Alba.Dsl.V1.Bch2025
 import Alba.Dsl.V1.Bch2025.Contract.Math
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, isZero)
 import Alba.Dsl.V1.Bch2025.Ops (opDup)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
@@ -126,5 +126,5 @@ factorial =
     fn =
       begin
         # (roll "product" # pick "n" # opMul)
-        # (roll "n" # op1SubUnsafe)
+        # (roll "n" # nat1SubUnsafe)
         # (opDup # isZero)

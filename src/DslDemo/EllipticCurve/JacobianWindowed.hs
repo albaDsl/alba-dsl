@@ -8,6 +8,7 @@ module DslDemo.EllipticCurve.JacobianWindowed
   )
 where
 
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import DslDemo.EllipticCurve.Jacobian
@@ -43,7 +44,7 @@ setupTable =
                   # (roll "fId" # op1Add)
                   # pick "p"
                   # (roll "acc" # roll "p" # EC.ecAddJ)
-                  # (roll "i" # op1SubUnsafe)
+                  # (roll "i" # nat1SubUnsafe)
                   # unname 4 setupTable'
               )
         )
@@ -100,7 +101,7 @@ ecMulJLoop =
           # name2
             "arr'"
             "digit"
-            (roll "arr" # nat 1 # opSplit # opSwap # opBin2Num # i2n)
+            (roll "arr" # nat 1 # opSplit # opSwap # opBin2Num # i2nUnsafe)
           # (pick "digit" # op0 # opGreaterThan)
           # opIf
             ( begin
@@ -114,9 +115,6 @@ ecMulJLoop =
     tableLookup :: Fn (s > TTab > TNat) (s > TPointJ)
     tableLookup = opAdd # getConstant # b2p
 
-    i2n :: Fn (s > TInt) (s > TNat)
-    i2n = cast
-
     b2p :: Fn (s > TBytes) (s > TPointJ)
     b2p = cast
 
@@ -127,7 +125,7 @@ doubleN =
         # (opSwap # opDup # op0 # opNumEqual)
         # opIf
           (opSwap # opTrue)
-          (op1SubUnsafe # opSwap # EC.ecDoubleJ # opFalse)
+          (nat1SubUnsafe # opSwap # EC.ecDoubleJ # opFalse)
     )
     # opNip
 

@@ -252,9 +252,6 @@ op1Add = aop OP_1ADD
 op1Sub :: (StackInt x1) => Fn (s > x1) (s > x1)
 op1Sub = aop OP_1SUB
 
-op1SubUnsafe :: (StackNat x1) => Fn (s > x1) (s > x1)
-op1SubUnsafe = aop OP_1SUB
-
 opNegate :: (StackInt x1) => Fn (s > x1) (s > x1)
 opNegate = aop OP_NEGATE
 
@@ -272,9 +269,6 @@ opAdd = aop OP_ADD
 
 opSub :: (StackInt x1) => Fn (s > x1 > x1) (s > x1)
 opSub = aop OP_SUB
-
-opSubUnsafe :: (StackNat x1) => Fn (s > x1 > x1) (s > x1)
-opSubUnsafe = aop OP_SUB
 
 opMul :: (StackNum x1) => Fn (s > x1 > x1) (s > x1)
 opMul = aop OP_MUL
