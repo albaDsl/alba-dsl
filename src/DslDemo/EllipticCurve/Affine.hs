@@ -15,7 +15,6 @@ import Alba.Dsl.V1.Bch2026
     ns2,
     ns3,
     opIf,
-    opNip,
     opNumEqual,
     opUntil,
     opWhen,
@@ -24,7 +23,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero, nip)
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
 import Prelude ()
@@ -36,7 +35,7 @@ ecMul =
         . (ns2 #n #p . pick #n . nat 0 . opNumEqual)
         . opIf
           (del #n . del #p . makeIdentity)
-          (roll #n . roll #p . makeIdentity . opUntil loop . opNip . opNip)
+          (roll #n . roll #p . makeIdentity . opUntil loop . nip . nip)
     )
   where
     loop :: Loop (s > TNat > TPoint > TPoint)

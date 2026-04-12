@@ -2,34 +2,48 @@
 
 module DslDemo.Exponentiation (pow) where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, isEven, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
+  ( Fn,
+    TInt,
+    TNat,
+    begin,
+    del,
+    fn,
+    int,
+    nat,
+    ns2,
+    opIf,
+    pick,
+    roll,
+    (.),
+    type (>),
+  )
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( div,
+    dup,
+    ifZero,
+    isEven,
+    mul,
+    nat1SubUnsafe,
+  )
 import Prelude ()
 
 pow :: Fn (s > TInt > TNat) (s > TInt)
-pow = fn (powHelper opMul)
+pow = fn (powHelper mul)
 
 powHelper ::
   (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
   Fn (s > TInt > TNat) (s > TInt)
-powHelper mul = unname 2 (powHelper' mul)
-
-powHelper' ::
-  (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
-  Fn (s > N "b" TInt > N "n" TNat) (s > TInt)
-powHelper' mul =
+powHelper f =
   begin
-    . pick #n
+    . (ns2 #b #n . pick #n)
     . ifZero
       (int 1 . del #n . del #b)
       ( begin
           . (pick #n . isEven)
           . opIf
-            (roll #b . roll #n . nat 2 . opDiv . pow . square mul)
-            (pick #b . roll #b . roll #n . nat1SubUnsafe . pow . mul)
+            (roll #b . roll #n . nat 2 . div . pow . square)
+            (pick #b . roll #b . roll #n . nat1SubUnsafe . pow . f)
       )
   where
-    square ::
-      (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
-      Fn (s > TInt) (s > TInt)
-    square mul' = opDup . mul'
+    square = dup . f

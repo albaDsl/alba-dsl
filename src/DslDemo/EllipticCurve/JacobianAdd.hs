@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (equal))
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal)
 import DslDemo.EllipticCurve.Field (feCube, feMul, feQuartic, feSquare, feSub)
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
@@ -100,7 +100,10 @@ doAdd =
           . name
             #y3
             ( begin
-                . (roll #r . roll #u1 . pick #h . term2 . pick #x3 . feSub . feMul)
+                . ( begin
+                      . (roll #r . roll #u1 . pick #h . term2 . pick #x3)
+                      . (feSub . feMul)
+                  )
                 . (roll #s1 . pick #h . term3)
                 . feSub
             )

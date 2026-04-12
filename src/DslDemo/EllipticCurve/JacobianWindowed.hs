@@ -8,14 +8,18 @@ module DslDemo.EllipticCurve.JacobianWindowed
   )
 where
 
-import Alba.Dsl.V1.Bch2025
-  ( Fn,
+import Alba.Dsl.V1.Bch2026
+  ( Env,
+    Fn,
     TBytes,
     TNat,
     begin,
     cast,
     del,
+    fn,
     i2nUnsafe,
+    lambda1,
+    lambda3,
     n2i,
     name,
     nat,
@@ -26,13 +30,12 @@ import Alba.Dsl.V1.Bch2025
     opFalse,
     opIf,
     opTrue,
+    opUntil,
     pick,
     roll,
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (nat1SubUnsafe)
-import Alba.Dsl.V1.Bch2026 (Env, fn, lambda1, lambda3, opUntil)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     Integral (..),
@@ -44,6 +47,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     dup,
     ifZero,
     just,
+    nat1SubUnsafe,
     nip,
     nothing,
     swap,

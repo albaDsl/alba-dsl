@@ -8,6 +8,17 @@ module DslDemo.EllipticCurve.LookupTable
 where
 
 import Alba.Dsl.V1.Bch2026
+  ( Fn,
+    TBytes,
+    TNat,
+    cast,
+    fn,
+    opDefine,
+    opInvoke,
+    opSwap,
+    (.),
+    type (>),
+  )
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 import Prelude (undefined)
 

@@ -14,16 +14,14 @@ import Alba.Dsl.V1.Bch2026
     name2,
     ns,
     ns2,
-    opDup,
     opIf,
-    opNumEqual,
     pick,
     roll,
     un,
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (dup, equal)
 import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
 import DslDemo.EllipticCurve.Point
   ( TPoint,
@@ -47,7 +45,7 @@ ecDouble =
               . ex1 (int 2 . pick #py . feMul . feInv)
               . feMul
           )
-        . name #rx (pick #l . feSquare . pick #px . opDup . feAdd . feSub)
+        . name #rx (pick #l . feSquare . pick #px . dup . feAdd . feSub)
         . (roll #l . roll #px . pick #rx . feSub . feMul . roll #py . feSub)
         . (un #rx . makePoint)
     )
@@ -74,7 +72,7 @@ ecAdd =
   where
     pointsAreEqual = pick #p . pick #q . equal
 
-    xCoordsEqual = pick #p . getX . pick #q . getX . opNumEqual
+    xCoordsEqual = pick #p . getX . pick #q . getX . equal
 
     doAdd :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
     doAdd =

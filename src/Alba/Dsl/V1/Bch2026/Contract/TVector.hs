@@ -58,7 +58,6 @@ module Alba.Dsl.V1.Bch2026.Contract.TVector
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
@@ -89,7 +88,6 @@ import Alba.Dsl.V1.Bch2026
     ns4,
     ns6,
     ns7,
-    op1Add,
     op2Drop,
     op2Dup,
     opCat,
@@ -97,12 +95,9 @@ import Alba.Dsl.V1.Bch2026
     opDrop,
     opEqual,
     opFalse,
-    opGreaterThan,
     opIf,
     opLessThan,
-    opMul,
     opNotIf,
-    opNumEqual,
     opRoll,
     opSize,
     opSplit,
@@ -120,42 +115,47 @@ import Alba.Dsl.V1.Bch2026
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
-import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
-  ( blobEqEqual,
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    Integral (add1, mul),
+    Ord (..),
+    PackFs (..),
+    TMaybe,
+    TPackFs,
+    TTuple,
+    apply2,
+    apply3,
+    apply3_2,
+    apply4_2,
+    blobEqEqual,
     blobEqEqualVerify,
     blobEqRecord,
-  )
-import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs
-  ( PackFs (..),
-    TPackFs,
+    dup,
+    errCanNotHappen,
+    fromMaybe',
+    fst,
     getPack,
     getSize,
+    ifJust,
+    ifZero,
+    just,
+    liftA2Maybe,
+    maybe,
+    nat1SubUnsafe,
+    nip,
+    nothing,
+    rot,
+    snd,
+    swap,
     tcDrop,
     tcPick,
     tcRoll,
     tcSize,
     tcUnpack,
-  )
-import Alba.Dsl.V1.Bch2026.Contract.PartialApplication
-  ( apply2,
-    apply3,
-    apply3_2,
-    apply4_2,
-  )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup, nip, rot, swap)
-import Alba.Dsl.V1.Bch2026.Contract.TMaybe
-  ( TMaybe,
-    fromMaybe',
-    ifJust,
-    just,
-    maybe,
-    nothing,
+    tuple,
+    untuple,
   )
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe qualified as Maybe
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tuple, untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (TTupleFs, calcPackFs, tupleF)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
@@ -195,8 +195,8 @@ lookupF ::
 lookupF =
   fn
     ( begin
-        . (ns3 #packFs #vec #cnt . tcPick . roll #cnt . roll #vec . splitAtF . nip)
-        . (tcRoll . swap . headF)
+        . (ns3 #packFs #vec #cnt . tcPick . roll #cnt . roll #vec . splitAtF)
+        . (nip . tcRoll . swap . headF)
     )
 
 head :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TMaybe a)
@@ -251,10 +251,10 @@ splitAtF :: Fn (s > TPackFs a > TNat > TVector a) (s > TVector a > TVector a)
 splitAtF =
   fn
     ( begin
-        . (ns3 #packFs #idx #vec . pick #idx . nat 0 . opNumEqual)
+        . (ns3 #packFs #idx #vec . pick #idx . nat 0 . equal)
         . opNotIf
           ( begin
-              . (tcPick . pick #vec . lengthF . pick #idx . opGreaterThan)
+              . (tcPick . pick #vec . lengthF . pick #idx . greaterThan)
               . opIf
                 (tcRoll . roll #idx . roll #vec . splitAtUnsafeF)
                 (roll #vec . empty . delCount 2)
@@ -264,7 +264,7 @@ splitAtF =
 
 splitAtUnsafeF ::
   Fn (s > TPackFs a > TNat > TVector a) (s > TVector a > TVector a)
-splitAtUnsafeF = fn (toRaw . swap . rot . getSize . opMul . opSplit . fixup)
+splitAtUnsafeF = fn (toRaw . swap . rot . getSize . mul . opSplit . fixup)
   where
     -- Optimizer will take care of redundant swaps.
     fixup :: Fn (s' > TBytes > TBytes) (s' > TVector a > TVector a)
@@ -349,7 +349,7 @@ generateF = fn (lambda3 f . apply3_2 . nat 0 . unfoldrF)
         . opIf
           ( begin
               . name #a (pick #cnt . roll #f . invoke1)
-              . (roll #cnt . op1Add . un #a . tuple . just)
+              . (roll #cnt . add1 . un #a . tuple . just)
           )
           (delCount 2 . nothing)
 
@@ -357,7 +357,9 @@ iterateN ::
   forall a s.
   (PackFs a) => Env (s > TNat > TLambda '[a] '[a] > a) (s > TVector a)
 iterateN =
-  ns3 #cnt #f #val . (packFsRec @a . roll #cnt . roll #f . roll #val . iterateNF)
+  begin
+    . ns3 #cnt #f #val
+    . (packFsRec @a . roll #cnt . roll #f . roll #val . iterateNF)
 
 iterateNF ::
   (StackEntry a) =>
@@ -375,8 +377,9 @@ iterateNF = fn (swap . lambda2 f . apply2 . rot . rot . tuple . unfoldrF)
         . ifZero
           (delCount 3 . nothing)
           ( begin
-              . (name #val' (pick #val) . roll #cnt . nat1SubUnsafe . rollN #val)
-              . (roll #f . un #val . invoke1 . tuple . un #val' . tuple . just)
+              . (name #val' (pick #val) . roll #cnt . nat1SubUnsafe)
+              . (rollN #val . roll #f . un #val . invoke1 . tuple . un #val')
+              . (tuple . just)
           )
 
 unfoldr ::
@@ -457,8 +460,8 @@ mapF ::
 mapF =
   fn
     ( begin
-        . (ns4 #pfsA #pfsB #f #vec . roll #pfsA . roll #pfsB . roll #f . lambda4 f)
-        . (apply4_2 . empty . roll #vec . foldlF)
+        . (ns4 #pfsA #pfsB #f #vec . roll #pfsA . roll #pfsB . roll #f)
+        . (lambda4 f . apply4_2 . empty . roll #vec . foldlF)
     )
   where
     f ::
@@ -493,8 +496,8 @@ zipF =
       Fn (s > a > b > TPackFs a > TPackFs b) (s > TTupleFs a b)
     f =
       begin
-        . (ns4 #a #b #pfsA #pfsB . roll #pfsA . roll #pfsB . rollN #a . rollN #b)
-        . (un2 #a #b . tupleF)
+        . (ns4 #a #b #pfsA #pfsB . roll #pfsA . roll #pfsB . rollN #a)
+        . (rollN #b . un2 #a #b . tupleF)
 
 lambdaFst :: (StackEntry a) => Fn s (s > TLambda '[TTuple a (TVector a)] '[a])
 lambdaFst = lambda1 fst
@@ -603,8 +606,8 @@ filterF =
   fn
     ( begin
         . ns3 #packFs #f #vec
-        . (pick #packFs . (roll #packFs . roll #f . lambda4 f . apply4_2) . empty)
-        . (roll #vec . foldlF)
+        . (pick #packFs . (roll #packFs . roll #f . lambda4 f . apply4_2))
+        . (empty . roll #vec . foldlF)
     )
   where
     f ::
@@ -622,7 +625,9 @@ foldl ::
   (StackEntry b, PackFs a) =>
   Fn (s > TLambda '[b, a] '[b] > b > TVector a) (s > b)
 foldl =
-  ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec . un #val . foldlF
+  begin
+    . (ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec)
+    . (un #val . foldlF)
 
 foldlF ::
   (StackEntry a, StackEntry b) =>
@@ -648,7 +653,9 @@ foldr ::
   (StackEntry b, PackFs a) =>
   Fn (s > TLambda '[a, b] '[b] > b > TVector a) (s > b)
 foldr =
-  ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec . un #val . foldrF
+  begin
+    . (ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec)
+    . (un #val . foldrF)
 
 foldrF ::
   (StackEntry a, StackEntry b) =>

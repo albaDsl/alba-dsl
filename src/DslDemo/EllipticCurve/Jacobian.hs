@@ -9,11 +9,13 @@ module DslDemo.EllipticCurve.Jacobian
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Loop,
     TNat,
     begin,
     del,
+    fn,
     int,
     name,
     name3,
@@ -22,6 +24,7 @@ import Alba.Dsl.V1.Bch2025
     ns2,
     ns3,
     opIf,
+    opUntil,
     opWhen,
     pick,
     roll,
@@ -36,9 +39,6 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     nip,
     swap,
   )
-import Alba.Dsl.V1.Bch2026.Lang (fn)
-import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
-import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint
@@ -82,17 +82,14 @@ toJacobian =
   fn
     ( begin
         . (ns #p . pick #p . AP.isIdentity)
-        . opIf
-          (del #p . makeIdentity)
-          (roll #p . AP.getXY' . int 1 . makePoint)
+        . opIf (del #p . makeIdentity) (roll #p . AP.getXY' . int 1 . makePoint)
     )
 
 fromJacobian :: Fn (s > TPointJ) (s > TPoint)
 fromJacobian =
   fn
     ( begin
-        . ns #p
-        . (pick #p . isIdentity)
+        . (ns #p . pick #p . isIdentity)
         . opIf
           (del #p . AP.makeIdentity)
           ( begin
