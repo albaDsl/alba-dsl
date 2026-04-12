@@ -9,8 +9,36 @@ module DslDemo.EllipticCurve.Jacobian
   )
 where
 
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero)
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
+  ( Fn,
+    TNat,
+    begin,
+    del,
+    int,
+    name,
+    name3,
+    nat,
+    ns,
+    ns2,
+    ns3,
+    opIf,
+    opWhen,
+    pick,
+    roll,
+    (#),
+    type (>),
+  )
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (equal),
+    halve,
+    isOdd,
+    isZero,
+    nip,
+    swap,
+  )
+import Alba.Dsl.V1.Bch2026.Lang (fn)
+import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
+import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint
@@ -23,12 +51,13 @@ import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
 
-type LoopTypeN s = s > N "n" TNat > N "p" TPointJ > N "r" TPointJ
-
-type LoopType s = s > TNat > TPointJ > TPointJ
+{- ORMOLU_DISABLE -}
+type N = "n"; type P = "p"; type R = "r"; type R2 = "r2"; type X = "x";
+type Y = "y"; type Z = "z"
+{- ORMOLU_ENABLE -}
 
 ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
-ecAdd = fn (toJacobian # opSwap # toJacobian # EC.ecAddJ # fromJacobian)
+ecAdd = fn (toJacobian # swap # toJacobian # EC.ecAddJ # fromJacobian)
 
 ecDouble :: Fn (s > TPoint) (s > TPoint)
 ecDouble = fn (toJacobian # EC.ecDoubleJ # fromJacobian)
@@ -37,62 +66,43 @@ ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
 ecMul = fn (toJacobian # ecMulJ # fromJacobian)
 
 ecMulJ :: Fn (s > TNat > TPointJ) (s > TPointJ)
-ecMulJ = unname 2 ecMulJ'
+ecMulJ =
+  begin
+    # (ns2 N P # pick N # nat 0 # equal)
+    # opIf
+      (del N # del P # makeIdentity)
+      (roll N # roll P # makeIdentity # opUntil loop # nip # nip)
   where
-    ecMulJ' :: Fn (s > N "n" TNat > N "p" TPointJ) (s > TPointJ)
-    ecMulJ' =
-      begin
-        # pick "n"
-        # (nat 0 # opNumEqual)
-        # opIf
-          (del "n" # del "p" # makeIdentity)
-          ( begin
-              # roll "n"
-              # roll "p"
-              # makeIdentity
-              # opUntil (unname 3 loop)
-              # opNip
-              # opNip
-          )
-
-    loop :: Fn (LoopTypeN s) (LoopType s > TBool)
+    loop :: Loop (s > TNat > TPointJ > TPointJ)
     loop =
       begin
-        # name
-          "r2"
-          (roll "r" # pick "n" # isOdd # opWhen (pick "p" # EC.ecAddJ))
-        # (pick "n" # halve)
-        # (roll "p" # EC.ecDoubleJ)
-        # roll "r2"
-        # (roll "n" # halve # isZero)
+        # ns3 N P R
+        # name R2 (roll R # pick N # isOdd # opWhen (pick P # EC.ecAddJ))
+        # (pick N # halve # roll P # EC.ecDoubleJ # roll R2)
+        # (roll N # halve # isZero)
 
 toJacobian :: Fn (s > TPoint) (s > TPointJ)
-toJacobian = fn (unname 1 toJacobian')
-  where
-    toJacobian' :: Fn (s > N "p" TPoint) (s > TPointJ)
-    toJacobian' =
-      begin
-        # ex1 (pick "p" # AP.isIdentity)
+toJacobian =
+  fn
+    ( begin
+        # (ns P # pick P # AP.isIdentity)
         # opIf
-          (del "p" # makeIdentity)
-          (pick "p" # AP.getX # roll "p" # AP.getY # int 1 # makePoint)
+          (del P # makeIdentity)
+          (pick P # AP.getX # roll P # AP.getY # int 1 # makePoint)
+    )
 
 fromJacobian :: Fn (s > TPointJ) (s > TPoint)
-fromJacobian = fn (unname 1 fromJacobian')
-  where
-    fromJacobian' :: Fn (s > N "p" TPointJ) (s > TPoint)
-    fromJacobian' =
-      begin
-        # (pick "p" # isIdentity)
+fromJacobian =
+  fn
+    ( begin
+        # ns P
+        # (pick P # isIdentity)
         # opIf
-          (del "p" # AP.makeIdentity)
+          (del P # AP.makeIdentity)
           ( begin
-              # name "z" (pick "p" # JP.getZ)
-              # name
-                "x'"
-                (pick "p" # JP.getX # pick "z" # feSquare # feInv # feMul)
-              # name
-                "y'"
-                (roll "p" # JP.getY # roll "z" # feCube # feInv # feMul)
-              # (roll "x'" # roll "y'" # AP.makePoint)
+              # name3 X Y Z (roll P # JP.getXYZ')
+              # (roll X # pick Z # feSquare # feInv # feMul)
+              # (roll Y # roll Z # feCube # feInv # feMul)
+              # AP.makePoint
           )
+    )

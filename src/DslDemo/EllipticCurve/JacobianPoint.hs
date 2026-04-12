@@ -6,102 +6,94 @@ module DslDemo.EllipticCurve.JacobianPoint
     pushPoint,
     makeIdentity,
     isIdentity,
-    getX,
-    getY,
-    getZ,
+    getXYZ,
+    getXYZ',
   )
 where
 
 import Alba.Dsl.V1.Bch2026
-import Numeric.Natural (Natural)
+  ( Fn,
+    StackEntry,
+    TBool,
+    TInt,
+    begin,
+    cast,
+    emptyProg,
+    fn,
+    int,
+    lambda1,
+    (#),
+    type (>),
+  )
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    TEither,
+    TMaybe,
+    TTuple,
+    TUnit,
+    blobEqEqual,
+    blobEqEqualVerify,
+    blobEqRecord,
+    drop,
+    dup,
+    either,
+    errPartialFunction,
+    fst,
+    isLeft,
+    just,
+    left,
+    nothing,
+    right,
+    rot,
+    snd,
+    swap,
+    tuple,
+    unit,
+  )
+import Prelude (Integer)
 
 data TPointJ
 
 instance StackEntry TPointJ
 
--- Byte layout for the PointJ record:
--- <tag:1><x:33><y:33><z:33>
-makePoint :: Fn (s > TInt > TInt > TInt) (s > TPointJ)
-makePoint = fn (unname 3 makePoint')
-  where
-    makePoint' :: Fn (s > N "x" TInt > N "y" TInt > N "z" TInt) (s > TPointJ)
-    makePoint' =
-      begin
-        # (int tagNonIdentity # nat tagSize # opNum2Bin)
-        # (roll "x" # nat coordSize # opNum2Bin)
-        # (roll "y" # nat coordSize # opNum2Bin)
-        # (roll "z" # nat coordSize # opNum2Bin)
-        # assemble
+instance BlobEq TPointJ where
+  equal = blobEqEqual
+  equalVerify = blobEqEqualVerify
+  blobEqRec = blobEqRecord
 
-assemble :: Fn (s > TBytes > TBytes > TBytes > TBytes) (s > TPointJ)
-assemble = opCat # opCat # opCat # fromBytes
+makePoint :: Fn (s > TInt > TInt > TInt) (s > TPointJ)
+makePoint = fn (tuple # tuple # right # fromRaw)
 
 pushPoint :: Integer -> Integer -> Integer -> Fn s (s > TPointJ)
-pushPoint x y z =
-  box tagSize tagNonIdentity # boxCoord x # boxCoord y # boxCoord z # assemble
+pushPoint x y z = int x # int y # int z # makePoint
 
 makeIdentity :: Fn s (s > TPointJ)
-makeIdentity = fn (box 1 tagIdentity # zero # zero # zero # assemble)
-  where
-    zero = boxCoord 0
-
-boxCoord :: Integer -> Fn s (s > TBytes)
-boxCoord = box coordSize
-
-box :: Natural -> Integer -> Fn s (s > TBytes)
-box size i = int i # nat size # opNum2Bin
+makeIdentity = unit # left # fromRaw
 
 isIdentity :: Fn (s > TPointJ) (s > TBool)
-isIdentity = getTag # int tagIdentity # opNumEqual
+isIdentity = toRaw # isLeft
 
-getTag :: Fn (s > TPointJ) (s > TInt)
-getTag = fn (toBytes # nat tagSize # opSplit # opDrop # opBin2Num)
+getXYZ :: Fn (s > TPointJ) (s > TMaybe (TTuple TInt (TTuple TInt TInt)))
+getXYZ = fn (lambda1 (drop # nothing) # lambda1 just # rot # toRaw # either)
 
-getX :: Fn (s > TPointJ) (s > TInt)
-getX = fn (toBytes # offset # nat coordSize # getField # opBin2Num)
+getXYZ' :: Fn (s > TPointJ) (s > TInt > TInt > TInt)
+getXYZ' =
+  fn
+    ( begin
+        # (err # lambda1 emptyProg # rot # toRaw # either # dup # fst # swap)
+        # (snd # dup # fst # swap # snd)
+    )
   where
-    offset = nat tagSize
+    err = lambda1 (drop # errPartialFunction)
 
-getY :: Fn (s > TPointJ) (s > TInt)
-getY = fn (toBytes # offset # nat coordSize # getField # opBin2Num)
-  where
-    offset = nat (tagSize + coordSize)
+fromRaw ::
+  Fn
+    (s > TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+    (s > TPointJ)
+fromRaw = cast
 
-getZ :: Fn (s > TPointJ) (s > TInt)
-getZ = fn (toBytes # offset # opSplit # opNip # opBin2Num)
-  where
-    offset = nat (tagSize + 2 * coordSize)
-
-getField :: Fn (s > TBytes > TNat > TNat) (s > TBytes)
-getField = fn (unname 3 getField')
-  where
-    getField' ::
-      Fn
-        (s > N "bytes" TBytes > N "offset" TNat > N "size" TNat)
-        (s > TBytes)
-    getField' =
-      begin
-        # (roll "bytes" # roll "offset" # opSplit)
-        # opNip
-        # roll "size"
-        # opSplit
-        # opDrop
-
-fromBytes :: Fn (s > TBytes) (s > TPointJ)
-fromBytes = cast
-
-toBytes :: Fn (s > TPointJ) (s > TBytes)
-toBytes = cast
-
-tagIdentity :: Integer
-tagIdentity = 1
-
-tagNonIdentity :: Integer
-tagNonIdentity = 2
-
-tagSize :: Natural
-tagSize = 1
-
--- Due to the sign bit, we need one more byte than usual.
-coordSize :: Natural
-coordSize = 33
+toRaw ::
+  Fn
+    (s > TPointJ)
+    (s > TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+toRaw = cast

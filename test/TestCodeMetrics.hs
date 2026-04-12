@@ -202,15 +202,17 @@ arithmetic = int 2 # int 3 # add # int 4 # sub # int 1 # equalVerify
 
 windowedMul :: FnC
 windowedMul =
-  begin
-    # (gTable # g # EJW.setupTable)
-    # gTable
-    # nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-    # EJW.ecMul
-    # pushPoint
-      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-      0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-    # (equal # opVerify)
+  runEnv
+    ( begin
+        # (gTable # g # EJW.setupTable)
+        # gTable
+        # nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+        # EJW.ecMul
+        # pushPoint
+          0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+          0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
+        # (equal # opVerify)
+    )
   where
     gTable = nat 100
 

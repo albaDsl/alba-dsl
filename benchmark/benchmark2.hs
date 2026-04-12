@@ -78,9 +78,11 @@ progMulJacobian scalar =
 
 progMulJacobianWindowed :: Natural -> Fn s (s > TInt > TInt)
 progMulJacobianWindowed scalar =
-  begin
-    # (gTable # g # EJW.setupTable)
-    # (gTable # nat scalar # EJW.ecMul # opDup # EA.getX # opSwap # EA.getY)
+  runEnv
+    ( begin
+        # (gTable # g # EJW.setupTable)
+        # (gTable # nat scalar # EJW.ecMul # opDup # EA.getX # opSwap # EA.getY)
+    )
   where
     gTable = nat 100
 

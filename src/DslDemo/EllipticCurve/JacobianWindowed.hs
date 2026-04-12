@@ -8,9 +8,48 @@ module DslDemo.EllipticCurve.JacobianWindowed
   )
 where
 
+import Alba.Dsl.V1.Bch2025
+  ( Fn,
+    TBytes,
+    TNat,
+    begin,
+    cast,
+    del,
+    i2nUnsafe,
+    n2i,
+    name,
+    nat,
+    ns2,
+    ns3,
+    ns4,
+    op0,
+    opFalse,
+    opIf,
+    opTrue,
+    pick,
+    roll,
+    (#),
+    type (>),
+  )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (nat1SubUnsafe)
-import Alba.Dsl.V1.Bch2026
-import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
+import Alba.Dsl.V1.Bch2026 (Env, fn, lambda1, lambda3, opUntil)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    Integral (..),
+    Ord (..),
+    TInt8,
+    TTuple,
+    apply3,
+    drop,
+    dup,
+    ifZero,
+    just,
+    nip,
+    nothing,
+    swap,
+    tuple,
+  )
+import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import DslDemo.EllipticCurve.Jacobian
   ( ecAdd,
     ecDouble,
@@ -19,101 +58,70 @@ import DslDemo.EllipticCurve.Jacobian
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
-import DslDemo.EllipticCurve.LookupTable (getConstant)
+import DslDemo.EllipticCurve.LookupTable (defineConstant, getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
+import Prelude hiding (div, drop, mod)
 
 type TFId = TNat -- Function Id
 
 type TTab = TFId -- Lookup table (represented by the base Function Id)
 
+{- ORMOLU_DISABLE -}
+type Acc = "acc"; type Digit = "digit"; type FId = "FId"; type I = "i";
+type N = "n"; type P = "m"; type Q = "q"; type Q' = "q'"; type Tab = "tab";
+{- ORMOLU_ENABLE -}
+
 setupTable :: Fn (s > TFId > TPoint) s
-setupTable =
-  toJacobian # makeIdentity # nat numValues # unname 4 setupTable'
+setupTable = toJacobian # makeIdentity # nat numValues # setupTable'
   where
-    setupTable' ::
-      Fn (s > N "fId" TNat > N "p" TPointJ > N "acc" TPointJ > N "i" TNat) s
     setupTable' =
       fn
         ( begin
-            # (pick "i" # op0 # opNumEqual)
+            # (ns4 FId P Acc I # pick I # op0 # equal)
             # opIf
-              (del "fId" # del "p" # del "acc" # del "i")
+              (del FId # del P # del Acc # del I)
               ( begin
-                  # (pick "fId" # pick "acc" # p2b # storePoint)
-                  # (roll "fId" # op1Add)
-                  # pick "p"
-                  # (roll "acc" # roll "p" # EC.ecAddJ)
-                  # (roll "i" # nat1SubUnsafe)
-                  # unname 4 setupTable'
+                  # (pick Acc # p2b # pick FId # defineConstant)
+                  # (roll FId # add1)
+                  # (pick P # roll Acc # roll P # EC.ecAddJ)
+                  # (roll I # nat1SubUnsafe # setupTable')
               )
         )
 
     p2b :: Fn (s > TPointJ) (s > TBytes)
     p2b = cast
 
-    -- Since the record size is fixed we can avoid using 'toPushOp' as an
-    -- optimization.
-    storePoint :: Fn (s > TNat > TBytes) s
-    storePoint =
-      begin
-        # (opcode OP_PUSHDATA1 # size # opRot # opCat # opCat)
-        # (b2c # opSwap # n2b)
-        # opDefine
-      where
-        size :: Fn s (s > TBytes)
-        size = nat 100 # n2b
-
-        n2b :: Fn (s > TNat) (s > TBytes)
-        n2b = cast
-
-    opcode :: OpcodeL1 -> Fn s (s > TBytes)
-    opcode op = bytes [(fromIntegral . fromEnum) op]
-
-    b2c :: Fn (s > TBytes) (s > TCode)
-    b2c = cast
-
-ecMul :: Fn (s > TTab > TNat) (s > TPoint)
-ecMul = fn (unname 2 ecMulJ # fromJacobian)
-
-ecMulJ :: Fn (s > N "tab" TTab > N "n" TNat) (s > TPointJ)
-ecMulJ =
-  begin
-    # (pick "n" # nat 0 # opNumEqual)
-    # opIf
-      (del "tab" # del "n" # makeIdentity)
+ecMul :: Env (s > TTab > TNat) (s > TPoint)
+ecMul =
+  fn
+    ( begin
+        # (ns2 Tab N # pick N # nat 0 # equal)
+        # opIf
+          (del Tab # del N # makeIdentity)
+          ( begin
+              # (roll Tab # lambda3 f # apply3)
+              # (makeIdentity # roll N # digits # V.foldr)
+          )
+        # fromJacobian
+    )
+  where
+    f :: Fn (s > TInt8 > TPointJ > TTab) (s > TPointJ)
+    f =
       ( begin
-          # (roll "tab" # roll "n" # digits # makeIdentity)
-          # (opUntil (unname 3 ecMulJLoop) # opNip # opNip)
-      )
-
-ecMulJLoop ::
-  Fn
-    (s > N "tab" TTab > N "arr" TBytes > N "q" TPointJ)
-    (s > TTab > TBytes > TPointJ > TBool)
-ecMulJLoop =
-  begin
-    # (pick "arr" # bytes [] # opEqual)
-    # opIf
-      (roll "tab" # roll "arr" # roll "q" # opTrue)
-      ( begin
-          # name "q'" (nat windowSize # roll "q" # doubleN)
-          # name2
-            "arr'"
-            "digit"
-            (roll "arr" # nat 1 # opSplit # opSwap # opBin2Num # i2nUnsafe)
-          # (pick "digit" # op0 # opGreaterThan)
+          # ns3 Digit Q Tab
+          # name Q' (nat windowSize # roll Q # doubleN)
+          # (pick Digit # toInt # op0 # greaterThan)
           # opIf
             ( begin
-                # (pick "tab" # roll "digit" # tableLookup)
-                # (roll "q'" # EC.ecAddJ)
+                # (roll Tab # roll Digit # toInt # i2nUnsafe)
+                # (tableLookup # roll Q' # EC.ecAddJ)
             )
-            (del "digit" # roll "q'")
-          # (roll "tab" # roll "arr'" # opRot # opFalse)
+            (del Tab # del Digit # roll Q')
       )
-  where
+
     tableLookup :: Fn (s > TTab > TNat) (s > TPointJ)
-    tableLookup = opAdd # getConstant # b2p
+    tableLookup = add # getConstant # b2p
 
     b2p :: Fn (s > TBytes) (s > TPointJ)
     b2p = cast
@@ -122,25 +130,22 @@ doubleN :: Fn (s > TNat > TPointJ) (s > TPointJ)
 doubleN =
   opUntil
     ( begin
-        # (opSwap # opDup # op0 # opNumEqual)
+        # (swap # dup # op0 # equal)
         # opIf
-          (opSwap # opTrue)
-          (nat1SubUnsafe # opSwap # EC.ecDoubleJ # opFalse)
+          (swap # opTrue)
+          (nat1SubUnsafe # swap # EC.ecDoubleJ # opFalse)
     )
-    # opNip
+    # nip
 
-digits :: Fn (s > TNat) (s > TBytes)
-digits = bytes [] # opSwap # opUntil (unname 2 loop) # opDrop
+digits :: Fn (s > TNat) (s > V.TVector TInt8)
+digits =
+  lambda1 (dup # ifZero (drop # nothing) (tup # just)) # swap # V.unfoldr
   where
-    loop :: Fn (s > N "arr" TBytes > N "n" TNat) (s > TBytes > TNat > TBool)
-    loop =
-      begin
-        # (pick "n" # winMod # n2i # nat 1 # opNum2Bin)
-        # (roll "arr" # opCat # roll "n" # winDiv)
-        # (opDup # op0 # opNumEqual)
+    tup :: Fn (s > TNat) (s > TTuple TInt8 TNat)
+    tup = dup # wmod # swap # wdiv # tuple
 
-    winMod = nat numValues # opMod
-    winDiv = nat numValues # opDiv
+    wmod = nat numValues # mod # n2i # fromInt
+    wdiv = nat numValues # div
 
 windowSize :: Natural
 windowSize = 4
