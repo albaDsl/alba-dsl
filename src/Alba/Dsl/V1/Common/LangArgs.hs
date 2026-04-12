@@ -32,8 +32,7 @@ where
 
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang (castStack)
-import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), type (:|))
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), castStack, type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Reverse)
 import Data.Kind (Type)
 import GHC.TypeLits

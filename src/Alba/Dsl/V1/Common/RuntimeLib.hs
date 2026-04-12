@@ -21,8 +21,8 @@ import Alba.Dsl.V1.Bch2025.Ops
 import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Stack (TCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang (begin, cast, (#))
-import Alba.Dsl.V1.Common.Stack (Fn, TBool, TBytes, TNat)
+import Alba.Dsl.V1.Common.Lang (begin, (#))
+import Alba.Dsl.V1.Common.Stack (Fn, TBool, TBytes, TNat, cast)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import Numeric.Natural (Natural)
 

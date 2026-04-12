@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     int,
     invoke1,
+    n2i,
     name,
     nat,
     ns3,
@@ -77,9 +78,6 @@ importLibrary =
 
 b2c :: Fn (s > TBytes) (s > TCode)
 b2c = cast
-
-n2i :: Fn (s > TNat) (s > TInt)
-n2i = cast
 
 -- Without transform.
 importLibrary' ::

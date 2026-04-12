@@ -6,9 +6,6 @@ module Alba.Dsl.V1.Common.Lang
     ex0,
     ex1,
     ex2,
-    natToInt,
-    cast,
-    castStack,
     branch1,
     branch2,
     branch3,
@@ -21,7 +18,7 @@ module Alba.Dsl.V1.Common.Lang
 where
 
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), TInt, TNat, type (:|))
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Data.Kind (Type)
 
@@ -41,15 +38,6 @@ ex1 prog state = let (S c fs) = prog state in S c fs
 
 ex2 :: FnA s alt (s > t1 > t2) alt -> FnA s alt (s > t1 > t2) alt
 ex2 prog state = let (S c fs) = prog state in S c fs
-
-natToInt :: Fn (s > TNat) (s > TInt)
-natToInt = cast
-
-cast :: Fn (s > t1) (s > t2)
-cast (S c fs) = let state = S c fs in state
-
-castStack :: FnA s alt s' alt'
-castStack (S c fs) = let state = S c fs in state
 
 branch1 :: forall s. Fn s (Branch1 s)
 branch1 (S c fs) = S c fs

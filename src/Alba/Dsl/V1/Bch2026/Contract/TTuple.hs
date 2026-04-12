@@ -20,8 +20,8 @@ import Alba.Dsl.V1.Bch2026
     cast,
     castStack,
     fn,
+    n2i,
     nat,
-    natToInt,
     ns2,
     opBin2Num,
     opCat,
@@ -61,7 +61,7 @@ tupleM =
     # (toBytes # opCat # cast)
   where
     addSizeTag :: Fn (s > TBytes) (s > TBytes)
-    addSizeTag = opSize # natToInt # tagSize # opNum2Bin # swap # opCat
+    addSizeTag = opSize # n2i # tagSize # opNum2Bin # swap # opCat
 
 tagSize :: Fn s (s > TNat)
 tagSize = nat 2

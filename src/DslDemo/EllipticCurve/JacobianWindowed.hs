@@ -144,9 +144,6 @@ digits = bytes [] # opSwap # opUntil (unname 2 loop) # opDrop
     winMod = nat numValues # opMod
     winDiv = nat numValues # opDiv
 
-n2i :: Fn (s > TNat) (s > TInt)
-n2i = cast
-
 windowSize :: Natural
 windowSize = 4
 

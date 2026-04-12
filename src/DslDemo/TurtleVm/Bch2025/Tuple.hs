@@ -17,7 +17,7 @@ tuple = unname 2 tuple'
       roll "fst" # opSize # box # opSwap # roll "snd" # opCat # opCat # cast
       where
         box :: Fn (s > TNat) (s > TBytes)
-        box = natToInt # nat 2 # opNum2Bin
+        box = n2i # nat 2 # opNum2Bin
 
 untuple :: Fn (s > TTuple) (s > TBytes > TBytes)
 untuple =

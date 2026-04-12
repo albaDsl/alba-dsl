@@ -20,6 +20,9 @@ module Alba.Dsl.V1.Common.Stack
     TBytes,
     TSig,
     TPubKey,
+    cast,
+    castStack,
+    n2i,
   )
 where
 
@@ -89,3 +92,12 @@ type family Remove (xs :: [Type]) (idx :: Nat) :: [Type] where
   Remove '[] _ = '[]
   Remove (xs > _) 0 = xs
   Remove (xs > x) idx = Remove xs (idx - 1) > x
+
+cast :: Fn (s > t1) (s > t2)
+cast (S c fs) = let state = S c fs in state
+
+castStack :: FnA s alt s' alt'
+castStack (S c fs) = let state = S c fs in state
+
+n2i :: Fn (s > TNat) (s > TInt)
+n2i = cast
