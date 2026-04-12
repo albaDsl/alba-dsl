@@ -7,8 +7,8 @@ module DslDemo.TurtleVm.Bch2026.TurtleOpAltStack
 where
 
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opFromAltStack, opSwap, opToAltStack)
-import Alba.Dsl.V1.Bch2026 (FnA, (.))
-import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
+import Alba.Dsl.V1.Bch2026 (FnA)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, (.))
 import DslDemo.TurtleVm.Bch2026.TurtleVmState (getState, putState)
 import Prelude ()
 

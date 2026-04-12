@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
-import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped, (∘))
 import Prelude (($))
 
 apply1 ::
@@ -47,9 +47,9 @@ applyTop = fromTyped $ fn (toTyped f)
     f :: FnU
     f =
       begin
-        . (fromTyped toPushOp . UT.opSwap . fromTyped toPushOp . UT.opSwap)
-        . (fromTyped (progCode (toTyped UT.opInvoke)) . UT.opCat . UT.opCat)
-        . (fromTyped freshId . UT.opDup . UT.opRot . UT.opSwap . UT.opDefine)
+        ∘ (fromTyped toPushOp ∘ UT.opSwap ∘ fromTyped toPushOp ∘ UT.opSwap)
+        ∘ (fromTyped (progCode (toTyped UT.opInvoke)) ∘ UT.opCat ∘ UT.opCat)
+        ∘ (fromTyped freshId ∘ UT.opDup ∘ UT.opRot ∘ UT.opSwap ∘ UT.opDefine)
 
 apply2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
@@ -67,11 +67,11 @@ applyTop2 = fromTyped $ fn (toTyped f)
     f :: FnU
     f =
       begin
-        . (fromTyped toPushOp . UT.opRot . fromTyped toPushOp . UT.opRot)
-        . (fromTyped toPushOp . UT.opRot)
-        . (fromTyped (progCode (toTyped UT.opInvoke)))
-        . (UT.opCat . UT.opCat . UT.opCat)
-        . (fromTyped freshId . UT.opDup . UT.opRot . UT.opSwap . UT.opDefine)
+        ∘ (fromTyped toPushOp ∘ UT.opRot ∘ fromTyped toPushOp ∘ UT.opRot)
+        ∘ (fromTyped toPushOp ∘ UT.opRot)
+        ∘ (fromTyped (progCode (toTyped UT.opInvoke)))
+        ∘ (UT.opCat ∘ UT.opCat ∘ UT.opCat)
+        ∘ (fromTyped freshId ∘ UT.opDup ∘ UT.opRot ∘ UT.opSwap ∘ UT.opDefine)
 
 apply3 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>

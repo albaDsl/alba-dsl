@@ -1,7 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Common.StackUntyped
-  ( SU (..),
+  ( (.),
+    (∘),
+    SU (..),
     F,
     FnU,
     toTyped,
@@ -13,6 +15,14 @@ import Alba.Dsl.V1.Common.FunctionState (FunctionState)
 import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3)
 import Alba.Dsl.V1.Common.Stack (FnA, S (..))
 import GHC.Stack (HasCallStack)
+import Prelude ()
+import Prelude qualified as P
+
+(.) :: (SU -> SU) -> (SU -> SU) -> (SU -> SU)
+(.) op1 op2 = op2 P.. op1
+
+(∘) :: (SU -> SU) -> (SU -> SU) -> (SU -> SU)
+(∘) = (.)
 
 data SU = SU
   { c :: CodeL3,

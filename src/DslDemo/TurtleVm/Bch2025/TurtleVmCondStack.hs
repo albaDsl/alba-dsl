@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2025
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
-import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped, (∘))
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, ifJust)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isConditionalOp, isSingleByteOp)
 import Prelude (Int, pred)
@@ -61,9 +61,9 @@ condStackExecuteP :: Int -> Fn (s > TBytes) (s > TBool)
 condStackExecuteP maxCsDepth =
   toTyped
     ( begin
-        . repeatProg maxCsDepth (fromTyped check)
-        . UT.opDrop
-        . repeatProg (pred maxCsDepth) UT.opBoolAnd
+        ∘ repeatProg maxCsDepth (fromTyped check)
+        ∘ UT.opDrop
+        ∘ repeatProg (pred maxCsDepth) UT.opBoolAnd
     )
   where
     check :: Fn (s > TBytes) (s > TBool > TBytes)

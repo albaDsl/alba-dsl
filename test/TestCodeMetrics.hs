@@ -43,7 +43,7 @@ import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
-import Alba.Dsl.V1.Common.StackUntyped (toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (toTyped, (.))
 import Alba.Dsl.V1.Common.StackUntyped qualified as UT
 import Alba.Vm.Bch2026 (VmMetrics (..), b2SeUnsafe)
 import Data.ByteString.Lazy.Char8 (pack)
@@ -64,7 +64,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
 import TestUtils2026 (emptyStacks, evaluateScript)
-import Prelude hiding (div, mod)
+import Prelude hiding (div, mod, (.))
 import Prelude qualified as P
 
 testCodeMetrics :: TestTree
@@ -150,7 +150,7 @@ goldenTest dir testName test =
 
 toFileName :: String -> FilePath
 toFileName =
-  take 80 . map (\c -> if isAlphaNum c then c else '_') . makeValid
+  take 80 P.. map (\c -> if isAlphaNum c then c else '_') P.. makeValid
 
 -- Gives size of code + function table.
 sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String
@@ -182,7 +182,7 @@ turtleVmCostOf prog =
       cr =
         compile'
           O1
-          (toTyped $ T2026.turtleVmInit 10 ∘ consumeAll T2026.turtleVmEval)
+          (toTyped $ T2026.turtleVmInit 10 . consumeAll T2026.turtleVmEval)
       stacks = (S.fromList $ replicate count (b2SeUnsafe code), S.empty)
       res = evaluateScript cr.code stacks minimalContext
    in case res of
@@ -195,7 +195,7 @@ turtleVmCostOf prog =
         Left (err, _) -> error (show err)
   where
     consumeAll :: UT.FnU -> UT.FnU
-    consumeAll prog' = UT.opUntil (prog' ∘ UT.opDepth ∘ UT.op0 ∘ UT.opEqual)
+    consumeAll prog' = UT.opUntil (prog' . UT.opDepth . UT.op0 . UT.opEqual)
 
 arithmetic :: FnC
 arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify

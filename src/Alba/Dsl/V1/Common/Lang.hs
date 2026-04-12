@@ -22,13 +22,19 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Data.Kind (Type)
-import Prelude (flip, id)
+import Prelude (id)
 import Prelude qualified as P
 
-(.) :: (a -> b) -> (b -> c) -> (a -> c)
-(.) = flip (P..)
+(.) ::
+  (S s1 alt1 -> S s2 alt2) ->
+  (S s2 alt2 -> S s3 alt3) ->
+  (S s1 alt1 -> S s3 alt3)
+(.) op1 op2 = op2 P.. op1
 
-(∘) :: (a -> b) -> (b -> c) -> (a -> c)
+(∘) ::
+  (S s1 alt1 -> S s2 alt2) ->
+  (S s2 alt2 -> S s3 alt3) ->
+  (S s1 alt1 -> S s3 alt3)
 (∘) = (.)
 
 begin :: a -> a

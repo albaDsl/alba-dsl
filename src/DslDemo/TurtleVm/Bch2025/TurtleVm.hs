@@ -17,8 +17,8 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSwap,
     opUnless,
   )
-import Alba.Dsl.V1.Common.Lang (begin, (.))
-import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
+import Alba.Dsl.V1.Common.Lang (begin)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, (.))
 import DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic (turtleOpArithmetic)
 import DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic (turtleOpBitwiseLogic)
 import DslDemo.TurtleVm.Bch2025.TurtleOpBytes (turtleOpBytes)

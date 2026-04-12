@@ -36,7 +36,7 @@ import Alba.Dsl.V1.Bch2025
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
-import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped, (∘))
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
 import Prelude hiding (drop, (.))
 
@@ -68,7 +68,7 @@ verifyBytecode :: Fn (s > TBytes) (s > TBytes)
 verifyBytecode = opDup . bytes [255] . opSwap . toTyped checkAll
   where
     checkAll :: FnU
-    checkAll = repeatProg progMaxSize (fromTyped check) . UT.op2Drop
+    checkAll = repeatProg progMaxSize (fromTyped check) ∘ UT.op2Drop
 
     check ::
       Fn

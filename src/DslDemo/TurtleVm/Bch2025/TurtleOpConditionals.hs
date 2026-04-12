@@ -13,8 +13,8 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opReturn,
     opVerify,
   )
-import Alba.Dsl.V1.Common.Lang (begin, (.))
-import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
+import Alba.Dsl.V1.Common.Lang (begin)
+import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, (.))
 import DslDemo.TurtleVm.Bch2025.TurtleVmCondStack (condStackExecuteP)
 import DslDemo.TurtleVm.Bch2025.TurtleVmState
   ( dropCondStack,
