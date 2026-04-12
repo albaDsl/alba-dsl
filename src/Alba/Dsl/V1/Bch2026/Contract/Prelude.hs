@@ -2,41 +2,50 @@
 
 module Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( module Alba.Dsl.V1.Bch2025.Contract.Prelude,
-    iterate,
+    module Alba.Dsl.V1.Bch2026.Contract.Applicative,
+    module Alba.Dsl.V1.Bch2026.Contract.BlobEq,
+    module Alba.Dsl.V1.Bch2026.Contract.BlobEqClass,
+    module Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils,
+    module Alba.Dsl.V1.Bch2026.Contract.Error,
+    module Alba.Dsl.V1.Bch2026.Contract.ExternalLib,
+    module Alba.Dsl.V1.Bch2026.Contract.LzssBit,
+    module Alba.Dsl.V1.Bch2026.Contract.Integral,
+    module Alba.Dsl.V1.Bch2026.Contract.Math,
+    module Alba.Dsl.V1.Bch2026.Contract.Misc,
+    module Alba.Dsl.V1.Bch2026.Contract.Ord,
+    module Alba.Dsl.V1.Bch2026.Contract.PackFs,
+    module Alba.Dsl.V1.Bch2026.Contract.PartialApplication,
+    module Alba.Dsl.V1.Bch2026.Contract.Shorthand,
+    module Alba.Dsl.V1.Bch2026.Contract.TBytes128,
+    module Alba.Dsl.V1.Bch2026.Contract.TEither,
+    module Alba.Dsl.V1.Bch2026.Contract.TInt64,
+    module Alba.Dsl.V1.Bch2026.Contract.TInt8,
+    module Alba.Dsl.V1.Bch2026.Contract.TMaybe,
+    module Alba.Dsl.V1.Bch2026.Contract.TTuple,
+    module Alba.Dsl.V1.Bch2026.Contract.TUnit,
   )
 where
 
-import Alba.Dsl.V1.Bch2025
-  ( TNat,
-    nat,
-    opDrop,
-    opFromAltStack,
-    opNop,
-    opToAltStack,
-  )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude
-import Alba.Dsl.V1.Bch2025.Ops (opDup, opNumEqual)
-import Alba.Dsl.V1.Bch2026.Ops (opUntil)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang (begin, (#))
-import Alba.Dsl.V1.Common.Stack (FnA, TBool)
-import Numeric.Natural (Natural)
-import Prelude hiding (iterate)
-
-iterate ::
-  forall s alt.
-  Natural ->
-  FnA s (alt > TNat) s (alt > TNat) ->
-  FnA s alt s alt
-iterate n f =
-  if n > 0
-    then nat (fromIntegral n) # opUntil body # opDrop
-    else opNop
-  where
-    body :: FnA (s > TNat) alt (s > TNat > TBool) alt
-    body =
-      begin
-        # opToAltStack
-        # f
-        # (opFromAltStack # nat1SubUnsafe)
-        # (opDup # nat 0 # opNumEqual)
+import Alba.Dsl.V1.Bch2026.Contract.Applicative
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+import Alba.Dsl.V1.Bch2026.Contract.Error
+import Alba.Dsl.V1.Bch2026.Contract.ExternalLib
+import Alba.Dsl.V1.Bch2026.Contract.Integral
+import Alba.Dsl.V1.Bch2026.Contract.LzssBit
+import Alba.Dsl.V1.Bch2026.Contract.Math
+import Alba.Dsl.V1.Bch2026.Contract.Misc
+import Alba.Dsl.V1.Bch2026.Contract.Ord
+import Alba.Dsl.V1.Bch2026.Contract.PackFs
+import Alba.Dsl.V1.Bch2026.Contract.PartialApplication
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand
+import Alba.Dsl.V1.Bch2026.Contract.TBytes128
+import Alba.Dsl.V1.Bch2026.Contract.TEither
+import Alba.Dsl.V1.Bch2026.Contract.TInt64
+import Alba.Dsl.V1.Bch2026.Contract.TInt8
+import Alba.Dsl.V1.Bch2026.Contract.TMaybe
+import Alba.Dsl.V1.Bch2026.Contract.TTuple
+import Alba.Dsl.V1.Bch2026.Contract.TUnit

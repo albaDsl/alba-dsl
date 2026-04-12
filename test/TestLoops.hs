@@ -3,9 +3,13 @@
 module TestLoops (testLoops) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Math (factorial, pow)
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (iterate, nat1SubUnsafe)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    factorial,
+    iterate,
+    nat1SubUnsafe,
+    pow,
+  )
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)

@@ -2,8 +2,7 @@
 
 module DslDemo.Exponentiation (pow) where
 
-import Alba.Dsl.V1.Bch2025.Contract.Math (isEven)
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
+import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, isEven, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
 
 pow :: Fn (s > TInt > TNat) (s > TInt)

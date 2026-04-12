@@ -2,9 +2,8 @@
 
 module DslDemo.EllipticCurve.Affine (ecDouble, ecAdd, ecMul) where
 
-import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (isZero)
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero)
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
 
@@ -41,7 +40,7 @@ ecMul' =
               # ex1 (pick "n" # isOdd)
               # opWhen (pick "p" # ecAdd)
           )
-        # (pick "n" # half)
+        # (pick "n" # halve)
         # (roll "p" # ecDouble)
         # (roll "r2")
-        # (roll "n" # half # isZero)
+        # (roll "n" # halve # isZero)

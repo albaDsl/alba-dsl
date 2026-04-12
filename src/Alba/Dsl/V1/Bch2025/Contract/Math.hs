@@ -2,7 +2,7 @@ module Alba.Dsl.V1.Bch2025.Contract.Math
   ( isEven,
     isOdd,
     square,
-    half,
+    halve,
   )
 where
 
@@ -30,5 +30,5 @@ isOdd = op2 # opMod # op1 # opNumEqual
 square :: (StackNum x1) => Fn (s > x1) (s > x1)
 square = opDup # opMul
 
-half :: (StackNum x1) => Fn (s > x1) (s > x1)
-half = op2 # opDiv
+halve :: (StackNum x1) => Fn (s > x1) (s > x1)
+halve = op2 # opDiv

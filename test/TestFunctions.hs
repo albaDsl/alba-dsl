@@ -4,12 +4,14 @@ module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
-import Alba.Dsl.V1.Bch2026.Contract.PartialApplication (apply2, apply3_2)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (swap)
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 ()
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    Integral (..),
+    TInt8,
+    apply2,
+    apply3_2,
+    swap,
+  )
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector, generate, reverse)
 import Data.ByteString qualified as B
 import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)

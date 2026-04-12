@@ -1,6 +1,5 @@
 module Alba.Dsl.V1.Bch2026.Contract.Math
-  ( module Alba.Dsl.V1.Bch2025.Contract.Math,
-    pow,
+  ( pow,
     pow',
     pow'',
     factorial,
@@ -30,10 +29,14 @@ import Alba.Dsl.V1.Bch2025
     roll,
     unname,
   )
-import Alba.Dsl.V1.Bch2025.Contract.Math
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, isZero)
+import Alba.Dsl.V1.Bch2025.Contract.Prelude
+  ( halve,
+    ifZero,
+    isOdd,
+    isZero,
+    nat1SubUnsafe,
+  )
 import Alba.Dsl.V1.Bch2025.Ops (opDup)
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
@@ -64,7 +67,7 @@ pow' mul =
         # opWhen (pick "b" # mul) -- <args> res'
         # (roll "b" # square') -- <args> res' b
         # opSwap -- <args> b res'
-        # (roll "n" # half) -- <args> b res' n
+        # (roll "n" # halve) -- <args> b res' n
         # ex1 (opDup # isZero) -- b res' n zero?
         # opRot -- b n zero? res'
         # opSwap -- b n res' zero?
@@ -106,7 +109,7 @@ pow'' mul =
         # opWhen (pick "b" # pick "data" # mul) -- <args> res'
         # (roll "b" # pick "data" # square') -- <args> res' b'
         # opSwap -- <args> b' res'
-        # (roll "n" # half) -- <args> b' res' n'
+        # (roll "n" # halve) -- <args> b' res' n'
         # ex1 (opDup # isZero) -- <args> b' res' n' zero?
         # opRot -- <args> b' n' zero? res'
         # roll "data" -- b' n' zero? res' data

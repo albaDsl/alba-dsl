@@ -84,6 +84,7 @@ library
   exposed-modules:
       Alba.Dsl.V1.Bch2025,
       Alba.Dsl.V1.Bch2025.Contract.Math,
+      Alba.Dsl.V1.Bch2025.Contract.Misc,
       Alba.Dsl.V1.Bch2025.Contract.Prelude,
       Alba.Dsl.V1.Bch2025.Conversion,
       Alba.Dsl.V1.Bch2025.Infix,
@@ -109,6 +110,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.LzssBit,
       Alba.Dsl.V1.Bch2026.Contract.Integral,
       Alba.Dsl.V1.Bch2026.Contract.Math,
+      Alba.Dsl.V1.Bch2026.Contract.Misc,
       Alba.Dsl.V1.Bch2026.Contract.Ord,
       Alba.Dsl.V1.Bch2026.Contract.PackFs,
       Alba.Dsl.V1.Bch2026.Contract.PartialApplication,

@@ -9,8 +9,7 @@ module DslDemo.EllipticCurve.Jacobian
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Math (half, isOdd)
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (isZero)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero)
 import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
@@ -62,10 +61,10 @@ ecMulJ = unname 2 ecMulJ'
         # name
           "r2"
           (roll "r" # pick "n" # isOdd # opWhen (pick "p" # EC.ecAddJ))
-        # (pick "n" # half)
+        # (pick "n" # halve)
         # (roll "p" # EC.ecDoubleJ)
         # roll "r2"
-        # (roll "n" # half # isZero)
+        # (roll "n" # halve # isZero)
 
 toJacobian :: Fn (s > TPoint) (s > TPointJ)
 toJacobian = fn (unname 1 toJacobian')
