@@ -10,6 +10,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     cast,
     constant,
+    fn,
     int,
     lambda1,
     nat,
@@ -70,4 +71,4 @@ int8 :: Integer -> Fn s (s > TInt8)
 int8 x = assert (x >= int8Min && x <= int8Max) (int x # cast)
 
 toInt8 :: Fn (s > TInt) (s > TInt8)
-toInt8 = dup # int int8Min # int int8Max # opWithin # opVerify # cast
+toInt8 = fn (dup # int int8Min # int int8Max # opWithin # opVerify # cast)

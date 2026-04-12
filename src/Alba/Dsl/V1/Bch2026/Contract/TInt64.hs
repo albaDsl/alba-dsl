@@ -10,6 +10,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     cast,
     constant,
+    fn,
     int,
     lambda1,
     nat,
@@ -70,4 +71,4 @@ int64 :: Integer -> Fn s (s > TInt64)
 int64 x = assert (x >= int64Min && x <= int64Max) (int x # cast)
 
 toInt64 :: Fn (s > TInt) (s > TInt64)
-toInt64 = dup # int int64Min # int int64Max # opWithin # opVerify # cast
+toInt64 = fn (dup # int int64Min # int int64Max # opWithin # opVerify # cast)
