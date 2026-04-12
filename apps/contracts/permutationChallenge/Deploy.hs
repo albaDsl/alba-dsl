@@ -12,7 +12,7 @@ import Alba.Dsl.V1.Bch2025
     compile,
     setScriptSig,
     signAll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
@@ -27,6 +27,7 @@ import Crypto.Secp256k1 (Ctx)
 import Data.Maybe (fromMaybe)
 import Data.Word (Word64)
 import Params (deployFee)
+import Prelude hiding ((.))
 
 -- outpoint: Points at the UTXO holding funds under alice's key.
 deployTx :: Ctx -> Network -> OutPoint -> IO Tx
@@ -44,7 +45,7 @@ deployTx ctx net outpoint = do
     err2 = error "Couldn't load wallet funding Tx."
 
     scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
-    scriptSig pubKey sig = bytes' pubKey ∘ bytes' sig
+    scriptSig pubKey sig = bytes' pubKey . bytes' sig
 
 txTemplate :: OutPoint -> Word64 -> Tx
 txTemplate outpoint walletAmount =

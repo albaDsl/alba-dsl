@@ -6,13 +6,13 @@ import Alba.Dsl.V1.Bch2026
 import Prelude ()
 
 error :: FnA (s > TBytes) alt s' alt'
-error = opFalse ∘ opVerify ∘ castStack
+error = opFalse . opVerify . castStack
 
 error' :: FnA s alt s' alt'
-error' = opFalse ∘ opVerify ∘ castStack
+error' = opFalse . opVerify . castStack
 
 errCanNotHappen :: FnA (s > TBytes) alt s' alt'
-errCanNotHappen = bytes "E0" ∘ error
+errCanNotHappen = bytes "E0" . error
 
 errPartialFunction :: FnA (s > TBytes) alt s' alt'
-errPartialFunction = bytes "E1" ∘ error
+errPartialFunction = bytes "E1" . error

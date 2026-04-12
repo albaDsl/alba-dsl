@@ -17,10 +17,10 @@ import Alba.Dsl.V1.Bch2025.Contract.Prelude
 import Alba.Dsl.V1.Bch2025.Ops (opDup, opNumEqual)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang (begin, (∘))
+import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Alba.Dsl.V1.Common.Stack (FnA, TBool)
 import Numeric.Natural (Natural)
-import Prelude hiding (iterate)
+import Prelude hiding (iterate, (.))
 
 iterate ::
   forall s alt.
@@ -29,13 +29,13 @@ iterate ::
   FnA s alt s alt
 iterate n f =
   if n > 0
-    then nat (fromIntegral n) ∘ opUntil body ∘ opDrop
+    then nat (fromIntegral n) . opUntil body . opDrop
     else opNop
   where
     body :: FnA (s > TNat) alt (s > TNat > TBool) alt
     body =
       begin
-        ∘ opToAltStack
-        ∘ f
-        ∘ (opFromAltStack ∘ nat1SubUnsafe)
-        ∘ (opDup ∘ nat 0 ∘ opNumEqual)
+        . opToAltStack
+        . f
+        . (opFromAltStack . nat1SubUnsafe)
+        . (opDup . nat 0 . opNumEqual)

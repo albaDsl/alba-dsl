@@ -1,12 +1,11 @@
 -- Copyright (c) 2025 albaDsl
 
 module DemoPrelude
-  ( -- module Alba.Dsl.V1.Bch2026,
-    module Alba.Dsl.V1.Bch2026.Contract.Math,
+  ( module Dsl,
+    module Alba.Dsl.V1.Bch2026.Contract.Prelude,
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
-    module Dsl,
     Natural,
     c,
     c',
@@ -24,7 +23,7 @@ where
 
 import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progSize)
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
-import Alba.Dsl.V1.Bch2026.Contract.Math
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
 import Alba.Misc.Logging (dumpLogToFile)
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026 hiding (FunctionTable)
@@ -35,17 +34,19 @@ import Data.Maybe (fromJust)
 import Data.Sequence qualified as S
 import Data.Text.Chart (height, options, plotWith)
 import Numeric.Natural (Natural)
-import Test.QuickCheck hiding (function, generate)
+import Test.QuickCheck hiding (function, generate, getSize, within)
 import Text.Printf (printf)
+import Prelude hiding (error, (.))
+import Prelude qualified as P
 
 c :: (S s Base -> S s' alt') -> CodeL1
-c = compile Dsl.O1
+c = compile O1
 
 c' :: (S s Base -> S s' alt') -> CompilationResult
-c' = compile' Dsl.O1
+c' = compile' O1
 
 ev :: CodeL1 -> Integer -> Integer
-ev code x = toInt $ evaluateScript txCtx startState'
+ev code x = toIntRes $ evaluateScript txCtx startState'
   where
     txCtx = fromJust $ mkTxContext undefined 0 undefined
     startState' =
@@ -55,12 +56,12 @@ ev code x = toInt $ evaluateScript txCtx startState'
           logData = Nothing
         }
 
-    toInt :: Either (ScriptError, Maybe VmState) VmState -> Integer
-    toInt (Right state) =
+    toIntRes :: Either (ScriptError, Maybe VmState) VmState -> Integer
+    toIntRes (Right state) =
       fromRight
-        (error "Couldn't convert stack element to integer.")
+        (P.error "Couldn't convert stack element to integer.")
         (stackElementToInteger vmParamsStandard $ S.reverse state.s `S.index` 0)
-    toInt (Left err) = error (show err)
+    toIntRes (Left err) = P.error (show err)
 
 paramsWithLargeStackLimits :: VmParams
 paramsWithLargeStackLimits = largerLimits vmParamsStandard
@@ -82,7 +83,7 @@ evl code x = dump $ evaluateScript txCtx startState'
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
     dump (Right res) = dumpLog defaultDisplayOpts res
-    dump (Left (res, _)) = error (show res)
+    dump (Left (res, _)) = P.error (show res)
 
 evlh :: CompilationResult -> Integer -> IO ()
 evlh cr x = dump $ evaluateScript txCtx startState'
@@ -96,7 +97,7 @@ evlh cr x = dump $ evaluateScript txCtx startState'
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
     dump (Right res) = dumpLogToFile (Just cr) res.logData "log.html"
-    dump (Left (res, _)) = error (show res)
+    dump (Left (res, _)) = P.error (show res)
 
 -- Prints VM metrics for the run.
 evm :: CodeL1 -> Integer -> IO ()
@@ -112,7 +113,7 @@ evm code x = dump $ evaluateScript txCtx startState'
 
     dump :: Either (ScriptError, Maybe VmState) VmState -> IO ()
     dump res = do
-      let state = fromRight (error "") res
+      let state = fromRight (P.error "") res
       dumpLog defaultDisplayOpts state
       dumpMetrics state
       printf "\nVM Limits are maxed out, so ignore the percentages above.\n"

@@ -27,7 +27,7 @@ import Alba.Dsl.V1.Bch2025
     opSize,
     opSplit,
     roll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -56,14 +56,14 @@ tuple = fn tupleM
 tupleM :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
 tupleM =
   begin
-    ∘ (ns2 #fst #snd ∘ roll #fst ∘ valToBytes ∘ addSizeTag ∘ roll #snd)
-    ∘ (valToBytes ∘ opCat ∘ fromRaw)
+    . (ns2 #fst #snd . roll #fst . valToBytes . addSizeTag . roll #snd)
+    . (valToBytes . opCat . fromRaw)
   where
     valToBytes :: Fn (s > a) (s > TBytes)
     valToBytes = cast
 
     addSizeTag :: Fn (s > TBytes) (s > TBytes)
-    addSizeTag = opSize ∘ n2i ∘ tagSize ∘ opNum2Bin ∘ swap ∘ opCat
+    addSizeTag = opSize . n2i . tagSize . opNum2Bin . swap . opCat
 
 tagSize :: Fn s (s > TNat)
 tagSize = nat 2
@@ -72,18 +72,18 @@ untuple :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a > b)
 untuple =
   fn
     ( begin
-        ∘ (toRaw ∘ tagSize ∘ opSplit ∘ swap ∘ opBin2Num ∘ i2nUnsafe ∘ opSplit)
-        ∘ (bytesToVal ∘ swap ∘ bytesToVal ∘ swap)
+        . (toRaw . tagSize . opSplit . swap . opBin2Num . i2nUnsafe . opSplit)
+        . (bytesToVal . swap . bytesToVal . swap)
     )
   where
     bytesToVal :: Fn (s > TBytes) (s > a)
     bytesToVal = cast
 
 fst :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a)
-fst = untuple ∘ drop
+fst = untuple . drop
 
 snd :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > b)
-snd = untuple ∘ nip
+snd = untuple . nip
 
 toRaw :: Fn (s > TTuple a b) (s > TBytes)
 toRaw = cast

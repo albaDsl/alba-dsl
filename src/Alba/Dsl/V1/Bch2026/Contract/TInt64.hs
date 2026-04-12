@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2026
     opSub,
     opVerify,
     opWithin,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -59,44 +59,44 @@ instance BlobEq TInt64 where
   blobEqRec = blobEqRecord
 
 instance Ord TInt64 where
-  lessThan = toRaw2 ∘ opLessThan
-  lessThanOrEqual = toRaw2 ∘ opLessThanOrEqual
-  greaterThan = toRaw2 ∘ opGreaterThan
-  greaterThanOrEqual = toRaw2 ∘ opGreaterThanOrEqual
-  min = toRaw2 ∘ opMin ∘ fromRaw
-  max = toRaw2 ∘ opMax ∘ fromRaw
-  within = toRaw3 ∘ opWithin
+  lessThan = toRaw2 . opLessThan
+  lessThanOrEqual = toRaw2 . opLessThanOrEqual
+  greaterThan = toRaw2 . opGreaterThan
+  greaterThanOrEqual = toRaw2 . opGreaterThanOrEqual
+  min = toRaw2 . opMin . fromRaw
+  max = toRaw2 . opMax . fromRaw
+  within = toRaw3 . opWithin
   blobOrdRec = undefined -- FIXME: implement.
 
 instance Integral TInt64 where
-  add = toRaw2 ∘ opAdd ∘ fromInt
-  add1 = toRaw ∘ op1Add ∘ fromInt
-  sub = toRaw2 ∘ opSub ∘ fromInt
-  sub1 = toRaw ∘ op1Sub ∘ fromInt
-  mul = toRaw2 ∘ opMul ∘ fromInt
-  div = toRaw2 ∘ opDiv ∘ fromInt
-  mod = toRaw2 ∘ opMod ∘ fromInt
-  negate = toRaw ∘ opNegate ∘ fromRaw
-  abs = toRaw ∘ opAbs ∘ fromRaw
+  add = toRaw2 . opAdd . fromInt
+  add1 = toRaw . op1Add . fromInt
+  sub = toRaw2 . opSub . fromInt
+  sub1 = toRaw . op1Sub . fromInt
+  mul = toRaw2 . opMul . fromInt
+  div = toRaw2 . opDiv . fromInt
+  mod = toRaw2 . opMod . fromInt
+  negate = toRaw . opNegate . fromRaw
+  abs = toRaw . opAbs . fromRaw
   fromInt =
-    fn (dup ∘ int int64Min ∘ int int64Max ∘ opWithin ∘ opVerify ∘ fromRaw)
+    fn (dup . int int64Min . int int64Max . opWithin . opVerify . fromRaw)
   toInt = toRaw
 
 instance PackFs TInt64 where
   sizeConst = 8
   size = nat (sizeConst @TInt64)
-  pack = toRaw ∘ size @TInt64 ∘ opNum2Bin
-  unpack = opBin2Num ∘ fromRaw
+  pack = toRaw . size @TInt64 . opNum2Bin
+  unpack = opBin2Num . fromRaw
   packFsRec = int64PackFs
 
 int64PackFs :: Fn s (s > TPackFs TInt64)
 int64PackFs =
   constant
     ( begin
-        ∘ size @TInt64
-        ∘ lambda1 (pack @TInt64)
-        ∘ lambda1 (unpack @TInt64)
-        ∘ mkPackFsM
+        . size @TInt64
+        . lambda1 (pack @TInt64)
+        . lambda1 (unpack @TInt64)
+        . mkPackFsM
     )
 
 int64Max :: Integer
@@ -106,7 +106,7 @@ int64Min :: Integer
 int64Min = -int64Max
 
 int64 :: Integer -> Fn s (s > TInt64)
-int64 x = assert (x >= int64Min && x <= int64Max) (int x ∘ fromRaw)
+int64 x = assert (x >= int64Min && x <= int64Max) (int x . fromRaw)
 
 fromRaw :: Fn (s > TInt) (s > TInt64)
 fromRaw = cast

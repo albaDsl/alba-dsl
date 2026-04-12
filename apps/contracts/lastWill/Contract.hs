@@ -34,7 +34,7 @@ import Alba.Dsl.V1.Bch2025
     opUtxoValue,
     roll,
     timeSequence,
-    (∘),
+    (.),
     type (:|),
     type (>),
   )
@@ -42,6 +42,7 @@ import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSub)
 import Data.Word (Word64)
 import Numeric.Natural (Natural)
 import Params (fee, inheritDelay, refreshDelay)
+import Prelude hiding ((.))
 
 type LastWill =
   Contract
@@ -67,56 +68,56 @@ contract = MkContract $ entry3 refresh withdraw inherit
 refresh :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 refresh =
   begin
-    ∘ ( begin
-          ∘ (roll #sig ∘ roll #refreshHash ∘ roll #pubKey)
-          ∘ verifyAuthorized
+    . ( begin
+          . (roll #sig . roll #refreshHash . roll #pubKey)
+          . verifyAuthorized
       )
-    ∘ verifyOutputAmount 0
-    ∘ verifyOutputScript 0
-    ∘ verifySequence refreshDelay
-    ∘ (del #withdrawHash ∘ del #inheritHash)
-    ∘ opTrue
+    . verifyOutputAmount 0
+    . verifyOutputScript 0
+    . verifySequence refreshDelay
+    . (del #withdrawHash . del #inheritHash)
+    . opTrue
   where
     verifyOutputAmount :: Natural -> FnC
     verifyOutputAmount outputIndex =
       begin
-        ∘ (opInputIndex ∘ opUtxoValue ∘ subMinerFee fee)
-        ∘ (nat (fromIntegral outputIndex) ∘ opOutputValue)
-        ∘ opNumEqualVerify
+        . (opInputIndex . opUtxoValue . subMinerFee fee)
+        . (nat (fromIntegral outputIndex) . opOutputValue)
+        . opNumEqualVerify
 
     subMinerFee :: Word64 -> Fn (s > TNat) (s > TNat)
-    subMinerFee minerFee = nat (fromIntegral minerFee) ∘ natSub
+    subMinerFee minerFee = nat (fromIntegral minerFee) . natSub
 
     verifyOutputScript :: Natural -> FnC
     verifyOutputScript outputIndex =
       begin
-        ∘ (opInputIndex ∘ opUtxoBytecode)
-        ∘ (nat (fromIntegral outputIndex) ∘ opOutputBytecode)
-        ∘ opEqualVerify
+        . (opInputIndex . opUtxoBytecode)
+        . (nat (fromIntegral outputIndex) . opOutputBytecode)
+        . opEqualVerify
 
 withdraw :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 withdraw =
   begin
-    ∘ ( begin
-          ∘ (roll #sig ∘ roll #withdrawHash ∘ roll #pubKey)
-          ∘ verifyAuthorized
+    . ( begin
+          . (roll #sig . roll #withdrawHash . roll #pubKey)
+          . verifyAuthorized
       )
-    ∘ (del #refreshHash ∘ del #inheritHash)
-    ∘ opTrue
+    . (del #refreshHash . del #inheritHash)
+    . opTrue
 
 inherit :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
 inherit =
   begin
-    ∘ ( begin
-          ∘ (roll #sig ∘ roll #inheritHash ∘ roll #pubKey)
-          ∘ verifyAuthorized
+    . ( begin
+          . (roll #sig . roll #inheritHash . roll #pubKey)
+          . verifyAuthorized
       )
-    ∘ verifySequence inheritDelay
-    ∘ (del #refreshHash ∘ del #withdrawHash)
-    ∘ opTrue
+    . verifySequence inheritDelay
+    . (del #refreshHash . del #withdrawHash)
+    . opTrue
 
 verifyAuthorized :: Fn (s > TSig > THash160 > TPubKey) s
-verifyAuthorized = opDup ∘ opHash160 ∘ opRot ∘ opEqualVerify ∘ opCheckSigVerify
+verifyAuthorized = opDup . opHash160 . opRot . opEqualVerify . opCheckSigVerify
 
 verifySequence :: Natural -> FnC
-verifySequence t = nat (timeSequence t) ∘ opCheckSequenceVerify ∘ opDrop
+verifySequence t = nat (timeSequence t) . opCheckSequenceVerify . opDrop

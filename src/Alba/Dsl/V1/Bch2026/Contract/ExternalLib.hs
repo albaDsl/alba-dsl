@@ -42,12 +42,12 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     un,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Alba.Dsl.V1.Bch2026.TxDsl (simpleWrapChunkSize)
-import Prelude hiding (drop)
+import Prelude (fromIntegral, undefined)
 
 importLibrary ::
   Fn
@@ -56,22 +56,22 @@ importLibrary ::
 importLibrary =
   fn
     ( begin
-        ∘ ns6 #fId #transform #startInput #numInputs #size #hash
-        ∘ (roll #startInput ∘ roll #numInputs ∘ n2i ∘ bytes [])
-        ∘ (opUntil loop ∘ nip ∘ nip)
-        ∘ (roll #size ∘ opSplit ∘ drop ∘ roll #transform ∘ invoke1)
-        ∘ (dup ∘ opHash256 ∘ roll #hash ∘ opEqualVerify ∘ b2c)
-        ∘ (pick #fId ∘ opDefine ∘ roll #fId ∘ opInvoke libInit)
+        . ns6 #fId #transform #startInput #numInputs #size #hash
+        . (roll #startInput . roll #numInputs . n2i . bytes [])
+        . (opUntil loop . nip . nip)
+        . (roll #size . opSplit . drop . roll #transform . invoke1)
+        . (dup . opHash256 . roll #hash . opEqualVerify . b2c)
+        . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
     loop :: Loop (s > TNat > TInt > TBytes)
     loop =
       begin
-        ∘ ns3 #input #cnt #acc
-        ∘ (pick #input ∘ op1Add)
-        ∘ name #cnt' (roll #cnt ∘ op1Sub)
-        ∘ (roll #acc ∘ roll #input ∘ opUtxoBytecode ∘ simpleUnwrapProg)
-        ∘ (opCat ∘ pick #cnt' ∘ int 0 ∘ opNumEqual ∘ un #cnt')
+        . ns3 #input #cnt #acc
+        . (pick #input . op1Add)
+        . name #cnt' (roll #cnt . op1Sub)
+        . (roll #acc . roll #input . opUtxoBytecode . simpleUnwrapProg)
+        . (opCat . pick #cnt' . int 0 . opNumEqual . un #cnt')
 
     libInit :: Fn s s
     libInit = undefined
@@ -87,22 +87,22 @@ importLibrary' ::
 importLibrary' =
   fn
     ( begin
-        ∘ ns5 #fId #startInput #numInputs #size #hash
-        ∘ (roll #startInput ∘ roll #numInputs ∘ n2i ∘ bytes [])
-        ∘ (opUntil loop ∘ nip ∘ nip)
-        ∘ (roll #size ∘ opSplit ∘ drop)
-        ∘ (dup ∘ opHash256 ∘ roll #hash ∘ opEqualVerify ∘ b2c)
-        ∘ (pick #fId ∘ opDefine ∘ roll #fId ∘ opInvoke libInit)
+        . ns5 #fId #startInput #numInputs #size #hash
+        . (roll #startInput . roll #numInputs . n2i . bytes [])
+        . (opUntil loop . nip . nip)
+        . (roll #size . opSplit . drop)
+        . (dup . opHash256 . roll #hash . opEqualVerify . b2c)
+        . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
     loop :: Loop (s > TNat > TInt > TBytes)
     loop =
       begin
-        ∘ ns3 #input #cnt #acc
-        ∘ (pick #input ∘ op1Add)
-        ∘ name #cnt' (roll #cnt ∘ op1Sub)
-        ∘ (roll #acc ∘ roll #input ∘ opUtxoBytecode ∘ simpleUnwrapProg)
-        ∘ (opCat ∘ pick #cnt' ∘ int 0 ∘ opNumEqual ∘ un #cnt')
+        . ns3 #input #cnt #acc
+        . (pick #input . op1Add)
+        . name #cnt' (roll #cnt . op1Sub)
+        . (roll #acc . roll #input . opUtxoBytecode . simpleUnwrapProg)
+        . (opCat . pick #cnt' . int 0 . opNumEqual . un #cnt')
 
     libInit :: Fn s s
     libInit = undefined
@@ -111,6 +111,6 @@ importLibrary' =
 -- data chunk always starts at offset 2 and is 197 bytes long.
 simpleUnwrapProg :: Fn (s > TBytes) (s > TBytes)
 simpleUnwrapProg =
-  fn (nat 2 ∘ opSplit ∘ nip ∘ nat size ∘ opSplit ∘ drop)
+  fn (nat 2 . opSplit . nip . nat size . opSplit . drop)
   where
     size = fromIntegral simpleWrapChunkSize

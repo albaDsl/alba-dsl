@@ -31,9 +31,9 @@ instantiate ctx refreshPk withdrawPk inheritPk =
           withdrawHash = (hash160 P.. marshalPk) withdrawPk
           inheritHash = (hash160 P.. marshalPk) inheritPk
        in begin
-            ∘ name #refreshHash (bytes' refreshHash)
-            ∘ name #withdrawHash (bytes' withdrawHash)
-            ∘ name #inheritHash (bytes' inheritHash)
+            . name #refreshHash (bytes' refreshHash)
+            . name #withdrawHash (bytes' withdrawHash)
+            . name #inheritHash (bytes' inheritHash)
 
 refresh :: Ctx -> CodeL1 -> PubKey -> TxSignature -> CodeL1
 refresh = scriptSig 0
@@ -51,4 +51,4 @@ scriptSig fn ctx redeemScript pubKey sig = compile None args
     args =
       let pk = marshal ctx (wrapPubKey False pubKey)
           s = marshal ctx sig
-       in bytes' pk ∘ bytes' s ∘ nat fn ∘ bytes redeemScript
+       in bytes' pk . bytes' s . nat fn . bytes redeemScript

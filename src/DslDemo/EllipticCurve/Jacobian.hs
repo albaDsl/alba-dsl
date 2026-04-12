@@ -25,7 +25,7 @@ import Alba.Dsl.V1.Bch2025
     opWhen,
     pick,
     roll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
@@ -50,54 +50,55 @@ import DslDemo.EllipticCurve.JacobianPoint
 import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
+import Prelude ()
 
 ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
-ecAdd = fn (toJacobian ∘ swap ∘ toJacobian ∘ EC.ecAddJ ∘ fromJacobian)
+ecAdd = fn (toJacobian . swap . toJacobian . EC.ecAddJ . fromJacobian)
 
 ecDouble :: Fn (s > TPoint) (s > TPoint)
-ecDouble = fn (toJacobian ∘ EC.ecDoubleJ ∘ fromJacobian)
+ecDouble = fn (toJacobian . EC.ecDoubleJ . fromJacobian)
 
 ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
-ecMul = fn (toJacobian ∘ ecMulJ ∘ fromJacobian)
+ecMul = fn (toJacobian . ecMulJ . fromJacobian)
 
 ecMulJ :: Fn (s > TNat > TPointJ) (s > TPointJ)
 ecMulJ =
   begin
-    ∘ (ns2 #n #p ∘ pick #n ∘ nat 0 ∘ equal)
-    ∘ opIf
-      (del #n ∘ del #p ∘ makeIdentity)
-      (roll #n ∘ roll #p ∘ makeIdentity ∘ opUntil loop ∘ nip ∘ nip)
+    . (ns2 #n #p . pick #n . nat 0 . equal)
+    . opIf
+      (del #n . del #p . makeIdentity)
+      (roll #n . roll #p . makeIdentity . opUntil loop . nip . nip)
   where
     loop :: Loop (s > TNat > TPointJ > TPointJ)
     loop =
       begin
-        ∘ ns3 #n #p #r
-        ∘ name #r2 (roll #r ∘ pick #n ∘ isOdd ∘ opWhen (pick #p ∘ EC.ecAddJ))
-        ∘ (pick #n ∘ halve ∘ roll #p ∘ EC.ecDoubleJ ∘ roll #r2)
-        ∘ (roll #n ∘ halve ∘ isZero)
+        . ns3 #n #p #r
+        . name #r2 (roll #r . pick #n . isOdd . opWhen (pick #p . EC.ecAddJ))
+        . (pick #n . halve . roll #p . EC.ecDoubleJ . roll #r2)
+        . (roll #n . halve . isZero)
 
 toJacobian :: Fn (s > TPoint) (s > TPointJ)
 toJacobian =
   fn
     ( begin
-        ∘ (ns #p ∘ pick #p ∘ AP.isIdentity)
-        ∘ opIf
-          (del #p ∘ makeIdentity)
-          (roll #p ∘ AP.getXY' ∘ int 1 ∘ makePoint)
+        . (ns #p . pick #p . AP.isIdentity)
+        . opIf
+          (del #p . makeIdentity)
+          (roll #p . AP.getXY' . int 1 . makePoint)
     )
 
 fromJacobian :: Fn (s > TPointJ) (s > TPoint)
 fromJacobian =
   fn
     ( begin
-        ∘ ns #p
-        ∘ (pick #p ∘ isIdentity)
-        ∘ opIf
-          (del #p ∘ AP.makeIdentity)
+        . ns #p
+        . (pick #p . isIdentity)
+        . opIf
+          (del #p . AP.makeIdentity)
           ( begin
-              ∘ name3 #x #y #z (roll #p ∘ JP.getXYZ')
-              ∘ (roll #x ∘ pick #z ∘ feSquare ∘ feInv ∘ feMul)
-              ∘ (roll #y ∘ roll #z ∘ feCube ∘ feInv ∘ feMul)
-              ∘ AP.makePoint
+              . name3 #x #y #z (roll #p . JP.getXYZ')
+              . (roll #x . pick #z . feSquare . feInv . feMul)
+              . (roll #y . roll #z . feCube . feInv . feMul)
+              . AP.makePoint
           )
     )

@@ -10,12 +10,13 @@ import Alba.Dsl.V1.Bch2025
     TBytes,
     bytes,
     compile,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Misc.Haskoin (Address (..), scriptAddress)
 import Contract (contract)
 import Crypto.Secp256k1 (Ctx)
+import Prelude hiding ((.))
 
 instantiate :: Ctx -> (CodeL1, Address)
 instantiate _ctx =
@@ -28,4 +29,4 @@ withdraw :: Ctx -> CodeL1 -> CodeL1 -> CodeL1
 withdraw _ctx solution redeemScript = compile None args
   where
     args :: Fn s (s > TBytes > TBytes)
-    args = bytes solution ∘ bytes redeemScript
+    args = bytes solution . bytes redeemScript

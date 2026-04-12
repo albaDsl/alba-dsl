@@ -16,7 +16,7 @@ import Alba.Dsl.V1.Bch2026
     int,
     nat,
     opBin2Num,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
@@ -27,7 +27,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Common.Contract (Contract (..))
 import Numeric.Natural (Natural)
-import Prelude hiding (drop)
+import Prelude (fromIntegral)
 
 type PermutationChallenge =
   Contract
@@ -47,15 +47,15 @@ contract = MkContract withdraw
 withdraw :: CFn (Base > TBytes > TBytes)
 withdraw =
   begin
-    ∘ (opBin2Num ∘ int 0 ∘ equalVerify)
-    ∘ loadDecompressionLib 0
-    ∘ loadVectorLib dcNumUtxos
-    ∘ (Dc.decompress ∘ b2v ∘ Vc.sort ∘ target ∘ equal)
+    . (opBin2Num . int 0 . equalVerify)
+    . loadDecompressionLib 0
+    . loadVectorLib dcNumUtxos
+    . (Dc.decompress . b2v . Vc.sort . target . equal)
   where
     dcNumUtxos = fromIntegral Dc.numUtxos
 
     target :: Fn s (s > TVector TInt8)
-    target = bytes "     Saabeeeeeeehhhhllllorsssssssty" ∘ b2v
+    target = bytes "     Saabeeeeeeehhhhllllorsssssssty" . b2v
 
     b2v :: Fn (s > TBytes) (s > TVector TInt8)
     b2v = cast
@@ -63,8 +63,8 @@ withdraw =
 loadDecompressionLib :: Natural -> FnC
 loadDecompressionLib startInput =
   begin
-    ∘ (bytes [254] ∘ nat startInput ∘ nat numUtxos)
-    ∘ (nat size ∘ bytes Dc.lib.hash ∘ b2h ∘ importLibrary')
+    . (bytes [254] . nat startInput . nat numUtxos)
+    . (nat size . bytes Dc.lib.hash . b2h . importLibrary')
   where
     numUtxos = fromIntegral Dc.numUtxos
     size = fromIntegral Dc.lib.deploySize
@@ -75,8 +75,8 @@ b2h = cast
 loadVectorLib :: Natural -> FnC
 loadVectorLib startInput =
   begin
-    ∘ (bytes [255] ∘ nat startInput ∘ nat numUtxos)
-    ∘ (nat size ∘ bytes Vc.lib.hash ∘ b2h ∘ importLibrary')
+    . (bytes [255] . nat startInput . nat numUtxos)
+    . (nat size . bytes Vc.lib.hash . b2h . importLibrary')
   where
     numUtxos = fromIntegral Vc.numUtxos
     size = fromIntegral Vc.lib.deploySize

@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2025
     outputScript,
     setScriptSig,
     signAll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Misc.Cmd (deployMsg, runInVm, showTx)
@@ -43,6 +43,7 @@ import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Word (Word64)
 import Opts (Command (..), Opts (..), SpendOpts (..), cmdOpts, execParser)
+import Prelude hiding ((.))
 
 fundingTxAmount :: Word64
 fundingTxAmount = 10_000
@@ -123,4 +124,4 @@ txTemplate fundingTx recvAddr =
     }
 
 scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
-scriptSig pubKey sig = bytes' pubKey ∘ bytes' sig
+scriptSig pubKey sig = bytes' pubKey . bytes' sig

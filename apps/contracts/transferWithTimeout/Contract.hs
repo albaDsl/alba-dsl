@@ -17,10 +17,11 @@ import Alba.Dsl.V1.Bch2025
     opDrop,
     opTrue,
     roll,
-    (∘),
+    (.),
     type (:|),
     type (>),
   )
+import Prelude hiding ((.))
 
 type TransferWithTimeout =
   Contract
@@ -37,13 +38,13 @@ contract = MkContract $ entry2 recipientWithdraw senderWithdraw
   where
     recipientWithdraw =
       begin
-        ∘ (roll #sig ∘ roll #recipientPub ∘ opCheckSigVerify)
-        ∘ (del #timeout ∘ del #senderPub)
-        ∘ opTrue
+        . (roll #sig . roll #recipientPub . opCheckSigVerify)
+        . (del #timeout . del #senderPub)
+        . opTrue
 
     senderWithdraw =
       begin
-        ∘ (roll #sig ∘ roll #senderPub ∘ opCheckSigVerify)
-        ∘ (roll #timeout ∘ opCheckLockTimeVerify ∘ opDrop)
-        ∘ del #recipientPub
-        ∘ opTrue
+        . (roll #sig . roll #senderPub . opCheckSigVerify)
+        . (roll #timeout . opCheckLockTimeVerify . opDrop)
+        . del #recipientPub
+        . opTrue

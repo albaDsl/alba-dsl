@@ -24,7 +24,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     opVerify,
-    (∘),
+    (.),
     type (>),
   )
 import Data.Kind (Type)
@@ -38,6 +38,6 @@ class (StackEntry a) => BlobEq a where
   equal :: (StackEntry a) => Fn (s > a > a) (s > TBool)
 
   equalVerify :: (StackEntry a) => Fn (s > a > a) s
-  equalVerify = equal ∘ opVerify
+  equalVerify = equal . opVerify
 
   blobEqRec :: Fn s (s > TBlobEqRec a)

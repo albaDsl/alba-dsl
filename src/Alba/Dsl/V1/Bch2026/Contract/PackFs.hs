@@ -30,7 +30,7 @@ import Alba.Dsl.V1.Bch2026
     del,
     pick,
     roll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
@@ -63,16 +63,16 @@ mkPackFsM ::
   Fn
     (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
     (s > TPackFs a)
-mkPackFsM = tupleM ∘ tupleM ∘ fromRaw
+mkPackFsM = tupleM . tupleM . fromRaw
 
 getSize :: Fn (s > TPackFs a) (s > TNat)
-getSize = fn (toRaw ∘ fst)
+getSize = fn (toRaw . fst)
 
 getPack :: Fn (s > TPackFs a) (s > TLambda '[a] '[TBytes])
-getPack = fn (toRaw ∘ untuple ∘ nip ∘ fst)
+getPack = fn (toRaw . untuple . nip . fst)
 
 getUnpack :: Fn (s > TPackFs a) (s > TLambda '[TBytes] '[a])
-getUnpack = fn (toRaw ∘ untuple ∘ nip ∘ snd)
+getUnpack = fn (toRaw . untuple . nip . snd)
 
 fromRaw ::
   Fn
@@ -126,7 +126,7 @@ tcSize ::
     UnName arg ~ TPackFs a
   ) =>
   Fn s (s > TNat)
-tcSize = pick #packFs ∘ getSize
+tcSize = pick #packFs . getSize
 
 tcPack ::
   forall s a arg idx.
@@ -137,7 +137,7 @@ tcPack ::
     UnName arg ~ TPackFs a
   ) =>
   Fn (s > a) (s > TBytes)
-tcPack = pick #packFs ∘ getPack ∘ invoke1
+tcPack = pick #packFs . getPack . invoke1
 
 tcUnpack ::
   forall s a arg idx.
@@ -148,4 +148,4 @@ tcUnpack ::
     UnName arg ~ TPackFs a
   ) =>
   Fn (s > TBytes) (s > a)
-tcUnpack = pick #packFs ∘ getUnpack ∘ invoke1
+tcUnpack = pick #packFs . getUnpack . invoke1

@@ -16,7 +16,7 @@ import Alba.Dsl.V1.Bch2025
     opMul,
     outputScript,
     setScriptSig,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Misc.Haskoin (Address)
@@ -28,7 +28,7 @@ import Data.Word (Word64)
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (turtleOpDefine, turtleOpInvoke)
 import Numeric.Natural (Natural)
 import Params (fee)
-import Prelude hiding (seq)
+import Prelude hiding (seq, (.))
 
 withdrawTx ::
   Ctx -> OutPoint -> TxOut -> CodeL1 -> Address -> Tx
@@ -43,15 +43,15 @@ withdrawTx ctx outpoint utxo redeemScript recvAddr =
 progSolution :: Fn s (s > TInt)
 progSolution =
   begin
-    ∘ bytes (compile None f)
-    ∘ turtleOpDefine
-    ∘ int 1
-    ∘ op1Add
-    ∘ int 1
-    ∘ turtleOpInvoke f
-    ∘ op1Add
+    . bytes (compile None f)
+    . turtleOpDefine
+    . int 1
+    . op1Add
+    . int 1
+    . turtleOpInvoke f
+    . op1Add
   where
-    f = op1Add ∘ opMul
+    f = op1Add . opMul
 
 txTemplate :: OutPoint -> Natural -> Word64 -> B.ByteString -> Tx
 txTemplate outpoint seq outAmount scriptPubKey =

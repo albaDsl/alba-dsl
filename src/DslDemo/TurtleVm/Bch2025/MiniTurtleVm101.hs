@@ -12,7 +12,7 @@ import Alba.Dsl.V1.Bch2025 qualified as TY
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped (op1, op1Add, opDrop, opIf, opMul)
 import Alba.Dsl.V1.Common.CompilerUtils (aop)
-import Alba.Dsl.V1.Common.Lang (begin, (∘))
+import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (OP_DEFINE, OP_INVOKE))
 import DslDemo.TurtleVm.Bch2025.Maybe (ifJust)
@@ -24,18 +24,19 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
     putFunction,
   )
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped (condOpLeaf, is)
+import Prelude ()
 
 miniTurtleVm101 :: FnU
-miniTurtleVm101 = ft initStateWithDefaultOpDefine ∘ repeatProg 12 handleOp
+miniTurtleVm101 = ft initStateWithDefaultOpDefine . repeatProg 12 handleOp
 
 handleOp :: FnU
 handleOp =
   begin
-    ∘ ft getOp
-    ∘ ft (ifJust (toSigned ∘ TY.opTrue) (TY.op0 ∘ TY.opFalse))
-    ∘ opIf handleOp' opDrop
+    . ft getOp
+    . ft (ifJust (toSigned . TY.opTrue) (TY.op0 . TY.opFalse))
+    . opIf handleOp' opDrop
   where
-    toSigned = TY.bytes [0] ∘ TY.opCat ∘ TY.opBin2Num
+    toSigned = TY.bytes [0] . TY.opCat . TY.opBin2Num
 
 handleOp' :: FnU
 handleOp' =

@@ -13,7 +13,7 @@ import Alba.Dsl.V1.Bch2025
     op2Dup,
     opBoolAnd,
     opIf,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
@@ -35,12 +35,12 @@ liftA2Maybe ::
 liftA2Maybe =
   fn
     ( begin
-        ∘ (op2Dup ∘ isJust ∘ swap ∘ isJust ∘ opBoolAnd)
-        ∘ opIf
-          (fromJust ∘ swap ∘ fromJust ∘ swap ∘ rot ∘ invoke2 ∘ just)
-          (op2Drop ∘ drop ∘ nothing)
+        . (op2Dup . isJust . swap . isJust . opBoolAnd)
+        . opIf
+          (fromJust . swap . fromJust . swap . rot . invoke2 . just)
+          (op2Drop . drop . nothing)
     )
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = lambda0 (errCanNotHappen) ∘ swap ∘ fromMaybe'
+fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'

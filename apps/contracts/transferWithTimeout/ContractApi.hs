@@ -13,6 +13,7 @@ import Alba.Misc.Haskoin
 import Contract (Params, contract)
 import Crypto.Secp256k1 (Ctx, PubKey)
 import Numeric.Natural (Natural)
+import Prelude hiding ((.))
 
 instantiate :: Ctx -> PubKey -> PubKey -> Natural -> (CodeL1, Address)
 instantiate ctx senderPub recipientPub timeout =
@@ -26,9 +27,9 @@ instantiate ctx senderPub recipientPub timeout =
       let senderPub' = marshal ctx (wrapPubKey False senderPub)
           recipientPub' = marshal ctx (wrapPubKey False recipientPub)
        in begin
-            ∘ name #senderPub (pubKeyBytes senderPub')
-            ∘ name #recipientPub (pubKeyBytes recipientPub')
-            ∘ name #timeout (nat timeout)
+            . name #senderPub (pubKeyBytes senderPub')
+            . name #recipientPub (pubKeyBytes recipientPub')
+            . name #timeout (nat timeout)
 
 recipientWithdraw :: Ctx -> CodeL1 -> TxSignature -> CodeL1
 recipientWithdraw = scriptSig 0
@@ -42,4 +43,4 @@ scriptSig fn ctx redeemScript sig = compile None args
     args :: Fn s (s > TBytes > TNat > TBytes)
     args =
       let s = marshal ctx sig
-       in bytes s ∘ nat fn ∘ bytes redeemScript
+       in bytes s . nat fn . bytes redeemScript

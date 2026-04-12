@@ -20,7 +20,7 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     un,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..))
@@ -33,58 +33,59 @@ import DslDemo.EllipticCurve.Point
     makeIdentity,
     makePoint,
   )
+import Prelude ()
 
 ecDouble :: Fn (s > TPoint) (s > TPoint)
 ecDouble =
   fn
     ( begin
-        ∘ (ns #p ∘ name2 #px #py (roll #p ∘ getXY'))
-        ∘ name
+        . (ns #p . name2 #px #py (roll #p . getXY'))
+        . name
           #l
           ( begin
-              ∘ ex1 (int 3 ∘ pick #px ∘ feSquare ∘ feMul)
-              ∘ ex1 (int 2 ∘ pick #py ∘ feMul ∘ feInv)
-              ∘ feMul
+              . ex1 (int 3 . pick #px . feSquare . feMul)
+              . ex1 (int 2 . pick #py . feMul . feInv)
+              . feMul
           )
-        ∘ name #rx (pick #l ∘ feSquare ∘ pick #px ∘ opDup ∘ feAdd ∘ feSub)
-        ∘ (roll #l ∘ roll #px ∘ pick #rx ∘ feSub ∘ feMul ∘ roll #py ∘ feSub)
-        ∘ (un #rx ∘ makePoint)
+        . name #rx (pick #l . feSquare . pick #px . opDup . feAdd . feSub)
+        . (roll #l . roll #px . pick #rx . feSub . feMul . roll #py . feSub)
+        . (un #rx . makePoint)
     )
 
 ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
 ecAdd =
   begin
-    ∘ (ns2 #p #q ∘ pick #p ∘ isIdentity)
-    ∘ opIf
-      (roll #q ∘ del #p)
+    . (ns2 #p #q . pick #p . isIdentity)
+    . opIf
+      (roll #q . del #p)
       ( begin
-          ∘ (pick #q ∘ isIdentity)
-          ∘ opIf
-            (roll #p ∘ del #q)
+          . (pick #q . isIdentity)
+          . opIf
+            (roll #p . del #q)
             ( pointsAreEqual
-                ∘ opIf
-                  (roll #p ∘ ecDouble ∘ del #q)
+                . opIf
+                  (roll #p . ecDouble . del #q)
                   ( begin
-                      ∘ xCoordsEqual
-                      ∘ opIf (makeIdentity ∘ del #q ∘ del #p) doAdd
+                      . xCoordsEqual
+                      . opIf (makeIdentity . del #q . del #p) doAdd
                   )
             )
       )
   where
-    pointsAreEqual = pick #p ∘ pick #q ∘ equal
+    pointsAreEqual = pick #p . pick #q . equal
 
-    xCoordsEqual = pick #p ∘ getX ∘ pick #q ∘ getX ∘ opNumEqual
+    xCoordsEqual = pick #p . getX . pick #q . getX . opNumEqual
 
     doAdd :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
     doAdd =
       begin
-        ∘ name2 #px #py (roll #p ∘ getXY')
-        ∘ name2 #qx #qy (roll #q ∘ getXY')
-        ∘ name #xdiff (pick #px ∘ pick #qx ∘ feSub)
-        ∘ name #ydiff (pick #py ∘ roll #qy ∘ feSub)
-        ∘ name #l (roll #ydiff ∘ roll #xdiff ∘ feInv ∘ feMul)
-        ∘ name #rx (pick #l ∘ feSquare ∘ pick #px ∘ roll #qx ∘ feAdd ∘ feSub)
-        ∘ name
+        . name2 #px #py (roll #p . getXY')
+        . name2 #qx #qy (roll #q . getXY')
+        . name #xdiff (pick #px . pick #qx . feSub)
+        . name #ydiff (pick #py . roll #qy . feSub)
+        . name #l (roll #ydiff . roll #xdiff . feInv . feMul)
+        . name #rx (pick #l . feSquare . pick #px . roll #qx . feAdd . feSub)
+        . name
           #ry
-          (roll #l ∘ roll #px ∘ pick #rx ∘ feSub ∘ feMul ∘ roll #py ∘ feSub)
-        ∘ (roll #rx ∘ roll #ry ∘ makePoint)
+          (roll #l . roll #px . pick #rx . feSub . feMul . roll #py . feSub)
+        . (roll #rx . roll #ry . makePoint)

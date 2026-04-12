@@ -28,7 +28,7 @@ import Alba.Dsl.V1.Bch2025
     pick,
     roll,
     un,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
@@ -48,32 +48,32 @@ import Alba.Dsl.V1.Bch2026.Lang (fn, lambda0)
 import Prelude ()
 
 sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
-sort = packFsRec @a ∘ opSwap ∘ sortF
+sort = packFsRec @a . opSwap . sortF
 
 sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
 sortF =
   fn
     ( begin
-        ∘ ns2 #pfs #vec
-        ∘ (pick #pfs ∘ pick #vec ∘ lengthF ∘ nat 1 ∘ opGreaterThan)
-        ∘ opIf
+        . ns2 #pfs #vec
+        . (pick #pfs . pick #vec . lengthF . nat 1 . opGreaterThan)
+        . opIf
           ( begin
-              ∘ (pick #pfs ∘ roll #vec ∘ halveF)
-              ∘ (pick #pfs ∘ opSwap ∘ sortF ∘ opSwap)
-              ∘ (pick #pfs ∘ opSwap ∘ sortF ∘ opSwap)
-              ∘ (pick #pfs ∘ opRot ∘ opRot ∘ mergeF)
+              . (pick #pfs . roll #vec . halveF)
+              . (pick #pfs . opSwap . sortF . opSwap)
+              . (pick #pfs . opSwap . sortF . opSwap)
+              . (pick #pfs . opRot . opRot . mergeF)
           )
           (roll #vec)
-        ∘ del #pfs
+        . del #pfs
     )
 
 halveF :: Fn (s > TPackFs a > TVector a) (s > TVector a > TVector a)
 halveF =
   fn
     ( begin
-        ∘ ns2 #pfs #vec
-        ∘ (pick #pfs ∘ pick #vec ∘ lengthF ∘ nat 2 ∘ opDiv)
-        ∘ (roll #pfs ∘ opSwap ∘ roll #vec ∘ splitAtF)
+        . ns2 #pfs #vec
+        . (pick #pfs . pick #vec . lengthF . nat 2 . opDiv)
+        . (roll #pfs . opSwap . roll #vec . splitAtF)
     )
 
 mergeF ::
@@ -82,53 +82,53 @@ mergeF ::
 mergeF =
   fn
     ( begin
-        ∘ (ns3 #pfs #xs #ys ∘ pick #xs ∘ pick #ys ∘ baseCases)
-        ∘ opIf
+        . (ns3 #pfs #xs #ys . pick #xs . pick #ys . baseCases)
+        . opIf
           ( begin
-              ∘ opDrop
-              ∘ name2 #x #xRest (pick #pfs ∘ pick #xs ∘ uncons')
-              ∘ name2 #y #yRest (pick #pfs ∘ pick #ys ∘ uncons')
-              ∘ ( begin
-                    ∘ (pick #x ∘ toNum ∘ pick #y ∘ toNum)
-                    ∘ opLessThanOrEqual
+              . opDrop
+              . name2 #x #xRest (pick #pfs . pick #xs . uncons')
+              . name2 #y #yRest (pick #pfs . pick #ys . uncons')
+              . ( begin
+                    . (pick #x . toNum . pick #y . toNum)
+                    . opLessThanOrEqual
                 )
-              ∘ opIf
+              . opIf
                 ( begin
-                    ∘ (name #elem (roll #x) ∘ roll #xRest ∘ roll #ys)
-                    ∘ (del #yRest ∘ del #y ∘ del #xs)
+                    . (name #elem (roll #x) . roll #xRest . roll #ys)
+                    . (del #yRest . del #y . del #xs)
                 )
                 ( begin
-                    ∘ (name #elem (roll #y) ∘ roll #xs ∘ roll #yRest)
-                    ∘ (del #ys ∘ del #xRest ∘ del #x)
+                    . (name #elem (roll #y) . roll #xs . roll #yRest)
+                    . (del #ys . del #xRest . del #x)
                 )
-              ∘ (pick #pfs ∘ opRot ∘ opRot ∘ mergeF)
-              ∘ (roll #pfs ∘ opRot ∘ opRot ∘ un #elem ∘ consF)
+              . (pick #pfs . opRot . opRot . mergeF)
+              . (roll #pfs . opRot . opRot . un #elem . consF)
           )
-          (del #pfs ∘ del #xs ∘ del #ys)
+          (del #pfs . del #xs . del #ys)
     )
   where
     uncons' ::
       (StackEntry a) =>
       Fn (s' > TPackFs a > TVector a) (s' > a > TVector a)
-    uncons' = unconsF ∘ fromJust ∘ untuple
+    uncons' = unconsF . fromJust . untuple
 
     -- FIXME: cast.
     toNum :: Fn (s' > a) (s' > TInt)
-    toNum = cast ∘ opBin2Num
+    toNum = cast . opBin2Num
 
     baseCases :: Fn (s' > TVector a > TVector a) (s' > TVector a > TBool)
     baseCases =
       begin
-        ∘ (ns2 #xs #ys ∘ pick #xs ∘ null)
-        ∘ opIf
-          (roll #ys ∘ del #xs ∘ opFalse)
+        . (ns2 #xs #ys . pick #xs . null)
+        . opIf
+          (roll #ys . del #xs . opFalse)
           ( begin
-              ∘ (pick #ys ∘ null)
-              ∘ opIf
-                (del #ys ∘ roll #xs ∘ opFalse)
-                (del #xs ∘ del #ys ∘ empty ∘ opTrue)
+              . (pick #ys . null)
+              . opIf
+                (del #ys . roll #xs . opFalse)
+                (del #xs . del #ys . empty . opTrue)
           )
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = lambda0 (errCanNotHappen) ∘ opSwap ∘ fromMaybe'
+fromJust = lambda0 (errCanNotHappen) . opSwap . fromMaybe'

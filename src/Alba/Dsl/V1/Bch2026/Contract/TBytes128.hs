@@ -36,7 +36,7 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     pick,
     roll,
-    (∘),
+    (.),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -72,10 +72,10 @@ bytes128PackFs :: Fn s (s > TPackFs TBytes128)
 bytes128PackFs =
   constant
     ( begin
-        ∘ size @TBytes128
-        ∘ lambda1 (pack @TBytes128)
-        ∘ lambda1 (unpack @TBytes128)
-        ∘ mkPackFsM
+        . size @TBytes128
+        . lambda1 (pack @TBytes128)
+        . lambda1 (unpack @TBytes128)
+        . mkPackFsM
     )
 
 maxPayloadSize :: Int
@@ -91,33 +91,33 @@ packTBytes128 :: Fn (s > TBytes128) (s > TBytes)
 packTBytes128 =
   fn
     ( begin
-        ∘ ns #b128
-        ∘ name #size (pick #b128 ∘ toRaw ∘ opSize ∘ nip)
-        ∘ (pick #size ∘ n2i ∘ nat sizeFieldSize ∘ opNum2Bin)
-        ∘ (roll #b128 ∘ toRaw ∘ int 0 ∘ nat (fromIntegral maxPayloadSize))
-        ∘ (roll #size ∘ natSubUnsafe ∘ opNum2Bin ∘ opCat ∘ opCat)
+        . ns #b128
+        . name #size (pick #b128 . toRaw . opSize . nip)
+        . (pick #size . n2i . nat sizeFieldSize . opNum2Bin)
+        . (roll #b128 . toRaw . int 0 . nat (fromIntegral maxPayloadSize))
+        . (roll #size . natSubUnsafe . opNum2Bin . opCat . opCat)
     )
 
 unpackTBytes128 :: Fn (s > TBytes) (s > TBytes128)
 unpackTBytes128 =
   fn
     ( begin
-        ∘ ns #bytes
-        ∘ name2 #size #rest (roll #bytes ∘ nat sizeFieldSize ∘ opSplit)
-        ∘ (roll #rest ∘ roll #size ∘ opBin2Num ∘ i2nUnsafe ∘ opSplit ∘ drop)
-        ∘ fromRaw
+        . ns #bytes
+        . name2 #size #rest (roll #bytes . nat sizeFieldSize . opSplit)
+        . (roll #rest . roll #size . opBin2Num . i2nUnsafe . opSplit . drop)
+        . fromRaw
     )
 
 bytes128 :: Bytes -> Fn s (s > TBytes128)
 bytes128 x =
-  assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x ∘ fromRaw)
+  assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x . fromRaw)
 
 fromBytes :: Fn (s > TBytes) (s > TBytes128)
 fromBytes =
   fn
     ( begin
-        ∘ (dup ∘ opSize ∘ nip ∘ nat (fromIntegral maxPayloadSize))
-        ∘ (opLessThanOrEqual ∘ opVerify ∘ fromRaw)
+        . (dup . opSize . nip . nat (fromIntegral maxPayloadSize))
+        . (opLessThanOrEqual . opVerify . fromRaw)
     )
 
 toBytes :: Fn (s > TBytes128) (s > TBytes)
