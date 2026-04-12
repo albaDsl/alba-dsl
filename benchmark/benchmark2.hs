@@ -69,8 +69,7 @@ ecMultiply code =
     Left err -> error ("err: " <> show err)
 
 progMul :: Natural -> Fn s (s > TInt > TInt)
-progMul scalar =
-  nat scalar # g # EA.ecMul # opDup # EA.getX # opSwap # EA.getY
+progMul scalar = nat scalar # g # EA.ecMul # EA.getXY'
 
 progMulJacobian :: Natural -> Fn s (s > TInt > TInt)
 progMulJacobian scalar =

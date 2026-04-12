@@ -88,7 +88,7 @@ toJacobian =
         # (ns P # pick P # AP.isIdentity)
         # opIf
           (del P # makeIdentity)
-          (pick P # AP.getX # roll P # AP.getY # int 1 # makePoint)
+          (roll P # AP.getXY' # int 1 # makePoint)
     )
 
 fromJacobian :: Fn (s > TPointJ) (s > TPoint)
