@@ -37,41 +37,41 @@ testLibMaybe =
 progBasics :: Fn s (s > TBool)
 progBasics =
   begin
-    # ( begin
-          # (int8 1 # just # isJust # opVerify)
-          # (int8 1 # just # isNothing # opFalse # equalVerify)
-          # (emptyInt8 # isJust # opFalse # equalVerify)
-          # (emptyInt8 # isNothing # opVerify)
-          # (int64 1 # just # isJust # opVerify)
-          # (int64 1 # just # isNothing # opFalse # equalVerify)
-          # (emptyInt64 # isJust # opFalse # equalVerify)
-          # (emptyInt64 # isNothing # opVerify)
+    ∘ ( begin
+          ∘ (int8 1 ∘ just ∘ isJust ∘ opVerify)
+          ∘ (int8 1 ∘ just ∘ isNothing ∘ opFalse ∘ equalVerify)
+          ∘ (emptyInt8 ∘ isJust ∘ opFalse ∘ equalVerify)
+          ∘ (emptyInt8 ∘ isNothing ∘ opVerify)
+          ∘ (int64 1 ∘ just ∘ isJust ∘ opVerify)
+          ∘ (int64 1 ∘ just ∘ isNothing ∘ opFalse ∘ equalVerify)
+          ∘ (emptyInt64 ∘ isJust ∘ opFalse ∘ equalVerify)
+          ∘ (emptyInt64 ∘ isNothing ∘ opVerify)
       )
-    # ( begin
-          # (int8 2 # int8 1 # just # fromMaybe # int8 1 # equalVerify)
-          # (int8 2 # emptyInt8 # fromMaybe # int8 2 # equalVerify)
-          # (int64 2 # int64 1 # just # fromMaybe # int64 1 # equalVerify)
-          # (int64 2 # emptyInt64 # fromMaybe # int64 2 # equalVerify)
+    ∘ ( begin
+          ∘ (int8 2 ∘ int8 1 ∘ just ∘ fromMaybe ∘ int8 1 ∘ equalVerify)
+          ∘ (int8 2 ∘ emptyInt8 ∘ fromMaybe ∘ int8 2 ∘ equalVerify)
+          ∘ (int64 2 ∘ int64 1 ∘ just ∘ fromMaybe ∘ int64 1 ∘ equalVerify)
+          ∘ (int64 2 ∘ emptyInt64 ∘ fromMaybe ∘ int64 2 ∘ equalVerify)
       )
-    # ( begin
-          # (int8 1 # just # ifJust opNop (int8 0) # int8 1 # equalVerify)
-          # (emptyInt8 # ifJust opNop (int8 0) # int8 0 # equalVerify)
-          # (int64 1 # just # ifJust opNop (int64 0) # int64 1)
-          # equalVerify
-          # (emptyInt64 # ifJust opNop (int64 0) # int64 0 # equalVerify)
+    ∘ ( begin
+          ∘ (int8 1 ∘ just ∘ ifJust opNop (int8 0) ∘ int8 1 ∘ equalVerify)
+          ∘ (emptyInt8 ∘ ifJust opNop (int8 0) ∘ int8 0 ∘ equalVerify)
+          ∘ (int64 1 ∘ just ∘ ifJust opNop (int64 0) ∘ int64 1)
+          ∘ equalVerify
+          ∘ (emptyInt64 ∘ ifJust opNop (int64 0) ∘ int64 0 ∘ equalVerify)
       )
-    # ( begin
-          # (int8 2 # lambda1 int64To8 # int64 1 # just # maybe)
-          # (int8 1 # equalVerify)
-          # (int8 2 # lambda1 int64To8 # nothing # maybe)
-          # (int8 2 # equalVerify)
+    ∘ ( begin
+          ∘ (int8 2 ∘ lambda1 int64To8 ∘ int64 1 ∘ just ∘ maybe)
+          ∘ (int8 1 ∘ equalVerify)
+          ∘ (int8 2 ∘ lambda1 int64To8 ∘ nothing ∘ maybe)
+          ∘ (int8 2 ∘ equalVerify)
       )
-    # ( begin
-          # (int8 1 # testPacking)
-          # (int64 2 # testPacking)
-          # (bytes128 "hello world" # testPacking)
+    ∘ ( begin
+          ∘ (int8 1 ∘ testPacking)
+          ∘ (int64 2 ∘ testPacking)
+          ∘ (bytes128 "hello world" ∘ testPacking)
       )
-    # opTrue
+    ∘ opTrue
   where
     emptyInt8 :: Fn s (s > TMaybe TInt8)
     emptyInt8 = nothing
@@ -87,8 +87,8 @@ progBasics =
       (BlobEq a, StackEntry a, PackFs (TMaybe a)) => Fn (s > a) s
     testPacking =
       begin
-        # (dup # just # dup # V.empty # V.cons # V.cons # V.uncons)
-        # ifJust (untuple # opDrop # ifJust (equalVerify) fail) fail
+        ∘ (dup ∘ just ∘ dup ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.uncons)
+        ∘ ifJust (untuple ∘ opDrop ∘ ifJust (equalVerify) fail) fail
 
     fail :: FnA s alt s' alt'
-    fail = bytes "Fail" # error
+    fail = bytes "Fail" ∘ error

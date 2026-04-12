@@ -23,29 +23,29 @@ testLibTuple =
 progBasics :: Fn s (s > TBool)
 progBasics =
   begin
-    # ( begin
-          # ( begin
-                # (int8 1 # int64 2 # tuple)
-                # (untuple # opDrop # int8 1 # equalVerify)
+    ∘ ( begin
+          ∘ ( begin
+                ∘ (int8 1 ∘ int64 2 ∘ tuple)
+                ∘ (untuple ∘ opDrop ∘ int8 1 ∘ equalVerify)
             )
-          # ( begin
-                # (int8 1 # int64 2 # tuple)
-                # (untuple # opNip # int64 2 # equalVerify)
+          ∘ ( begin
+                ∘ (int8 1 ∘ int64 2 ∘ tuple)
+                ∘ (untuple ∘ opNip ∘ int64 2 ∘ equalVerify)
             )
-          # ( begin
-                # (int8 1 # int64 2 # tuple # fst # int8 1 # equalVerify)
-                # (int8 1 # int64 2 # tuple # snd # int64 2 # equalVerify)
+          ∘ ( begin
+                ∘ (int8 1 ∘ int64 2 ∘ tuple ∘ fst ∘ int8 1 ∘ equalVerify)
+                ∘ (int8 1 ∘ int64 2 ∘ tuple ∘ snd ∘ int64 2 ∘ equalVerify)
             )
       )
-    # opTrue
+    ∘ opTrue
 
 progNested :: Fn s (s > TBool)
 progNested =
   begin
-    # ( begin
-          # ( begin
-                # (int64 1 # int8 2 # int64 3 # tuple # tuple)
-                # (snd # fst # int8 2 # equalVerify)
+    ∘ ( begin
+          ∘ ( begin
+                ∘ (int64 1 ∘ int8 2 ∘ int64 3 ∘ tuple ∘ tuple)
+                ∘ (snd ∘ fst ∘ int8 2 ∘ equalVerify)
             )
       )
-    # opTrue
+    ∘ opTrue

@@ -15,10 +15,11 @@ import Alba.Dsl.V1.Bch2025.Ops (opDrop)
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, integerToDataOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang ((#))
+import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.LangArgs
   ( FindName,
     FindNamedArgs,
+    Px,
     RemoveNamedArgs,
     UnName,
   )
@@ -29,11 +30,11 @@ import Data.Proxy (Proxy (..))
 import GHC.TypeLits (KnownNat, natVal)
 
 pick ::
-  forall s arg idx.
-  forall argName ->
-  (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
+  forall name s arg idx.
+  Px name ->
+  (KnownNat idx, FindName name s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
   Fn s (s > UnName arg)
-pick _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
+pick _name = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 pick' :: Integer -> S s alt -> S s' alt
 pick' idx =
@@ -43,22 +44,22 @@ pick' idx =
     _ -> aops [integerToDataOp idx, OP_PICK]
 
 pickN ::
-  forall s arg idx.
-  forall argName ->
-  (KnownNat idx, FindName argName s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
+  forall name s arg idx.
+  Px name ->
+  (KnownNat idx, FindName name s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
   Fn s (s > arg)
-pickN _argName = pick' (natVal (Proxy :: Proxy idx) :: Integer)
+pickN _name = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 roll ::
-  forall s s' arg idx.
-  forall argName ->
+  forall name s s' arg idx.
+  Px name ->
   ( KnownNat idx,
-    FindName argName s 0 ~ 'Just idx,
+    FindName name s 0 ~ 'Just idx,
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
   Fn s (s' > UnName arg)
-roll _argName = roll' (natVal (Proxy :: Proxy idx))
+roll _name = roll' (natVal (Proxy :: Proxy idx))
 
 roll' :: Integer -> S s alt -> S s' alt
 roll' idx st@(S c fs) =
@@ -69,27 +70,27 @@ roll' idx st@(S c fs) =
     _ -> aops [integerToDataOp idx, OP_ROLL] st
 
 rollN ::
-  forall s s' arg idx.
-  forall argName ->
+  forall name s s' arg idx.
+  Px name ->
   ( KnownNat idx,
-    FindName argName s 0 ~ 'Just idx,
+    FindName name s 0 ~ 'Just idx,
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
   Fn s (s' > arg)
-rollN _argName = roll' (natVal (Proxy :: Proxy idx) :: Integer)
+rollN _name = roll' (natVal (Proxy :: Proxy idx) :: Integer)
 
 del ::
-  forall s s' arg idx.
-  forall argName ->
+  forall name s s' arg idx.
+  Px name ->
   ( KnownNat idx,
     StackEntry (UnName arg),
-    FindName argName s 0 ~ 'Just idx,
+    FindName name s 0 ~ 'Just idx,
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
   Fn s s'
-del argName = roll argName # opDrop
+del name = roll name ∘ opDrop
 
 delCount ::
   forall s s' idxs.

@@ -18,7 +18,7 @@ import Alba.Dsl.V1.Bch2026
     opMul,
     opNegate,
     opSub,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
@@ -51,12 +51,12 @@ instance Integral TInt where
 instance Integral TNat where
   add = opAdd
   add1 = op1Add
-  sub = n2i # swap # n2i # swap # opSub # i2n
-  sub1 = n2i # op1Sub # i2n
+  sub = n2i ∘ swap ∘ n2i ∘ swap ∘ opSub ∘ i2n
+  sub1 = n2i ∘ op1Sub ∘ i2n
   mul = opMul
   div = opDiv
   mod = opMod
   negate = error "Can't negate TNat."
-  abs = toInt # opAbs # cast
+  abs = toInt ∘ opAbs ∘ cast
   fromInt = i2n
   toInt = n2i

@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2026
     opSub,
     opVerify,
     opWithin,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -59,43 +59,43 @@ instance BlobEq TInt8 where
   blobEqRec = blobEqRecord
 
 instance Ord TInt8 where
-  lessThan = toRaw2 # opLessThan
-  lessThanOrEqual = toRaw2 # opLessThanOrEqual
-  greaterThan = toRaw2 # opGreaterThan
-  greaterThanOrEqual = toRaw2 # opGreaterThanOrEqual
-  min = toRaw2 # opMin # fromRaw
-  max = toRaw2 # opMax # fromRaw
-  within = toRaw3 # opWithin
+  lessThan = toRaw2 ∘ opLessThan
+  lessThanOrEqual = toRaw2 ∘ opLessThanOrEqual
+  greaterThan = toRaw2 ∘ opGreaterThan
+  greaterThanOrEqual = toRaw2 ∘ opGreaterThanOrEqual
+  min = toRaw2 ∘ opMin ∘ fromRaw
+  max = toRaw2 ∘ opMax ∘ fromRaw
+  within = toRaw3 ∘ opWithin
   blobOrdRec = undefined -- FIXME: implement.
 
 instance Integral TInt8 where
-  add = toRaw2 # opAdd # fromInt
-  add1 = toRaw # op1Add # fromInt
-  sub = toRaw2 # opSub # fromInt
-  sub1 = toRaw # op1Sub # fromInt
-  mul = toRaw2 # opMul # fromInt
-  div = toRaw2 # opDiv # fromInt
-  mod = toRaw2 # opMod # fromInt
-  negate = toRaw # opNegate # fromRaw
-  abs = toRaw # opAbs # fromRaw
-  fromInt = fn (dup # int int8Min # int int8Max # opWithin # opVerify # fromRaw)
+  add = toRaw2 ∘ opAdd ∘ fromInt
+  add1 = toRaw ∘ op1Add ∘ fromInt
+  sub = toRaw2 ∘ opSub ∘ fromInt
+  sub1 = toRaw ∘ op1Sub ∘ fromInt
+  mul = toRaw2 ∘ opMul ∘ fromInt
+  div = toRaw2 ∘ opDiv ∘ fromInt
+  mod = toRaw2 ∘ opMod ∘ fromInt
+  negate = toRaw ∘ opNegate ∘ fromRaw
+  abs = toRaw ∘ opAbs ∘ fromRaw
+  fromInt = fn (dup ∘ int int8Min ∘ int int8Max ∘ opWithin ∘ opVerify ∘ fromRaw)
   toInt = toRaw
 
 instance PackFs TInt8 where
   sizeConst = 1
   size = nat (sizeConst @TInt8)
-  pack = toRaw # size @TInt8 # opNum2Bin
-  unpack = opBin2Num # fromRaw
+  pack = toRaw ∘ size @TInt8 ∘ opNum2Bin
+  unpack = opBin2Num ∘ fromRaw
   packFsRec = int8PackFs
 
 int8PackFs :: Fn s (s > TPackFs TInt8)
 int8PackFs =
   constant
     ( begin
-        # size @TInt8
-        # lambda1 (pack @TInt8)
-        # lambda1 (unpack @TInt8)
-        # mkPackFsM
+        ∘ size @TInt8
+        ∘ lambda1 (pack @TInt8)
+        ∘ lambda1 (unpack @TInt8)
+        ∘ mkPackFsM
     )
 
 int8Max :: Integer
@@ -105,7 +105,7 @@ int8Min :: Integer
 int8Min = -int8Max
 
 int8 :: Integer -> Fn s (s > TInt8)
-int8 x = assert (x >= int8Min && x <= int8Max) (int x # fromRaw)
+int8 x = assert (x >= int8Min && x <= int8Max) (int x ∘ fromRaw)
 
 fromRaw :: Fn (s > TInt) (s > TInt8)
 fromRaw = cast

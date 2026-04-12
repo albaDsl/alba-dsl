@@ -26,7 +26,7 @@ import Alba.Dsl.V1.Common.Lang
     branch6,
     branch7,
     branch8,
-    (#),
+    (∘),
   )
 import Alba.Dsl.V1.Common.ThUtils qualified as TH
 
@@ -108,11 +108,11 @@ entry8 f1 f2 f3 f4 f5 f6 f7 f8 =
 
 fIdxCase num f stack continuation =
   begin
-    # (pick "_fIdx" # int num # opNumEqual)
-    # opIf (roll "_fIdx" # opDrop # stack # f) continuation
+    ∘ (pick #_fIdx ∘ int num ∘ opNumEqual)
+    ∘ opIf (roll #_fIdx ∘ opDrop ∘ stack ∘ f) continuation
 
 fIdxLast num f stack =
   begin
-    # (roll "_fIdx" # int num # opNumEqualVerify)
-    # stack
-    # f
+    ∘ (roll #_fIdx ∘ int num ∘ opNumEqualVerify)
+    ∘ stack
+    ∘ f

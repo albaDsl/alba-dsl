@@ -18,7 +18,7 @@ import Alba.Dsl.V1.Bch2025.Ops (opDup, opIf)
 import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackEntry, StackInt, StackNat)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, bytesToDataOp, integerToDataOp)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang ((#))
+import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.Stack
   ( Fn,
     S,
@@ -70,7 +70,7 @@ case' ::
   (S (s > t) alt -> S s' alt')
 case' [] def st = def st
 case' ((test, result) : rest) def st =
-  (opDup # test # opIf result (case' rest def)) st
+  (opDup ∘ test ∘ opIf result (case' rest def)) st
 
 cond ::
   forall s alt s' alt'.
@@ -78,4 +78,4 @@ cond ::
   (S s alt -> S s' alt') ->
   (S s alt -> S s' alt')
 cond [] def st = def st
-cond ((test, result) : rest) def st = (test # opIf result (cond rest def)) st
+cond ((test, result) : rest) def st = (test ∘ opIf result (cond rest def)) st

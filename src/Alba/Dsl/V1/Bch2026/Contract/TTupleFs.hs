@@ -34,7 +34,7 @@ import Alba.Dsl.V1.Bch2026
     rollN,
     un,
     un2,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -83,10 +83,10 @@ tuplePackFs ::
   Fn s (s > TPackFs (TTupleFs a b))
 tuplePackFs =
   begin
-    # size @(TTupleFs a b)
-    # lambda1 (pack @(TTupleFs a b))
-    # lambda1 (unpack @(TTupleFs a b))
-    # mkPackFs
+    ∘ size @(TTupleFs a b)
+    ∘ lambda1 (pack @(TTupleFs a b))
+    ∘ lambda1 (unpack @(TTupleFs a b))
+    ∘ mkPackFs
 
 tuple ::
   forall a b s.
@@ -94,23 +94,23 @@ tuple ::
   Fn (s > a > b) (s > TTupleFs a b)
 tuple =
   begin
-    # (ns2 "a" "b" # packFsRec @a # packFsRec @b # rollN "a" # rollN "b")
-    # (un2 "a" "b" # tupleF)
+    ∘ (ns2 #a #b ∘ packFsRec @a ∘ packFsRec @b ∘ rollN #a ∘ rollN #b)
+    ∘ (un2 #a #b ∘ tupleF)
 
 tupleF ::
   (StackEntry a, StackEntry b) =>
   Fn (s > TPackFs a > TPackFs b > a > b) (s > TTupleFs a b)
 tupleF =
   begin
-    # (rot # getPack # invoke1 # rot # swap # rot # rot # getPack # invoke1)
-    # (swap # opCat # fromRaw)
+    ∘ (rot ∘ getPack ∘ invoke1 ∘ rot ∘ swap ∘ rot ∘ rot ∘ getPack ∘ invoke1)
+    ∘ (swap ∘ opCat ∘ fromRaw)
 
 calcPackFs ::
   Fn (s > TPackFs a > TPackFs b) (s > TPackFs (TTupleFs a b))
 calcPackFs =
   begin
-    # (getSize # swap # getSize # opAdd)
-    # (emptyLambda # emptyLambda # mkPackFs)
+    ∘ (getSize ∘ swap ∘ getSize ∘ opAdd)
+    ∘ (emptyLambda ∘ emptyLambda ∘ mkPackFs)
 
 emptyLambda :: (StackEntry a, StackEntry b) => Fn s (s > TLambda '[a] '[b])
 emptyLambda = lambda1 cast
@@ -119,7 +119,7 @@ untuple ::
   forall a b s.
   (PackFs a, PackFs b) =>
   Fn (s > TTupleFs a b) (s > a > b)
-untuple = toRaw # (size @a) # opSplit # unpack # swap # unpack # swap
+untuple = toRaw ∘ (size @a) ∘ opSplit ∘ unpack ∘ swap ∘ unpack ∘ swap
 
 untupleF ::
   forall a b s.
@@ -127,16 +127,16 @@ untupleF ::
   Fn (s > TPackFs a > TPackFs b > TTupleFs a b) (s > a > b)
 untupleF =
   begin
-    # ns3 "pfsA" "pfsB" "tuple"
-    # (roll "tuple" # toRaw # pick "pfsA" # getSize # opSplit)
-    # (roll "pfsB" # getUnpack # invoke1 # ns "b" # swap)
-    # (roll "pfsA" # getUnpack # invoke1 # swap # un "b")
+    ∘ ns3 #pfsA #pfsB #tuple
+    ∘ (roll #tuple ∘ toRaw ∘ pick #pfsA ∘ getSize ∘ opSplit)
+    ∘ (roll #pfsB ∘ getUnpack ∘ invoke1 ∘ ns #b ∘ swap)
+    ∘ (roll #pfsA ∘ getUnpack ∘ invoke1 ∘ swap ∘ un #b)
 
 fst :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > a)
-fst = untuple # drop
+fst = untuple ∘ drop
 
 snd :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > b)
-snd = untuple # nip
+snd = untuple ∘ nip
 
 toRaw :: Fn (s > TTupleFs a b) (s > TBytes)
 toRaw = cast

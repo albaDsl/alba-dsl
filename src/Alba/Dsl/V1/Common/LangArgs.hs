@@ -3,6 +3,7 @@
 
 module Alba.Dsl.V1.Common.LangArgs
   ( N,
+    Px,
     UnName,
     FindName,
     FindNamedArgs,
@@ -35,8 +36,10 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), castStack, type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Reverse)
 import Data.Kind (Type)
+import GHC.OverloadedLabels (IsLabel (..))
 import GHC.TypeLits
   ( ErrorMessage (Text),
+    KnownSymbol,
     Nat,
     Symbol,
     TypeError,
@@ -44,98 +47,105 @@ import GHC.TypeLits
     type (-),
   )
 
+-- Named stack entry.
 data N (n :: Symbol) (t :: Type)
 
 instance (StackEntry a) => StackEntry (N n a)
 
--- ## "Name stack" (ns) functions.
-ns :: forall s x1. forall n1 -> Fn (s > x1) (s > N n1 x1)
+-- Proxy.
+data Px n = Px
+
+instance (n ~ n', KnownSymbol n) => IsLabel n (Px n') where
+  fromLabel = Px
+
+-- ## Name stack (ns) functions.
+ns :: forall s n1 x1. Px n1 -> Fn (s > x1) (s > N n1 x1)
 ns _n1 = castStack
 
 ns2 ::
-  forall s x1 x2.
-  forall n1 ->
-  forall n2 ->
+  forall s n1 n2 x1 x2.
+  Px n1 ->
+  Px n2 ->
   Fn (s > x1 > x2) (s > N n1 x1 > N n2 x2)
 ns2 _n1 _n2 = castStack
 
 ns3 ::
-  forall s x1 x2 x3.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
+  forall s n1 n2 n3 x1 x2 x3.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
   Fn (s > x1 > x2 > x3) (s > N n1 x1 > N n2 x2 > N n3 x3)
 ns3 _n1 _n2 _n3 = castStack
 
 ns4 ::
-  forall s x1 x2 x3 x4.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
+  forall s n1 n2 n3 n4 x1 x2 x3 x4.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
   Fn (s > x1 > x2 > x3 > x4) (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4)
 ns4 _n1 _n2 _n3 _n4 = castStack
 
 ns5 ::
-  forall s x1 x2 x3 x4 x5.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
+  forall s n1 n2 n3 n4 n5 x1 x2 x3 x4 x5.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
   Fn
     (s > x1 > x2 > x3 > x4 > x5)
     (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5)
 ns5 _n1 _n2 _n3 _n4 _n5 = castStack
 
 ns6 ::
-  forall s x1 x2 x3 x4 x5 x6.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
-  forall n6 ->
+  forall s n1 n2 n3 n4 n5 n6 x1 x2 x3 x4 x5 x6.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
+  Px n6 ->
   Fn
     (s > x1 > x2 > x3 > x4 > x5 > x6)
     (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5 > N n6 x6)
 ns6 _n1 _n2 _n3 _n4 _n5 _n6 = castStack
 
 ns7 ::
-  forall s x1 x2 x3 x4 x5 x6 x7.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
-  forall n6 ->
-  forall n7 ->
+  forall s n1 n2 n3 n4 n5 n6 n7 x1 x2 x3 x4 x5 x6 x7.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
+  Px n6 ->
+  Px n7 ->
   Fn
     (s > x1 > x2 > x3 > x4 > x5 > x6 > x7)
     (s > N n1 x1 > N n2 x2 > N n3 x3 > N n4 x4 > N n5 x5 > N n6 x6 > N n7 x7)
 ns7 _n1 _n2 _n3 _n4 _n5 _n6 _n7 = castStack
 
--- ## "Unname stack" (un) functions.
+-- ## Unname stack (un) functions.
 un ::
-  forall s s'.
-  forall name ->
-  (UnNameNamed name s ~ s') =>
+  forall n1 s s'.
+  Px n1 ->
+  (UnNameNamed n1 s ~ s') =>
   Fn s s'
-un _name = castStack
+un _n1 = castStack
 
 un2 ::
-  forall s1 s2 s3.
-  forall n1 ->
-  forall n2 ->
+  forall n1 n2 s1 s2 s3.
+  Px n1 ->
+  Px n2 ->
   (UnNameNamed n1 s1 ~ s2, UnNameNamed n2 s2 ~ s3) =>
   Fn s1 s3
 un2 _n1 _n2 = castStack
 
 un3 ::
-  forall s1 s2 s3 s4.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
+  forall n1 n2 n3 s1 s2 s3 s4.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
   ( UnNameNamed n1 s1 ~ s2,
     UnNameNamed n2 s2 ~ s3,
     UnNameNamed n3 s3 ~ s4
@@ -144,11 +154,11 @@ un3 ::
 un3 _n1 _n2 _n3 = castStack
 
 un4 ::
-  forall s1 s2 s3 s4 s5.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
+  forall n1 n2 n3 n4 s1 s2 s3 s4 s5.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
   ( UnNameNamed n1 s1 ~ s2,
     UnNameNamed n2 s2 ~ s3,
     UnNameNamed n3 s3 ~ s4,
@@ -158,12 +168,12 @@ un4 ::
 un4 _n1 _n2 _n3 _n4 = castStack
 
 un5 ::
-  forall s1 s2 s3 s4 s5 s6.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
+  forall n1 n2 n3 n4 n5 s1 s2 s3 s4 s5 s6.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
   ( UnNameNamed n1 s1 ~ s2,
     UnNameNamed n2 s2 ~ s3,
     UnNameNamed n3 s3 ~ s4,
@@ -174,13 +184,13 @@ un5 ::
 un5 _n1 _n2 _n3 _n4 _n5 = castStack
 
 un6 ::
-  forall s1 s2 s3 s4 s5 s6 s7.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
-  forall n6 ->
+  forall n1 n2 n3 n4 n5 n6 s1 s2 s3 s4 s5 s6 s7.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
+  Px n6 ->
   ( UnNameNamed n1 s1 ~ s2,
     UnNameNamed n2 s2 ~ s3,
     UnNameNamed n3 s3 ~ s4,
@@ -192,14 +202,14 @@ un6 ::
 un6 _n1 _n2 _n3 _n4 _n5 _n6 = castStack
 
 un7 ::
-  forall s1 s2 s3 s4 s5 s6 s7 s8.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
-  forall n4 ->
-  forall n5 ->
-  forall n6 ->
-  forall n7 ->
+  forall n1 n2 n3 n4 n5 n6 n7 s1 s2 s3 s4 s5 s6 s7 s8.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
+  Px n4 ->
+  Px n5 ->
+  Px n6 ->
+  Px n7 ->
   ( UnNameNamed n1 s1 ~ s2,
     UnNameNamed n2 s2 ~ s3,
     UnNameNamed n3 s3 ~ s4,
@@ -213,25 +223,25 @@ un7 _n1 _n2 _n3 _n4 _n5 _n6 _n7 = castStack
 
 -- ## Functions to name results of prog execution. And uname progs.
 name ::
-  forall t s s' alt alt'.
-  forall name ->
+  forall n1 t s s' alt alt'.
+  Px n1 ->
   FnA s alt (s' > t) alt' ->
-  FnA s alt (s' > N name t) alt'
-name _name prog state = let (S c fs) = prog state in S c fs
+  FnA s alt (s' > N n1 t) alt'
+name _n1 prog state = let (S c fs) = prog state in S c fs
 
 name2 ::
-  forall t1 t2 s s' alt alt'.
-  forall n1 ->
-  forall n2 ->
+  forall n1 n2 t1 t2 s s' alt alt'.
+  Px n1 ->
+  Px n2 ->
   FnA s alt (s' > t1 > t2) alt' ->
   FnA s alt (s' > N n1 t1 > N n2 t2) alt'
 name2 _n1 _n2 prog state = let (S c fs) = prog state in S c fs
 
 name3 ::
-  forall t1 t2 t3 s s' alt alt'.
-  forall n1 ->
-  forall n2 ->
-  forall n3 ->
+  forall n1 n2 n3 t1 t2 t3 s s' alt alt'.
+  Px n1 ->
+  Px n2 ->
+  Px n3 ->
   FnA s alt (s' > t1 > t2 > t3) alt' ->
   FnA s alt (s' > N n1 t1 > N n2 t2 > N n3 t3) alt'
 name3 _n1 _n2 _n3 prog state = let (S c fs) = prog state in S c fs

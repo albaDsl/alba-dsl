@@ -23,7 +23,7 @@ import Alba.Dsl.V1.Bch2025
     opVerify,
     pick,
     sizeStr,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
@@ -91,7 +91,7 @@ codeSize =
         (sizeOf EJW.ecMul),
       golden
         "EC scalar point multiply (Windowed Jacobian / tbl setup)"
-        (sizeOf (EJW.setupTable # EJW.ecMul)),
+        (sizeOf (EJW.setupTable ∘ EJW.ecMul)),
       golden "Vector ops" (sizeOf vectorOps),
       golden "LZSS" (sizeOf CLZ.decompress),
       golden "LZSS Bitstream" (sizeOf CLZB.decompress)
@@ -182,7 +182,7 @@ turtleVmCostOf prog =
       cr =
         compile'
           O1
-          (toTyped $ T2026.turtleVmInit 10 # consumeAll T2026.turtleVmEval)
+          (toTyped $ T2026.turtleVmInit 10 ∘ consumeAll T2026.turtleVmEval)
       stacks = (S.fromList $ replicate count (b2SeUnsafe code), S.empty)
       res = evaluateScript cr.code stacks minimalContext
    in case res of
@@ -195,23 +195,23 @@ turtleVmCostOf prog =
         Left (err, _) -> error (show err)
   where
     consumeAll :: UT.FnU -> UT.FnU
-    consumeAll prog' = UT.opUntil (prog' # UT.opDepth # UT.op0 # UT.opEqual)
+    consumeAll prog' = UT.opUntil (prog' ∘ UT.opDepth ∘ UT.op0 ∘ UT.opEqual)
 
 arithmetic :: FnC
-arithmetic = int 2 # int 3 # add # int 4 # sub # int 1 # equalVerify
+arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 
 windowedMul :: FnC
 windowedMul =
   runEnv
     ( begin
-        # (gTable # g # EJW.setupTable)
-        # gTable
-        # nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-        # EJW.ecMul
-        # pushPoint
+        ∘ (gTable ∘ g ∘ EJW.setupTable)
+        ∘ gTable
+        ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+        ∘ EJW.ecMul
+        ∘ pushPoint
           0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
           0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-        # (equal # opVerify)
+        ∘ (equal ∘ opVerify)
     )
   where
     gTable = nat 100
@@ -220,49 +220,49 @@ vectorOps :: FnC
 vectorOps =
   runEnv
     ( begin
-        # (nat n # lambda1 (add1 # n2i # fromInt) # V.generate)
-        # (nat n # lambda1 add1 # int8 1 # V.iterateN)
-        # ns2 "vec64" "vec8"
-        # ( begin
-              # (lambda2 (toInt # fromInt # add) # nat 0)
-              # (nat n # int8 1 # V.replicate)
-              # (V.foldl # nat n # equalVerify)
+        ∘ (nat n ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+        ∘ (nat n ∘ lambda1 add1 ∘ int8 1 ∘ V.iterateN)
+        ∘ ns2 #vec64 #vec8
+        ∘ ( begin
+              ∘ (lambda2 (toInt ∘ fromInt ∘ add) ∘ nat 0)
+              ∘ (nat n ∘ int8 1 ∘ V.replicate)
+              ∘ (V.foldl ∘ nat n ∘ equalVerify)
           )
-        # (pick "vec64" # dup # V.reverse # sort # equalVerify)
-        # (pick "vec8" # dup # V.reverse # sort # equalVerify)
-        # ( begin
-              # lambda2 (untuple # toInt # swap # toInt # add # add)
-              # int 0
-              # (pick "vec8" # pick "vec8" # V.zip)
-              # (V.foldl # int (fromIntegral $ n * (n + 1)) # equalVerify)
+        ∘ (pick #vec64 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
+        ∘ (pick #vec8 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
+        ∘ ( begin
+              ∘ lambda2 (untuple ∘ toInt ∘ swap ∘ toInt ∘ add ∘ add)
+              ∘ int 0
+              ∘ (pick #vec8 ∘ pick #vec8 ∘ V.zip)
+              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
           )
-        # ( begin
-              # lambda2 (toInt # swap # add)
-              # int 0
-              # ( begin
-                    # ( (lambda2 (toInt # swap # toInt # add # fromInt)) ::
+        ∘ ( begin
+              ∘ lambda2 (toInt ∘ swap ∘ add)
+              ∘ int 0
+              ∘ ( begin
+                    ∘ ( (lambda2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
                           Fn s (s > TLambda '[TInt64, TInt8] '[TInt64])
                       )
-                    # (pick "vec64" # pick "vec8" # V.zipWith)
+                    ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
                 )
-              # (V.foldl # int (fromIntegral $ n * (n + 1)) # equalVerify)
+              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
           )
-        # ( begin
-              # (lambda2 (toInt # add) # int 0)
-              # (lambda1 (int64 10 # mul) # pick "vec64" # V.map)
-              # (V.foldl # int (fromIntegral $ n * (n + 1) * 5))
-              # equalVerify
+        ∘ ( begin
+              ∘ (lambda2 (toInt ∘ add) ∘ int 0)
+              ∘ (lambda1 (int64 10 ∘ mul) ∘ pick #vec64 ∘ V.map)
+              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1) * 5))
+              ∘ equalVerify
           )
-        # ( begin
-              # lambda2 (toInt # add)
-              # int 0
-              # ( begin
-                    # lambda1 (int64 2 # mod # int64 0 # equal)
-                    # (pick "vec64" # V.filter)
+        ∘ ( begin
+              ∘ lambda2 (toInt ∘ add)
+              ∘ int 0
+              ∘ ( begin
+                    ∘ lambda1 (int64 2 ∘ mod ∘ int64 0 ∘ equal)
+                    ∘ (pick #vec64 ∘ V.filter)
                 )
-              # (V.foldl # int 650 # equalVerify)
+              ∘ (V.foldl ∘ int 650 ∘ equalVerify)
           )
-        # delCount 2
+        ∘ delCount 2
     )
   where
     n :: Natural
@@ -271,9 +271,9 @@ vectorOps =
 decompressTest :: FnC
 decompressTest =
   let code = Vc.lib.code
-   in bytes (LZ.compress code) # CLZ.decompress # bytes code # equalVerify
+   in bytes (LZ.compress code) ∘ CLZ.decompress ∘ bytes code ∘ equalVerify
 
 decompressTestBit :: FnC
 decompressTestBit =
   let code = Vc.lib.code
-   in bytes (LZB.compress code) # CLZB.decompress # bytes code # equalVerify
+   in bytes (LZB.compress code) ∘ CLZB.decompress ∘ bytes code ∘ equalVerify

@@ -24,48 +24,48 @@ testLambdas =
 progBasic1 :: Fn s (s > TBool)
 progBasic1 =
   begin
-    # int 3
-    # lambda1 (opDup # opDup # opMul # opMul)
-    # (opDup # opToAltStack)
-    # (invoke1 # int 27 # opNumEqual)
-    # int 5
-    # opFromAltStack
-    # (invoke1 # int 125 # opNumEqual)
-    # opBoolAnd
+    ∘ int 3
+    ∘ lambda1 (opDup ∘ opDup ∘ opMul ∘ opMul)
+    ∘ (opDup ∘ opToAltStack)
+    ∘ (invoke1 ∘ int 27 ∘ opNumEqual)
+    ∘ int 5
+    ∘ opFromAltStack
+    ∘ (invoke1 ∘ int 125 ∘ opNumEqual)
+    ∘ opBoolAnd
 
 progBasic2 :: Fn s (s > TBool)
-progBasic2 = int 3 # int 4 # lambda2 opMul # invoke2 # int 12 # opNumEqual
+progBasic2 = int 3 ∘ int 4 ∘ lambda2 opMul ∘ invoke2 ∘ int 12 ∘ opNumEqual
 
 progBasic3 :: Fn s (s > TBool)
 progBasic3 =
-  int 6 # int 3 # int 7 # lambda3 opWithin # invoke3 # opTrue # opEqual
+  int 6 ∘ int 3 ∘ int 7 ∘ lambda3 opWithin ∘ invoke3 ∘ opTrue ∘ opEqual
 
 progUntyped :: Fn s (s > TBool)
 progUntyped =
   begin
-    # int 3
-    # lambda cube
-    # (opDup # opToAltStack)
-    # (invoke cube # int 27 # opNumEqual)
-    # int 5
-    # opFromAltStack
-    # (invoke cube # int 125 # opNumEqual)
-    # opBoolAnd
+    ∘ int 3
+    ∘ lambda cube
+    ∘ (opDup ∘ opToAltStack)
+    ∘ (invoke cube ∘ int 27 ∘ opNumEqual)
+    ∘ int 5
+    ∘ opFromAltStack
+    ∘ (invoke cube ∘ int 125 ∘ opNumEqual)
+    ∘ opBoolAnd
   where
     cube :: Fn (s > TInt) (s > TInt)
-    cube = opDup # opDup # opMul # opMul
+    cube = opDup ∘ opDup ∘ opMul ∘ opMul
 
 progMapLambda :: Fn s (s > TBool)
 progMapLambda =
   begin
-    # lambda1 double
-    # bytes [0, 1, 2, 3]
-    # mapVec 1
-    # bytes [0, 2, 4, 6]
-    # opEqual
+    ∘ lambda1 double
+    ∘ bytes [0, 1, 2, 3]
+    ∘ mapVec 1
+    ∘ bytes [0, 2, 4, 6]
+    ∘ opEqual
   where
     double :: Fn (s > TBytes) (s > TBytes)
-    double = opBin2Num # int 2 # opMul # nat 1 # opNum2Bin
+    double = opBin2Num ∘ int 2 ∘ opMul ∘ nat 1 ∘ opNum2Bin
 
     mapVec ::
       Natural ->
@@ -81,66 +81,66 @@ progMapLambda =
         (s > TBytes)
     mapVec' elemSize =
       begin
-        # name
-          "size"
+        ∘ name
+          #size
           ( ex1
               ( begin
-                  # pick "vec"
-                  # opSize
-                  # opNip
-                  # nat elemSize
-                  # opDiv
+                  ∘ pick #vec
+                  ∘ opSize
+                  ∘ opNip
+                  ∘ nat elemSize
+                  ∘ opDiv
               )
           )
-        # pick "size"
-        # ifZero
-          (del "size" # del "f" # roll "vec")
+        ∘ pick #size
+        ∘ ifZero
+          (del #size ∘ del #f ∘ roll #vec)
           ( begin
-              # (nat 0 # roll "vec")
-              # opUntil
+              ∘ (nat 0 ∘ roll #vec)
+              ∘ opUntil
                 ( begin
-                    # ns2 "i" "v"
-                    # ( begin
-                          # pick "i"
-                          # roll "v"
-                          # split elemSize
+                    ∘ ns2 #i #v
+                    ∘ ( begin
+                          ∘ pick #i
+                          ∘ roll #v
+                          ∘ split elemSize
                       )
-                    # uncons elemSize
-                    # opSwap
-                    # (pick "f" # invoke1)
-                    # opSwap
-                    # opCat
-                    # opCat
-                    # (roll "i" # op1Add)
-                    # ex1 (opDup # pick "size" # opNumEqual)
-                    # (opRot # opSwap)
+                    ∘ uncons elemSize
+                    ∘ opSwap
+                    ∘ (pick #f ∘ invoke1)
+                    ∘ opSwap
+                    ∘ opCat
+                    ∘ opCat
+                    ∘ (roll #i ∘ op1Add)
+                    ∘ ex1 (opDup ∘ pick #size ∘ opNumEqual)
+                    ∘ (opRot ∘ opSwap)
                 )
-              # opNip
-              # del "size"
-              # del "f"
+              ∘ opNip
+              ∘ del #size
+              ∘ del #f
           )
 
     uncons :: Natural -> Fn (s > TBytes) (s > TBytes > TBytes)
-    uncons elemSize = nat elemSize # opSplit
+    uncons elemSize = nat elemSize ∘ opSplit
 
     split :: Natural -> Fn (s > TNat > TBytes) (s > TBytes > TBytes)
     split elemSize =
       begin
-        # opSwap
-        # (nat elemSize # opMul)
-        # opSplit
+        ∘ opSwap
+        ∘ (nat elemSize ∘ opMul)
+        ∘ opSplit
 
 progNested :: Fn s (s > TBool)
 progNested =
   begin
-    # int 5
-    # lambda1 polynomial
-    # invoke1
-    # int 132
-    # opNumEqual
+    ∘ int 5
+    ∘ lambda1 polynomial
+    ∘ invoke1
+    ∘ int 132
+    ∘ opNumEqual
   where
     polynomial :: Fn (s > TInt) (s > TInt)
-    polynomial = lambda1 cube # invoke1 # int 7 # opAdd
+    polynomial = lambda1 cube ∘ invoke1 ∘ int 7 ∘ opAdd
 
     cube :: Fn (s > TInt) (s > TInt)
-    cube = opDup # opDup # opMul # opMul
+    cube = opDup ∘ opDup ∘ opMul ∘ opMul

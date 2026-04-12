@@ -21,6 +21,7 @@ common shared-properties
       OverloadedLabels
       OverloadedRecordDot
       OverloadedStrings
+      OverloadedLabels
       OverloadedLists
       PatternSynonyms
       PartialTypeSignatures

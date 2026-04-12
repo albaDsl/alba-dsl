@@ -2,7 +2,7 @@
 
 module TestLzss (testLzss) where
 
-import Alba.Dsl.V1.Bch2025 (Bytes, Fn, TBool, bytes, opEqual, (#), type (>))
+import Alba.Dsl.V1.Bch2025 (Bytes, Fn, TBool, bytes, opEqual, (∘), type (>))
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.Lzss (compress, decompress)
 import Alba.Misc.Utils (decodeHex)
@@ -71,7 +71,7 @@ testVectors =
 
 progDecompress :: Bytes -> Bytes -> Fn s (s > TBool)
 progDecompress plain compressed =
-  bytes compressed # LZ.decompress # bytes plain # opEqual
+  bytes compressed ∘ LZ.decompress ∘ bytes plain ∘ opEqual
 
 propCompressDecompressAb :: Bytes -> Property
 propCompressDecompressAb str =

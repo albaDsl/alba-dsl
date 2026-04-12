@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2025
     outputScript,
     setScriptSig,
     signAll,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Misc.Cmd (deployMsg, runInVm, showTx)
@@ -123,4 +123,4 @@ txTemplate fundingTx recvAddr =
     }
 
 scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
-scriptSig pubKey sig = bytes' pubKey # bytes' sig
+scriptSig pubKey sig = bytes' pubKey ∘ bytes' sig

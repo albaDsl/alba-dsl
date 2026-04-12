@@ -26,7 +26,7 @@ import Alba.Dsl.V1.Bch2026
     opSize,
     opSplit,
     opToAltStack,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero)
@@ -43,59 +43,59 @@ data TFunction
 instance StackEntry TFunction
 
 initState :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
-initState = bytes [] # b2f # opToAltStack # b2c # opToAltStack
+initState = bytes [] ∘ b2f ∘ opToAltStack ∘ b2c ∘ opToAltStack
 
 -- Make OP_INVOKE = op0 at startup. Should really be a VmError when invoking an
 -- undefined function but that currently makes MiniTurtleVm101 too large.
 initStateWithDefaultOpDefine :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
 initStateWithDefaultOpDefine =
   begin
-    # bytes [0x0]
-    # b2f
-    # opToAltStack
-    # b2c
-    # opToAltStack
+    ∘ bytes [0x0]
+    ∘ b2f
+    ∘ opToAltStack
+    ∘ b2c
+    ∘ opToAltStack
 
 getOp ::
   FnA s (alt > TCode) (s > TMaybe TBytes) (alt > TCode)
 getOp =
   begin
-    # (getCode # opSize)
-    # ifZero (putCode # nothing) (nat 1 # opSplit # putCode # just)
+    ∘ (getCode ∘ opSize)
+    ∘ ifZero (putCode ∘ nothing) (nat 1 ∘ opSplit ∘ putCode ∘ just)
 
 getOpBytes ::
   Int -> FnA s (alt > TCode) (s > TBytes) (alt > TCode)
-getOpBytes count = getCode # (nat (fromIntegral count) # opSplit # putCode)
+getOpBytes count = getCode ∘ (nat (fromIntegral count) ∘ opSplit ∘ putCode)
 
 putFunction ::
   FnA (s > TBytes) (alt > TFunction > TCode) s (alt > TFunction > TCode)
 putFunction =
   begin
-    # (opFromAltStack # opFromAltStack)
-    # (drop # swap # b2f)
-    # (opToAltStack # opToAltStack)
+    ∘ (opFromAltStack ∘ opFromAltStack)
+    ∘ (drop ∘ swap ∘ b2f)
+    ∘ (opToAltStack ∘ opToAltStack)
 
 getFunction ::
   FnA s (alt > TFunction > TCode) (s > TBytes) (alt > TFunction > TCode)
 getFunction =
   begin
-    # (opFromAltStack # opFromAltStack)
-    # (op2Dup # opToAltStack # opToAltStack)
-    # (nip # f2b)
+    ∘ (opFromAltStack ∘ opFromAltStack)
+    ∘ (op2Dup ∘ opToAltStack ∘ opToAltStack)
+    ∘ (nip ∘ f2b)
 
 invokeFunction ::
   FnA s (alt > TFunction > TCode) s (alt > TFunction > TCode)
 invokeFunction =
   begin
-    # (opFromAltStack # c2b # opFromAltStack # f2b)
-    # (dup # rot # opCat # swap)
-    # (b2f # opToAltStack # b2c # opToAltStack)
+    ∘ (opFromAltStack ∘ c2b ∘ opFromAltStack ∘ f2b)
+    ∘ (dup ∘ rot ∘ opCat ∘ swap)
+    ∘ (b2f ∘ opToAltStack ∘ b2c ∘ opToAltStack)
 
 getCode :: FnA s (alt > TCode) (s > TBytes) alt
-getCode = opFromAltStack # c2b
+getCode = opFromAltStack ∘ c2b
 
 putCode :: FnA (s > TBytes) alt s (alt > TCode)
-putCode = b2c # opToAltStack
+putCode = b2c ∘ opToAltStack
 
 b2c :: Fn (s > TBytes) (s > TCode)
 b2c = cast

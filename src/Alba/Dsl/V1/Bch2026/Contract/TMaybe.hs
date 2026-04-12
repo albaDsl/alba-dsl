@@ -35,7 +35,7 @@ import Alba.Dsl.V1.Bch2026
     opEqual,
     opIf,
     opSplit,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -68,22 +68,22 @@ instance PackFs (TMaybe TInt8) where
   size = nat (sizeConst @(TMaybe TInt8))
   pack =
     ifJust
-      (pack @TInt8 # just # toRaw)
-      (tagNothing # zeroes (sizeConst @TInt8) # opCat)
+      (pack @TInt8 ∘ just ∘ toRaw)
+      (tagNothing ∘ zeroes (sizeConst @TInt8) ∘ opCat)
     where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw # ifJust (unpack @TInt8 # just) nothing
+  unpack = fromRaw ∘ ifJust (unpack @TInt8 ∘ just) nothing
   packFsRec = maybeInt8PackFs
 
 maybeInt8PackFs :: Fn s (s > TPackFs (TMaybe TInt8))
 maybeInt8PackFs =
   constant
     ( begin
-        # size @(TMaybe TInt8)
-        # lambda1 (pack @(TMaybe TInt8))
-        # lambda1 (unpack @(TMaybe TInt8))
-        # mkPackFsM
+        ∘ size @(TMaybe TInt8)
+        ∘ lambda1 (pack @(TMaybe TInt8))
+        ∘ lambda1 (unpack @(TMaybe TInt8))
+        ∘ mkPackFsM
     )
 
 instance PackFs (TMaybe TInt64) where
@@ -91,22 +91,22 @@ instance PackFs (TMaybe TInt64) where
   size = nat (sizeConst @(TMaybe TInt64))
   pack =
     ifJust
-      (pack @TInt64 # just # toRaw)
-      (tagNothing # zeroes (sizeConst @TInt64) # opCat)
+      (pack @TInt64 ∘ just ∘ toRaw)
+      (tagNothing ∘ zeroes (sizeConst @TInt64) ∘ opCat)
     where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw # ifJust (unpack @TInt64 # just) nothing
+  unpack = fromRaw ∘ ifJust (unpack @TInt64 ∘ just) nothing
   packFsRec = maybeInt64PackFs
 
 maybeInt64PackFs :: Fn s (s > TPackFs (TMaybe TInt64))
 maybeInt64PackFs =
   constant
     ( begin
-        # size @(TMaybe TInt64)
-        # lambda1 (pack @(TMaybe TInt64))
-        # lambda1 (unpack @(TMaybe TInt64))
-        # mkPackFsM
+        ∘ size @(TMaybe TInt64)
+        ∘ lambda1 (pack @(TMaybe TInt64))
+        ∘ lambda1 (unpack @(TMaybe TInt64))
+        ∘ mkPackFsM
     )
 
 instance PackFs (TMaybe TBytes128) where
@@ -114,53 +114,53 @@ instance PackFs (TMaybe TBytes128) where
   size = nat (sizeConst @(TMaybe TBytes128))
   pack =
     ifJust
-      (pack @TBytes128 # just # toRaw)
-      (tagNothing # zeroes (sizeConst @TBytes128) # opCat)
+      (pack @TBytes128 ∘ just ∘ toRaw)
+      (tagNothing ∘ zeroes (sizeConst @TBytes128) ∘ opCat)
     where
       zeroes :: Natural -> Fn s (s > TBytes)
       zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw # ifJust (unpack @TBytes128 # just) nothing
+  unpack = fromRaw ∘ ifJust (unpack @TBytes128 ∘ just) nothing
   packFsRec = maybeBytes128PackFs
 
 maybeBytes128PackFs :: Fn s (s > TPackFs (TMaybe TBytes128))
 maybeBytes128PackFs =
   constant
     ( begin
-        # size @(TMaybe TBytes128)
-        # lambda1 (pack @(TMaybe TBytes128))
-        # lambda1 (unpack @(TMaybe TBytes128))
-        # mkPackFsM
+        ∘ size @(TMaybe TBytes128)
+        ∘ lambda1 (pack @(TMaybe TBytes128))
+        ∘ lambda1 (unpack @(TMaybe TBytes128))
+        ∘ mkPackFsM
     )
 
 just :: Fn (s > a) (s > TMaybe a)
-just = fn (valToBytes # tagJust # swap # opCat # fromRaw)
+just = fn (valToBytes ∘ tagJust ∘ swap ∘ opCat ∘ fromRaw)
   where
     valToBytes :: Fn (s > a) (s > TBytes)
     valToBytes = cast
 
 nothing :: Fn s (s > TMaybe a)
-nothing = tagNothing # fromRaw
+nothing = tagNothing ∘ fromRaw
 
 isJust :: Fn (s > TMaybe a) (s > TBool)
-isJust = fn (getTag # tagJust # opEqual)
+isJust = fn (getTag ∘ tagJust ∘ opEqual)
 
 isNothing :: (StackEntry a) => Fn (s > TMaybe a) (s > TBool)
-isNothing = fn (getTag # tagNothing # opEqual)
+isNothing = fn (getTag ∘ tagNothing ∘ opEqual)
 
 getTag :: Fn (s > TMaybe a) (s > TBytes)
-getTag = fn (split # drop)
+getTag = fn (split ∘ drop)
 
 split :: Fn (s > TMaybe a) (s > TBytes > TBytes)
-split = toRaw # tagSize # opSplit
+split = toRaw ∘ tagSize ∘ opSplit
 
 fromMaybe :: (StackEntry a) => Fn (s > a > TMaybe a) (s > a)
-fromMaybe = fn (contentAndBool # opIf nip drop)
+fromMaybe = fn (contentAndBool ∘ opIf nip drop)
 
 fromMaybe' :: (StackEntry a) => Fn (s > TLambda '[] '[a] > TMaybe a) (s > a)
-fromMaybe' = fn (contentAndBool # opIf nip (drop # invoke0))
+fromMaybe' = fn (contentAndBool ∘ opIf nip (drop ∘ invoke0))
 
 contentAndBool :: (StackEntry a) => Fn (s > TMaybe a) (s > a > TBool)
-contentAndBool = split # valToBytes # swap # tagJust # opEqual
+contentAndBool = split ∘ valToBytes ∘ swap ∘ tagJust ∘ opEqual
   where
     valToBytes :: Fn (s > TBytes) (s > a)
     valToBytes = cast
@@ -170,17 +170,17 @@ ifJust ::
   FnA (s > a) alt s' alt' ->
   FnA s alt s' alt' ->
   FnA (s > TMaybe a) alt s' alt'
-ifJust ifOps elseOps = contentAndBool # opIf ifOps (drop # elseOps)
+ifJust ifOps elseOps = contentAndBool ∘ opIf ifOps (drop ∘ elseOps)
 
 maybe ::
   (StackEntry a, StackEntry b) =>
   Fn (s > b > TLambda '[a] '[b] > TMaybe a) (s > b)
-maybe = fn (ifJust (swap # invoke1 # nip) drop)
+maybe = fn (ifJust (swap ∘ invoke1 ∘ nip) drop)
 
 map ::
   (StackEntry a) =>
   Fn (s > TLambda '[a] '[b] > TMaybe a) (s > TMaybe b)
-map = fn (ifJust (swap # invoke1 # just) (drop # nothing))
+map = fn (ifJust (swap ∘ invoke1 ∘ just) (drop ∘ nothing))
 
 tagSize :: Fn s (s > TNat)
 tagSize = nat 1

@@ -14,6 +14,8 @@ import Alba.Tx.Bch2025 (hash160)
 import Contract (Params, contract)
 import Crypto.Secp256k1 (Ctx, PubKey)
 import Numeric.Natural (Natural)
+import Prelude hiding ((.))
+import Prelude qualified as P
 
 instantiate :: Ctx -> PubKey -> PubKey -> PubKey -> (CodeL1, Address)
 instantiate ctx refreshPk withdrawPk inheritPk =
@@ -25,13 +27,13 @@ instantiate ctx refreshPk withdrawPk inheritPk =
     params :: Fn Base Params
     params =
       let marshalPk pk = marshal ctx (wrapPubKey False pk)
-          refreshHash = (hash160 . marshalPk) refreshPk
-          withdrawHash = (hash160 . marshalPk) withdrawPk
-          inheritHash = (hash160 . marshalPk) inheritPk
+          refreshHash = (hash160 P.. marshalPk) refreshPk
+          withdrawHash = (hash160 P.. marshalPk) withdrawPk
+          inheritHash = (hash160 P.. marshalPk) inheritPk
        in begin
-            # name "refreshHash" (bytes' refreshHash)
-            # name "withdrawHash" (bytes' withdrawHash)
-            # name "inheritHash" (bytes' inheritHash)
+            ∘ name #refreshHash (bytes' refreshHash)
+            ∘ name #withdrawHash (bytes' withdrawHash)
+            ∘ name #inheritHash (bytes' inheritHash)
 
 refresh :: Ctx -> CodeL1 -> PubKey -> TxSignature -> CodeL1
 refresh = scriptSig 0
@@ -49,4 +51,4 @@ scriptSig fn ctx redeemScript pubKey sig = compile None args
     args =
       let pk = marshal ctx (wrapPubKey False pubKey)
           s = marshal ctx sig
-       in bytes' pk # bytes' s # nat fn # bytes redeemScript
+       in bytes' pk ∘ bytes' s ∘ nat fn ∘ bytes redeemScript

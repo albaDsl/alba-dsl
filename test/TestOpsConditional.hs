@@ -22,40 +22,40 @@ testOpsConditional =
 progIf :: Fn s (s > TBool)
 progIf =
   begin
-    # opFalse
-    # opIf op1 addUp
-    # int 3
-    # opNumEqual
+    ∘ opFalse
+    ∘ opIf op1 addUp
+    ∘ int 3
+    ∘ opNumEqual
   where
-    addUp = op1 # op2 # opAdd
+    addUp = op1 ∘ op2 ∘ opAdd
 
 progNotIf :: Fn s (s > TBool)
 progNotIf =
   begin
-    # opFalse
-    # opNotIf op1 addUp
-    # int 1
-    # opNumEqual
+    ∘ opFalse
+    ∘ opNotIf op1 addUp
+    ∘ int 1
+    ∘ opNumEqual
   where
-    addUp = op1 # op2 # opAdd
+    addUp = op1 ∘ op2 ∘ opAdd
 
 progNestedIf :: Fn s (s > TBool)
 progNestedIf =
   begin
-    # opTrue
-    # opIf
+    ∘ opTrue
+    ∘ opIf
       ( begin
-          # opFalse
-          # opIf
-            (op1 # op2 # opAdd)
-            (op1 # op3 # opAdd)
+          ∘ opFalse
+          ∘ opIf
+            (op1 ∘ op2 ∘ opAdd)
+            (op1 ∘ op3 ∘ opAdd)
       )
-      (op1 # op1 # opAdd)
-    # int 4
-    # opNumEqual
+      (op1 ∘ op1 ∘ opAdd)
+    ∘ int 4
+    ∘ opNumEqual
 
 progVerify :: FnC
-progVerify = opFalse # opVerify
+progVerify = opFalse ∘ opVerify
 
 progReturn :: Fn s (s > TBytes)
-progReturn = opReturn # bytes "hello world!"
+progReturn = opReturn ∘ bytes "hello world!"

@@ -2,7 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt) where
 
-import Alba.Dsl.V1.Bch2025 (Bytes, FnA, FunctionTable, bytes, (#))
+import Alba.Dsl.V1.Bch2025 (Bytes, FnA, FunctionTable, bytes, (∘))
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
 import Alba.Dsl.V1.Common.FunctionStateResolved (Function (..))
 import Alba.Dsl.V1.Common.OpcodeL3
@@ -25,7 +25,7 @@ data LibData = LibData
   deriving (Show)
 
 invokeExt :: LibData -> String -> String -> FnA s alt s' alt'
-invokeExt lib modName funName = bytes ref # opInvoke prog
+invokeExt lib modName funName = bytes ref ∘ opInvoke prog
   where
     prog :: FnA s alt s' alt'
     prog = undefined

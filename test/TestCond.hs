@@ -21,58 +21,58 @@ testCond =
 progCondNats :: Fn s (s > TBool)
 progCondNats =
   begin
-    # nat 2
-    # case'
+    ∘ nat 2
+    ∘ case'
       [ (is 1, nat 2),
         (is 2, nat 3),
         (is 3, nat 4)
       ]
       (nat 0)
-    # opNip
-    # nat 3
-    # opNumEqual
+    ∘ opNip
+    ∘ nat 3
+    ∘ opNumEqual
   where
-    is x = nat x # opNumEqual
+    is x = nat x ∘ opNumEqual
 
 progCondStrings :: Fn s (s > TBool)
 progCondStrings =
   begin
-    # bytes "orange"
-    # case'
+    ∘ bytes "orange"
+    ∘ case'
       [ (is "apple", nat 1),
         (is "pear", nat 2),
         (is "orange", nat 3),
         (is "lemon", nat 4)
       ]
       (nat 0)
-    # opNip
-    # nat 3
-    # opNumEqual
+    ∘ opNip
+    ∘ nat 3
+    ∘ opNumEqual
   where
-    is x = bytes x # opEqual
+    is x = bytes x ∘ opEqual
 
 progCondStringsDefault :: Fn s (s > TBool)
 progCondStringsDefault =
   begin
-    # bytes "strawberry"
-    # case'
+    ∘ bytes "strawberry"
+    ∘ case'
       [ (is "apple", nat 1),
         (is "pear", nat 2),
         (is "orange", nat 3),
         (is "lemon", nat 4)
       ]
       (nat 0)
-    # opNip
-    # nat 0
-    # opNumEqual
+    ∘ opNip
+    ∘ nat 0
+    ∘ opNumEqual
   where
-    is x = bytes x # opEqual
+    is x = bytes x ∘ opEqual
 
 progCondNested :: Fn s (s > TBool)
 progCondNested =
   begin
-    # nat 75
-    # case'
+    ∘ nat 75
+    ∘ case'
       [ (inRange 0 50, bytes "low"),
         ( inRange 50 100,
           case'
@@ -84,8 +84,8 @@ progCondNested =
         (inRange 100 150, bytes "high")
       ]
       (bytes "failure")
-    # opNip
-    # bytes "mid — second"
-    # opEqual
+    ∘ opNip
+    ∘ bytes "mid — second"
+    ∘ opEqual
   where
-    inRange x y = nat x # nat y # opWithin
+    inRange x y = nat x ∘ nat y ∘ opWithin

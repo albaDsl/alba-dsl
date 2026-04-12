@@ -58,9 +58,9 @@ testTurtleVm2026 =
 progDataPush :: Fn s (s > TBool)
 progDataPush =
   begin
-    # (bytes [1, 2, 3] # bytes [1, 2] # bytes [3] # opCat # opEqual)
-    # (bytes (B.pack $ replicate 74 1) # nat 37 # opSplit # opEqual)
-    # opBoolAnd
+    ∘ (bytes [1, 2, 3] ∘ bytes [1, 2] ∘ bytes [3] ∘ opCat ∘ opEqual)
+    ∘ (bytes (B.pack $ replicate 74 1) ∘ nat 37 ∘ opSplit ∘ opEqual)
+    ∘ opBoolAnd
 
 -- Use multi-byte strings inside conditionals. If multi-byte opcodes are not
 -- handled correctly by the VM, then it could start interpreting the data as
@@ -68,20 +68,20 @@ progDataPush =
 progConditionals :: Fn s (s > TBool)
 progConditionals =
   begin
-    # opTrue
-    # opIf
+    ∘ opTrue
+    ∘ opIf
       ( begin
-          # opTrue
-          # opNotIf
+          ∘ opTrue
+          ∘ opNotIf
             someBytes
             ( begin
-                # opFalse
-                # opIf someBytes expectedBytes
+                ∘ opFalse
+                ∘ opIf someBytes expectedBytes
             )
       )
       someBytes
-    # expectedBytes
-    # opEqual
+    ∘ expectedBytes
+    ∘ opEqual
   where
     expectedBytes :: Fn s (s > TBytes)
     expectedBytes = bytes [opEndif, opEndif, opEndif]
@@ -96,81 +96,81 @@ progConditionals =
 progArithmetic1 :: Fn s (s > TBool)
 progArithmetic1 =
   begin
-    # (int 2 # int 3 # opMul # int 4 # opAdd # int 2 # opDiv)
-    # (int 7 # int 5 # opMod)
-    # opSub
-    # (int 3 # opNumEqual)
+    ∘ (int 2 ∘ int 3 ∘ opMul ∘ int 4 ∘ opAdd ∘ int 2 ∘ opDiv)
+    ∘ (int 7 ∘ int 5 ∘ opMod)
+    ∘ opSub
+    ∘ (int 3 ∘ opNumEqual)
 
 progArithmetic2 :: Fn s (s > TBool)
 progArithmetic2 =
   begin
-    # (int 2 # int 3 # opLessThan)
-    # (int 3 # int 3 # opLessThanOrEqual)
-    # (int 3 # int 4 # opNumNotEqual)
-    # (int 3 # int 1 # int 5 # opWithin)
-    # (opBoolAnd # opBoolAnd # opBoolAnd)
+    ∘ (int 2 ∘ int 3 ∘ opLessThan)
+    ∘ (int 3 ∘ int 3 ∘ opLessThanOrEqual)
+    ∘ (int 3 ∘ int 4 ∘ opNumNotEqual)
+    ∘ (int 3 ∘ int 1 ∘ int 5 ∘ opWithin)
+    ∘ (opBoolAnd ∘ opBoolAnd ∘ opBoolAnd)
 
 progIntrospection :: Fn s (s > TBool)
 progIntrospection =
   begin
-    # (opTxVersion # nat 2 # opNumEqual)
-    # (opTxInputCount # nat 1 # opNumEqual)
-    # opBoolAnd
+    ∘ (opTxVersion ∘ nat 2 ∘ opNumEqual)
+    ∘ (opTxInputCount ∘ nat 1 ∘ opNumEqual)
+    ∘ opBoolAnd
 
 progStack1 :: Fn s (s > TBool)
-progStack1 = nat 2 # opTrue # opNip # opDup # opDrop
+progStack1 = nat 2 ∘ opTrue ∘ opNip ∘ opDup ∘ opDrop
 
 progStack2 :: Fn s (s > TBool)
 progStack2 =
   begin
-    # name "x4" (int 4)
-    # name "x3" (int 3)
-    # name "x2" (int 2)
-    # name "x1" (int 1)
-    # name "x0" (int 0)
-    # (pick "x4" # roll "x3" # opMul # int 12 # opNumEqual)
-    # (del "x0" # del "x1" # del "x2" # del "x4")
+    ∘ name #x4 (int 4)
+    ∘ name #x3 (int 3)
+    ∘ name #x2 (int 2)
+    ∘ name #x1 (int 1)
+    ∘ name #x0 (int 0)
+    ∘ (pick #x4 ∘ roll #x3 ∘ opMul ∘ int 12 ∘ opNumEqual)
+    ∘ (del #x0 ∘ del #x1 ∘ del #x2 ∘ del #x4)
 
 progAltStack :: Fn s (s > TBool)
 progAltStack =
   begin
-    # int 5
-    # int 3
-    # int 7
-    # opToAltStack
-    # opToAltStack
-    # opToAltStack
-    # opFromAltStack
-    # opFromAltStack
-    # opSub
-    # opFromAltStack
-    # opMul
-    # int 14
-    # opNumEqual
+    ∘ int 5
+    ∘ int 3
+    ∘ int 7
+    ∘ opToAltStack
+    ∘ opToAltStack
+    ∘ opToAltStack
+    ∘ opFromAltStack
+    ∘ opFromAltStack
+    ∘ opSub
+    ∘ opFromAltStack
+    ∘ opMul
+    ∘ int 14
+    ∘ opNumEqual
 
 progBytes :: Fn s (s > TBool)
 progBytes =
   begin
-    # startBytes -- b
-    # opSize -- b s
-    # opSwap -- s b
-    # opDup -- s b b
-    # opReverseBytes -- s b br
-    # opCat -- s b(br)
-    # opSwap -- b(br) s
-    # opSplit -- b br
-    # opReverseBytes -- b b
-    # opEqual -- t
+    ∘ startBytes -- b
+    ∘ opSize -- b s
+    ∘ opSwap -- s b
+    ∘ opDup -- s b b
+    ∘ opReverseBytes -- s b br
+    ∘ opCat -- s b(br)
+    ∘ opSwap -- b(br) s
+    ∘ opSplit -- b br
+    ∘ opReverseBytes -- b b
+    ∘ opEqual -- t
   where
     startBytes :: Fn s (s > TBytes)
-    startBytes = int 1 # i2b # int 2 # i2b # opCat
+    startBytes = int 1 ∘ i2b ∘ int 2 ∘ i2b ∘ opCat
 
 i2b :: Fn (s > TInt) (s > TBytes)
 i2b = cast
 
 progBitwise :: Fn s (s > TBool)
 progBitwise =
-  int 1 # i2b # int 2 # i2b # opOr # int 3 # i2b # opEqual
+  int 1 ∘ i2b ∘ int 2 ∘ i2b ∘ opOr ∘ int 3 ∘ i2b ∘ opEqual
 
 progOpReserved :: Fn s s
 progOpReserved = insertOpCode (OP_UNUSED OP_RESERVED)

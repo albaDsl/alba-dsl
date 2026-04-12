@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Bch2025
     opTrue,
     pick,
     roll,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
@@ -94,166 +94,166 @@ testLibVector =
 progLength :: Fn s (s > TBool)
 progLength =
   begin
-    # (int64Vector # V.length # nat 3 # equalVerify)
-    # (int8Vector # V.length # nat 3 # equalVerify)
-    # (bytes128Vector # V.length # nat 3 # equalVerify)
-    # (int64Vector # V.null # opFalse # equalVerify)
-    # (int8Vector # V.null # opFalse # equalVerify)
-    # (bytes128Vector # V.null # opFalse # equalVerify)
-    # opTrue
+    ∘ (int64Vector ∘ V.length ∘ nat 3 ∘ equalVerify)
+    ∘ (int8Vector ∘ V.length ∘ nat 3 ∘ equalVerify)
+    ∘ (bytes128Vector ∘ V.length ∘ nat 3 ∘ equalVerify)
+    ∘ (int64Vector ∘ V.null ∘ opFalse ∘ equalVerify)
+    ∘ (int8Vector ∘ V.null ∘ opFalse ∘ equalVerify)
+    ∘ (bytes128Vector ∘ V.null ∘ opFalse ∘ equalVerify)
+    ∘ opTrue
 
 progIndexing :: Fn s (s > TBool)
 progIndexing =
   begin
-    # (int64Vector # V.last # fromJust # int64 2 # equalVerify)
-    # (int8Vector # V.last # fromJust # int8 2 # equalVerify)
-    # (bytes128Vector # V.last # fromJust # bytes128 b2 # equalVerify)
-    # (int64Vector # V.head # fromJust # int64 0 # equalVerify)
-    # (int8Vector # V.head # fromJust # int8 0 # equalVerify)
-    # (bytes128Vector # V.head # fromJust # bytes128 b0 # equalVerify)
-    # (int64Vector # nat 0 # V.lookup # fromJust # int64 0 # equalVerify)
-    # (int64Vector # nat 1 # V.lookup # fromJust # int64 1 # equalVerify)
-    # (int64Vector # nat 2 # V.lookup # fromJust # int64 2 # equalVerify)
-    # (int64Vector # nat 3 # V.lookup # nothing # equalVerify)
-    # (int8Vector # nat 0 # V.lookup # fromJust # int8 0 # equalVerify)
-    # (int8Vector # nat 1 # V.lookup # fromJust # int8 1 # equalVerify)
-    # (int8Vector # nat 2 # V.lookup # fromJust # int8 2 # equalVerify)
-    # (int8Vector # nat 3 # V.lookup # nothing # equalVerify)
-    # ( begin
-          # (bytes128Vector # nat 0 # V.lookup # fromJust # bytes128 b0)
-          # equalVerify
+    ∘ (int64Vector ∘ V.last ∘ fromJust ∘ int64 2 ∘ equalVerify)
+    ∘ (int8Vector ∘ V.last ∘ fromJust ∘ int8 2 ∘ equalVerify)
+    ∘ (bytes128Vector ∘ V.last ∘ fromJust ∘ bytes128 b2 ∘ equalVerify)
+    ∘ (int64Vector ∘ V.head ∘ fromJust ∘ int64 0 ∘ equalVerify)
+    ∘ (int8Vector ∘ V.head ∘ fromJust ∘ int8 0 ∘ equalVerify)
+    ∘ (bytes128Vector ∘ V.head ∘ fromJust ∘ bytes128 b0 ∘ equalVerify)
+    ∘ (int64Vector ∘ nat 0 ∘ V.lookup ∘ fromJust ∘ int64 0 ∘ equalVerify)
+    ∘ (int64Vector ∘ nat 1 ∘ V.lookup ∘ fromJust ∘ int64 1 ∘ equalVerify)
+    ∘ (int64Vector ∘ nat 2 ∘ V.lookup ∘ fromJust ∘ int64 2 ∘ equalVerify)
+    ∘ (int64Vector ∘ nat 3 ∘ V.lookup ∘ nothing ∘ equalVerify)
+    ∘ (int8Vector ∘ nat 0 ∘ V.lookup ∘ fromJust ∘ int8 0 ∘ equalVerify)
+    ∘ (int8Vector ∘ nat 1 ∘ V.lookup ∘ fromJust ∘ int8 1 ∘ equalVerify)
+    ∘ (int8Vector ∘ nat 2 ∘ V.lookup ∘ fromJust ∘ int8 2 ∘ equalVerify)
+    ∘ (int8Vector ∘ nat 3 ∘ V.lookup ∘ nothing ∘ equalVerify)
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ nat 0 ∘ V.lookup ∘ fromJust ∘ bytes128 b0)
+          ∘ equalVerify
       )
-    # ( begin
-          # (bytes128Vector # nat 1 # V.lookup # fromJust # bytes128 b1)
-          # equalVerify
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ nat 1 ∘ V.lookup ∘ fromJust ∘ bytes128 b1)
+          ∘ equalVerify
       )
-    # ( begin
-          # (bytes128Vector # nat 2 # V.lookup # fromJust # bytes128 b2)
-          # equalVerify
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ nat 2 ∘ V.lookup ∘ fromJust ∘ bytes128 b2)
+          ∘ equalVerify
       )
-    # (bytes128Vector # nat 3 # V.lookup # nothing # equalVerify)
-    # opTrue
+    ∘ (bytes128Vector ∘ nat 3 ∘ V.lookup ∘ nothing ∘ equalVerify)
+    ∘ opTrue
 
 progSlicing :: Fn s (s > TBool)
 progSlicing =
   begin
-    # (int64Vector # testUncons int64)
-    # (int8Vector # testUncons int8)
-    # ( begin
-          # (int64Vector # V.unsnoc # fromJust # snd)
-          # int64 2
-          # equalVerify
+    ∘ (int64Vector ∘ testUncons int64)
+    ∘ (int8Vector ∘ testUncons int8)
+    ∘ ( begin
+          ∘ (int64Vector ∘ V.unsnoc ∘ fromJust ∘ snd)
+          ∘ int64 2
+          ∘ equalVerify
       )
-    # ( begin
-          # (int8Vector # V.unsnoc # fromJust # snd)
-          # int8 2
-          # equalVerify
+    ∘ ( begin
+          ∘ (int8Vector ∘ V.unsnoc ∘ fromJust ∘ snd)
+          ∘ int8 2
+          ∘ equalVerify
       )
-    # ( begin
-          # (bytes128Vector # V.unsnoc # fromJust # snd)
-          # bytes128 b2
-          # equalVerify
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ V.unsnoc ∘ fromJust ∘ snd)
+          ∘ bytes128 b2
+          ∘ equalVerify
       )
-    # ( begin
-          # (int64Vector # V.init # fromJust)
-          # (int64 0 # int64 1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (int64Vector ∘ V.init ∘ fromJust)
+          ∘ (int64 0 ∘ int64 1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (int8Vector # V.init # fromJust)
-          # (int8 0 # int8 1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (int8Vector ∘ V.init ∘ fromJust)
+          ∘ (int8 0 ∘ int8 1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (bytes128Vector # V.init # fromJust)
-          # (bytes128 b0 # bytes128 b1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ V.init ∘ fromJust)
+          ∘ (bytes128 b0 ∘ bytes128 b1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (int64Vector # V.tail # fromJust)
-          # (int64 1 # int64 2 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (int64Vector ∘ V.tail ∘ fromJust)
+          ∘ (int64 1 ∘ int64 2 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (int8Vector # V.tail # fromJust)
-          # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (int8Vector ∘ V.tail ∘ fromJust)
+          ∘ (int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (bytes128Vector # V.tail # fromJust)
-          # (bytes128 b1 # bytes128 b2 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (bytes128Vector ∘ V.tail ∘ fromJust)
+          ∘ (bytes128 b1 ∘ bytes128 b2 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int64Vector # V.take)
-          # (int64 0 # int64 1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int64Vector ∘ V.take)
+          ∘ (int64 0 ∘ int64 1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int8Vector # V.take)
-          # (int8 0 # int8 1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int8Vector ∘ V.take)
+          ∘ (int8 0 ∘ int8 1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # bytes128Vector # V.take)
-          # (bytes128 b0 # bytes128 b1 # V.empty # V.cons # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ bytes128Vector ∘ V.take)
+          ∘ (bytes128 b0 ∘ bytes128 b1 ∘ V.empty ∘ V.cons ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int64Vector # V.drop)
-          # (int64 2 # V.empty # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int64Vector ∘ V.drop)
+          ∘ (int64 2 ∘ V.empty ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int8Vector # V.drop)
-          # (int8 2 # V.empty # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int8Vector ∘ V.drop)
+          ∘ (int8 2 ∘ V.empty ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # bytes128Vector # V.drop)
-          # (bytes128 b2 # V.empty # V.cons)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ bytes128Vector ∘ V.drop)
+          ∘ (bytes128 b2 ∘ V.empty ∘ V.cons)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int64Vector # V.splitAt)
-          # (nip # int64 2 # V.singleton)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int64Vector ∘ V.splitAt)
+          ∘ (nip ∘ int64 2 ∘ V.singleton)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # int8Vector # V.splitAt)
-          # (nip # int8 2 # V.singleton)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ int8Vector ∘ V.splitAt)
+          ∘ (nip ∘ int8 2 ∘ V.singleton)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 2 # bytes128Vector # V.splitAt)
-          # (nip # bytes128 b2 # V.singleton)
-          # equalVerify
+    ∘ ( begin
+          ∘ (nat 2 ∘ bytes128Vector ∘ V.splitAt)
+          ∘ (nip ∘ bytes128 b2 ∘ V.singleton)
+          ∘ equalVerify
       )
-    # ( begin
-          # (nat 10 # int64Vector # V.splitAt)
-          # (drop # int64Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 10 ∘ int64Vector ∘ V.splitAt)
+          ∘ (drop ∘ int64Vector ∘ equalVerify)
       )
-    # ( begin
-          # (nat 10 # int8Vector # V.splitAt)
-          # (drop # int8Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 10 ∘ int8Vector ∘ V.splitAt)
+          ∘ (drop ∘ int8Vector ∘ equalVerify)
       )
-    # ( begin
-          # (nat 10 # bytes128Vector # V.splitAt)
-          # (drop # bytes128Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 10 ∘ bytes128Vector ∘ V.splitAt)
+          ∘ (drop ∘ bytes128Vector ∘ equalVerify)
       )
-    # ( begin
-          # (nat 0 # int64Vector # V.splitAt)
-          # (nip # int64Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 0 ∘ int64Vector ∘ V.splitAt)
+          ∘ (nip ∘ int64Vector ∘ equalVerify)
       )
-    # ( begin
-          # (nat 0 # int8Vector # V.splitAt)
-          # (nip # int8Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 0 ∘ int8Vector ∘ V.splitAt)
+          ∘ (nip ∘ int8Vector ∘ equalVerify)
       )
-    # ( begin
-          # (nat 0 # bytes128Vector # V.splitAt)
-          # (nip # bytes128Vector # equalVerify)
+    ∘ ( begin
+          ∘ (nat 0 ∘ bytes128Vector ∘ V.splitAt)
+          ∘ (nip ∘ bytes128Vector ∘ equalVerify)
       )
-    # opTrue
+    ∘ opTrue
   where
     testUncons ::
       (BlobEq a, PackFs a) =>
@@ -261,110 +261,110 @@ progSlicing =
       Fn (s > V.TVector a) s
     testUncons val =
       begin
-        # (V.uncons # fromJust # snd)
-        # (V.uncons # fromJust # fst # val 1 # equalVerify)
+        ∘ (V.uncons ∘ fromJust ∘ snd)
+        ∘ (V.uncons ∘ fromJust ∘ fst ∘ val 1 ∘ equalVerify)
 
 progConstruction :: Fn s (s > TBool)
 progConstruction =
   runEnv
     ( begin
-        # ( begin
-              # (nat 3 # int64 1 # V.replicate)
-              # (int64 1 # int64 1 # int64 1 # V.empty)
-              # (V.cons # V.cons # V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (nat 3 ∘ int64 1 ∘ V.replicate)
+              ∘ (int64 1 ∘ int64 1 ∘ int64 1 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
-        # ( begin
-              # (nat 0 # int64 1 # V.replicate)
-              # V.empty
-              # equalVerify
+        ∘ ( begin
+              ∘ (nat 0 ∘ int64 1 ∘ V.replicate)
+              ∘ V.empty
+              ∘ equalVerify
           )
-        # ( begin
-              # (nat 3 # lambda1 (add1 # n2i # fromInt) # V.generate)
-              # (int64 1 # int64 2 # int64 3 # V.empty)
-              # (V.cons # V.cons # V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (int64 1 ∘ int64 2 ∘ int64 3 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
-        # ( begin
-              # (nat 3 # lambda1 (int8 2 # mul) # int8 2 # V.iterateN)
-              # (int8 2 # int8 4 # int8 8 # V.empty)
-              # (V.cons # V.cons # V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (nat 3 ∘ lambda1 (int8 2 ∘ mul) ∘ int8 2 ∘ V.iterateN)
+              ∘ (int8 2 ∘ int8 4 ∘ int8 8 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
-        # opTrue
+        ∘ opTrue
     )
 
 progConcatenation :: Fn s (s > TBool)
 progConcatenation =
   runEnv
     ( begin
-        # ( begin
-              # (nat 3 # lambda1 (add1 # n2i # fromInt) # V.generate)
-              # (int64 1 # V.empty # V.cons # int64 2 # V.snoc # int64 3)
-              # (V.snoc # equalVerify)
+        ∘ ( begin
+              ∘ (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (int64 1 ∘ V.empty ∘ V.cons ∘ int64 2 ∘ V.snoc ∘ int64 3)
+              ∘ (V.snoc ∘ equalVerify)
           )
-        # ( begin
-              # ( (nat 3 # lambda1 (add1 # n2i # fromInt) # V.generate) ::
+        ∘ ( begin
+              ∘ ( (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate) ::
                     Env s (s > V.TVector TInt64)
                 )
-              # ( (nat 3 # lambda1 (n2i # fromInt) # V.generate) ::
+              ∘ ( (nat 3 ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate) ::
                     Env s (s > V.TVector TInt64)
                 )
-              # V.append
-              # ( begin
-                    # (int64 1 # int64 2 # int64 3 # int64 0 # int64 1)
-                    # (int64 2 # V.empty # V.cons # V.cons # V.cons # V.cons)
-                    # (V.cons # V.cons)
+              ∘ V.append
+              ∘ ( begin
+                    ∘ (int64 1 ∘ int64 2 ∘ int64 3 ∘ int64 0 ∘ int64 1)
+                    ∘ (int64 2 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons ∘ V.cons)
+                    ∘ (V.cons ∘ V.cons)
                 )
-              # equalVerify
+              ∘ equalVerify
           )
-        # opTrue
+        ∘ opTrue
     )
 
 progPermutation :: Fn s (s > TBool)
 progPermutation =
   runEnv
     ( begin
-        # ( begin
-              # (int8Vector # V.reverse)
-              # (int8 2 # int8 1 # int8 0 # V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (int8Vector ∘ V.reverse)
+              ∘ (int8 2 ∘ int8 1 ∘ int8 0 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (int64Vector # V.reverse)
-              # (int64 2 # int64 1 # int64 0 # V.empty)
-              # (V.cons # V.cons # V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (int64Vector ∘ V.reverse)
+              ∘ (int64 2 ∘ int64 1 ∘ int64 0 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
-        # ( begin
-              # (bytes128Vector # V.reverse)
-              # (bytes128 b2 # bytes128 b1 # bytes128 b0 # V.empty)
-              # (V.cons # V.cons # V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (bytes128Vector ∘ V.reverse)
+              ∘ (bytes128 b2 ∘ bytes128 b1 ∘ bytes128 b0 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
-        # opTrue
+        ∘ opTrue
     )
 
 progMapping :: Fn s (s > TBool)
 progMapping =
   runEnv
     ( begin
-        # ( begin
-              # (lambda1 (int8 2 # mul) # int8Vector # V.map)
-              # (int8 0 # int8 2 # int8 4 # V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (lambda1 (int8 2 ∘ mul) ∘ int8Vector ∘ V.map)
+              ∘ (int8 0 ∘ int8 2 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (lambda1 (int64 2 # mul) # int64Vector # V.map)
-              # (int64 0 # int64 2 # int64 4 # V.empty # V.cons # V.cons)
-              # (V.cons # equalVerify)
+        ∘ ( begin
+              ∘ (lambda1 (int64 2 ∘ mul) ∘ int64Vector ∘ V.map)
+              ∘ (int64 0 ∘ int64 2 ∘ int64 4 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ equalVerify)
           )
-        # ( begin
-              # (lambda1 addExclamation # bytes128Vector # V.map)
-              # (bytes128 (b0 <> "!") # bytes128 (b1 <> "!"))
-              # (bytes128 (b2 <> "!") # V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (lambda1 addExclamation ∘ bytes128Vector ∘ V.map)
+              ∘ (bytes128 (b0 <> "!") ∘ bytes128 (b1 <> "!"))
+              ∘ (bytes128 (b2 <> "!") ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (lambda1 int8to64 # int8Vector # V.map)
-              # (int64Vector # equalVerify)
+        ∘ ( begin
+              ∘ (lambda1 int8to64 ∘ int8Vector ∘ V.map)
+              ∘ (int64Vector ∘ equalVerify)
           )
-        # opTrue
+        ∘ opTrue
     )
   where
     int8to64 :: Fn (s > TInt8) (s > TInt64)
@@ -374,80 +374,80 @@ progZipping :: Fn s (s > TBool)
 progZipping =
   runEnv
     ( begin
-        # ( begin
-              # (int64Vector # int8Vector # V.zip)
-              # (int64 0 # int8 0 # TFS.tuple)
-              # (int64 1 # int8 1 # TFS.tuple)
-              # (int64 2 # int8 2 # TFS.tuple)
-              # (V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (int64Vector ∘ int8Vector ∘ V.zip)
+              ∘ (int64 0 ∘ int8 0 ∘ TFS.tuple)
+              ∘ (int64 1 ∘ int8 1 ∘ TFS.tuple)
+              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (int64Vector # int8Vector # V.zip)
-              # (V.unsnoc # fromJust # snd)
-              # (int64 2 # int8 2 # TFS.tuple)
-              # equalVerify
+        ∘ ( begin
+              ∘ (int64Vector ∘ int8Vector ∘ V.zip)
+              ∘ (V.unsnoc ∘ fromJust ∘ snd)
+              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ equalVerify
           )
-        # ( begin
-              # (int64Vector # bytes128Vector # V.zip)
-              # (int64 0 # bytes128 b0 # TFS.tuple)
-              # (int64 1 # bytes128 b1 # TFS.tuple)
-              # (int64 2 # bytes128 b2 # TFS.tuple)
-              # (V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (int64Vector ∘ bytes128Vector ∘ V.zip)
+              ∘ (int64 0 ∘ bytes128 b0 ∘ TFS.tuple)
+              ∘ (int64 1 ∘ bytes128 b1 ∘ TFS.tuple)
+              ∘ (int64 2 ∘ bytes128 b2 ∘ TFS.tuple)
+              ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (int64Vector # bytes128Vector # V.zip)
-              # (V.unsnoc # fromJust # snd)
-              # (int64 2 # bytes128 b2 # TFS.tuple)
-              # equalVerify
+        ∘ ( begin
+              ∘ (int64Vector ∘ bytes128Vector ∘ V.zip)
+              ∘ (V.unsnoc ∘ fromJust ∘ snd)
+              ∘ (int64 2 ∘ bytes128 b2 ∘ TFS.tuple)
+              ∘ equalVerify
           )
-        # ( begin
-              # lambda2
+        ∘ ( begin
+              ∘ lambda2
                 ( begin
-                    # (packFsRec @TInt64 # packFsRec @TInt8 # op2Swap)
-                    # TFS.tupleF
+                    ∘ (packFsRec @TInt64 ∘ packFsRec @TInt8 ∘ op2Swap)
+                    ∘ TFS.tupleF
                 )
-              # (int64Vector # int8Vector # V.zipWith)
-              # (int64 0 # int8 0 # TFS.tuple)
-              # (int64 1 # int8 1 # TFS.tuple)
-              # (int64 2 # int8 2 # TFS.tuple)
-              # (V.empty # V.cons # V.cons # V.cons)
-              # equalVerify
+              ∘ (int64Vector ∘ int8Vector ∘ V.zipWith)
+              ∘ (int64 0 ∘ int8 0 ∘ TFS.tuple)
+              ∘ (int64 1 ∘ int8 1 ∘ TFS.tuple)
+              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # ( begin
-              # (int64Vector # int8Vector # V.zip)
-              # V.unzip
-              # (int8Vector # equalVerify)
-              # (int64Vector # equalVerify)
+        ∘ ( begin
+              ∘ (int64Vector ∘ int8Vector ∘ V.zip)
+              ∘ V.unzip
+              ∘ (int8Vector ∘ equalVerify)
+              ∘ (int64Vector ∘ equalVerify)
           )
-        # ( begin
-              # lambda2 add
-              # int64Vector
-              # (dup # lambda1 (int64 1 # add) # swap # V.map)
-              # V.zipWith
-              # (int64 1 # int64 3 # int64 5 # V.empty)
-              # (V.cons # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ lambda2 add
+              ∘ int64Vector
+              ∘ (dup ∘ lambda1 (int64 1 ∘ add) ∘ swap ∘ V.map)
+              ∘ V.zipWith
+              ∘ (int64 1 ∘ int64 3 ∘ int64 5 ∘ V.empty)
+              ∘ (V.cons ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # opTrue
+        ∘ opTrue
     )
 
 progFiltering :: Fn s (s > TBool)
 progFiltering =
   runEnv
     ( begin
-        # ( begin
-              # (nat 10 # lambda1 (add1 # n2i # fromInt) # V.generate)
-              # (lambda1 (int8 3 # lessThan) # swap # V.filter)
-              # (int8 1 # int8 2 # V.empty # V.cons # V.cons)
-              # equalVerify
+        ∘ ( begin
+              ∘ (nat 10 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (lambda1 (int8 3 ∘ lessThan) ∘ swap ∘ V.filter)
+              ∘ (int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ equalVerify
           )
-        # opTrue
+        ∘ opTrue
     )
 
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = lambda0 (errCanNotHappen) # swap # fromMaybe'
+fromJust = lambda0 (errCanNotHappen) ∘ swap ∘ fromMaybe'
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
 propReverse :: BytesSize -> Bool
@@ -457,7 +457,7 @@ propReverse (BytesSize size) =
   where
     prog :: Natural -> Fn s (s > TBool)
     prog len' =
-      runEnv (testVector len' # dup # V.reverse # V.reverse # equal)
+      runEnv (testVector len' ∘ dup ∘ V.reverse ∘ V.reverse ∘ equal)
 
     overhead :: Integer
     overhead = 10
@@ -468,7 +468,7 @@ propLength (BytesSize size) =
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
     prog :: Natural -> Fn s (s > TBool)
-    prog len' = runEnv (nat len' # testVector len' # V.length # opNumEqual)
+    prog len' = runEnv (nat len' ∘ testVector len' ∘ V.length ∘ opNumEqual)
 
 propLookup :: BytesSize -> BytesSize -> Property
 propLookup (BytesSize size1) (BytesSize size2) =
@@ -481,8 +481,8 @@ propLookup (BytesSize size1) (BytesSize size2) =
     prog len' idx' =
       runEnv
         ( begin
-            # (testVector len' # nat idx' # V.lookup)
-            # (int64 (fromIntegral idx') # just # equal)
+            ∘ (testVector len' ∘ nat idx' ∘ V.lookup)
+            ∘ (int64 (fromIntegral idx') ∘ just ∘ equal)
         )
 
 propConsSnocAppend :: BytesSize -> Bool
@@ -494,11 +494,11 @@ propConsSnocAppend (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (int64 1 # pick "vec" # V.cons # int64 2 # V.snoc)
-            # (int64 1 # V.singleton # roll "vec" # int64 2 # V.singleton)
-            # (V.append # V.append)
-            # equal
+            ∘ name #vec (testVector len')
+            ∘ (int64 1 ∘ pick #vec ∘ V.cons ∘ int64 2 ∘ V.snoc)
+            ∘ (int64 1 ∘ V.singleton ∘ roll #vec ∘ int64 2 ∘ V.singleton)
+            ∘ (V.append ∘ V.append)
+            ∘ equal
         )
 
 propHeadTailUncons :: BytesSize -> Property
@@ -511,10 +511,10 @@ propHeadTailUncons (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (lambda2 tuple # pick "vec" # V.head)
-            # (pick "vec" # V.tail # liftA2Maybe)
-            # (roll "vec" # V.uncons # equal)
+            ∘ name #vec (testVector len')
+            ∘ (lambda2 tuple ∘ pick #vec ∘ V.head)
+            ∘ (pick #vec ∘ V.tail ∘ liftA2Maybe)
+            ∘ (roll #vec ∘ V.uncons ∘ equal)
         )
 
 propLastInitUnsnoc :: BytesSize -> Property
@@ -527,10 +527,10 @@ propLastInitUnsnoc (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (lambda2 tuple # pick "vec" # V.init)
-            # (pick "vec" # V.last # liftA2Maybe)
-            # (roll "vec" # V.unsnoc # equal)
+            ∘ name #vec (testVector len')
+            ∘ (lambda2 tuple ∘ pick #vec ∘ V.init)
+            ∘ (pick #vec ∘ V.last ∘ liftA2Maybe)
+            ∘ (roll #vec ∘ V.unsnoc ∘ equal)
         )
 
 -- 9998 is based on current 10K element limit and leaving room for the
@@ -546,10 +546,10 @@ propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
     prog len' idx' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (nat idx' # pick "vec" # V.take)
-            # (nat idx' # pick "vec" # V.drop # tuple)
-            # (nat idx' # roll "vec" # V.splitAt # tuple # equal)
+            ∘ name #vec (testVector len')
+            ∘ (nat idx' ∘ pick #vec ∘ V.take)
+            ∘ (nat idx' ∘ pick #vec ∘ V.drop ∘ tuple)
+            ∘ (nat idx' ∘ roll #vec ∘ V.splitAt ∘ tuple ∘ equal)
         )
 
 -- 4000 is based on current 10K element limit and leaving ample room for the
@@ -565,12 +565,12 @@ propZipUnzip (BytesSize size1) (BytesSize size2) =
     prog len1' len2' =
       runEnv
         ( begin
-            # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
-            # (pick "vec1" # pick "vec2" # V.zip # V.unzip # V.zip)
-            # name "minLen" (nat len1' # nat len2' # min)
-            # (pick "minLen" # roll "vec1" # V.take)
-            # (roll "minLen" # roll "vec2" # V.take)
-            # (V.zip # equal)
+            ∘ (name #vec1 (testVector len1') ∘ name #vec2 (testVector len2'))
+            ∘ (pick #vec1 ∘ pick #vec2 ∘ V.zip ∘ V.unzip ∘ V.zip)
+            ∘ name #minLen (nat len1' ∘ nat len2' ∘ min)
+            ∘ (pick #minLen ∘ roll #vec1 ∘ V.take)
+            ∘ (roll #minLen ∘ roll #vec2 ∘ V.take)
+            ∘ (V.zip ∘ equal)
         )
 
 propZipWithUnzip :: BytesSize -> BytesSize -> Property
@@ -584,13 +584,13 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
     prog len1' len2' =
       runEnv
         ( begin
-            # (name "vec1" (testVector len1') # name "vec2" (testVector len2'))
-            # (lambda2 TFS.tuple # dup)
-            # (pick "vec1" # pick "vec2" # V.zipWith # V.unzip # V.zipWith)
-            # name "minLen" (nat len1' # nat len2' # min)
-            # (pick "minLen" # roll "vec1" # V.take)
-            # (roll "minLen" # roll "vec2" # V.take)
-            # (V.zip # equal)
+            ∘ (name #vec1 (testVector len1') ∘ name #vec2 (testVector len2'))
+            ∘ (lambda2 TFS.tuple ∘ dup)
+            ∘ (pick #vec1 ∘ pick #vec2 ∘ V.zipWith ∘ V.unzip ∘ V.zipWith)
+            ∘ name #minLen (nat len1' ∘ nat len2' ∘ min)
+            ∘ (pick #minLen ∘ roll #vec1 ∘ V.take)
+            ∘ (roll #minLen ∘ roll #vec2 ∘ V.take)
+            ∘ (V.zip ∘ equal)
         )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -603,8 +603,8 @@ propFilterKeepAll (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # (testVector len' # dup)
-            # (lambda1 (drop # opTrue) # swap # V.filter # equal)
+            ∘ (testVector len' ∘ dup)
+            ∘ (lambda1 (drop ∘ opTrue) ∘ swap ∘ V.filter ∘ equal)
         )
 
     overhead :: Integer
@@ -619,8 +619,8 @@ propFilterKeepNone (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # (V.empty # testVector len')
-            # (lambda1 (drop # opFalse) # swap # V.filter # equal)
+            ∘ (V.empty ∘ testVector len')
+            ∘ (lambda1 (drop ∘ opFalse) ∘ swap ∘ V.filter ∘ equal)
         )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -633,17 +633,17 @@ propMapComposition (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (lambda1 f # lambda1 g # pick "vec" # V.map # V.map)
-            # (lambda1 (g # f) # roll "vec" # V.map)
-            # equal
+            ∘ name #vec (testVector len')
+            ∘ (lambda1 f ∘ lambda1 g ∘ pick #vec ∘ V.map ∘ V.map)
+            ∘ (lambda1 (g ∘ f) ∘ roll #vec ∘ V.map)
+            ∘ equal
         )
 
     f :: Fn (s > TInt64) (s > TInt64)
-    f = int64 2 # add
+    f = int64 2 ∘ add
 
     g :: Fn (s > TInt64) (s > TInt64)
-    g = int64 2 # mul
+    g = int64 2 ∘ mul
 
     overhead :: Integer
     overhead = 10
@@ -658,8 +658,8 @@ propMapIdentity (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # name "vec" (testVector len')
-            # (pick "vec" # lambda1 emptyProg # roll "vec" # V.map # equal)
+            ∘ name #vec (testVector len')
+            ∘ (pick #vec ∘ lambda1 emptyProg ∘ roll #vec ∘ V.map ∘ equal)
         )
 
     overhead :: Integer
@@ -673,11 +673,11 @@ propFolding (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            # (lambda2 add # int64 0 # testVector len' # V.foldl)
-            # (int64 sum # equalVerify)
-            # (lambda2 add # int64 0 # testVector len' # V.foldr)
-            # (int64 sum # equalVerify)
-            # opTrue
+            ∘ (lambda2 add ∘ int64 0 ∘ testVector len' ∘ V.foldl)
+            ∘ (int64 sum ∘ equalVerify)
+            ∘ (lambda2 add ∘ int64 0 ∘ testVector len' ∘ V.foldr)
+            ∘ (int64 sum ∘ equalVerify)
+            ∘ opTrue
         )
 
     len :: Integer
@@ -691,8 +691,8 @@ int64Vector :: Fn s (s > V.TVector TInt64)
 int64Vector =
   fn
     ( begin
-        # (int64 0 # int64 1 # int64 2 # V.empty # V.cons # V.cons # V.cons)
-        # (dup # v2b # opSize # nip # nat (8 * 3) # equalVerify)
+        ∘ (int64 0 ∘ int64 1 ∘ int64 2 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+        ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (8 * 3) ∘ equalVerify)
     )
 
 v2b :: Fn (s > V.TVector a) (s > TBytes)
@@ -702,17 +702,17 @@ int8Vector :: Fn s (s > V.TVector TInt8)
 int8Vector =
   fn
     ( begin
-        # (int8 0 # int8 1 # int8 2 # V.empty # V.cons # V.cons # V.cons)
-        # (dup # v2b # opSize # nip # nat (1 * 3) # equalVerify)
+        ∘ (int8 0 ∘ int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
+        ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (1 * 3) ∘ equalVerify)
     )
 
 bytes128Vector :: Fn s (s > V.TVector TBytes128)
 bytes128Vector =
   fn
     ( begin
-        # (bytes128 b0 # bytes128 b1 # bytes128 b2 # V.empty)
-        # (V.cons # V.cons # V.cons)
-        # (dup # v2b # opSize # nip # nat (130 * 3) # equalVerify)
+        ∘ (bytes128 b0 ∘ bytes128 b1 ∘ bytes128 b2 ∘ V.empty)
+        ∘ (V.cons ∘ V.cons ∘ V.cons)
+        ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (130 * 3) ∘ equalVerify)
     )
 
 b0 :: Bytes
@@ -725,11 +725,11 @@ b2 :: Bytes
 b2 = ""
 
 testVector :: Natural -> Env s (s > V.TVector TInt64)
-testVector len = nat len # lambda1 (n2i # fromInt) # V.generate
+testVector len = nat len ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate
 
 testVectorElemSize :: Integer
 testVectorElemSize = 8
 
 -- ## bytes128Vector ops.
 addExclamation :: Fn (s > TBytes128) (s > TBytes128)
-addExclamation = toBytes # bytes "!" # opCat # fromBytes
+addExclamation = toBytes ∘ bytes "!" ∘ opCat ∘ fromBytes

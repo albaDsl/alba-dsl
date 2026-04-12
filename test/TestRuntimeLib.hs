@@ -44,9 +44,9 @@ propToPushOp b =
 prog :: Fn (s > TBytes) (s > TBool)
 prog =
   begin
-    # (opDup # toPushOp # opDefineNamed "f")
-    # opInvokeNamed "f" f
-    # opEqual
+    ∘ (opDup ∘ toPushOp ∘ opDefineNamed "f")
+    ∘ opInvokeNamed "f" f
+    ∘ opEqual
   where
     f :: Fn s (s > TBytes)
     f = undefined

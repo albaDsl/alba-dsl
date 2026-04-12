@@ -37,16 +37,16 @@ test prog = do
 progCheckDataSig :: Bytes -> Bytes -> Bytes -> Fn s (s > TBool)
 progCheckDataSig sig msg pk =
   begin
-    # sigBytes sig
-    # bytes msg
-    # pubKeyBytes pk
-    # opCheckDataSig
+    ∘ sigBytes sig
+    ∘ bytes msg
+    ∘ pubKeyBytes pk
+    ∘ opCheckDataSig
 
 progCheckDataSigVerify :: Bytes -> Bytes -> Bytes -> Fn s (s > TBool)
 progCheckDataSigVerify sig msg pk =
   begin
-    # sigBytes sig
-    # bytes msg
-    # pubKeyBytes pk
-    # opCheckDataSigVerify
-    # opTrue
+    ∘ sigBytes sig
+    ∘ bytes msg
+    ∘ pubKeyBytes pk
+    ∘ opCheckDataSigVerify
+    ∘ opTrue

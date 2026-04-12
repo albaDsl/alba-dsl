@@ -50,7 +50,7 @@ signTx utxo secKey = do
     )
 
 progCheckSig :: Bytes -> Fn (s > TSig) (s > TBool)
-progCheckSig pk = pubKeyBytes pk # opCheckSig
+progCheckSig pk = pubKeyBytes pk ∘ opCheckSig
 
 progCheckSigVerify :: Bytes -> Fn (s > TSig) (s > TBool)
-progCheckSigVerify pk = pubKeyBytes pk # opCheckSigVerify # opTrue
+progCheckSigVerify pk = pubKeyBytes pk ∘ opCheckSigVerify ∘ opTrue

@@ -23,7 +23,7 @@ import Alba.Dsl.V1.Bch2025.Ops
 import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Stack (TCode)
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang (begin, (#))
+import Alba.Dsl.V1.Common.Lang (begin, (∘))
 import Alba.Dsl.V1.Common.Stack (Fn, TBool, TBytes, TNat, cast)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import Data.ByteString qualified as B
@@ -35,49 +35,49 @@ toPushOp :: Fn (s > TBytes) (s > TCode)
 toPushOp =
   fn
     ( begin
-        # opSize
-        # case'
-          [ (numEq 0, op2Drop # opcode OP_0),
+        ∘ opSize
+        ∘ case'
+          [ (numEq 0, op2Drop ∘ opcode OP_0),
             ( numEq 1,
               begin
-                # opDrop
-                # case'
+                ∘ opDrop
+                ∘ case'
                   [ (bytesEq [0x00], simpleOpData),
-                    ( bytes [0x80] # opAnd # bytes [0] # opEqual,
+                    ( bytes [0x80] ∘ opAnd ∘ bytes [0] ∘ opEqual,
                       case'
-                        [ ( b2n # numInRange 1 17,
-                            (b2n # opcode OP_RESERVED # b2n # opAdd # n2b)
+                        [ ( b2n ∘ numInRange 1 17,
+                            (b2n ∘ opcode OP_RESERVED ∘ b2n ∘ opAdd ∘ n2b)
                           )
                         ]
                         simpleOpData
                     ),
-                    (bytesEq [0x81], opDrop # opcode OP_1NEGATE)
+                    (bytesEq [0x81], opDrop ∘ opcode OP_1NEGATE)
                   ]
                   simpleOpData
             ),
-            (lessOrEq 0x4b, n2b # opSwap # opCat),
-            (lessOrEq 0x7f, n2b # opcode OP_PUSHDATA1 # assemblePushData),
-            (lessOrEq 0xff, dropSign # opcode OP_PUSHDATA1 # assemblePushData),
-            (lessOrEq 9997, n2b # opcode OP_PUSHDATA2 # assemblePushData)
+            (lessOrEq 0x4b, n2b ∘ opSwap ∘ opCat),
+            (lessOrEq 0x7f, n2b ∘ opcode OP_PUSHDATA1 ∘ assemblePushData),
+            (lessOrEq 0xff, dropSign ∘ opcode OP_PUSHDATA1 ∘ assemblePushData),
+            (lessOrEq 9997, n2b ∘ opcode OP_PUSHDATA2 ∘ assemblePushData)
           ]
-          (opDrop # opFalse # opVerify)
-        # b2c
+          (opDrop ∘ opFalse ∘ opVerify)
+        ∘ b2c
     )
   where
     simpleOpData :: forall s. Fn (s > TBytes) (s > TBytes)
-    simpleOpData = bytes [0x01] # opSwap # opCat
+    simpleOpData = bytes [0x01] ∘ opSwap ∘ opCat
 
     numEq :: Natural -> Fn (s > TNat) (s > TBool)
-    numEq x = nat x # opNumEqual
+    numEq x = nat x ∘ opNumEqual
 
     numInRange :: Natural -> Natural -> Fn (s > TNat) (s > TBool)
-    numInRange x y = nat x # nat y # opWithin
+    numInRange x y = nat x ∘ nat y ∘ opWithin
 
     lessOrEq :: Natural -> Fn (s > TNat) (s > TBool)
-    lessOrEq x = nat x # opLessThanOrEqual
+    lessOrEq x = nat x ∘ opLessThanOrEqual
 
     bytesEq :: B.ByteString -> Fn (s > TBytes) (s > TBool)
-    bytesEq x = bytes x # opEqual
+    bytesEq x = bytes x ∘ opEqual
 
     b2n :: Fn (s > TBytes) (s > TNat)
     b2n = cast
@@ -92,7 +92,7 @@ toPushOp =
     opcode op = bytes [(fromIntegral . fromEnum) op]
 
     dropSign :: Fn (s > TNat) (s > TBytes)
-    dropSign = n2b # nat 1 # opSplit # opDrop
+    dropSign = n2b ∘ nat 1 ∘ opSplit ∘ opDrop
 
     assemblePushData :: Fn (s > TBytes > TBytes > TBytes) (s > TBytes)
-    assemblePushData = opSwap # opRot # opCat # opCat
+    assemblePushData = opSwap ∘ opRot ∘ opCat ∘ opCat

@@ -33,36 +33,36 @@ testLibEither =
 progBasics :: Fn s (s > TBool)
 progBasics =
   begin
-    # ( begin
-          # (int8 1 # testIsLeftIsRight)
-          # (int64 1024 # testIsLeftIsRight)
-          # (bytes128 "hello world" # testIsLeftIsRight)
+    ∘ ( begin
+          ∘ (int8 1 ∘ testIsLeftIsRight)
+          ∘ (int64 1024 ∘ testIsLeftIsRight)
+          ∘ (bytes128 "hello world" ∘ testIsLeftIsRight)
       )
-    # ( begin
-          # (int8 1 # testIfLeft)
-          # (int64 1024 # testIfLeft)
-          # (bytes128 "hello world" # testIfLeft)
+    ∘ ( begin
+          ∘ (int8 1 ∘ testIfLeft)
+          ∘ (int64 1024 ∘ testIfLeft)
+          ∘ (bytes128 "hello world" ∘ testIfLeft)
       )
-    # ( begin
-          # (int8 1 # testEither)
-          # (int64 1024 # testEither)
-          # (bytes128 "hello world" # testEither)
+    ∘ ( begin
+          ∘ (int8 1 ∘ testEither)
+          ∘ (int64 1024 ∘ testEither)
+          ∘ (bytes128 "hello world" ∘ testEither)
       )
-    # opTrue
+    ∘ opTrue
   where
     testIsLeftIsRight :: (StackEntry a) => Fn (s > a) s
     testIsLeftIsRight =
       begin
-        # (dup # left # isLeft # opVerify)
-        # (dup # right # isLeft # opNot # opVerify)
-        # (dup # left # isRight # opNot # opVerify)
-        # (right # isRight # opVerify)
+        ∘ (dup ∘ left ∘ isLeft ∘ opVerify)
+        ∘ (dup ∘ right ∘ isLeft ∘ opNot ∘ opVerify)
+        ∘ (dup ∘ left ∘ isRight ∘ opNot ∘ opVerify)
+        ∘ (right ∘ isRight ∘ opVerify)
 
     testIfLeft :: (StackEntry a) => Fn (s > a) s
     testIfLeft =
       begin
-        # (dup # r # ifLeft fail drop)
-        # (l # ifLeft drop fail)
+        ∘ (dup ∘ r ∘ ifLeft fail drop)
+        ∘ (l ∘ ifLeft drop fail)
       where
         l :: Fn (s > a) (s > TEither a TInt8)
         l = left
@@ -71,16 +71,16 @@ progBasics =
         r = right
 
     fail :: FnA s alt s' alt'
-    fail = bytes "Fail" # error
+    fail = bytes "Fail" ∘ error
 
     testEither :: (StackEntry a) => Fn (s > a) s
     testEither =
       begin
-        # dup
-        # (r # lambda1 (drop # int 1) # lambda1 (drop # int 2) # rot # either)
-        # swap
-        # (l # lambda1 (drop # int 2) # lambda1 (drop # int 1) # rot # either)
-        # (opAdd # int 4 # equalVerify)
+        ∘ dup
+        ∘ (r ∘ lambda1 (drop ∘ int 1) ∘ lambda1 (drop ∘ int 2) ∘ rot ∘ either)
+        ∘ swap
+        ∘ (l ∘ lambda1 (drop ∘ int 2) ∘ lambda1 (drop ∘ int 1) ∘ rot ∘ either)
+        ∘ (opAdd ∘ int 4 ∘ equalVerify)
       where
         l :: Fn (s > a) (s > TEither a TInt8)
         l = left

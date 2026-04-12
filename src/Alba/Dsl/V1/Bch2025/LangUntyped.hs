@@ -12,7 +12,7 @@ where
 import Alba.Dsl.V1.Bch2025.OpsUntyped (opDup, opIf)
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp, integerToDataOp)
 import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
-import Alba.Dsl.V1.Common.Lang ((#))
+import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.StackUntyped (FnU, SU)
 import Alba.Vm.Common.BasicTypes (Bytes)
 
@@ -25,7 +25,7 @@ bytes x = aop (bytesToDataOp x)
 cond :: [(SU -> SU, SU -> SU)] -> FnU -> FnU
 cond [] def st = def st
 cond ((test, result) : rest) def st =
-  (opDup # test # opIf result (cond rest def)) st
+  (opDup ∘ test ∘ opIf result (cond rest def)) st
 
 repeatProg :: Int -> FnU -> FnU
 repeatProg count prog st = iterate prog st !! count

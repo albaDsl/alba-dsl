@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     un3,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
@@ -47,16 +47,6 @@ type TLen = TNat
 
 type TOff = TNat
 
--- Experiment with type aliases.
-{- ORMOLU_DISABLE -}
-type Acc = "acc"
-type Bs = "bs"
-type End = "end"
-type I = "i"
-type Len = "len"
-type Off = "off"
-{- ORMOLU_ENABLE -}
-
 padLen, lenBits, lenBias, offBias :: Natural
 padLen = 2 -- Byte size of padding.
 lenBits = 4 -- Number of bits used to store the match length in the ref.
@@ -67,56 +57,56 @@ offBias = 1 -- Bias to add to the offset field.
 -- >>> Dsl.progSize decompress
 -- "2 opcodes, 2 bytes. Including function table: 5 opcodes, 92 bytes.\n"
 decompress :: Fn (s > TBytes) (s > TBytes)
-decompress = fn (bytes [] # swap # pad # opUntil decompressLoop # drop)
+decompress = fn (bytes [] ∘ swap ∘ pad ∘ opUntil decompressLoop ∘ drop)
   where
     -- Keeps the bytestring positive (when viewed as a number).
-    pad = bytes [0xff, 0x00] # opCat
+    pad = bytes [0xff, 0x00] ∘ opCat
 
 decompressLoop :: Loop (s > TBytes > TBytes) -- acc bs
 decompressLoop =
   begin
-    # (opSize # nat padLen # lessThanOrEqual)
-    # opIf
+    ∘ (opSize ∘ nat padLen ∘ lessThanOrEqual)
+    ∘ opIf
       opTrue
       ( begin
-          # ns2 Acc Bs
-          # (pick Bs # dropLowBit # roll Bs # lowBitSet)
-          # opIf
-            (getBits8 # roll Acc # rot # opCat)
+          ∘ ns2 #acc #bs
+          ∘ (pick #bs ∘ dropLowBit ∘ roll #bs ∘ lowBitSet)
+          ∘ opIf
+            (getBits8 ∘ roll #acc ∘ rot ∘ opCat)
             ( begin
-                # (getBits16 # swap # unpackRef) -- <acc> bs off len
-                # (roll Acc # rot # rot # copyFromBack)
+                ∘ (getBits16 ∘ swap ∘ unpackRef) -- <acc> bs off len
+                ∘ (roll #acc ∘ rot ∘ rot ∘ copyFromBack)
             )
-          # (swap # opFalse)
+          ∘ (swap ∘ opFalse)
       )
   where
     lowBitSet :: Fn (s > TBytes) (s > TBool)
-    lowBitSet = b2n # nat 2 # mod # nat 1 # equal
+    lowBitSet = b2n ∘ nat 2 ∘ mod ∘ nat 1 ∘ equal
 
     b2n :: Fn (s > TBytes) (s > TNat)
     b2n = cast
 
     dropLowBit :: Fn (s > TBytes) (s > TBytes)
-    dropLowBit = b2i # nat 1 # opRShiftNum # cast
+    dropLowBit = b2i ∘ nat 1 ∘ opRShiftNum ∘ cast
 
     b2i :: Fn (s > TBytes) (s > TInt)
     b2i = cast
 
     getBits8 :: Fn (s > TBytes) (s > TBytes > TBytes)
-    getBits8 = nat 1 # opSplit
+    getBits8 = nat 1 ∘ opSplit
 
     getBits16 :: Fn (s > TBytes) (s > TBytes > TBytes)
-    getBits16 = nat 2 # opSplit
+    getBits16 = nat 2 ∘ opSplit
 
 unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
-    # (dup # toSigned # nat lenBits # opRShiftNum # i2nUnsafe # nat offBias)
-    # (opAdd # swap # maskLen # opAnd # opBin2Num # i2nUnsafe # nat lenBias)
-    # opAdd
+    ∘ (dup ∘ toSigned ∘ nat lenBits ∘ opRShiftNum ∘ i2nUnsafe ∘ nat offBias)
+    ∘ (opAdd ∘ swap ∘ maskLen ∘ opAnd ∘ opBin2Num ∘ i2nUnsafe ∘ nat lenBias)
+    ∘ opAdd
   where
     toSigned :: Fn (s > TBytes) (s > TInt)
-    toSigned = bytes [0] # opCat # opBin2Num
+    toSigned = bytes [0] ∘ opCat ∘ opBin2Num
 
     maskLen = bytes [0x0f, 0x00]
 
@@ -127,19 +117,19 @@ unpackRef =
 copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes) -- bs off len
 copyFromBack =
   begin
-    # (ns3 Bs Off Len # roll Bs # opSize # roll Off # natSubUnsafe)
-    # (dup # roll Len # add # opUntil loop # op2Drop)
+    ∘ (ns3 #bs #off #len ∘ roll #bs ∘ opSize ∘ roll #off ∘ natSubUnsafe)
+    ∘ (dup ∘ roll #len ∘ add ∘ opUntil loop ∘ op2Drop)
   where
     loop :: Loop (s > TBytes > TNat > TNat) -- acc start end
     loop =
       begin
-        # (ns3 Acc I End # pick I # pick End # equal)
-        # opIf
-          (un3 Acc I End # opTrue)
+        ∘ (ns3 #acc #i #end ∘ pick #i ∘ pick #end ∘ equal)
+        ∘ opIf
+          (un3 #acc #i #end ∘ opTrue)
           ( begin
-              # (roll Acc # dup # pick I # index # opCat)
-              # (roll I # add1 # roll End # opFalse)
+              ∘ (roll #acc ∘ dup ∘ pick #i ∘ index ∘ opCat)
+              ∘ (roll #i ∘ add1 ∘ roll #end ∘ opFalse)
           )
 
     index :: Fn (s > TBytes > TNat) (s > TBytes)
-    index = opSplit # nip # nat 1 # opSplit # drop
+    index = opSplit ∘ nip ∘ nat 1 ∘ opSplit ∘ drop

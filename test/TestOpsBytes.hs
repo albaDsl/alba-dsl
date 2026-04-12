@@ -36,7 +36,7 @@ propReverse x =
    in s == S.singleton (b2SeUnsafe x)
   where
     prog :: Fn (s > TBytes) (s > TBytes)
-    prog = opReverseBytes # opReverseBytes
+    prog = opReverseBytes ∘ opReverseBytes
 
 propReverseSize :: Bytes -> Bool
 propReverseSize x =
@@ -47,14 +47,14 @@ propReverseSize x =
     prog :: Fn (s > TBytes) (s > TNat)
     prog =
       begin
-        # opSize -- b s
-        # opSwap -- s b
-        # opReverseBytes -- s br
-        # opSize -- s br s
-        # opSwap -- s s br
-        # opDrop -- s s
-        # opDup -- s s s
-        # opNumEqualVerify -- s
+        ∘ opSize -- b s
+        ∘ opSwap -- s b
+        ∘ opReverseBytes -- s br
+        ∘ opSize -- s br s
+        ∘ opSwap -- s s br
+        ∘ opDrop -- s s
+        ∘ opDup -- s s s
+        ∘ opNumEqualVerify -- s
 
 propCatAndSplit :: BytesHalf -> Bool
 propCatAndSplit (BytesHalf x) =
@@ -65,21 +65,21 @@ propCatAndSplit (BytesHalf x) =
     prog :: Fn (s > TBytes) (s > TBool)
     prog =
       begin -- b
-        # opSize -- b s
-        # opSwap -- s b
-        # opDup -- s b b
-        # opCat -- s bb
-        # opSwap -- bb s
-        # opSplit -- b b
-        # opEqual -- t
+        ∘ opSize -- b s
+        ∘ opSwap -- s b
+        ∘ opDup -- s b b
+        ∘ opCat -- s bb
+        ∘ opSwap -- bb s
+        ∘ opSplit -- b b
+        ∘ opEqual -- t
 
 progPushSize :: Fn s (s > TBytes)
 progPushSize =
   begin
-    # bytes (B.replicate (maxBytes `div` 2) 0)
-    # opDup
-    # bytes (B.singleton 0)
-    # opCat
-    # opCat
+    ∘ bytes (B.replicate (maxBytes `div` 2) 0)
+    ∘ opDup
+    ∘ bytes (B.singleton 0)
+    ∘ opCat
+    ∘ opCat
   where
     maxBytes = VP.vmParamsStandard.maxScriptElementSize

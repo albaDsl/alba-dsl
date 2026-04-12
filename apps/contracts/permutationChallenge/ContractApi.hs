@@ -2,7 +2,7 @@
 
 module ContractApi (instantiate, withdraw) where
 
-import Alba.Dsl.V1.Bch2025 (bytes, (#))
+import Alba.Dsl.V1.Bch2025 (bytes, (∘))
 import Alba.Dsl.V1.Common.Compile (Optimize (None, O1), compile)
 import Alba.Dsl.V1.Common.Contract (Contract (MkContract))
 import Alba.Vm.Common.BasicTypes (Bytes)
@@ -18,6 +18,6 @@ instantiate =
    in script'
 
 withdraw :: Ctx -> Bytes -> CodeL1
-withdraw _ctx solution = compile None (bytes solution # bytes filler)
+withdraw _ctx solution = compile None (bytes solution ∘ bytes filler)
   where
     filler = B.replicate 7000 0

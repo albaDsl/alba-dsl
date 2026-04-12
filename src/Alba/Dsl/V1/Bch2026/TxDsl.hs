@@ -19,7 +19,7 @@ import Alba.Dsl.V1.Bch2025
     compile,
     opDrop,
     opTrue,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
@@ -79,4 +79,4 @@ simpleWrapChunkSize = 201 - headerSize - trailerSize
     trailerSize = 2 -- OP_DROP OP_TRUE
 
 simpleWrapProg :: CodeL1 -> Fn s (s > TBool)
-simpleWrapProg chunk = bytes chunk # opDrop # opTrue
+simpleWrapProg chunk = bytes chunk ∘ opDrop ∘ opTrue

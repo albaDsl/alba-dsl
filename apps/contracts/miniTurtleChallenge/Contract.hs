@@ -31,7 +31,7 @@ import Alba.Dsl.V1.Bch2025
     opWhen,
     pick,
     roll,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
@@ -53,22 +53,22 @@ contract = MkContract withdraw
 withdraw :: CFn (Base > TBytes)
 withdraw =
   begin
-    # verifyProgramSize
-    # verifyBytecode
-    # (toTyped miniTurtleVm101 # int 5 # opNumEqualVerify)
-    # opTrue
+    ∘ verifyProgramSize
+    ∘ verifyBytecode
+    ∘ (toTyped miniTurtleVm101 ∘ int 5 ∘ opNumEqualVerify)
+    ∘ opTrue
 
 verifyProgramSize :: Fn (s > TBytes) (s > TBytes)
 verifyProgramSize =
-  opSize # nat (fromIntegral progMaxSize) # opLessThanOrEqual # opVerify
+  opSize ∘ nat (fromIntegral progMaxSize) ∘ opLessThanOrEqual ∘ opVerify
 
 -- The same opcode/byte can not appear twice in a row. OP_1ADD may not follow
 -- OP_MUL.
 verifyBytecode :: Fn (s > TBytes) (s > TBytes)
-verifyBytecode = opDup # bytes [255] # opSwap # toTyped checkAll
+verifyBytecode = opDup ∘ bytes [255] ∘ opSwap ∘ toTyped checkAll
   where
     checkAll :: FnU
-    checkAll = repeatProg progMaxSize (fromTyped check) # UT.op2Drop
+    checkAll = repeatProg progMaxSize (fromTyped check) ∘ UT.op2Drop
 
     check ::
       Fn
@@ -76,28 +76,28 @@ verifyBytecode = opDup # bytes [255] # opSwap # toTyped checkAll
         (s > TBytes > TBytes)
     check =
       begin
-        # (pick "ops" # isNotEmpty)
-        # opIf
+        ∘ (pick #ops ∘ isNotEmpty)
+        ∘ opIf
           ( begin
-              # name2 "op" "ops'" (roll "ops" # nat 1 # opSplit)
-              # (pick "lastOp" # pick "op" # verifyNotEqual)
-              # ( begin
-                    # (roll "lastOp" # mul # opEqual)
-                    # opWhen (pick "op" # add1 # verifyNotEqual)
+              ∘ name2 #op #ops' (roll #ops ∘ nat 1 ∘ opSplit)
+              ∘ (pick #lastOp ∘ pick #op ∘ verifyNotEqual)
+              ∘ ( begin
+                    ∘ (roll #lastOp ∘ mul ∘ opEqual)
+                    ∘ opWhen (pick #op ∘ add1 ∘ verifyNotEqual)
                 )
-              # (roll "op" # roll "ops'")
+              ∘ (roll #op ∘ roll #ops')
           )
-          (roll "lastOp" # roll "ops")
+          (roll #lastOp ∘ roll #ops)
 
     mul = bytes [0x95]
 
     add1 = bytes [0x8B]
 
     verifyNotEqual :: Fn (s > TBytes > TBytes) s
-    verifyNotEqual = opEqual # opNot # opVerify
+    verifyNotEqual = opEqual ∘ opNot ∘ opVerify
 
     isNotEmpty :: Fn (s > TBytes) (s > TBool)
-    isNotEmpty = opSize # nat 1 # opGreaterThanOrEqual # opNip
+    isNotEmpty = opSize ∘ nat 1 ∘ opGreaterThanOrEqual ∘ opNip
 
 progMaxSize :: Int
 progMaxSize = 9

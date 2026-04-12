@@ -33,7 +33,7 @@ import Alba.Dsl.V1.Bch2025.Ops
     opXor,
   )
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Lang ((#))
+import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.Stack
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Data.Bits (xor, (.&.), (.|.))
@@ -93,39 +93,39 @@ infixl 5 :|
 intExp :: IntExp -> Fn s (s > TInt)
 intExp = \case
   Int x -> int x
-  e1 :+ e2 -> intExp e1 # intExp e2 # opAdd
-  e1 :- e2 -> intExp e1 # intExp e2 # opSub
-  e1 :* e2 -> intExp e1 # intExp e2 # opMul
-  e1 :/ e2 -> intExp e1 # intExp e2 # opDiv
-  e1 :% e2 -> intExp e1 # intExp e2 # opMod
-  Abs e -> intExp e # opAbs
-  Neg e -> intExp e # opNegate
-  Succ e -> intExp e # op1Add
-  Pred e -> intExp e # op1Sub
-  Min e1 e2 -> intExp e1 # intExp e2 # opMin
-  Max e1 e2 -> intExp e1 # intExp e2 # opMax
+  e1 :+ e2 -> intExp e1 ∘ intExp e2 ∘ opAdd
+  e1 :- e2 -> intExp e1 ∘ intExp e2 ∘ opSub
+  e1 :* e2 -> intExp e1 ∘ intExp e2 ∘ opMul
+  e1 :/ e2 -> intExp e1 ∘ intExp e2 ∘ opDiv
+  e1 :% e2 -> intExp e1 ∘ intExp e2 ∘ opMod
+  Abs e -> intExp e ∘ opAbs
+  Neg e -> intExp e ∘ opNegate
+  Succ e -> intExp e ∘ op1Add
+  Pred e -> intExp e ∘ op1Sub
+  Min e1 e2 -> intExp e1 ∘ intExp e2 ∘ opMin
+  Max e1 e2 -> intExp e1 ∘ intExp e2 ∘ opMax
 
 boolExp :: BoolExp -> Fn s (s > TBool)
 boolExp = \case
   Bool x -> if x then opTrue else opFalse
-  e1 :&& e2 -> boolExp e1 # boolExp e2 # opBoolAnd
-  e1 :|| e2 -> boolExp e1 # boolExp e2 # opBoolOr
-  Not e -> boolExp e # opNot
-  (e1 :== e2) -> intExp e1 # intExp e2 # opNumEqual
-  (e1 :/= e2) -> intExp e1 # intExp e2 # opNumNotEqual
-  (e1 :< e2) -> intExp e1 # intExp e2 # opLessThan
-  (e1 :> e2) -> intExp e1 # intExp e2 # opGreaterThan
-  (e1 :<= e2) -> intExp e1 # intExp e2 # opLessThanOrEqual
-  (e1 :>= e2) -> intExp e1 # intExp e2 # opGreaterThanOrEqual
-  Within e1 e2 e3 -> intExp e1 # intExp e2 # intExp e3 # opWithin
-  ZeroNotEqual e -> intExp e # op0NotEqual
+  e1 :&& e2 -> boolExp e1 ∘ boolExp e2 ∘ opBoolAnd
+  e1 :|| e2 -> boolExp e1 ∘ boolExp e2 ∘ opBoolOr
+  Not e -> boolExp e ∘ opNot
+  (e1 :== e2) -> intExp e1 ∘ intExp e2 ∘ opNumEqual
+  (e1 :/= e2) -> intExp e1 ∘ intExp e2 ∘ opNumNotEqual
+  (e1 :< e2) -> intExp e1 ∘ intExp e2 ∘ opLessThan
+  (e1 :> e2) -> intExp e1 ∘ intExp e2 ∘ opGreaterThan
+  (e1 :<= e2) -> intExp e1 ∘ intExp e2 ∘ opLessThanOrEqual
+  (e1 :>= e2) -> intExp e1 ∘ intExp e2 ∘ opGreaterThanOrEqual
+  Within e1 e2 e3 -> intExp e1 ∘ intExp e2 ∘ intExp e3 ∘ opWithin
+  ZeroNotEqual e -> intExp e ∘ op0NotEqual
 
 bitExp :: BitExp -> Fn s (s > TBytes)
 bitExp = \case
   Bytes x -> bytes x
-  e1 :& e2 -> bitExp e1 # bitExp e2 # opAnd
-  e1 :| e2 -> bitExp e1 # bitExp e2 # opOr
-  Xor e1 e2 -> bitExp e1 # bitExp e2 # opXor
+  e1 :& e2 -> bitExp e1 ∘ bitExp e2 ∘ opAnd
+  e1 :| e2 -> bitExp e1 ∘ bitExp e2 ∘ opOr
+  Xor e1 e2 -> bitExp e1 ∘ bitExp e2 ∘ opXor
 
 evalIntExp :: IntExp -> Maybe Integer
 evalIntExp = \case

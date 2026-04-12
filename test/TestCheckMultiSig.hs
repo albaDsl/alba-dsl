@@ -75,11 +75,11 @@ progCheckMultiSig2of3 ::
   Fn (s > TNat > TSig > TSig > TNat) (s > TBool)
 progCheckMultiSig2of3 key1 key2 key3 =
   begin
-    # pubKeyBytes key1
-    # pubKeyBytes key2
-    # pubKeyBytes key3
-    # nat 3
-    # opCheckMultiSig @2 @3
+    ∘ pubKeyBytes key1
+    ∘ pubKeyBytes key2
+    ∘ pubKeyBytes key3
+    ∘ nat 3
+    ∘ opCheckMultiSig @2 @3
 
 progCheckMultiSigVerify2of3 ::
   Bytes ->
@@ -88,9 +88,9 @@ progCheckMultiSigVerify2of3 ::
   Fn (s > TNat > TSig > TSig > TNat) (s > TBool)
 progCheckMultiSigVerify2of3 key1 key2 key3 =
   begin
-    # pubKeyBytes key1
-    # pubKeyBytes key2
-    # pubKeyBytes key3
-    # nat 3
-    # opCheckMultiSigVerify @2 @3
-    # opTrue
+    ∘ pubKeyBytes key1
+    ∘ pubKeyBytes key2
+    ∘ pubKeyBytes key3
+    ∘ nat 3
+    ∘ opCheckMultiSigVerify @2 @3
+    ∘ opTrue

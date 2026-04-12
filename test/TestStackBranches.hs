@@ -65,7 +65,7 @@ testStackBranches =
         |> i2SeUnsafe fIdx
         |> i2SeUnsafe 100
 
--- "choice" has to be positioned above the stack branch. Otherwise it can't be
+-- #choice has to be positioned above the stack branch. Otherwise it can't be
 -- fetched given that the stack branch depth is unknown.
 progSimpleStackBranch ::
   Fn
@@ -79,11 +79,11 @@ progSimpleStackBranch ::
     (s > TInt)
 progSimpleStackBranch =
   begin
-    # (roll "bytes" # opSize # op5 # opNumEqualVerify # opDrop)
-    # (roll "choice" # op1 # opNumEqual)
-    # opIf
-      (branch1 # del "b1" # int 2)
-      (branch2 # del "b2" # del "b3" # roll "int" # int 29 # opSub)
+    ∘ (roll #bytes ∘ opSize ∘ op5 ∘ opNumEqualVerify ∘ opDrop)
+    ∘ (roll #choice ∘ op1 ∘ opNumEqual)
+    ∘ opIf
+      (branch1 ∘ del #b1 ∘ int 2)
+      (branch2 ∘ del #b2 ∘ del #b3 ∘ roll #int ∘ int 29 ∘ opSub)
 
 {- ORMOLU_DISABLE -}
 type Args0 = '[N "x0" TInt]
@@ -110,45 +110,45 @@ progEntry8 = entry8 f0 f1 f2 f3 f4 f5 f6 f7
     f0 :: Fn (Append s (Append Args0 '[Param])) (s > TInt)
     f0 =
       begin
-        # (roll "x0" # roll "param")
-        # opAdd
+        ∘ (roll #x0 ∘ roll #param)
+        ∘ opAdd
     f1 :: Fn (Append s (Append Args1 '[Param])) (s > TInt)
     f1 =
       begin
-        # (roll "x0" # roll "x1" # roll "param")
-        # (opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #param)
+        ∘ (opAdd ∘ opAdd)
     f2 :: Fn (Append s (Append Args2 '[Param])) (s > TInt)
     f2 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "param")
-        # (opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #param)
+        ∘ (opAdd ∘ opAdd ∘ opAdd)
     f3 :: Fn (Append s (Append Args3 '[Param])) (s > TInt)
     f3 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
-        # roll "param"
-        # (opAdd # opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
+        ∘ roll #param
+        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
     f4 :: Fn (Append s (Append Args4 '[Param])) (s > TInt)
     f4 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
-        # (roll "x4" # roll "param")
-        # (opAdd # opAdd # opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
+        ∘ (roll #x4 ∘ roll #param)
+        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
     f5 :: Fn (Append s (Append Args5 '[Param])) (s > TInt)
     f5 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
-        # (roll "x4" # roll "x5" # roll "param")
-        # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
+        ∘ (roll #x4 ∘ roll #x5 ∘ roll #param)
+        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
     f6 :: Fn (Append s (Append Args6 '[Param])) (s > TInt)
     f6 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
-        # (roll "x4" # roll "x5" # roll "x6" # roll "param")
-        # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
+        ∘ (roll #x4 ∘ roll #x5 ∘ roll #x6 ∘ roll #param)
+        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
     f7 =
       begin
-        # (roll "x0" # roll "x1" # roll "x2" # roll "x3")
-        # (roll "x4" # roll "x5" # roll "x6" # roll "x7")
-        # roll "param"
-        # (opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd # opAdd)
+        ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
+        ∘ (roll #x4 ∘ roll #x5 ∘ roll #x6 ∘ roll #x7)
+        ∘ roll #param
+        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)

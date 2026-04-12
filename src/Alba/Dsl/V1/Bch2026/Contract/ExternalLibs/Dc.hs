@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2026
     libraryToTx,
     simpleWrap,
     simpleWrapChunkSize,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as LZ
@@ -40,7 +40,7 @@ numUtxos :: Word32
 numUtxos = fromIntegral $ length deployTx.outputs
 
 showCase :: Fn s s
-showCase = bytes "0341421300" # LZ.decompress # drop
+showCase = bytes "0341421300" ∘ LZ.decompress ∘ drop
 
 decompress :: Fn (s > TBytes) (s > TBytes)
 decompress = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.LzssBit" "decompress"

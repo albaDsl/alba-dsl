@@ -12,7 +12,7 @@ import Alba.Dsl.V1.Bch2025
     compileL2,
     int,
     opAdd,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Common.ThUtils qualified as TH
@@ -56,11 +56,11 @@ testIntPushing =
 progConstants :: Fn s (s > TInt)
 progConstants =
   begin
-    # $(TH.foldrInts 'fn 'id [1 .. 16])
-    # $(TH.foldrInts 'fnAdd 'id [1 .. 15])
+    ∘ $(TH.foldrInts 'fn 'id [1 .. 16])
+    ∘ $(TH.foldrInts 'fnAdd 'id [1 .. 15])
   where
-    fn n a = int n # a
-    fnAdd _ a = opAdd # a
+    fn n a = int n ∘ a
+    fnAdd _ a = opAdd ∘ a
 
 progConstantsCode :: CodeL2
 progConstantsCode =
@@ -87,13 +87,13 @@ progConstantsCode =
 progPushInt :: Fn s (s > TInt)
 progPushInt =
   begin
-    # int 0x0100000000000002
-    # int (-0x0102)
-    # int 0
-    # int 0x01
-    # opAdd
-    # opAdd
-    # opAdd
+    ∘ int 0x0100000000000002
+    ∘ int (-0x0102)
+    ∘ int 0
+    ∘ int 0x01
+    ∘ opAdd
+    ∘ opAdd
+    ∘ opAdd
 
 progPushIntCode :: CodeL2
 progPushIntCode =

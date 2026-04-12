@@ -17,7 +17,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped
     opSwap,
     opUnless,
   )
-import Alba.Dsl.V1.Common.Lang (begin, (#))
+import Alba.Dsl.V1.Common.Lang (begin, (∘))
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped)
 import DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic (turtleOpArithmetic)
 import DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic (turtleOpBitwiseLogic)
@@ -44,7 +44,7 @@ import DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
 
 turtleVm :: Int -> Int -> FnU
 turtleVm maxOps maxCsDepth =
-  ft initState # repeatProg maxOps (handleOp maxCsDepth)
+  ft initState ∘ repeatProg maxOps (handleOp maxCsDepth)
 
 ft :: TY.FnA s alt s' alt' -> FnU
 ft = fromTyped
@@ -52,20 +52,20 @@ ft = fromTyped
 handleOp :: Int -> FnU
 handleOp maxCsDepth =
   begin
-    # (ft getOpAndCondStack # ft (executeP maxCsDepth))
-    # opIf (handleOp' maxCsDepth) opDrop
+    ∘ (ft getOpAndCondStack ∘ ft (executeP maxCsDepth))
+    ∘ opIf (handleOp' maxCsDepth) opDrop
 
 handleOp' :: Int -> FnU
 handleOp' maxCsDepth =
   begin
-    # ft isSingleByteOp
-    # opIf
+    ∘ ft isSingleByteOp
+    ∘ opIf
       ( begin
-          # ft toSigned
-          # condOp
+          ∘ ft toSigned
+          ∘ condOp
             [ ( inRange 0x00 0x83,
                 condOp
-                  [ (is 0x00, opDrop # op0),
+                  [ (is 0x00, opDrop ∘ op0),
                     -- (inRange 0x01 0x4c, ft getOpBytes),
                     (inRange 0x4c 0x4f, ft (vmError "E5")), -- OP_PUSHDATA
                     ( inRange 0x4f 0x83,
@@ -86,12 +86,12 @@ handleOp' maxCsDepth =
                     (inRange 0x8b 0xa6, turtleOpArithmetic),
                     (inRange 0xa6 0xb0, turtleOpCryptography),
                     -- 0xB0 = OP_NOP1
-                    (is 0xb1, opDrop # opCheckLockTimeVerify),
-                    (is 0xb2, opDrop # opCheckSequenceVerify),
+                    (is 0xb1, opDrop ∘ opCheckLockTimeVerify),
+                    (is 0xb2, opDrop ∘ opCheckSequenceVerify),
                     -- 0xB3 - 0xB9 = discouraged nops
-                    (is 0xba, opDrop # opCheckDataSig),
-                    (is 0xbb, opDrop # opCheckDataSigVerify),
-                    (is 0xbc, opDrop # opReverseBytes),
+                    (is 0xba, opDrop ∘ opCheckDataSig),
+                    (is 0xbb, opDrop ∘ opCheckDataSigVerify),
+                    (is 0xbc, opDrop ∘ opReverseBytes),
                     -- 0xBD = OP_AVAILABLE_BD
                     -- 0xBE = OP_AVAILABLE_BE
                     -- 0xBF = OP_AVAILABLE_BF
@@ -101,7 +101,7 @@ handleOp' maxCsDepth =
             ]
       )
       ( begin
-          # (int 1 # opSplit # opSwap)
-          # ft isOpDataOp
-          # opUnless unsupportedOp
+          ∘ (int 1 ∘ opSplit ∘ opSwap)
+          ∘ ft isOpDataOp
+          ∘ opUnless unsupportedOp
       )

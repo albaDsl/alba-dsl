@@ -41,23 +41,23 @@ import Prelude hiding (Int, foldl)
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
   begin
-    # int 3
-    # int 7
-    # opMul
+    ∘ int 3
+    ∘ int 7
+    ∘ opMul
 
 -- Example 2. Implement a function that calculates x^2 - 2*x
 f2 :: S (s > TInt) alt -> S (s > TInt) alt
 f2 =
   begin
-    # opDup
-    # square
-    # opSwap
-    # coeff 2
-    # opSub
+    ∘ opDup
+    ∘ square
+    ∘ opSwap
+    ∘ coeff 2
+    ∘ opSub
   where
-    square = opDup # opMul
+    square = opDup ∘ opMul
 
-    coeff c = int c # opMul
+    coeff c = int c ∘ opMul
 
 prop1 :: Integer -> Property
 prop1 x = ev (c f2) x === x ^ 2 - 2 * x
@@ -66,33 +66,34 @@ prop2 :: Integer -> Property
 prop2 x = (ev (c f2) x >= 0) === True
 
 -- Example 3. Implement a function that calculates x^3 - x^2 + 2*x
-f3 :: S (s > N "x" TInt) alt -> S (s > TInt) alt
+f3 :: S (s > TInt) alt -> S (s > TInt) alt
 f3 =
   begin
-    # pick "x"
-    # cube
-    # pick "x"
-    # square
-    # coeff (-1)
-    # roll "x"
-    # coeff 2
-    # opAdd
-    # opAdd
+    ∘ ns #x
+    ∘ pick #x
+    ∘ cube
+    ∘ pick #x
+    ∘ square
+    ∘ coeff (-1)
+    ∘ roll #x
+    ∘ coeff 2
+    ∘ opAdd
+    ∘ opAdd
   where
-    square = opDup # opMul
+    square = opDup ∘ opMul
 
-    coeff c = int c # opMul
+    coeff c = int c ∘ opMul
 
 prop3 :: Integer -> Property
 prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 4. Demo of the recursive pow function.
-f4 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f4 = int 2 # roll "x" # Exp.pow
+f4 :: S (s > TNat) alt -> S (s > TInt) alt
+f4 = int 2 ∘ opSwap ∘ Exp.pow
 
 -- Example 5. Demo of the loops based pow function.
-f5 :: S (s > N "x" TNat) alt -> S (s > TInt) alt
-f5 = int 2 # roll "x" # pow
+f5 :: S (s > TNat) alt -> S (s > TInt) alt
+f5 = int 2 ∘ opSwap ∘ pow
 
 -- Example 6. Secp256k1 point multiplication. Calculates n * G and returns the
 -- x-coordinate. Try with e.g. test vectors from:
@@ -100,12 +101,12 @@ f5 = int 2 # roll "x" # pow
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
 f6 :: S (s > TNat) alt -> S (s > TInt) alt
-f6 = EC.g # EC.ecMul # EC.getX
+f6 = EC.g ∘ EC.ecMul ∘ EC.getX
 
 -- Example 7. Evaluating =f3= using turtleVm (Bch2025).
 -- evl (c f7)
 f7 :: Fn (s > TInt) (s > TInt)
-f7 = bytes (c f3) # toTyped (T25.turtleVm 20 5)
+f7 = bytes (c f3) ∘ toTyped (T25.turtleVm 20 5)
 
 prop4 :: Integer -> Property
 prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x
@@ -113,7 +114,7 @@ prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x
 -- Example 8. Evaluating =f3= using turtleVm (Bch2026).
 -- evl (c f8)
 f8 :: Fn (s > TInt) (s > TInt)
-f8 = bytes (c f3) # toTyped (T26.turtleVm 5)
+f8 = bytes (c f3) ∘ toTyped (T26.turtleVm 5)
 
 prop5 :: Integer -> Property
 prop5 x = ev (c f8) x === x ^ 3 - x ^ 2 + 2 * x
@@ -124,9 +125,9 @@ prop5 x = ev (c f8) x === x ^ 3 - x ^ 2 + 2 * x
 f9 :: Fn (s > TInt) (s > TInt)
 f9 =
   begin
-    # bytes solution
-    # bytes (c (toTyped miniTurtleVm101))
-    # toTyped (T26.turtleVm 30)
+    ∘ bytes solution
+    ∘ bytes (c (toTyped miniTurtleVm101))
+    ∘ toTyped (T26.turtleVm 30)
   where
     solution :: Bytes
     solution = [0x02, 0x8b, 0x95, 0x89, 0x51, 0x8b, 0x51, 0x8a, 0x8b]
@@ -136,15 +137,15 @@ f9 =
 -- >>> Dsl.progSize f10
 -- "22 opcodes, 25 bytes. Including function table: 88 opcodes, 397 bytes.\n"
 f10 :: Fn (s > TInt) (s > TInt)
-f10 = runEnv (opDrop # f)
+f10 = runEnv (opDrop ∘ f)
   where
     f :: Env s (s > TInt)
     f =
       begin
-        # lambda2 (toInt # add)
-        # int 0
-        # (nat 10 # lambda1 (add1 # toTInt8) # generate)
-        # foldl
+        ∘ lambda2 (toInt ∘ add)
+        ∘ int 0
+        ∘ (nat 10 ∘ lambda1 (add1 ∘ toTInt8) ∘ generate)
+        ∘ foldl
 
     toTInt8 :: Fn (s > TNat) (s > TInt8)
-    toTInt8 = n2i # fromInt
+    toTInt8 = n2i ∘ fromInt

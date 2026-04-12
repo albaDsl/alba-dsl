@@ -1,7 +1,8 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Common.Lang
-  ( (#),
+  ( (.),
+    (∘),
     begin,
     ex0,
     ex1,
@@ -21,9 +22,14 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), type (:|))
 import Alba.Dsl.V1.Common.TypeFamilies (Append)
 import Data.Kind (Type)
+import Prelude (flip, id)
+import Prelude qualified as P
 
-(#) :: (a -> b) -> (b -> c) -> (a -> c)
-(#) = flip (.)
+(.) :: (a -> b) -> (b -> c) -> (a -> c)
+(.) = flip (P..)
+
+(∘) :: (a -> b) -> (b -> c) -> (a -> c)
+(∘) = (.)
 
 begin :: a -> a
 begin = id

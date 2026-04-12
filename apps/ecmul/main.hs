@@ -23,7 +23,7 @@ ecMultiply code =
     Left err -> error ("err: " <> show err)
 
 progMul :: Natural -> Fn s (s > TInt)
-progMul scalar = nat scalar # g # ecMul # getX
+progMul scalar = nat scalar ∘ g ∘ ecMul ∘ getX
 
 vmEval :: CodeL1 -> Either ScriptError VmState
 vmEval code =

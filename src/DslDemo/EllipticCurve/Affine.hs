@@ -21,7 +21,7 @@ import Alba.Dsl.V1.Bch2026
     opWhen,
     pick,
     roll,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero)
@@ -32,18 +32,16 @@ ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
 ecMul =
   fn
     ( begin
-        # (ns2 "n" "p" # pick "n" # nat 0 # opNumEqual)
-        # opIf
-          (del "n" # del "p" # makeIdentity)
-          (roll "n" # roll "p" # makeIdentity # opUntil loop # opNip # opNip)
+        ∘ (ns2 #n #p ∘ pick #n ∘ nat 0 ∘ opNumEqual)
+        ∘ opIf
+          (del #n ∘ del #p ∘ makeIdentity)
+          (roll #n ∘ roll #p ∘ makeIdentity ∘ opUntil loop ∘ opNip ∘ opNip)
     )
   where
     loop :: Loop (s > TNat > TPoint > TPoint)
     loop =
       begin
-        # ns3 "n" "p" "r"
-        # name
-          "r2"
-          (roll "r" # ex1 (pick "n" # isOdd) # opWhen (pick "p" # ecAdd))
-        # (pick "n" # halve # roll "p" # ecDouble # roll "r2")
-        # (roll "n" # halve # isZero)
+        ∘ ns3 #n #p #r
+        ∘ name #r2 (roll #r ∘ ex1 (pick #n ∘ isOdd) ∘ opWhen (pick #p ∘ ecAdd))
+        ∘ (pick #n ∘ halve ∘ roll #p ∘ ecDouble ∘ roll #r2)
+        ∘ (roll #n ∘ halve ∘ isZero)

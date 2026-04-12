@@ -17,9 +17,9 @@ testEval =
 progBasics :: Fn s (s > TBool)
 progBasics =
   begin
-    # (int 5 # progCode square # opEval square)
-    # (int 25 # opNumEqualVerify)
-    # opTrue
+    ∘ (int 5 ∘ progCode square ∘ opEval square)
+    ∘ (int 25 ∘ opNumEqualVerify)
+    ∘ opTrue
   where
     square :: Fn (s > TInt) (s > TInt)
-    square = opDup # opMul
+    square = opDup ∘ opMul

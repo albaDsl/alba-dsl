@@ -28,7 +28,7 @@ import Alba.Dsl.V1.Bch2025
     opTrue,
     pick,
     roll,
-    (#),
+    (∘),
     type (>),
   )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (nat1SubUnsafe)
@@ -67,25 +67,20 @@ type TFId = TNat -- Function Id
 
 type TTab = TFId -- Lookup table (represented by the base Function Id)
 
-{- ORMOLU_DISABLE -}
-type Acc = "acc"; type Digit = "digit"; type FId = "FId"; type I = "i";
-type N = "n"; type P = "m"; type Q = "q"; type Q' = "q'"; type Tab = "tab";
-{- ORMOLU_ENABLE -}
-
 setupTable :: Fn (s > TFId > TPoint) s
-setupTable = toJacobian # makeIdentity # nat numValues # setupTable'
+setupTable = toJacobian ∘ makeIdentity ∘ nat numValues ∘ setupTable'
   where
     setupTable' =
       fn
         ( begin
-            # (ns4 FId P Acc I # pick I # op0 # equal)
-            # opIf
-              (del FId # del P # del Acc # del I)
+            ∘ (ns4 #fId #p #acc #i ∘ pick #i ∘ op0 ∘ equal)
+            ∘ opIf
+              (del #fId ∘ del #p ∘ del #acc ∘ del #i)
               ( begin
-                  # (pick Acc # p2b # pick FId # defineConstant)
-                  # (roll FId # add1)
-                  # (pick P # roll Acc # roll P # EC.ecAddJ)
-                  # (roll I # nat1SubUnsafe # setupTable')
+                  ∘ (pick #acc ∘ p2b ∘ pick #fId ∘ defineConstant)
+                  ∘ (roll #fId ∘ add1)
+                  ∘ (pick #p ∘ roll #acc ∘ roll #p ∘ EC.ecAddJ)
+                  ∘ (roll #i ∘ nat1SubUnsafe ∘ setupTable')
               )
         )
 
@@ -96,32 +91,32 @@ ecMul :: Env (s > TTab > TNat) (s > TPoint)
 ecMul =
   fn
     ( begin
-        # (ns2 Tab N # pick N # nat 0 # equal)
-        # opIf
-          (del Tab # del N # makeIdentity)
+        ∘ (ns2 #tab #n ∘ pick #n ∘ nat 0 ∘ equal)
+        ∘ opIf
+          (del #tab ∘ del #n ∘ makeIdentity)
           ( begin
-              # (roll Tab # lambda3 f # apply3)
-              # (makeIdentity # roll N # digits # V.foldr)
+              ∘ (roll #tab ∘ lambda3 f ∘ apply3)
+              ∘ (makeIdentity ∘ roll #n ∘ digits ∘ V.foldr)
           )
-        # fromJacobian
+        ∘ fromJacobian
     )
   where
     f :: Fn (s > TInt8 > TPointJ > TTab) (s > TPointJ)
     f =
       ( begin
-          # ns3 Digit Q Tab
-          # name Q' (nat windowSize # roll Q # doubleN)
-          # (pick Digit # toInt # op0 # greaterThan)
-          # opIf
+          ∘ ns3 #digit #q #tab
+          ∘ name #q' (nat windowSize ∘ roll #q ∘ doubleN)
+          ∘ (pick #digit ∘ toInt ∘ op0 ∘ greaterThan)
+          ∘ opIf
             ( begin
-                # (roll Tab # roll Digit # toInt # i2nUnsafe)
-                # (tableLookup # roll Q' # EC.ecAddJ)
+                ∘ (roll #tab ∘ roll #digit ∘ toInt ∘ i2nUnsafe)
+                ∘ (tableLookup ∘ roll #q' ∘ EC.ecAddJ)
             )
-            (del Tab # del Digit # roll Q')
+            (del #tab ∘ del #digit ∘ roll #q')
       )
 
     tableLookup :: Fn (s > TTab > TNat) (s > TPointJ)
-    tableLookup = add # getConstant # b2p
+    tableLookup = add ∘ getConstant ∘ b2p
 
     b2p :: Fn (s > TBytes) (s > TPointJ)
     b2p = cast
@@ -130,22 +125,22 @@ doubleN :: Fn (s > TNat > TPointJ) (s > TPointJ)
 doubleN =
   opUntil
     ( begin
-        # (swap # dup # op0 # equal)
-        # opIf
-          (swap # opTrue)
-          (nat1SubUnsafe # swap # EC.ecDoubleJ # opFalse)
+        ∘ (swap ∘ dup ∘ op0 ∘ equal)
+        ∘ opIf
+          (swap ∘ opTrue)
+          (nat1SubUnsafe ∘ swap ∘ EC.ecDoubleJ ∘ opFalse)
     )
-    # nip
+    ∘ nip
 
 digits :: Fn (s > TNat) (s > V.TVector TInt8)
 digits =
-  lambda1 (dup # ifZero (drop # nothing) (tup # just)) # swap # V.unfoldr
+  lambda1 (dup ∘ ifZero (drop ∘ nothing) (tup ∘ just)) ∘ swap ∘ V.unfoldr
   where
     tup :: Fn (s > TNat) (s > TTuple TInt8 TNat)
-    tup = dup # wmod # swap # wdiv # tuple
+    tup = dup ∘ wmod ∘ swap ∘ wdiv ∘ tuple
 
-    wmod = nat numValues # mod # n2i # fromInt
-    wdiv = nat numValues # div
+    wmod = nat numValues ∘ mod ∘ n2i ∘ fromInt
+    wdiv = nat numValues ∘ div
 
 windowSize :: Natural
 windowSize = 4
