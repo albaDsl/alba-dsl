@@ -9,25 +9,44 @@ import Data.ByteString qualified as B
 import Data.Sequence qualified as S
 import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.HUnit (Assertion, testCase, (@?=))
 import Test.Tasty.QuickCheck (Property, testProperty, (==>))
-import TestUtils2026 (evaluateProgWithStack, isTrue')
+import TestUtils2026 (evaluateProgWithStack, isTrue, isTrue')
 import Prelude hiding (drop, fst, snd, sum)
 
 testRuntimeLib :: TestTree
 testRuntimeLib =
-  testGroup "Runtime Lib" [testProperty "toPushOp" propToPushOp]
+  testGroup
+    "Runtime Lib"
+    [ testCase "One byte strings" $ do progOneByte,
+      testProperty "toPushOp" propToPushOp
+    ]
+
+progOneByte :: Assertion
+progOneByte =
+  do
+    mapM_
+      ( \x ->
+          isTrue
+            (evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty))
+      )
+      bs
+    True @?= True
+  where
+    bs :: [B.ByteString]
+    bs = [B.singleton val | val <- [0 .. 255]]
 
 propToPushOp :: Bytes -> Property
 propToPushOp b =
   (B.length b <= 9997) ==>
     isTrue' (evaluateProgWithStack prog (S.singleton $ b2SeUnsafe b, S.empty))
-  where
-    prog :: Fn (s > TBytes) (s > TBool)
-    prog =
-      begin
-        # (opDup # toPushOp # opDefineNamed "f")
-        # opInvokeNamed "f" f
-        # opEqual
 
+prog :: Fn (s > TBytes) (s > TBool)
+prog =
+  begin
+    # (opDup # toPushOp # opDefineNamed "f")
+    # opInvokeNamed "f" f
+    # opEqual
+  where
     f :: Fn s (s > TBytes)
     f = undefined

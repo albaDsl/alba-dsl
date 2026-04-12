@@ -6,8 +6,10 @@ import Alba.Dsl.V1.Bch2025.Lang (bytes, case', nat)
 import Alba.Dsl.V1.Bch2025.Ops
   ( op2Drop,
     opAdd,
+    opAnd,
     opCat,
     opDrop,
+    opEqual,
     opFalse,
     opLessThanOrEqual,
     opNumEqual,
@@ -24,25 +26,34 @@ import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (#))
 import Alba.Dsl.V1.Common.Stack (Fn, TBool, TBytes, TNat, cast)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
+import Data.ByteString qualified as B
 import Numeric.Natural (Natural)
 
 -- Turns a byte value into an instruction for pushing that byte value. ToPushOp
--- is 98 bytes in size.
+-- is 125 bytes in size.
 toPushOp :: Fn (s > TBytes) (s > TCode)
 toPushOp =
   fn
     ( begin
         # opSize
         # case'
-          [ (is 0x00, op2Drop # opcode OP_0),
-            ( is 0x01,
+          [ (numEq 0, op2Drop # opcode OP_0),
+            ( numEq 1,
               begin
-                # (opDrop # b2n)
+                # opDrop
                 # case'
-                  [ (inRange 0x01 0x11, opcode OP_RESERVED # b2n # opAdd # n2b),
-                    (is 0x81, opDrop # opcode OP_1NEGATE)
+                  [ (bytesEq [0x00], simpleOpData),
+                    ( bytes [0x80] # opAnd # bytes [0] # opEqual,
+                      case'
+                        [ ( b2n # numInRange 1 17,
+                            (b2n # opcode OP_RESERVED # b2n # opAdd # n2b)
+                          )
+                        ]
+                        simpleOpData
+                    ),
+                    (bytesEq [0x81], opDrop # opcode OP_1NEGATE)
                   ]
-                  (n2b # bytes [0x01] # opSwap # opCat)
+                  simpleOpData
             ),
             (lessOrEq 0x4b, n2b # opSwap # opCat),
             (lessOrEq 0x7f, n2b # opcode OP_PUSHDATA1 # assemblePushData),
@@ -53,14 +64,20 @@ toPushOp =
         # b2c
     )
   where
-    is :: Natural -> Fn (s > TNat) (s > TBool)
-    is x = nat x # opNumEqual
+    simpleOpData :: forall s. Fn (s > TBytes) (s > TBytes)
+    simpleOpData = bytes [0x01] # opSwap # opCat
+
+    numEq :: Natural -> Fn (s > TNat) (s > TBool)
+    numEq x = nat x # opNumEqual
+
+    numInRange :: Natural -> Natural -> Fn (s > TNat) (s > TBool)
+    numInRange x y = nat x # nat y # opWithin
 
     lessOrEq :: Natural -> Fn (s > TNat) (s > TBool)
     lessOrEq x = nat x # opLessThanOrEqual
 
-    inRange :: Natural -> Natural -> Fn (s > TNat) (s > TBool)
-    inRange x y = nat x # nat y # opWithin
+    bytesEq :: B.ByteString -> Fn (s > TBytes) (s > TBool)
+    bytesEq x = bytes x # opEqual
 
     b2n :: Fn (s > TBytes) (s > TNat)
     b2n = cast
