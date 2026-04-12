@@ -3,6 +3,41 @@
 module Contract (LastWill, Params, contract) where
 
 import Alba.Dsl.V1.Bch2025
+  ( Append,
+    Base,
+    CFn,
+    Contract (..),
+    Fn,
+    FnC,
+    N,
+    THash160,
+    TNat,
+    TPubKey,
+    TSig,
+    begin,
+    del,
+    entry3,
+    nat,
+    opCheckSequenceVerify,
+    opCheckSigVerify,
+    opDrop,
+    opDup,
+    opEqualVerify,
+    opHash160,
+    opInputIndex,
+    opNumEqualVerify,
+    opOutputBytecode,
+    opOutputValue,
+    opRot,
+    opTrue,
+    opUtxoBytecode,
+    opUtxoValue,
+    roll,
+    timeSequence,
+    (#),
+    type (:|),
+    type (>),
+  )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSub)
 import Data.Word (Word64)
 import Numeric.Natural (Natural)

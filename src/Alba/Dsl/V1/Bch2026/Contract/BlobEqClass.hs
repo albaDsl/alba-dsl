@@ -20,6 +20,13 @@ module Alba.Dsl.V1.Bch2026.Contract.BlobEqClass
 where
 
 import Alba.Dsl.V1.Bch2026
+  ( Fn,
+    StackEntry,
+    TBool,
+    opVerify,
+    (#),
+    type (>),
+  )
 import Data.Kind (Type)
 import Prelude ()
 

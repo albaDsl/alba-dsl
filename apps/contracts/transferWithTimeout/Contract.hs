@@ -3,6 +3,24 @@
 module Contract (TransferWithTimeout, Params, contract) where
 
 import Alba.Dsl.V1.Bch2025
+  ( Base,
+    Contract (..),
+    N,
+    TNat,
+    TPubKey,
+    TSig,
+    begin,
+    del,
+    entry2,
+    opCheckLockTimeVerify,
+    opCheckSigVerify,
+    opDrop,
+    opTrue,
+    roll,
+    (#),
+    type (:|),
+    type (>),
+  )
 
 type TransferWithTimeout =
   Contract
