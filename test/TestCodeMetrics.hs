@@ -23,6 +23,8 @@ import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Dsl.V1.Common.StackUntyped qualified as UT
 import Alba.Misc.Logging qualified as ML
 import Alba.Vm.Bch2026 (VmMetrics (..), b2SeUnsafe)
+import Data.ByteString.Lazy.Char8 (pack)
+import Data.Char (isAlphaNum)
 import Data.Sequence qualified as S
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
@@ -33,9 +35,10 @@ import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
 import Numeric.Natural (Natural)
+import System.FilePath (makeValid, (</>))
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
 import TestUtils2026 (emptyStacks, evaluateProg, evaluateScript)
 
@@ -43,54 +46,86 @@ testCodeMetrics :: TestTree
 testCodeMetrics =
   testGroup
     "Code metrics"
-    [ testGroup
-        "Code size"
-        [ testCase "turtleVm 2025" $
-            sizeOf (toTyped (T2025.turtleVm 1 1))
-              @?= "1462 opcodes, 1762 bytes.",
-          testCase "turtleVm 2026" $
-            sizeOf (toTyped (T2026.turtleVm 1)) @?= "564 opcodes, 1031 bytes.",
-          testCase "EC scalar point multiply (Affine)" $
-            sizeOf EA.ecMul @?= "68 opcodes, 489 bytes.",
-          testCase "EC scalar point multiply (Jacobian)" $
-            sizeOf EJ.ecMul @?= "95 opcodes, 724 bytes.",
-          testCase "EC scalar point multiply (Windowed Jacobian)" $
-            sizeOf EJW.ecMul @?= "62 opcodes, 621 bytes.",
-          testCase "EC scalar point multiply (Windowed Jacobian / tbl setup)" $
-            sizeOf (EJW.setupTable # EJW.ecMul) @?= "105 opcodes, 818 bytes.",
-          testCase "Vector ops" $
-            sizeOf vectorOps @?= "356 opcodes, 1377 bytes.",
-          testCase "LZSS" $ sizeOf CLZ.decompress @?= "8 opcodes, 186 bytes.",
-          testCase "LZSS Bitstream" $
-            sizeOf CLZB.decompress @?= "5 opcodes, 92 bytes."
-        ],
-      testGroup
-        "Code Compressibility"
-        [ testCase "turtleVm 2025" $
-            ratio (toTyped (T2025.turtleVm 1 1))
-              @?= "1762 byte to 1050 bytes (saving 40.4%)",
-          testCase "turtleVm 2026" $
-            ratio (toTyped (T2026.turtleVm 1))
-              @?= "1031 byte to 990 bytes (saving 4.0%)",
-          testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            ratio windowedMul @?= "1002 byte to 860 bytes (saving 14.2%)",
-          testCase "Vector ops" $
-            ratio vectorOps @?= "1377 byte to 1156 bytes (saving 16.0%)"
-        ],
-      testGroup
-        "Cost"
-        [ testCase "EC scalar point multiply (Windowed Jacobian demo)" $
-            costOf windowedMul @?= 31_864_470,
-          testCase "Vector ops" $ costOf vectorOps @?= 23_924_857,
-          testCase "LZSS" $ costOf decompressTest @?= 21_115_628,
-          testCase "LZSS Bitstream" $ costOf decompressTestBit @?= 11_498_968
-        ],
-      testGroup
-        "TurtleVm efficiency"
-        [ testCase "TurtleVm 2026" $
-            turtleVmCostOf arithmetic `div` costOf arithmetic @?= 196
-        ]
+    [ codeSize,
+      codeCompressibility,
+      executionCost,
+      turtleVmEfficiency
     ]
+  where
+
+codeSize :: TestTree
+codeSize =
+  testGroup
+    "Code size"
+    [ golden "turtleVm 2025" (sizeOf (toTyped (T2025.turtleVm 1 1))),
+      golden "turtleVm 2026" (sizeOf (toTyped (T2026.turtleVm 1))),
+      golden "EC scalar point multiply (Affine)" (sizeOf EA.ecMul),
+      golden "EC scalar point multiply (Jacobian)" (sizeOf EJ.ecMul),
+      golden
+        "EC scalar point multiply (Windowed Jacobian)"
+        (sizeOf EJW.ecMul),
+      golden
+        "EC scalar point multiply (Windowed Jacobian / tbl setup)"
+        (sizeOf (EJW.setupTable # EJW.ecMul)),
+      golden "Vector ops" (sizeOf vectorOps),
+      golden "LZSS" (sizeOf CLZ.decompress),
+      golden "LZSS Bitstream" (sizeOf CLZB.decompress)
+    ]
+  where
+    golden = goldenTest "code_size"
+
+codeCompressibility :: TestTree
+codeCompressibility =
+  testGroup
+    "Code Compressibility"
+    [ golden "turtleVm 2025" $ ratio (toTyped (T2025.turtleVm 1 1)),
+      golden "turtleVm 2026" $ ratio (toTyped (T2026.turtleVm 1)),
+      golden
+        "EC scalar point multiply (Windowed Jacobian demo)"
+        $ ratio windowedMul,
+      golden "Vector ops" $ ratio vectorOps
+    ]
+  where
+    golden = goldenTest "code_compressibility"
+
+executionCost :: TestTree
+executionCost =
+  testGroup
+    "Execution Cost"
+    [ golden "EC scalar point multiply (Windowed Jacobian demo)" $
+        costOf' windowedMul,
+      golden "Vector ops" $ costOf' vectorOps,
+      golden "LZSS" $ costOf' decompressTest,
+      golden "LZSS Bitstream" $ costOf' decompressTestBit
+    ]
+  where
+    golden = goldenTest "execution_cost"
+    costOf' prog = show $ costOf prog
+
+turtleVmEfficiency :: TestTree
+turtleVmEfficiency =
+  testGroup
+    "TurtleVm efficiency"
+    [ golden
+        "TurtleVm 2026"
+        (show (turtleVmCostOf arithmetic `div` costOf arithmetic))
+    ]
+  where
+    golden = goldenTest "turtlevm_efficiency"
+
+goldenTest :: String -> String -> String -> TestTree
+goldenTest dir testName test =
+  goldenVsString
+    testName
+    (goldenDir </> dir </> toFileName testName)
+    (pure $ pack test)
+  where
+    goldenDir :: String
+    goldenDir = "test" </> "golden"
+
+toFileName :: String -> FilePath
+toFileName =
+  take 80 . map (\c -> if isAlphaNum c then c else '_') . makeValid
 
 -- Gives size of code + function table.
 sizeOf :: forall s s' alt alt'. (S s alt -> S s' alt') -> String

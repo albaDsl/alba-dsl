@@ -68,6 +68,7 @@ common shared-properties
       pretty-simple,
       secp256k1-haskell,
       tasty,
+      tasty-golden,
       tasty-hunit,
       tasty-quickcheck,
       template-haskell,
