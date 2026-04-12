@@ -61,7 +61,7 @@ setupTable =
         # opDefine
       where
         size :: Fn s (s > TBytes)
-        size = nat 100 # cast
+        size = nat 100 # n2b
 
         n2b :: Fn (s > TNat) (s > TBytes)
         n2b = cast

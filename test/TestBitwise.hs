@@ -57,7 +57,7 @@ progBasic =
       )
     # ( begin
           # (int 0 # nat 10_000 # opNum2Bin # opInvert # opSha256)
-          # (bytes (fromJust $ decodeHex hash) # cast)
+          # (bytes' (fromJust $ decodeHex hash))
           # opEqualVerify
       )
     # ( begin
@@ -73,25 +73,31 @@ progBasic =
           # opEqualVerify
       )
     # ( begin
-          # (bytes [0b0000_0001, 0b0000_0011] # cast)
-          # (nat 1 # opRShiftNum # cast)
+          # (bytes [0b0000_0001, 0b0000_0011] # b2i)
+          # (nat 1 # opRShiftNum # i2b)
           # bytes [0b1000_0000, 0b0000_0001]
           # opEqualVerify
-          # (bytes [0b0000_0001, 0b0000_0001] # cast)
-          # (nat 1 # opRShiftNum # cast)
+          # (bytes [0b0000_0001, 0b0000_0001] # b2i)
+          # (nat 1 # opRShiftNum # i2b)
           # bytes [0b1000_0000, 0b0000_0000]
           # opEqualVerify
-          # (bytes [0b1000_0000, 0b0000_0000] # cast)
-          # (nat 1 # opRShiftNum # cast)
+          # (bytes [0b1000_0000, 0b0000_0000] # b2i)
+          # (nat 1 # opRShiftNum # i2b)
           # bytes [0b0100_0000]
           # opEqualVerify
-          # (bytes [0b1000_0011, 0b0000_0000, 0b1111_1111] # cast)
-          # (nat 1 # opRShiftNum # cast)
+          # (bytes [0b1000_0011, 0b0000_0000, 0b1111_1111] # b2i)
+          # (nat 1 # opRShiftNum # i2b)
           # (bytes [0b0100_0010, 0b1000_0000, 0b1011_1111] # opEqualVerify)
       )
     # opTrue
   where
     hash = "2bf7158cb3d8f419f1e19ee71df61927cc17017f37ea8820f3bd719d2b4f88f8"
+
+    b2i :: Fn (s > TBytes) (s > TInt)
+    b2i = cast
+
+    i2b :: Fn (s > TInt) (s > TBytes)
+    i2b = cast
 
 propInvert :: Bytes -> Bool
 propInvert x =

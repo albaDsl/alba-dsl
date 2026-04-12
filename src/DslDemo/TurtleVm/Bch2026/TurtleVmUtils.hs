@@ -13,42 +13,36 @@ module DslDemo.TurtleVm.Bch2026.TurtleVmUtils
   )
 where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
   ( Bytes,
     Fn,
     FnA,
-    S (S),
     TBool,
     TBytes,
-    TCode,
     TInt,
     bytes,
     cast,
-    fn,
     int,
     nat,
     opBin2Num,
     opCat,
-    opFalse,
     opGreaterThan,
     opNumEqual,
     opSize,
     opSplit,
-    opVerify,
     opWhen,
     opWithin,
-    progCode,
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (error)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop)
-import Prelude hiding (drop)
+import Alba.Dsl.V1.Bch2026.Lang (fn, progCode)
+import Alba.Dsl.V1.Bch2026.Stack (TCode)
+import Prelude hiding (drop, error)
 
 vmError :: Bytes -> FnA s alt s' alt'
-vmError msg = bytes msg # opFalse # opVerify # castStack
-
-castStack :: FnA s alt s' alt'
-castStack (S c fs) = let state = S c fs in state
+vmError msg = bytes msg # error
 
 -- Convert a positive value represented as a bytestring to a positive CashVm
 -- integer.

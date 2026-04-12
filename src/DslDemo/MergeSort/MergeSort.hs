@@ -2,13 +2,12 @@
 
 module DslDemo.MergeSort.MergeSort where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
   ( Fn,
     StackEntry,
     TBool,
     TInt,
     begin,
-    bytes,
     cast,
     del,
     name,
@@ -26,13 +25,13 @@ import Alba.Dsl.V1.Bch2026
     opRot,
     opSwap,
     opTrue,
-    opVerify,
     pick,
     roll,
     un,
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs)
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, fromMaybe')
 import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
@@ -113,6 +112,7 @@ mergeF =
       Fn (s' > TPackFs a > TVector a) (s' > a > TVector a)
     uncons' = unconsF # fromJust # untuple
 
+    -- FIXME: cast.
     toNum :: Fn (s' > a) (s' > TInt)
     toNum = cast # opBin2Num
 
@@ -131,6 +131,4 @@ mergeF =
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = err # opSwap # fromMaybe'
-  where
-    err = lambda0 (bytes "E0" # opFalse # opVerify # cast)
+fromJust = lambda0 (errCanNotHappen) # opSwap # fromMaybe'

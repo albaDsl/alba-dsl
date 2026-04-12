@@ -15,11 +15,11 @@ import Alba.Dsl.V1.Bch2025
   ( Bytes,
     Fn,
     FnA,
-    S (S),
     TBool,
     TBytes,
     TInt,
     bytes,
+    castStack,
     int,
     nat,
     opBin2Num,
@@ -35,9 +35,6 @@ import Alba.Dsl.V1.Bch2025
 
 vmError :: Bytes -> FnA s alt s' alt'
 vmError msg = bytes msg # opFalse # opVerify # castStack
-
-castStack :: FnA s alt s' alt'
-castStack (S c fs) = let state = S c fs in state
 
 -- Convert a positive value [0, 255] represented as a single byte to a positive
 -- CashVm integer.

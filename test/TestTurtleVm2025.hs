@@ -150,17 +150,14 @@ progBytes =
     # opEqual -- t
   where
     startBytes :: Fn s (s > TBytes)
-    startBytes = int 1 # toBytes # int 2 # toBytes # opCat
+    startBytes = int 1 # i2b # int 2 # i2b # opCat
 
-    toBytes :: Fn (s > TInt) (s > TBytes)
-    toBytes = cast
+i2b :: Fn (s > TInt) (s > TBytes)
+i2b = cast
 
 progBitwise :: Fn s (s > TBool)
 progBitwise =
-  int 1 # toBytes # int 2 # toBytes # opOr # int 3 # toBytes # opEqual
-  where
-    toBytes :: Fn (s > TInt) (s > TBytes)
-    toBytes = cast
+  int 1 # i2b # int 2 # i2b # opOr # int 3 # i2b # opEqual
 
 progMiniTurtle :: Fn s (s > TInt)
 progMiniTurtle =

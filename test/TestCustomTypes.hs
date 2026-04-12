@@ -23,10 +23,10 @@ testCustomTypes =
     [testCase "Custom int" $ isTrue (evaluateProg progAge)]
 
 progAge :: Fn s (s > TBool)
-progAge = begin # pushAge 32 # incAge # int 33 # cast # opNumEqual
+progAge = begin # pushAge 32 # op1Add # nat 33 # natToAge # opNumEqual
 
 pushAge :: Natural -> Fn s (s > TAge)
 pushAge = nat'
 
-incAge :: Fn (s > TAge) (s > TAge)
-incAge = pushAge 1 # opAdd
+natToAge :: Fn (s > TNat) (s > TAge)
+natToAge = cast

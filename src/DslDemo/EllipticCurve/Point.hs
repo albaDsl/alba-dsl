@@ -18,6 +18,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (errPartialFunction)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TEither
   ( TEither,
@@ -41,19 +42,19 @@ instance BlobEq TPoint where
   blobEqRec = blobEqRecord
 
 makePoint :: Fn (s > TInt > TInt) (s > TPoint)
-makePoint = fn (tuple # right # cast)
+makePoint = fn (tuple # right # fromRaw)
 
 pushPoint :: Integer -> Integer -> Fn s (s > TPoint)
 pushPoint x y = int x # int y # makePoint
 
 makeIdentity :: Fn s (s > TPoint)
-makeIdentity = unit # left # cast
+makeIdentity = unit # left # fromRaw
 
 isIdentity :: Fn (s > TPoint) (s > TBool)
-isIdentity = cast # isLeft
+isIdentity = toRaw # isLeft
 
 getXY :: Fn (s > TPoint) (s > TMaybe (TTuple TInt TInt))
-getXY = fn (lambda1 (drop # nothing) # lambda1 just # rot # fromPoint # either)
+getXY = fn (lambda1 (drop # nothing) # lambda1 just # rot # toRaw # either)
 
 getX :: Fn (s > TPoint) (s > TInt)
 getX = getXY # err # swap # fromMaybe' # fst
@@ -61,8 +62,11 @@ getX = getXY # err # swap # fromMaybe' # fst
 getY :: Fn (s > TPoint) (s > TInt)
 getY = getXY # err # swap # fromMaybe' # snd
 
-fromPoint :: Fn (s > TPoint) (s > TEither TUnit (TTuple TInt TInt))
-fromPoint = cast
+fromRaw :: Fn (s > TEither TUnit (TTuple TInt TInt)) (s > TPoint)
+fromRaw = cast
+
+toRaw :: Fn (s > TPoint) (s > TEither TUnit (TTuple TInt TInt))
+toRaw = cast
 
 err :: (StackEntry a) => Fn s (s > TLambda '[] '[a])
-err = lambda0 (bytes "E0" # opFalse # opVerify # cast)
+err = lambda0 errPartialFunction

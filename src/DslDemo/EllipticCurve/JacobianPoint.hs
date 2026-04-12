@@ -34,7 +34,7 @@ makePoint = fn (unname 3 makePoint')
         # assemble
 
 assemble :: Fn (s > TBytes > TBytes > TBytes > TBytes) (s > TPointJ)
-assemble = opCat # opCat # opCat # cast
+assemble = opCat # opCat # opCat # fromBytes
 
 pushPoint :: Integer -> Integer -> Integer -> Fn s (s > TPointJ)
 pushPoint x y z =
@@ -55,20 +55,20 @@ isIdentity :: Fn (s > TPointJ) (s > TBool)
 isIdentity = getTag # int tagIdentity # opNumEqual
 
 getTag :: Fn (s > TPointJ) (s > TInt)
-getTag = fn (pointToBytes # nat tagSize # opSplit # opDrop # opBin2Num)
+getTag = fn (toBytes # nat tagSize # opSplit # opDrop # opBin2Num)
 
 getX :: Fn (s > TPointJ) (s > TInt)
-getX = fn (pointToBytes # offset # nat coordSize # getField # opBin2Num)
+getX = fn (toBytes # offset # nat coordSize # getField # opBin2Num)
   where
     offset = nat tagSize
 
 getY :: Fn (s > TPointJ) (s > TInt)
-getY = fn (pointToBytes # offset # nat coordSize # getField # opBin2Num)
+getY = fn (toBytes # offset # nat coordSize # getField # opBin2Num)
   where
     offset = nat (tagSize + coordSize)
 
 getZ :: Fn (s > TPointJ) (s > TInt)
-getZ = fn (pointToBytes # offset # opSplit # opNip # opBin2Num)
+getZ = fn (toBytes # offset # opSplit # opNip # opBin2Num)
   where
     offset = nat (tagSize + 2 * coordSize)
 
@@ -87,8 +87,11 @@ getField = fn (unname 3 getField')
         # opSplit
         # opDrop
 
-pointToBytes :: Fn (s > TPointJ) (s > TBytes)
-pointToBytes = cast
+fromBytes :: Fn (s > TBytes) (s > TPointJ)
+fromBytes = cast
+
+toBytes :: Fn (s > TPointJ) (s > TBytes)
+toBytes = cast
 
 tagIdentity :: Integer
 tagIdentity = 1

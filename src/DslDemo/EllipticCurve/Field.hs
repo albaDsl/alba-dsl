@@ -38,7 +38,10 @@ feInv :: Fn (s > TInt) (s > TInt)
 feInv = fn (primeModulusMinus2 # pow' feMul)
   where
     primeModulusMinus2 :: Fn s (s > TNat)
-    primeModulusMinus2 = primeModulus # op2 # opSub # cast
+    primeModulusMinus2 = primeModulus # op2 # opSub # i2n
+
+    i2n :: Fn (s > TInt) (s > TNat)
+    i2n = cast
 
 primeModulus :: Fn s (s > TInt)
 primeModulus = constant (int (fromIntegral p))

@@ -19,10 +19,13 @@ data TMaybe a
 instance StackEntry (TMaybe a)
 
 just :: Fn (s > TBytes) (s > TMaybe TBytes)
-just = tagJust # opSwap # opCat # cast
+just = tagJust # opSwap # opCat # fromRaw
+
+fromRaw :: Fn (s > TBytes) (s > TMaybe TBytes)
+fromRaw = cast
 
 nothing :: Fn s (s > TMaybe TBytes)
-nothing = tagNothing # cast
+nothing = tagNothing # fromRaw
 
 isJust :: Fn (s > TMaybe TBytes) (s > TBool)
 isJust = getTag # tagJust # opEqual
@@ -31,16 +34,19 @@ isNothing :: Fn (s > TMaybe TBytes) (s > TBool)
 isNothing = getTag # tagNothing # opEqual
 
 getTag :: Fn (s > TMaybe TBytes) (s > TBytes)
-getTag = maybeToBytes # nat 1 # opSplit # opDrop
+getTag = toRaw # nat 1 # opSplit # opDrop
+
+toRaw :: Fn (s > TMaybe TBytes) (s > TBytes)
+toRaw = cast
 
 fromMaybe :: Fn (s > TBytes > TMaybe TBytes) (s > TBytes)
 fromMaybe =
   begin
-    # (maybeToBytes # nat 1 # opSplit # opSwap # tagNothing # opEqual)
-    # opIf opDrop (opNip # cast)
+    # (toRaw # nat 1 # opSplit # opSwap # tagNothing # opEqual)
+    # opIf opDrop opNip
 
 fromJust :: Fn (s > TMaybe TBytes) (s > TBytes)
-fromJust = maybeToBytes # nat 1 # opSplit # opNip
+fromJust = toRaw # nat 1 # opSplit # opNip
 
 ifJust ::
   FnA (s > TBytes) alt s' alt' ->
@@ -48,11 +54,8 @@ ifJust ::
   FnA (s > TMaybe TBytes) alt s' alt'
 ifJust ifOps elseOps =
   begin
-    # (maybeToBytes # nat 1 # opSplit # opSwap # tagJust # opEqual)
+    # (toRaw # nat 1 # opSplit # opSwap # tagJust # opEqual)
     # opIf ifOps (opDrop # elseOps)
-
-maybeToBytes :: Fn (s > TMaybe TBytes) (s > TBytes)
-maybeToBytes = cast
 
 tagJust :: Fn s (s > TBytes)
 tagJust = bytes [1]

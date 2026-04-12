@@ -43,7 +43,7 @@ data TFunction
 instance StackEntry TFunction
 
 initState :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
-initState = bytes [] # toFunction # opToAltStack # toCode # opToAltStack
+initState = bytes [] # b2f # opToAltStack # b2c # opToAltStack
 
 -- Make OP_INVOKE = op0 at startup. Should really be a VmError when invoking an
 -- undefined function but that currently makes MiniTurtleVm101 too large.
@@ -51,9 +51,9 @@ initStateWithDefaultOpDefine :: FnA (s > TBytes) alt s (alt > TFunction > TCode)
 initStateWithDefaultOpDefine =
   begin
     # bytes [0x0]
-    # toFunction
+    # b2f
     # opToAltStack
-    # toCode
+    # b2c
     # opToAltStack
 
 getOp ::
@@ -72,7 +72,7 @@ putFunction ::
 putFunction =
   begin
     # (opFromAltStack # opFromAltStack)
-    # (drop # swap # toFunction)
+    # (drop # swap # b2f)
     # (opToAltStack # opToAltStack)
 
 getFunction ::
@@ -81,30 +81,30 @@ getFunction =
   begin
     # (opFromAltStack # opFromAltStack)
     # (op2Dup # opToAltStack # opToAltStack)
-    # (nip # fromFunction)
+    # (nip # f2b)
 
 invokeFunction ::
   FnA s (alt > TFunction > TCode) s (alt > TFunction > TCode)
 invokeFunction =
   begin
-    # (opFromAltStack # fromCode # opFromAltStack # fromFunction)
+    # (opFromAltStack # c2b # opFromAltStack # f2b)
     # (dup # rot # opCat # swap)
-    # (toFunction # opToAltStack # toCode # opToAltStack)
+    # (b2f # opToAltStack # b2c # opToAltStack)
 
 getCode :: FnA s (alt > TCode) (s > TBytes) alt
-getCode = opFromAltStack # fromCode
+getCode = opFromAltStack # c2b
 
 putCode :: FnA (s > TBytes) alt s (alt > TCode)
-putCode = toCode # opToAltStack
+putCode = b2c # opToAltStack
 
-toCode :: Fn (s > TBytes) (s > TCode)
-toCode = cast
+b2c :: Fn (s > TBytes) (s > TCode)
+b2c = cast
 
-fromCode :: Fn (s > TCode) (s > TBytes)
-fromCode = cast
+c2b :: Fn (s > TCode) (s > TBytes)
+c2b = cast
 
-toFunction :: Fn (s > TBytes) (s > TFunction)
-toFunction = cast
+b2f :: Fn (s > TBytes) (s > TFunction)
+b2f = cast
 
-fromFunction :: Fn (s > TFunction) (s > TBytes)
-fromFunction = cast
+f2b :: Fn (s > TFunction) (s > TBytes)
+f2b = cast
