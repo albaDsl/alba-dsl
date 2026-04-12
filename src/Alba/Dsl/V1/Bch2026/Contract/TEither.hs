@@ -22,13 +22,12 @@ import Alba.Dsl.V1.Bch2026
     cast,
     nat,
     opCat,
-    opEqual,
     opIf,
     opSplit,
     (.),
     type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   ( blobEqEqual,
     blobEqEqualVerify,
@@ -59,10 +58,10 @@ right :: Fn (s > b) (s > TEither a b)
 right = fn (valToBytes . tagRight . swap . opCat . fromRaw)
 
 isLeft :: Fn (s > TEither a b) (s > TBool)
-isLeft = fn (getTag . tagLeft . opEqual)
+isLeft = fn (getTag . tagLeft . equal)
 
 isRight :: Fn (s > TEither a b) (s > TBool)
-isRight = fn (getTag . tagRight . opEqual)
+isRight = fn (getTag . tagRight . equal)
 
 getTag :: Fn (s > TEither a b) (s > TBytes)
 getTag = fn (split . drop)
@@ -76,7 +75,7 @@ ifLeft ::
   FnA (s > b) alt s' alt' ->
   FnA (s > TEither a b) alt s' alt'
 ifLeft leftOps rightOps =
-  split . swap . tagLeft . opEqual . opIf (bToVal . leftOps) (bToVal . rightOps)
+  split . swap . tagLeft . equal . opIf (bToVal . leftOps) (bToVal . rightOps)
   where
     bToVal :: forall s a. Fn (s > TBytes) (s > a)
     bToVal = cast

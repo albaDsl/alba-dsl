@@ -23,14 +23,14 @@ import Alba.Dsl.V1.Bch2026
     begin,
     cast,
     fn,
-    op1Add,
-    opDup,
     opFromAltStack,
     opToAltStack,
     progCode,
     (.),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped, (∘))
@@ -98,10 +98,10 @@ apply4_2 ::
 apply4_2 = toTyped applyTop2
 
 freshId :: Env s (s > TBytes)
-freshId = fn (opFromAltStack . opDup . increment . opToAltStack . rt2b)
+freshId = fn (opFromAltStack . dup . increment . opToAltStack . rt2b)
   where
     increment :: Fn (s > TRuntimeState) (s > TRuntimeState)
-    increment = rt2i . op1Add . i2rt
+    increment = rt2i . add1 . i2rt
 
     i2rt :: Fn (s > TInt) (s > TRuntimeState)
     i2rt = cast

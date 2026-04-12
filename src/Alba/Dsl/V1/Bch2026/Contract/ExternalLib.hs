@@ -28,14 +28,10 @@ import Alba.Dsl.V1.Bch2026
     ns3,
     ns5,
     ns6,
-    op1Add,
-    op1Sub,
     opCat,
     opDefine,
-    opEqualVerify,
     opHash256,
     opInvoke,
-    opNumEqual,
     opSplit,
     opUntil,
     opUtxoBytecode,
@@ -45,6 +41,8 @@ import Alba.Dsl.V1.Bch2026
     (.),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Alba.Dsl.V1.Bch2026.TxDsl (simpleWrapChunkSize)
 import Prelude (fromIntegral, undefined)
@@ -60,7 +58,7 @@ importLibrary =
         . (roll #startInput . roll #numInputs . n2i . bytes [])
         . (opUntil loop . nip . nip)
         . (roll #size . opSplit . drop . roll #transform . invoke1)
-        . (dup . opHash256 . roll #hash . opEqualVerify . b2c)
+        . (dup . opHash256 . roll #hash . equalVerify . b2c)
         . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
@@ -68,10 +66,10 @@ importLibrary =
     loop =
       begin
         . ns3 #input #cnt #acc
-        . (pick #input . op1Add)
-        . name #cnt' (roll #cnt . op1Sub)
+        . (pick #input . add1)
+        . name #cnt' (roll #cnt . sub1)
         . (roll #acc . roll #input . opUtxoBytecode . simpleUnwrapProg)
-        . (opCat . pick #cnt' . int 0 . opNumEqual . un #cnt')
+        . (opCat . pick #cnt' . int 0 . equal . un #cnt')
 
     libInit :: Fn s s
     libInit = undefined
@@ -91,7 +89,7 @@ importLibrary' =
         . (roll #startInput . roll #numInputs . n2i . bytes [])
         . (opUntil loop . nip . nip)
         . (roll #size . opSplit . drop)
-        . (dup . opHash256 . roll #hash . opEqualVerify . b2c)
+        . (dup . opHash256 . roll #hash . equalVerify . b2c)
         . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
@@ -99,10 +97,10 @@ importLibrary' =
     loop =
       begin
         . ns3 #input #cnt #acc
-        . (pick #input . op1Add)
-        . name #cnt' (roll #cnt . op1Sub)
+        . (pick #input . add1)
+        . name #cnt' (roll #cnt . sub1)
         . (roll #acc . roll #input . opUtxoBytecode . simpleUnwrapProg)
-        . (opCat . pick #cnt' . int 0 . opNumEqual . un #cnt')
+        . (opCat . pick #cnt' . int 0 . equal . un #cnt')
 
     libInit :: Fn s s
     libInit = undefined

@@ -9,6 +9,21 @@ module Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
 where
 
 import Alba.Dsl.V1.Bch2026
+  ( Fn,
+    StackEntry,
+    TBool,
+    TBytes,
+    TLambda,
+    begin,
+    castStack,
+    constant,
+    lambda2,
+    lambda2_0,
+    opEqual,
+    opEqualVerify,
+    (.),
+    type (>),
+  )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (TBlobEqRec)
 import Prelude (undefined)
 

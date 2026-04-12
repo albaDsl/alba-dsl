@@ -3,6 +3,15 @@
 module Alba.Dsl.V1.Bch2026.Contract.Error where
 
 import Alba.Dsl.V1.Bch2026
+  ( FnA,
+    TBytes,
+    bytes,
+    castStack,
+    opFalse,
+    opVerify,
+    (.),
+    type (>),
+  )
 import Prelude ()
 
 error :: FnA (s > TBytes) alt s' alt'

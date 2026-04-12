@@ -29,7 +29,6 @@ import Alba.Dsl.V1.Bch2026
     ns,
     opBin2Num,
     opCat,
-    opLessThanOrEqual,
     opNum2Bin,
     opSize,
     opSplit,
@@ -45,6 +44,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Control.Exception (assert)
@@ -117,7 +117,7 @@ fromBytes =
   fn
     ( begin
         . (dup . opSize . nip . nat (fromIntegral maxPayloadSize))
-        . (opLessThanOrEqual . opVerify . fromRaw)
+        . (lessThanOrEqual . opVerify . fromRaw)
     )
 
 toBytes :: Fn (s > TBytes128) (s > TBytes)

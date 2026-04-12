@@ -32,7 +32,6 @@ import Alba.Dsl.V1.Bch2026
     lambda1,
     nat,
     opCat,
-    opEqual,
     opIf,
     opSplit,
     (.),
@@ -142,10 +141,10 @@ nothing :: Fn s (s > TMaybe a)
 nothing = tagNothing . fromRaw
 
 isJust :: Fn (s > TMaybe a) (s > TBool)
-isJust = fn (getTag . tagJust . opEqual)
+isJust = fn (getTag . tagJust . equal)
 
 isNothing :: (StackEntry a) => Fn (s > TMaybe a) (s > TBool)
-isNothing = fn (getTag . tagNothing . opEqual)
+isNothing = fn (getTag . tagNothing . equal)
 
 getTag :: Fn (s > TMaybe a) (s > TBytes)
 getTag = fn (split . drop)
@@ -160,7 +159,7 @@ fromMaybe' :: (StackEntry a) => Fn (s > TLambda '[] '[a] > TMaybe a) (s > a)
 fromMaybe' = fn (contentAndBool . opIf nip (drop . invoke0))
 
 contentAndBool :: (StackEntry a) => Fn (s > TMaybe a) (s > a > TBool)
-contentAndBool = split . valToBytes . swap . tagJust . opEqual
+contentAndBool = split . valToBytes . swap . tagJust . equal
   where
     valToBytes :: Fn (s > TBytes) (s > a)
     valToBytes = cast

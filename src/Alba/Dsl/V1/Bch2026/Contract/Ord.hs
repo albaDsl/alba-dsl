@@ -3,6 +3,20 @@
 module Alba.Dsl.V1.Bch2026.Contract.Ord where
 
 import Alba.Dsl.V1.Bch2026
+  ( Fn,
+    StackEntry,
+    TBool,
+    TInt,
+    TNat,
+    opGreaterThan,
+    opGreaterThanOrEqual,
+    opLessThan,
+    opLessThanOrEqual,
+    opMax,
+    opMin,
+    opWithin,
+    type (>),
+  )
 -- (StackEntry, Fn, type (>))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()

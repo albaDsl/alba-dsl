@@ -26,7 +26,6 @@ import Alba.Dsl.V1.Bch2026
     opFalse,
     opIf,
     opNot,
-    opNumEqual,
     opRShiftBin,
     opRShiftNum,
     opSize,
@@ -41,6 +40,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Error (error')
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
@@ -81,7 +81,7 @@ decompressLoop =
       [ ( pick #i . pick #n . greaterThanOrEqual,
           opTrue . un6 #bs #n #i #k #flag #out
         ),
-        ( pick #k . nat groupSize . opNumEqual,
+        ( pick #k . nat groupSize . equal,
           begin
             . (pick #bs . roll #n . pick #i . add1)
             . (del #k . nat 0 . del #flag . roll #bs)
@@ -112,7 +112,7 @@ copyFromBack =
     loop :: Loop (s > TNat > TNat > TBytes) -- start end acc
     loop =
       begin
-        . (ns3 #i #end #acc . pick #i . pick #end . opNumEqual)
+        . (ns3 #i #end #acc . pick #i . pick #end . equal)
         . opIf
           (un3 #i #end #acc . opTrue)
           ( begin
@@ -130,7 +130,7 @@ indexRef = opSplit . nip . nat refLen . opSplit . drop
 -- TBytes is expected to be a single byte.
 testBit :: Fn (s > TBytes > TNat) (s > TBool)
 testBit =
-  opRShiftBin . bytes [0x01] . opAnd . opBin2Num . op0 . opNumEqual . opNot
+  opRShiftBin . bytes [0x01] . opAnd . opBin2Num . op0 . equal . opNot
 
 -- Reference format: |offset:12|len:4|
 unpackRef :: Fn (s > TBytes) (s > TOff > TLen)

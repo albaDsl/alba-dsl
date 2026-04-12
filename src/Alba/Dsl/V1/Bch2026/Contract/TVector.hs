@@ -91,12 +91,9 @@ import Alba.Dsl.V1.Bch2026
     op2Drop,
     op2Dup,
     opCat,
-    opDiv,
     opDrop,
-    opEqual,
     opFalse,
     opIf,
-    opLessThan,
     opNotIf,
     opRoll,
     opSize,
@@ -117,7 +114,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
-    Integral (add1, mul),
+    Integral (add1, div, mul),
     Ord (..),
     PackFs (..),
     TMaybe,
@@ -173,18 +170,18 @@ instance (BlobEq a) => BlobEq (TVector a) where
 
 -- ## Length.
 length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
-length = toRaw . opSize . nip . size @a . opDiv
+length = toRaw . opSize . nip . size @a . div
 
 lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
 lengthF =
   fn
     ( begin
         . (ns2 #packFs #vec . un #vec)
-        . (toRaw . opSize . nip . tcSize . opDiv . tcDrop)
+        . (toRaw . opSize . nip . tcSize . div . tcDrop)
     )
 
 null :: Fn (s > TVector a) (s > TBool)
-null = toRaw . bytes [] . opEqual
+null = toRaw . bytes [] . equal
 
 -- ## Indexing.
 lookup :: forall a s. (PackFs a) => Fn (s > TVector a > TNat) (s > TMaybe a)
@@ -345,7 +342,7 @@ generateF = fn (lambda3 f . apply3_2 . nat 0 . unfoldrF)
       Fn (s > TNat > TNat > TLambda '[TNat] '[a]) (s > TMaybe (TTuple a TNat))
     f =
       begin
-        . (ns3 #cnt #limit #f . pick #cnt . roll #limit . opLessThan)
+        . (ns3 #cnt #limit #f . pick #cnt . roll #limit . lessThan)
         . opIf
           ( begin
               . name #a (pick #cnt . roll #f . invoke1)

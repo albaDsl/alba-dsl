@@ -19,7 +19,6 @@ import Alba.Dsl.V1.Bch2026
     ns2,
     ns3,
     op2Drop,
-    opAdd,
     opAnd,
     opBin2Num,
     opCat,
@@ -102,8 +101,8 @@ unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
 unpackRef =
   begin
     . (dup . toSigned . nat lenBits . opRShiftNum . i2nUnsafe . nat offBias)
-    . (opAdd . swap . maskLen . opAnd . opBin2Num . i2nUnsafe . nat lenBias)
-    . opAdd
+    . (add . swap . maskLen . opAnd . opBin2Num . i2nUnsafe . nat lenBias)
+    . add
   where
     toSigned :: Fn (s > TBytes) (s > TInt)
     toSigned = bytes [0] . opCat . opBin2Num

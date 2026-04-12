@@ -26,7 +26,6 @@ import Alba.Dsl.V1.Bch2026
     ns,
     ns2,
     ns3,
-    opAdd,
     opCat,
     opSplit,
     pick,
@@ -43,6 +42,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
@@ -109,7 +109,7 @@ calcPackFs ::
   Fn (s > TPackFs a > TPackFs b) (s > TPackFs (TTupleFs a b))
 calcPackFs =
   begin
-    . (getSize . swap . getSize . opAdd)
+    . (getSize . swap . getSize . add)
     . (emptyLambda . emptyLambda . mkPackFs)
 
 emptyLambda :: (StackEntry a, StackEntry b) => Fn s (s > TLambda '[a] '[b])
