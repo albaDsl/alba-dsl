@@ -1,8 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Common.FunctionState
-  ( FunctionState (..),
-    FunctionTable,
+  ( FunctionState,
     Function (..),
     startState,
     registerFunction,
@@ -11,29 +10,27 @@ module Alba.Dsl.V1.Common.FunctionState
     addCallSite,
     setCallSites,
     isRegistered,
+    mapFunctions,
+    functionTableMap,
     getCallerFunctionId,
     getCallerConstantId,
     getCallerRtConstantId,
     getCallerLambdaId,
-    getNumRtConstants,
-    mapFunctions,
-    ftLookup,
-    ftMapping,
   )
 where
 
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (..), isRtConstant)
+import Alba.Dsl.V1.Common.InsertionOrderMap (InsertionOrderMap)
+import Alba.Dsl.V1.Common.InsertionOrderMap qualified as IM
+import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (..))
 import Control.Arrow ((>>>))
 import Control.Monad.State (State, runState)
 import Data.Function (on)
 import Data.List (sortBy)
 import Data.Map qualified as M
 import GHC.Stack (HasCallStack, SrcLoc (..), callStack, getCallStack)
+import Prelude hiding (lookup)
 
-newtype FunctionState = FunctionState
-  { functionTable :: FunctionTable
-  }
-  deriving (Show)
+newtype FunctionState = FunctionState {ft :: FunctionTable}
 
 data Function = Function
   { code :: Maybe CodeL3,
@@ -42,69 +39,73 @@ data Function = Function
   }
   deriving (Show)
 
-data FunctionTable = FunctionTable
-  { mapping :: M.Map FunctionId Function,
-    order :: [FunctionId]
-  }
-  deriving (Show)
+type FunctionTable = InsertionOrderMap FunctionId Function
 
 startState :: FunctionState
-startState = FunctionState {functionTable = FunctionTable M.empty []}
+startState = FunctionState {ft = IM.empty}
 
 registerFunction :: FunctionId -> FunctionState -> Maybe FunctionState
-registerFunction fId fs@FunctionState {functionTable = ft} =
-  if not (ftMember fId ft)
+registerFunction fId fs@FunctionState {ft} =
+  if not (IM.member fId ft)
     then Just $
       case fId of
-        Standard {} ->
-          fs {functionTable = ftAdd fId (Function Nothing Nothing (Just 1)) ft}
-        Constant {} ->
-          fs {functionTable = ftAdd fId (Function Nothing Nothing (Just 1)) ft}
-        RuntimeConstant {} ->
-          fs {functionTable = ftAdd fId (Function Nothing Nothing (Just 1)) ft}
-        Lambda {} ->
-          fs {functionTable = ftAdd fId (Function Nothing Nothing Nothing) ft}
-        Named _ ->
-          fs {functionTable = ftAdd fId (Function Nothing Nothing (Just 0)) ft}
+        Standard {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
+        Constant {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
+        RuntimeConstant {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
+        Lambda {} -> fs {ft = IM.insert fId (fn Nothing) ft}
+        Named _ -> fs {ft = IM.insert fId (fn (Just 0)) ft}
         Absolute idx ->
-          fs
-            { functionTable =
-                ftAdd fId (Function Nothing (Just idx) (Just 0)) ft
-            }
+          fs {ft = IM.insert fId (Function Nothing (Just idx) (Just 0)) ft}
     else Nothing
   where
+    fn x = Function Nothing Nothing x
 
 addFunctionBody :: FunctionId -> CodeL3 -> FunctionState -> Maybe FunctionState
-addFunctionBody fId code fs@FunctionState {functionTable} =
+addFunctionBody fId code fs@FunctionState {ft} =
   maybe
     Nothing
-    (\ft' -> Just fs {functionTable = ft'})
-    (ftUpdate fId (\fn -> fn {code = Just code}) functionTable)
+    (\ft' -> Just fs {ft = ft'})
+    (IM.update fId (\fn -> fn {code = Just code}) ft)
 
 getFunctionBody :: FunctionId -> FunctionState -> Maybe CodeL3
-getFunctionBody fId FunctionState {functionTable} =
-  maybe Nothing (\fn -> fn.code) (ftLookup fId functionTable)
+getFunctionBody fId FunctionState {ft} =
+  maybe Nothing (\fn -> fn.code) (IM.lookup fId ft)
 
 addCallSite :: FunctionId -> FunctionState -> Maybe FunctionState
-addCallSite fId fs@FunctionState {functionTable} =
+addCallSite fId fs@FunctionState {ft} =
   maybe
     Nothing
-    (\ft' -> Just fs {functionTable = ft'})
-    (ftUpdate fId (\fn -> fn {callSites = inc fn.callSites}) functionTable)
+    (\ft' -> Just fs {ft = ft'})
+    (IM.update fId (\fn -> fn {callSites = inc fn.callSites}) ft)
   where
     inc :: Maybe Int -> Maybe Int
     inc Nothing = Nothing
     inc (Just n) = Just (succ n)
 
 setCallSites :: FunctionId -> FunctionState -> Int -> Maybe FunctionState
-setCallSites fId fs@FunctionState {functionTable} count =
+setCallSites fId fs@FunctionState {ft} count =
   maybe
     Nothing
-    (\ft' -> Just fs {functionTable = ft'})
-    (ftUpdate fId (\fn -> fn {callSites = Just count}) functionTable)
+    (\ft' -> Just fs {ft = ft'})
+    (IM.update fId (\fn -> fn {callSites = Just count}) ft)
 
 isRegistered :: FunctionId -> FunctionState -> Bool
-isRegistered fId FunctionState {functionTable} = ftMember fId functionTable
+isRegistered fId fs = IM.member fId fs.ft
+
+functionTableMap :: FunctionState -> M.Map FunctionId Function
+functionTableMap fs = IM.toMap fs.ft
+
+mapFunctions ::
+  ((FunctionId, Function) -> State Int (FunctionId, Function)) ->
+  FunctionState ->
+  FunctionState
+mapFunctions convert fs =
+  let res = runState (mapM convert functionsSortedBySitesAndInsertionOrder) 0
+   in fs {ft = IM.fromList (fst res)}
+  where
+    functionsSortedBySitesAndInsertionOrder :: [(FunctionId, Function)]
+    functionsSortedBySitesAndInsertionOrder =
+      (IM.toList >>> sortBy (flip compare `on` ((.callSites) . snd))) fs.ft
 
 getCallerFunctionId :: (HasCallStack) => Maybe FunctionId
 getCallerFunctionId =
@@ -143,59 +144,3 @@ getCallerLambdaId = convert <$> getCallerFunctionId
     convert (Standard moduleName line col funName) =
       Lambda moduleName line col funName
     convert _ = error ""
-
-getNumRtConstants :: FunctionTable -> Int
-getNumRtConstants ft =
-  M.size $ M.filterWithKey (\k _ -> isRtConstant k) ft.mapping
-
-mapFunctions ::
-  FunctionTable ->
-  ((FunctionId, Function) -> State Int (FunctionId, Function)) ->
-  FunctionTable
-mapFunctions ft convert =
-  let (res, _) =
-        runState (mapM convert (functionsSortedBySitesAndInsertionOrder ft)) 0
-   in ft {mapping = M.fromList res}
-
-functionsSortedBySitesAndInsertionOrder ::
-  FunctionTable -> [(FunctionId, Function)]
-functionsSortedBySitesAndInsertionOrder ft =
-  ( ftToList
-      >>> sortByKeyInsertion ft.order
-      >>> sortBy (flip compare `on` ((.callSites) . snd))
-  )
-    ft
-  where
-    sortByKeyInsertion :: (Ord k) => [k] -> [(k, v)] -> [(k, v)]
-    sortByKeyInsertion order xs =
-      sortBy (comparing posMap) xs
-      where
-        posMap = M.fromList $ zip order ([0 ..] :: [Int])
-        comparing m (k1, _) (k2, _) = compare (M.lookup k1 m) (M.lookup k2 m)
-
--- ## Operations on FunctionTable.
-ftMember :: FunctionId -> FunctionTable -> Bool
-ftMember fId FunctionTable {mapping} = M.member fId mapping
-
-ftAdd :: FunctionId -> Function -> FunctionTable -> FunctionTable
-ftAdd fId fn FunctionTable {..} =
-  FunctionTable {mapping = M.insert fId fn mapping, order = fId : order}
-
-ftUpdate ::
-  FunctionId -> (Function -> Function) -> FunctionTable -> Maybe FunctionTable
-ftUpdate fId update ft =
-  case M.lookup fId ft.mapping of
-    Just fn -> Just $ ft {mapping = M.insert fId (update fn) ft.mapping}
-    Nothing -> Nothing
-
-ftLookup :: FunctionId -> FunctionTable -> Maybe Function
-ftLookup fId ft =
-  case M.lookup fId ft.mapping of
-    Just fn -> Just $ fn
-    Nothing -> Nothing
-
-ftToList :: FunctionTable -> [(FunctionId, Function)]
-ftToList ft = M.toList ft.mapping
-
-ftMapping :: FunctionTable -> (M.Map FunctionId Function)
-ftMapping ft = ft.mapping

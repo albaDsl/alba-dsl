@@ -44,7 +44,6 @@ data S (s :: [Type]) (alt :: [Type]) = S
   { c :: CodeL3,
     fs :: FunctionState
   }
-  deriving (Show)
 
 -- A stack with nothing on it.
 type Base = '[]

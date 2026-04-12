@@ -48,19 +48,16 @@ data Function = Function
 type FunctionTable = M.Map FunctionId Function
 
 toResolved :: FunctionIdType -> FS.FunctionState -> FunctionState
-toResolved fIdType FS.FunctionState {functionTable = ft} =
-  FunctionState
-    { functionTable = M.map (fromMaybe (err ft) . convert) (FS.ftMapping ft)
-    }
+toResolved fIdType fs =
+  FunctionState {functionTable = M.map convert (FS.functionTableMap fs)}
   where
-    convert :: FS.Function -> Maybe Function
-    convert FS.Function {..} = do
-      idx <- index
-      pure $ Function {index = idx, vmFId = mkVmFunctionId fIdType idx, ..}
-
-    err x =
-      error
-        (printf "toResolved: FunctionState has undefined index: %s" (show x))
+    convert :: FS.Function -> Function
+    convert f@FS.Function {..} = do
+      case index of
+        Just idx ->
+          Function {index = idx, vmFId = mkVmFunctionId fIdType idx, ..}
+        Nothing ->
+          error (printf "toResolved: Function has undefined index: %s" (show f))
 
 getVmFunctionId :: FunctionId -> FunctionState -> Maybe VmFunctionId
 getVmFunctionId fId FunctionState {functionTable} =

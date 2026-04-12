@@ -18,7 +18,6 @@ data SU = SU
   { c :: CodeL3,
     fs :: FunctionState
   }
-  deriving (Show)
 
 -- Applies HasCallStack so the type can be used for a VM function.
 type F a = (HasCallStack) => a

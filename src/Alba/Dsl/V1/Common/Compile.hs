@@ -19,9 +19,7 @@ import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as CS
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( Function (..),
-    FunctionState (..),
-    ftLookup,
-    getNumRtConstants,
+    FunctionState,
     mapFunctions,
     startState,
   )
@@ -163,16 +161,18 @@ pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
 -- Use of 'iterate' is to get the call site count correct.
 addSupportFunctions :: FunctionState -> FunctionState
-addSupportFunctions fs@FunctionState {functionTable} =
+addSupportFunctions fs =
   iterate
     (\fs' -> snd (pass1 S.empty fs' toPushOp))
     fs
-    !! (getNumRtConstants functionTable)
+    !! numRtConstants
+  where
+    numRtConstants :: Int
+    numRtConstants =
+      M.size $ M.filterWithKey (\k _ -> isRtConstant k) (FS.functionTableMap fs)
 
 assignIndices :: Options -> FunctionState -> FSR.FunctionState
-assignIndices opts fs@FunctionState {functionTable} =
-  let ft = mapFunctions functionTable assign
-   in FSR.toResolved opts.fIdType (fs {FS.functionTable = ft})
+assignIndices opts fs = FSR.toResolved opts.fIdType (mapFunctions assign fs)
   where
     assign :: (FunctionId, Function) -> State Int (FunctionId, Function)
     assign (fId@(Absolute _), fun) = pure (fId, fun)
@@ -185,9 +185,9 @@ assignIndices opts fs@FunctionState {functionTable} =
 
     nextFree :: Int -> Int
     nextFree idx =
-      case ftLookup (Absolute idx) functionTable of
-        Just _ -> nextFree (succ idx)
-        Nothing -> idx
+      if FS.isRegistered (Absolute idx) fs
+        then nextFree (succ idx)
+        else idx
 
 functionDefinitions :: FSR.FunctionState -> CodeL3
 functionDefinitions fs@FSR.FunctionState {functionTable} =

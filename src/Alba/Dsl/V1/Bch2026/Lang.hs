@@ -29,7 +29,7 @@ import Alba.Dsl.V1.Bch2026.Stack (Env, TCode, TLambda, TLambdaUntyped)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aop', aops, aops')
 import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState
-  ( FunctionState (..),
+  ( FunctionState,
     addCallSite,
     addFunctionBody,
     getCallerConstantId,

@@ -143,6 +143,7 @@ library
       Alba.Dsl.V1.Common.FunctionStateResolved,
       Alba.Dsl.V1.Common.FunctionTableJson,
       Alba.Dsl.V1.Common.FunctionTableText,
+      Alba.Dsl.V1.Common.InsertionOrderMap,
       Alba.Dsl.V1.Common.Lang,
       Alba.Dsl.V1.Common.LangArgs,
       Alba.Dsl.V1.Common.LangDispatch,
