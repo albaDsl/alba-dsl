@@ -4,6 +4,7 @@ module TestLibMaybe (testLibMaybe) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Error (error)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (bytes128)
@@ -90,4 +91,4 @@ progBasics =
         # ifJust (untuple # opDrop # ifJust (equalVerify) fail) fail
 
     fail :: FnA s alt s' alt'
-    fail = opFalse # opVerify # castStack
+    fail = bytes "Fail" # error

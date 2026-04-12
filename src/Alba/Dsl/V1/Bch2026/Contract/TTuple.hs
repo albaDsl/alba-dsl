@@ -57,21 +57,21 @@ tuple = fn tupleM
 tupleM :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
 tupleM =
   begin
-    # (ns2 "fst" "snd" # roll "fst" # toBytes # addSizeTag # roll "snd")
-    # (toBytes # opCat # cast)
+    # (ns2 "fst" "snd" # roll "fst" # valToBytes # addSizeTag # roll "snd")
+    # (valToBytes # opCat # fromRaw)
   where
+    valToBytes :: Fn (s > a) (s > TBytes)
+    valToBytes = cast
+
     addSizeTag :: Fn (s > TBytes) (s > TBytes)
     addSizeTag = opSize # n2i # tagSize # opNum2Bin # swap # opCat
 
 tagSize :: Fn s (s > TNat)
 tagSize = nat 2
 
-toBytes :: Fn (s > a) (s > TBytes)
-toBytes = cast
-
 untuple :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a > b)
 untuple =
-  fn (toBytes # tagSize # opSplit # swap # opBin2Num # i2n # opSplit # fixup)
+  fn (toRaw # tagSize # opSplit # swap # opBin2Num # i2n # opSplit # fixup)
   where
     i2n :: Fn (s > TInt) (s > TNat)
     i2n = cast
@@ -84,3 +84,9 @@ fst = untuple # drop
 
 snd :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > b)
 snd = untuple # nip
+
+toRaw :: Fn (s > TTuple a b) (s > TBytes)
+toRaw = cast
+
+fromRaw :: Fn (s > TBytes) (s > TTuple a b)
+fromRaw = cast

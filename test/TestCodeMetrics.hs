@@ -1,27 +1,50 @@
 -- Copyright (c) 2025 albaDsl
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# OPTIONS_GHC -Wno-unused-local-binds #-}
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module TestCodeMetrics (testCodeMetrics) where
 
-import Alba.Dsl.V1.Bch2025.LangUntyped qualified as UT
+import Alba.Dsl.V1.Bch2025
+  ( CompilationResult (code),
+    Fn,
+    FnA,
+    FnC,
+    Optimize (O1),
+    S,
+    begin,
+    bytes,
+    compile,
+    compile',
+    compileL2,
+    compressibilityStr,
+    delCount,
+    int,
+    n2i,
+    nat,
+    ns2,
+    opVerify,
+    pick,
+    sizeStr,
+    (#),
+    type (>),
+  )
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
-import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, toInt64)
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8, toInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
+import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
+import Alba.Dsl.V1.Bch2026.Lang (lambda1, lambda2, runEnv)
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
+import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import Alba.Dsl.V1.Common.StackUntyped qualified as UT
-import Alba.Misc.Logging qualified as ML
 import Alba.Vm.Bch2026 (VmMetrics (..), b2SeUnsafe)
 import Data.ByteString.Lazy.Char8 (pack)
 import Data.Char (isAlphaNum)
@@ -40,7 +63,9 @@ import System.IO.Unsafe (unsafePerformIO)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
-import TestUtils2026 (emptyStacks, evaluateProg, evaluateScript)
+import TestUtils2026 (emptyStacks, evaluateScript)
+import Prelude hiding (div, mod)
+import Prelude qualified as P
 
 testCodeMetrics :: TestTree
 testCodeMetrics =
@@ -108,7 +133,7 @@ turtleVmEfficiency =
     "TurtleVm efficiency"
     [ golden
         "TurtleVm 2026"
-        (show (turtleVmCostOf arithmetic `div` costOf arithmetic))
+        (show (turtleVmCostOf arithmetic `P.div` costOf arithmetic))
     ]
   where
     golden = goldenTest "turtlevm_efficiency"
@@ -166,14 +191,14 @@ turtleVmCostOf prog =
             do
               -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
               -- writeFunctionTable cr.code cr.functionTable
-              pure $ tr.metrics.cost `div` count
+              pure $ tr.metrics.cost `P.div` count
         Left (err, _) -> error (show err)
   where
     consumeAll :: UT.FnU -> UT.FnU
     consumeAll prog' = UT.opUntil (prog' # UT.opDepth # UT.op0 # UT.opEqual)
 
 arithmetic :: FnC
-arithmetic = int 2 # int 3 # opAdd # int 4 # opSub # int 1 # opNumEqualVerify
+arithmetic = int 2 # int 3 # add # int 4 # sub # int 1 # equalVerify
 
 windowedMul :: FnC
 windowedMul =
@@ -193,45 +218,47 @@ vectorOps :: FnC
 vectorOps =
   runEnv
     ( begin
-        # (nat n # lambda1 (op1Add # cast # toInt64) # V.generate)
-        # (nat n # lambda1 (cast # op1Add # toInt8) # int8 1 # V.iterateN)
+        # (nat n # lambda1 (add1 # n2i # fromInt) # V.generate)
+        # (nat n # lambda1 add1 # int8 1 # V.iterateN)
         # ns2 "vec64" "vec8"
         # ( begin
-              # (lambda2 (cast # opAdd) # nat 0 # nat n # int8 1 # V.replicate)
-              # (V.foldl # nat n # opNumEqualVerify)
+              # (lambda2 (toInt # fromInt # add) # nat 0)
+              # (nat n # int8 1 # V.replicate)
+              # (V.foldl # nat n # equalVerify)
           )
-        # (pick "vec64" # opDup # V.reverse # sort # equalVerify)
-        # (pick "vec8" # opDup # V.reverse # sort # equalVerify)
+        # (pick "vec64" # dup # V.reverse # sort # equalVerify)
+        # (pick "vec8" # dup # V.reverse # sort # equalVerify)
         # ( begin
-              # lambda2 (untuple # castStack # opAdd # opAdd)
+              # lambda2 (untuple # toInt # swap # toInt # add # add)
               # int 0
               # (pick "vec8" # pick "vec8" # V.zip)
-              # (V.foldl # int (fromIntegral $ n * (n + 1)) # opNumEqualVerify)
+              # (V.foldl # int (fromIntegral $ n * (n + 1)) # equalVerify)
           )
         # ( begin
-              # lambda2 (castStack # opAdd)
+              # lambda2 (toInt # swap # add)
               # int 0
               # ( begin
-                    # lambda2 (castStack # opAdd # toInt64)
+                    # ( (lambda2 (toInt # swap # toInt # add # fromInt)) ::
+                          Fn s (s > TLambda '[TInt64, TInt8] '[TInt64])
+                      )
                     # (pick "vec64" # pick "vec8" # V.zipWith)
                 )
-              # (V.foldl # int (fromIntegral $ n * (n + 1)) # opNumEqualVerify)
+              # (V.foldl # int (fromIntegral $ n * (n + 1)) # equalVerify)
           )
         # ( begin
-              # (lambda2 (castStack # opAdd) # int 0)
-              # lambda1 (cast # int 10 # opMul # toInt64)
-              # (pick "vec64" # V.map)
+              # (lambda2 (toInt # add) # int 0)
+              # (lambda1 (int64 10 # mul) # pick "vec64" # V.map)
               # (V.foldl # int (fromIntegral $ n * (n + 1) * 5))
-              # opNumEqualVerify
+              # equalVerify
           )
         # ( begin
-              # lambda2 (castStack # opAdd)
+              # lambda2 (toInt # add)
               # int 0
               # ( begin
-                    # lambda1 (cast # int 2 # opMod # int 0 # opNumEqual)
+                    # lambda1 (int64 2 # mod # int64 0 # equal)
                     # (pick "vec64" # V.filter)
                 )
-              # (V.foldl # int 650 # opNumEqualVerify)
+              # (V.foldl # int 650 # equalVerify)
           )
         # delCount 2
     )
@@ -242,9 +269,9 @@ vectorOps =
 decompressTest :: FnC
 decompressTest =
   let code = Vc.lib.code
-   in bytes (LZ.compress code) # CLZ.decompress # bytes code # opEqualVerify
+   in bytes (LZ.compress code) # CLZ.decompress # bytes code # equalVerify
 
 decompressTestBit :: FnC
 decompressTestBit =
   let code = Vc.lib.code
-   in bytes (LZB.compress code) # CLZB.decompress # bytes code # opEqualVerify
+   in bytes (LZB.compress code) # CLZB.decompress # bytes code # equalVerify

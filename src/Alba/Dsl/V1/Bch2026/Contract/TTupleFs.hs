@@ -65,10 +65,10 @@ instance (BlobEq a, BlobEq b) => BlobEq (TTupleFs a b) where
 
 instance (PackFs a, PackFs b) => PackFs (TTupleFs a b) where
   pack :: Fn (s > TTupleFs a b) (s > TBytes)
-  pack = cast
+  pack = toRaw
 
   unpack :: Fn (s > TBytes) (s > TTupleFs a b)
-  unpack = cast
+  unpack = fromRaw
 
   size :: Fn s (s > TNat)
   size = nat (sizeConst @(TTupleFs a b))
@@ -103,7 +103,7 @@ tupleF ::
 tupleF =
   begin
     # (rot # getPack # invoke1 # rot # swap # rot # rot # getPack # invoke1)
-    # (swap # opCat # cast)
+    # (swap # opCat # fromRaw)
 
 calcPackFs ::
   Fn (s > TPackFs a > TPackFs b) (s > TPackFs (TTupleFs a b))
@@ -119,7 +119,7 @@ untuple ::
   forall a b s.
   (PackFs a, PackFs b) =>
   Fn (s > TTupleFs a b) (s > a > b)
-untuple = toBytes # (size @a) # opSplit # unpack # swap # unpack # swap
+untuple = toRaw # (size @a) # opSplit # unpack # swap # unpack # swap
 
 untupleF ::
   forall a b s.
@@ -128,15 +128,18 @@ untupleF ::
 untupleF =
   begin
     # ns3 "pfsA" "pfsB" "tuple"
-    # (roll "tuple" # toBytes # pick "pfsA" # getSize # opSplit)
+    # (roll "tuple" # toRaw # pick "pfsA" # getSize # opSplit)
     # (roll "pfsB" # getUnpack # invoke1 # ns "b" # swap)
     # (roll "pfsA" # getUnpack # invoke1 # swap # un "b")
-
-toBytes :: Fn (s > TTupleFs a b) (s > TBytes)
-toBytes = cast
 
 fst :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > a)
 fst = untuple # drop
 
 snd :: (PackFs a, PackFs b) => Fn (s > TTupleFs a b) (s > b)
 snd = untuple # nip
+
+toRaw :: Fn (s > TTupleFs a b) (s > TBytes)
+toRaw = cast
+
+fromRaw :: Fn (s > TBytes) (s > TTupleFs a b)
+fromRaw = cast

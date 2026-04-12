@@ -4,6 +4,7 @@ module TestLibEither (testLibEither) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Error (error)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, rot, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (bytes128)
 import Alba.Dsl.V1.Bch2026.Contract.TEither
@@ -70,7 +71,7 @@ progBasics =
         r = right
 
     fail :: FnA s alt s' alt'
-    fail = opFalse # opVerify # castStack
+    fail = bytes "Fail" # error
 
     testEither :: (StackEntry a) => Fn (s > a) s
     testEither =

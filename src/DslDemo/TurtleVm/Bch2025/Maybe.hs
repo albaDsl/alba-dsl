@@ -55,19 +55,7 @@ maybeToBytes :: Fn (s > TMaybe TBytes) (s > TBytes)
 maybeToBytes = cast
 
 tagJust :: Fn s (s > TBytes)
-tagJust = tagBytes tagJust'
-  where
-    tagJust' :: Integer
-    tagJust' = 1
+tagJust = bytes [1]
 
 tagNothing :: Fn s (s > TBytes)
-tagNothing = tagBytes tagNothing'
-  where
-    tagNothing' :: Integer
-    tagNothing' = 2
-
-tagBytes :: Integer -> Fn s (s > TBytes)
-tagBytes tag = int tag # intToBytes
-  where
-    intToBytes :: Fn (s > TInt) (s > TBytes)
-    intToBytes = cast
+tagNothing = bytes [2]

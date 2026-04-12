@@ -2,7 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.Contract.TBytes128
   ( TBytes128,
-    toBytes128,
+    fromBytes,
     bytes128,
     toBytes,
   )
@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     int,
     lambda1,
+    n2i,
     name,
     name2,
     nat,
@@ -92,9 +93,9 @@ packTBytes128 =
   fn
     ( begin
         # ns "b128"
-        # name "size" (pick "b128" # toBytes # opSize # nip)
-        # (pick "size" # cast # nat sizeFieldSize # opNum2Bin)
-        # (roll "b128" # toBytes # int 0 # nat (fromIntegral maxPayloadSize))
+        # name "size" (pick "b128" # toRaw # opSize # nip)
+        # (pick "size" # n2i # nat sizeFieldSize # opNum2Bin)
+        # (roll "b128" # toRaw # int 0 # nat (fromIntegral maxPayloadSize))
         # (roll "size" # opSubUnsafe # opNum2Bin # opCat # opCat)
     )
 
@@ -103,24 +104,31 @@ unpackTBytes128 =
   fn
     ( begin
         # ns "bytes"
-        # name2 "size" "rest" (roll "bytes" # nat 2 # opSplit)
-        # (roll "rest" # roll "size" # opBin2Num # i2n # opSplit # drop # cast)
+        # name2 "size" "rest" (roll "bytes" # nat sizeFieldSize # opSplit)
+        # (roll "rest" # roll "size" # opBin2Num # i2n # opSplit # drop)
+        # fromRaw
     )
+  where
+    i2n :: Fn (s > TInt) (s > TNat)
+    i2n = cast
 
 bytes128 :: Bytes -> Fn s (s > TBytes128)
 bytes128 x =
-  assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x # cast)
+  assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x # fromRaw)
 
-toBytes128 :: Fn (s > TBytes) (s > TBytes128)
-toBytes128 =
+fromBytes :: Fn (s > TBytes) (s > TBytes128)
+fromBytes =
   fn
     ( begin
         # (dup # opSize # nip # nat (fromIntegral maxPayloadSize))
-        # (opLessThanOrEqual # opVerify # cast)
+        # (opLessThanOrEqual # opVerify # fromRaw)
     )
 
-i2n :: Fn (s > TInt) (s > TNat)
-i2n = cast
-
 toBytes :: Fn (s > TBytes128) (s > TBytes)
-toBytes = cast
+toBytes = toRaw
+
+toRaw :: Fn (s > TBytes128) (s > TBytes)
+toRaw = cast
+
+fromRaw :: Fn (s > TBytes) (s > TBytes128)
+fromRaw = cast

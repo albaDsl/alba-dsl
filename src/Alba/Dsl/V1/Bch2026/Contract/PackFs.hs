@@ -17,7 +17,7 @@ module Alba.Dsl.V1.Bch2026.Contract.PackFs
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( FindName,
     Fn,
     Ref,
@@ -63,22 +63,28 @@ mkPackFsM ::
   Fn
     (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
     (s > TPackFs a)
-mkPackFsM = tupleM # tupleM # cast
+mkPackFsM = tupleM # tupleM # fromRaw
 
 getSize :: Fn (s > TPackFs a) (s > TNat)
-getSize = fn (toTuples # fst)
+getSize = fn (toRaw # fst)
 
 getPack :: Fn (s > TPackFs a) (s > TLambda '[a] '[TBytes])
-getPack = fn (toTuples # untuple # nip # fst)
+getPack = fn (toRaw # untuple # nip # fst)
 
 getUnpack :: Fn (s > TPackFs a) (s > TLambda '[TBytes] '[a])
-getUnpack = fn (toTuples # untuple # nip # snd)
+getUnpack = fn (toRaw # untuple # nip # snd)
 
-toTuples ::
+fromRaw ::
+  Fn
+    (s > TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a])))
+    (s > TPackFs a)
+fromRaw = cast
+
+toRaw ::
   Fn
     (s > TPackFs a)
     (s > TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a])))
-toTuples = cast
+toRaw = cast
 
 tcPick ::
   forall arg idx s a.

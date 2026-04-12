@@ -16,21 +16,22 @@ mkBlobEqRec ::
   Fn
     (s > TLambda '[a, a] '[TBool] > TLambda '[a, a] '[])
     (s > TBlobEqRec a)
-mkBlobEqRec = undefined -- FIXME
+mkBlobEqRec = undefined -- FIXME: implement.
 
 blobEqEqual :: (StackEntry a) => Fn (s > a > a) (s > TBool)
-blobEqEqual = toBytes # opEqual
+blobEqEqual = valsToBytes # opEqual
 
-toBytes :: Fn (s > a > a) (s > TBytes > TBytes)
-toBytes = castStack
+valsToBytes :: Fn (s > a > a) (s > TBytes > TBytes)
+valsToBytes = castStack
 
 blobEqEqualVerify :: (StackEntry a) => Fn (s > a > a) s
-blobEqEqualVerify = toBytes # opEqualVerify
+blobEqEqualVerify = valsToBytes # opEqualVerify
 
 blobEqRecord :: forall a s. (StackEntry a) => Fn s (s > TBlobEqRec a)
 blobEqRecord =
   constant
     ( begin
-        # (lambda2 (toBytes # opEqual) # lambda2_0 (toBytes # opEqualVerify))
+        # lambda2 (valsToBytes # opEqual)
+        # lambda2_0 (valsToBytes # opEqualVerify)
         # mkBlobEqRec
     )

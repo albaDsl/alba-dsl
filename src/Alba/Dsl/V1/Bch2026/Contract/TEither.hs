@@ -18,8 +18,8 @@ import Alba.Dsl.V1.Bch2026
     TBool,
     TBytes,
     TNat,
+    bytes,
     cast,
-    int,
     nat,
     opCat,
     opEqual,
@@ -50,13 +50,13 @@ instance (BlobEq a, BlobEq b) => BlobEq (TEither a b) where
   blobEqRec = blobEqRecord
 
 left :: Fn (s > a) (s > TEither a b)
-left = fn (toBytes # tagLeft # swap # opCat # cast)
+left = fn (valToBytes # tagLeft # swap # opCat # fromRaw)
 
-toBytes :: Fn (s > a) (s > TBytes)
-toBytes = cast
+valToBytes :: Fn (s > a) (s > TBytes)
+valToBytes = cast
 
 right :: Fn (s > b) (s > TEither a b)
-right = fn (toBytes # tagRight # swap # opCat # cast)
+right = fn (valToBytes # tagRight # swap # opCat # fromRaw)
 
 isLeft :: Fn (s > TEither a b) (s > TBool)
 isLeft = fn (getTag # tagLeft # opEqual)
@@ -68,10 +68,7 @@ getTag :: Fn (s > TEither a b) (s > TBytes)
 getTag = fn (split # drop)
 
 split :: Fn (s > TEither a b) (s > TBytes > TBytes)
-split = m2b # tagSize # opSplit
-  where
-    m2b :: Fn (s > TEither a b) (s > TBytes)
-    m2b = cast
+split = toRaw # tagSize # opSplit
 
 ifLeft ::
   (StackEntry a, StackEntry b) =>
@@ -79,7 +76,10 @@ ifLeft ::
   FnA (s > b) alt s' alt' ->
   FnA (s > TEither a b) alt s' alt'
 ifLeft leftOps rightOps =
-  split # swap # tagLeft # opEqual # opIf (cast # leftOps) (cast # rightOps)
+  split # swap # tagLeft # opEqual # opIf (bToVal # leftOps) (bToVal # rightOps)
+  where
+    bToVal :: forall s a. Fn (s > TBytes) (s > a)
+    bToVal = cast
 
 either ::
   (StackEntry a, StackEntry b, StackEntry c) =>
@@ -90,10 +90,13 @@ tagSize :: Fn s (s > TNat)
 tagSize = nat 1
 
 tagLeft :: Fn s (s > TBytes)
-tagLeft = tagBytes 1
+tagLeft = bytes [1]
 
 tagRight :: Fn s (s > TBytes)
-tagRight = tagBytes 2
+tagRight = bytes [2]
 
-tagBytes :: Integer -> Fn s (s > TBytes)
-tagBytes tag = int tag # cast
+toRaw :: Fn (s > TEither a b) (s > TBytes)
+toRaw = cast
+
+fromRaw :: Fn (s > TBytes) (s > TEither a b)
+fromRaw = cast

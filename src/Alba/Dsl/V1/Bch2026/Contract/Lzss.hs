@@ -12,7 +12,6 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    castStack,
     cond,
     del,
     fn,
@@ -38,7 +37,6 @@ import Alba.Dsl.V1.Bch2026
     opSubUnsafe,
     opTrue,
     opUntil,
-    opVerify,
     opWhen,
     pick,
     roll,
@@ -47,6 +45,7 @@ import Alba.Dsl.V1.Bch2026
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (error')
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
 import Numeric.Natural (Natural)
 import Prelude ()
@@ -98,7 +97,7 @@ decompressLoop =
       ]
       ( begin
           # (pick "i" # op1Add # pick "n" # opGreaterThanOrEqual)
-          # opWhen (opFalse # opVerify # castStack)
+          # opWhen error'
           # name2 "off" "len" (pick "bs" # pick "i" # indexRef # unpackRef)
           # (roll "bs" # roll "n" # roll "i" # nat refLen # opAdd)
           # (roll "k" # op1Add # roll "flag")

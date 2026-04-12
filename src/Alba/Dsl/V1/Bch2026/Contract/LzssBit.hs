@@ -96,10 +96,16 @@ decompressLoop =
       )
   where
     lowBitSet :: Fn (s > TBytes) (s > TBool)
-    lowBitSet = cast # nat 2 # opMod # nat 1 # opNumEqual
+    lowBitSet = b2n # nat 2 # opMod # nat 1 # opNumEqual
+
+    b2n :: Fn (s > TBytes) (s > TNat)
+    b2n = cast
 
     dropLowBit :: Fn (s > TBytes) (s > TBytes)
-    dropLowBit = cast # nat 1 # opRShiftNum # cast
+    dropLowBit = b2i # nat 1 # opRShiftNum # cast
+
+    b2i :: Fn (s > TBytes) (s > TInt)
+    b2i = cast
 
     getBits8 :: Fn (s > TBytes) (s > TBytes > TBytes)
     getBits8 = nat 1 # opSplit

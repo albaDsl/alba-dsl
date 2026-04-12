@@ -69,7 +69,6 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
-    castStack,
     del,
     delCount,
     fn,
@@ -110,7 +109,6 @@ import Alba.Dsl.V1.Bch2026
     opSplit,
     opTrue,
     opUntil,
-    opVerify,
     pick,
     pickN,
     roll,
@@ -130,6 +128,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
   ( PackFs (..),
     TPackFs,
@@ -199,18 +198,18 @@ type VecB = "vecB"
 
 -- ## Length.
 length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
-length = v2b # opSize # nip # size @a # opDiv
+length = toRaw # opSize # nip # size @a # opDiv
 
 lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
 lengthF =
   fn
     ( begin
         # (ns2 Pfs Vec # un Vec)
-        # (v2b # opSize # nip # tcSize # opDiv # tcDrop)
+        # (toRaw # opSize # nip # tcSize # opDiv # tcDrop)
     )
 
 null :: Fn (s > TVector a) (s > TBool)
-null = v2b # bytes [] # opEqual
+null = toRaw # bytes [] # opEqual
 
 -- ## Indexing.
 lookup :: forall a s. (PackFs a) => Fn (s > TVector a > TNat) (s > TMaybe a)
@@ -290,10 +289,11 @@ splitAtF =
 
 splitAtUnsafeF ::
   Fn (s > TPackFs a > TNat > TVector a) (s > TVector a > TVector a)
-splitAtUnsafeF = fn (v2b # swap # rot # getSize # opMul # opSplit # fixup)
+splitAtUnsafeF = fn (toRaw # swap # rot # getSize # opMul # opSplit # fixup)
   where
+    -- Optimizer will take care of redundant swaps.
     fixup :: Fn (s' > TBytes > TBytes) (s' > TVector a > TVector a)
-    fixup = castStack
+    fixup = fromRaw # swap # fromRaw # swap
 
 uncons ::
   forall a s.
@@ -310,7 +310,7 @@ unconsF =
         # opNotIf
           ( begin
               # (nat 1 # swap # tcPick # rot # rot # splitAtUnsafeF # swap)
-              # (v2b # tcUnpack # swap # tuple # just)
+              # (toRaw # tcUnpack # swap # tuple # just)
           )
           (opDrop # nothing)
         # tcDrop
@@ -331,7 +331,7 @@ unsnocF =
         # opNotIf
           ( begin
               # (dup # tcPick # swap # lengthF # op1SubUnsafe # swap)
-              # (tcPick # rot # rot # splitAtUnsafeF # v2b # tcUnpack # tuple)
+              # (tcPick # rot # rot # splitAtUnsafeF # toRaw # tcUnpack # tuple)
               # just
           )
           (opDrop # nothing)
@@ -340,13 +340,13 @@ unsnocF =
 
 -- ## Construction.
 empty :: Fn s (s > TVector a)
-empty = bytes [] # cast
+empty = bytes [] # fromRaw
 
 singleton :: (PackFs a) => Fn (s > a) (s > TVector a)
-singleton = pack # b2v
+singleton = pack # fromRaw
 
 singletonF :: (StackEntry a) => Fn (s > TPackFs a > a) (s > TVector a)
-singletonF = fn (swap # getPack # invoke1 # cast)
+singletonF = fn (swap # getPack # invoke1 # fromRaw)
 
 replicate :: forall a s. (PackFs a) => Env (s > TNat > a) (s > TVector a)
 replicate = packFsRec @a # rot # rot # replicateF
@@ -435,22 +435,24 @@ cons :: forall a s. (PackFs a) => Fn (s > a > TVector a) (s > TVector a)
 cons = packFsRec @a # rot # rot # consF
 
 consF :: (StackEntry a) => Fn (s > TPackFs a > a > TVector a) (s > TVector a)
-consF = fn (swap # rot # getPack # invoke1 # swap # v2b # opCat # cast)
+consF = fn (swap # rot # getPack # invoke1 # swap # toRaw # opCat # fromRaw)
 
 snoc :: forall a s. (PackFs a) => Fn (s > TVector a > a) (s > TVector a)
 snoc = packFsRec @a # rot # rot # snocF
 
 snocF :: (StackEntry a) => Fn (s > TPackFs a > TVector a > a) (s > TVector a)
-snocF = fn (fixup # rot # getPack # invoke1 # opCat # cast)
+snocF = fn (fixup # rot # getPack # invoke1 # opCat # fromRaw)
   where
-    fixup :: Fn (s > TVector a > a) (s > TBytes > a)
-    fixup = castStack
+    -- Optimizer will take care of redundant swaps.
+    fixup :: (StackEntry a) => Fn (s > TVector a > a) (s > TBytes > a)
+    fixup = swap # toRaw # swap
 
-append :: (PackFs a) => Fn (s > TVector a > TVector a) (s > TVector a)
-append = fixup # opCat # cast
+append :: Fn (s > TVector a > TVector a) (s > TVector a)
+append = fixup # opCat # fromRaw
   where
+    -- Optimizer will take care of redundant swaps.
     fixup :: Fn (s > TVector a > TVector a) (s > TBytes > TBytes)
-    fixup = castStack
+    fixup = toRaw # swap # toRaw # swap
 
 -- ## Permutation.
 reverse :: forall a s. (PackFs a) => Env (s > TVector a) (s > TVector a)
@@ -695,13 +697,11 @@ foldrF = fn (swap # opUntil loop # nip # nip # nip)
 -- ## Misc.
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = err # swap # fromMaybe'
-  where
-    err = lambda0 (bytes "E0" # opFalse # opVerify # cast)
+fromJust = lambda0 (errCanNotHappen) # swap # fromMaybe'
 
 -- ## Casting.
-b2v :: (PackFs a) => Fn (s > TBytes) (s > TVector a)
-b2v = cast
+fromRaw :: Fn (s > TBytes) (s > TVector a)
+fromRaw = cast
 
-v2b :: Fn (s > TVector a) (s > TBytes)
-v2b = cast
+toRaw :: Fn (s > TVector a) (s > TBytes)
+toRaw = cast

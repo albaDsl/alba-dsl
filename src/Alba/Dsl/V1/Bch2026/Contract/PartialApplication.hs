@@ -100,7 +100,10 @@ freshId :: Env s (s > TBytes)
 freshId = fn (opFromAltStack # opDup # increment # opToAltStack # rt2b)
   where
     increment :: Fn (s > TRuntimeState) (s > TRuntimeState)
-    increment = rt2i # op1Add # cast
+    increment = rt2i # op1Add # i2rt
+
+    i2rt :: Fn (s > TInt) (s > TRuntimeState)
+    i2rt = cast
 
     rt2i :: Fn (s > TRuntimeState) (s > TInt)
     rt2i = cast

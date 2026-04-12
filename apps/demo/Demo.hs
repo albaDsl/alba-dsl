@@ -23,6 +23,7 @@ module Demo
   )
 where
 
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.TVector (foldl, generate)
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
@@ -35,7 +36,7 @@ import DslDemo.Exponentiation qualified as Exp
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T25
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T26
-import Prelude hiding (foldl)
+import Prelude hiding (Int, foldl)
 
 -- Example 1. Write code to multiply 3 by 7.
 f1 =
@@ -131,18 +132,19 @@ f9 =
     solution = [0x02, 0x8b, 0x95, 0x89, 0x51, 0x8b, 0x51, 0x8a, 0x8b]
 
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
+-- >>> import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 -- >>> Dsl.progSize f10
--- "22 opcodes, 25 bytes. Including function table: 85 opcodes, 383 bytes.\n"
+-- "22 opcodes, 25 bytes. Including function table: 88 opcodes, 397 bytes.\n"
 f10 :: Fn (s > TInt) (s > TInt)
 f10 = runEnv (opDrop # f)
   where
     f :: Env s (s > TInt)
     f =
       begin
-        # lambda2 add
+        # lambda2 (toInt # add)
         # int 0
-        # (nat 10 # lambda1 (op1Add # cast) # generate)
+        # (nat 10 # lambda1 (add1 # toTInt8) # generate)
         # foldl
 
-    add :: Fn (s > TInt > TInt8) (s > TInt)
-    add = cast # opAdd
+    toTInt8 :: Fn (s > TNat) (s > TInt8)
+    toTInt8 = n2i # fromInt

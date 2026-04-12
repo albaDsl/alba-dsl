@@ -1,21 +1,36 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64, toInt64) where
+module Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     StackEntry,
-    StackNum,
     TInt,
     begin,
     cast,
+    castStack,
     constant,
     fn,
     int,
     lambda1,
     nat,
+    op1Add,
+    op1Sub,
+    opAbs,
+    opAdd,
     opBin2Num,
+    opDiv,
+    opGreaterThan,
+    opGreaterThanOrEqual,
+    opLessThan,
+    opLessThanOrEqual,
+    opMax,
+    opMin,
+    opMod,
+    opMul,
+    opNegate,
     opNum2Bin,
+    opSub,
     opVerify,
     opWithin,
     (#),
@@ -27,29 +42,52 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
+import Prelude (Integer, undefined, (&&), (<=), (>=))
 
 data TInt64
 
 instance StackEntry TInt64
 
--- We currently allow for standard arithmetic ops. Overflow is caught on
--- attempts to pack the datatype.
-instance StackNum TInt64
-
-instance PackFs TInt64 where
-  sizeConst = 8
-  size = nat (sizeConst @TInt64)
-  pack = cast # size @TInt64 # opNum2Bin
-  unpack = opBin2Num # cast
-  packFsRec = int64PackFs
-
 instance BlobEq TInt64 where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
+
+instance Ord TInt64 where
+  lessThan = toRaw2 # opLessThan
+  lessThanOrEqual = toRaw2 # opLessThanOrEqual
+  greaterThan = toRaw2 # opGreaterThan
+  greaterThanOrEqual = toRaw2 # opGreaterThanOrEqual
+  min = toRaw2 # opMin # fromRaw
+  max = toRaw2 # opMax # fromRaw
+  within = toRaw3 # opWithin
+  blobOrdRec = undefined -- FIXME: implement.
+
+instance Integral TInt64 where
+  add = toRaw2 # opAdd # fromInt
+  add1 = toRaw # op1Add # fromInt
+  sub = toRaw2 # opSub # fromInt
+  sub1 = toRaw # op1Sub # fromInt
+  mul = toRaw2 # opMul # fromInt
+  div = toRaw2 # opDiv # fromInt
+  mod = toRaw2 # opMod # fromInt
+  negate = toRaw # opNegate # fromRaw
+  abs = toRaw # opAbs # fromRaw
+  fromInt =
+    fn (dup # int int64Min # int int64Max # opWithin # opVerify # fromRaw)
+  toInt = toRaw
+
+instance PackFs TInt64 where
+  sizeConst = 8
+  size = nat (sizeConst @TInt64)
+  pack = toRaw # size @TInt64 # opNum2Bin
+  unpack = opBin2Num # fromRaw
+  packFsRec = int64PackFs
 
 int64PackFs :: Fn s (s > TPackFs TInt64)
 int64PackFs =
@@ -68,7 +106,16 @@ int64Min :: Integer
 int64Min = -int64Max
 
 int64 :: Integer -> Fn s (s > TInt64)
-int64 x = assert (x >= int64Min && x <= int64Max) (int x # cast)
+int64 x = assert (x >= int64Min && x <= int64Max) (int x # fromRaw)
 
-toInt64 :: Fn (s > TInt) (s > TInt64)
-toInt64 = fn (dup # int int64Min # int int64Max # opWithin # opVerify # cast)
+fromRaw :: Fn (s > TInt) (s > TInt64)
+fromRaw = cast
+
+toRaw :: Fn (s > TInt64) (s > TInt)
+toRaw = cast
+
+toRaw2 :: Fn (s > TInt64 > TInt64) (s > TInt > TInt)
+toRaw2 = castStack
+
+toRaw3 :: Fn (s > TInt64 > TInt64 > TInt64) (s > TInt > TInt > TInt)
+toRaw3 = castStack

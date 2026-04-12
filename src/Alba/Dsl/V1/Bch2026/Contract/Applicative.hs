@@ -5,25 +5,18 @@ module Alba.Dsl.V1.Bch2026.Contract.Applicative
   )
 where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2025
   ( Fn,
     StackEntry,
-    TLambda,
     begin,
-    bytes,
-    cast,
-    fn,
-    invoke2,
-    lambda0,
     op2Drop,
     op2Dup,
     opBoolAnd,
-    opFalse,
     opIf,
-    opVerify,
     (#),
     type (>),
   )
+import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe
   ( TMaybe,
@@ -32,6 +25,8 @@ import Alba.Dsl.V1.Bch2026.Contract.TMaybe
     just,
     nothing,
   )
+import Alba.Dsl.V1.Bch2026.Lang (fn, invoke2, lambda0)
+import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Prelude ()
 
 liftA2Maybe ::
@@ -48,6 +43,4 @@ liftA2Maybe =
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
-fromJust = err # swap # fromMaybe'
-  where
-    err = lambda0 (bytes "E0" # opFalse # opVerify # cast)
+fromJust = lambda0 (errCanNotHappen) # swap # fromMaybe'

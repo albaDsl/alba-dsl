@@ -4,9 +4,10 @@ module TestFunctions (testFunctions) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.PartialApplication (apply2, apply3_2)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (swap)
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 (toInt64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 ()
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector, generate, reverse)
 import Data.ByteString qualified as B
@@ -111,9 +112,12 @@ progSort :: Fn s (s > TBool)
 progSort =
   runEnv
     ( begin
-        # (nat 10 # lambda1 (op1Add # cast # toInt64) # generate)
+        # (nat 10 # lambda1 (op1Add # toInt8) # generate)
         # (opDup # reverse # MS.sort # equal)
     )
+  where
+    toInt8 :: Fn (s > TNat) (s > TInt8)
+    toInt8 = n2i # fromInt
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
