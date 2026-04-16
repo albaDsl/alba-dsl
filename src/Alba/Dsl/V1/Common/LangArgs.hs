@@ -272,47 +272,47 @@ unname _count prog (S c fs) = let state' = S c fs in prog state'
 type family
   FindName
     (name :: Symbol)
-    (xs :: Stack)
+    (s :: Stack)
     (idx :: Nat) ::
     Maybe Nat
   where
   forall name idx. FindName name Base idx = TypeError ('Text "Can't find name.")
-  forall name xs idx. FindName name (xs :> N name _) idx = 'Just idx
-  forall name xs idx. FindName name (xs :> _) idx = FindName name xs (idx + 1)
+  forall name s idx. FindName name (s :> N name _) idx = 'Just idx
+  forall name s idx. FindName name (s :> _) idx = FindName name s (idx + 1)
 
 type family
   FindNamedArgs
-    (xs :: Stack)
+    (s :: Stack)
     (count :: Nat)
     (idx :: Nat)
-    (idxs :: [Nat]) ::
+    (ids :: [Nat]) ::
     [Nat]
   where
   FindNamedArgs _ 0 idx found = Reverse found
-  FindNamedArgs (xs :> (_ :| _)) _ _ _ =
+  FindNamedArgs (s :> (_ :| _)) _ _ _ =
     TypeError
       ('Text "Can't process stack entries located below stack branches.")
-  FindNamedArgs (xs :> N _name _t) count idx found =
-    FindNamedArgs xs (count - 1) (idx + 1) (idx : found)
-  FindNamedArgs (xs :> _) count idx found =
-    FindNamedArgs xs count (idx + 1) found
+  FindNamedArgs (s :> N _name _t) count idx found =
+    FindNamedArgs s (count - 1) (idx + 1) (idx : found)
+  FindNamedArgs (s :> _) count idx found =
+    FindNamedArgs s count (idx + 1) found
 
-type family RemoveNamedArgs (xs :: Stack) (count :: Nat) :: Stack where
-  RemoveNamedArgs xs 0 = xs
-  RemoveNamedArgs (xs :> (_ :| _)) _ =
+type family RemoveNamedArgs (s :: Stack) (count :: Nat) :: Stack where
+  RemoveNamedArgs s 0 = s
+  RemoveNamedArgs (s :> (_ :| _)) _ =
     TypeError
       ('Text "Can't process stack entries located below stack branches.")
-  RemoveNamedArgs (xs :> N _name _t) count = RemoveNamedArgs xs (count - 1)
-  RemoveNamedArgs (xs :> x) count = RemoveNamedArgs xs count :> x
+  RemoveNamedArgs (s :> N _name _t) count = RemoveNamedArgs s (count - 1)
+  RemoveNamedArgs (s :> x) count = RemoveNamedArgs s count :> x
 
 type family UnName (x :: Type) :: Type where
   UnName (N _ t) = t
 
-type family UnNameSeveral (count :: Nat) (xs :: Stack) :: Stack where
-  UnNameSeveral 0 xs = xs
-  UnNameSeveral count (xs :> N n t) = UnNameSeveral (count - 1) xs :> t
-  UnNameSeveral count (xs :> x) = UnNameSeveral count xs :> x
+type family UnNameSeveral (count :: Nat) (s :: Stack) :: Stack where
+  UnNameSeveral 0 s = s
+  UnNameSeveral count (s :> N n t) = UnNameSeveral (count - 1) s :> t
+  UnNameSeveral count (s :> x) = UnNameSeveral count s :> x
 
-type family UnNameNamed (name :: Symbol) (xs :: Stack) :: Stack where
-  forall name xs t. UnNameNamed name (xs :> N name t) = xs :> t
-  forall name xs x. UnNameNamed name (xs :> x) = UnNameNamed name xs :> x
+type family UnNameNamed (name :: Symbol) (s :: Stack) :: Stack where
+  forall name s t. UnNameNamed name (s :> N name t) = s :> t
+  forall name s x. UnNameNamed name (s :> x) = UnNameNamed name s :> x

@@ -87,28 +87,28 @@ type family Replicate (n :: Nat) (t :: Type) where
   Replicate 0 _ = Base
   Replicate n t = Replicate (n - 1) t :> t
 
-type family ListToStack (stack :: [Type]) :: Stack where
+type family ListToStack (list :: [Type]) :: Stack where
   ListToStack '[] = 'Base
   ListToStack (a ': s) = ListToStack s :> a
 
-type family CountStackBranches (stacks :: Stack) :: Nat where
+type family CountStackBranches (s :: Stack) :: Nat where
   CountStackBranches (s :> a :| (b :: Stack)) = 1 + CountStackBranches b
   CountStackBranches (s :> a :| (b :: Type)) =
     1 + CountStackBranches (Base :> b)
   CountStackBranches (s :> a) = 1
 
-type family Ref (xs :: Stack) (idx :: Nat) :: Maybe Type where
+type family Ref (s :: Stack) (idx :: Nat) :: Maybe Type where
   Ref Base _ = TypeError ('Text "Access past known stack.")
-  Ref (xs :> (_ :| _)) _ =
+  Ref (s :> (_ :| _)) _ =
     TypeError
       ('Text "Can't lookup named stack entries located below stack branches.")
-  Ref (xs :> x) 0 = 'Just x
-  Ref (xs :> x) idx = Ref xs (idx - 1)
+  Ref (s :> x) 0 = 'Just x
+  Ref (s :> x) idx = Ref s (idx - 1)
 
-type family Remove (xs :: Stack) (idx :: Nat) :: Stack where
+type family Remove (s :: Stack) (idx :: Nat) :: Stack where
   Remove Base _ = Base
-  Remove (xs :> _) 0 = xs
-  Remove (xs :> x) idx = Remove xs (idx - 1) :> x
+  Remove (s :> _) 0 = s
+  Remove (s :> x) idx = Remove s (idx - 1) :> x
 
 cast :: Fn (s :> t1) (s :> t2)
 cast (S c fs) = let state = S c fs in state
