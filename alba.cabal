@@ -380,6 +380,7 @@ executable test
       TestLibEither,
       TestLibTuple,
       TestLibMaybe,
+      TestLibMisc,
       TestLibVector,
       TestLibauthVectors2025,
       TestLibauthVectors2026,

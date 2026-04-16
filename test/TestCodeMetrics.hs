@@ -19,6 +19,7 @@ import Alba.Dsl.V1.Bch2026
     compileL2,
     compressibilityStr,
     delCount,
+    functionId,
     int,
     lambda1,
     lambda2,
@@ -66,7 +67,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
 import TestUtils2026 (emptyStacks, evaluateScript)
-import Prelude hiding (div, mod, (.))
+import Prelude hiding (Integral (..), div, mod, (.))
 import Prelude qualified as P
 
 testCodeMetrics :: TestTree
@@ -93,7 +94,7 @@ codeSize =
         (sizeOf EJW.ecMul),
       golden
         "EC scalar point multiply (Windowed Jacobian / tbl setup)"
-        (sizeOf (EJW.setupTable ∘ EJW.ecMul)),
+        (sizeOf (EJW.setupTable gTableIdx ∘ EJW.ecMul)),
       golden "Vector ops" (sizeOf vectorOps),
       golden "LZSS" (sizeOf CLZ.decompress),
       golden "LZSS Bitstream" (sizeOf CLZB.decompress)
@@ -206,7 +207,7 @@ windowedMul :: FnC
 windowedMul =
   runEnv
     ( begin
-        ∘ (gTable ∘ g ∘ EJW.setupTable)
+        ∘ (g ∘ EJW.setupTable gTableIdx)
         ∘ gTable
         ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
         ∘ EJW.ecMul
@@ -216,7 +217,10 @@ windowedMul =
         ∘ (equal ∘ opVerify)
     )
   where
-    gTable = nat 100
+    gTable = functionId gTableIdx
+
+gTableIdx :: (P.Integral a) => a
+gTableIdx = 100
 
 vectorOps :: FnC
 vectorOps =

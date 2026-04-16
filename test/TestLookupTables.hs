@@ -24,7 +24,7 @@ progEllipticCurve :: Fn s (s :> TBool)
 progEllipticCurve =
   runEnv
     ( begin
-        ∘ (gTable ∘ g ∘ setupTable)
+        ∘ (g ∘ setupTable gTableIdx)
         ∘ (gTable ∘ nat 1 ∘ ecMul)
         ∘ pushPoint
           0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
@@ -99,4 +99,7 @@ progEllipticCurve =
         ∘ opTrue
     )
   where
-    gTable = nat 100
+    gTable = functionId 100
+
+    gTableIdx :: (Integral a) => a
+    gTableIdx = 100

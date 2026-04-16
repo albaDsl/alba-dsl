@@ -79,11 +79,14 @@ progMulJacobianWindowed :: Natural -> Fn s (s :> TInt :> TInt)
 progMulJacobianWindowed scalar =
   runEnv
     ( begin
-        ∘ (gTable ∘ g ∘ EJW.setupTable)
+        ∘ (g ∘ EJW.setupTable gTableIdx)
         ∘ (gTable ∘ nat scalar ∘ EJW.ecMul ∘ opDup ∘ EA.getX ∘ opSwap ∘ EA.getY)
     )
   where
-    gTable = nat 100
+    gTable = functionId 100
+
+    gTableIdx :: (Integral a) => a
+    gTableIdx = 100
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =

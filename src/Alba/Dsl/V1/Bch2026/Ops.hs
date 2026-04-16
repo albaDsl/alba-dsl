@@ -2,7 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.Ops where
 
-import Alba.Dsl.V1.Bch2026.Stack (TCode)
+import Alba.Dsl.V1.Bch2026.Stack (TCode, TFunctionId)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops')
 import Alba.Dsl.V1.Common.FunctionState (addCallSite, registerFunction)
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Absolute, Named), OpcodeL3 (..))
@@ -27,7 +27,7 @@ opUntil loopBody = aop OP_BEGIN >>> loopBody >>> aop OP_UNTIL
 -- Added for completeness. There are other better options to use. AlbaDsl does
 -- not offer a way for the user of this function to ensure the idx is not
 -- already in use.
-opDefine :: Fn (s :> TCode :> TBytes) s
+opDefine :: Fn (s :> TCode :> TFunctionId) s
 opDefine = aop OP_DEFINE
 
 -- Define function at an index relative current namespace.
@@ -48,7 +48,7 @@ opDefineNamed name st =
     err = error "opDefineNamed: name already defined."
 
 -- See opDefine.
-opInvoke :: FnA s alt s' alt' -> FnA (s :> TBytes) alt s' alt'
+opInvoke :: FnA s alt s' alt' -> FnA (s :> TFunctionId) alt s' alt'
 opInvoke _prog = aop OP_INVOKE
 
 opInvokeIdx :: Int -> FnA s alt s' alt' -> FnA s alt s' alt'

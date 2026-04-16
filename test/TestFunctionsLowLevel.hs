@@ -45,13 +45,16 @@ progRaw :: Fn s (s :> TBool)
 progRaw =
   begin
     ∘ progCode cube
-    ∘ bytes "cube"
+    ∘ (bytes "cube" ∘ unsafeCast)
     ∘ opDefine
     ∘ int 3
-    ∘ bytes "cube"
+    ∘ (bytes "cube" ∘ unsafeCast)
     ∘ opInvoke cube
     ∘ int 27
     ∘ opNumEqual
+  where
+    unsafeCast :: Fn (s :> TBytes) (s :> TFunctionId)
+    unsafeCast = cast
 
 progMixed :: Fn s (s :> TBool)
 progMixed =

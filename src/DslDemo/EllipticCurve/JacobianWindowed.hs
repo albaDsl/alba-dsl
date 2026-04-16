@@ -13,11 +13,13 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     Stack (..),
     TBytes,
+    TFunctionId,
     TNat,
     begin,
     cast,
     del,
     fn,
+    functionId,
     i2nUnsafe,
     lambda1,
     lambda3,
@@ -33,6 +35,7 @@ import Alba.Dsl.V1.Bch2026
     opTrue,
     opUntil,
     pick,
+    reserveSlots,
     roll,
     (.),
   )
@@ -45,6 +48,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     apply3,
     drop,
     dup,
+    functionIdOffset,
     ifZero,
     just,
     nat1SubUnsafe,
@@ -65,14 +69,16 @@ import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
 import DslDemo.EllipticCurve.LookupTable (defineConstant, getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
-import Prelude ((^))
+import Prelude (Int, fromIntegral, (+), (-), (^))
 
-type TFId = TNat -- Function Id
+type TTab = TFunctionId -- Lookup table (represented by the base Function Id)
 
-type TTab = TFId -- Lookup table (represented by the base Function Id)
-
-setupTable :: Fn (s :> TFId :> TPoint) s
-setupTable = toJacobian . makeIdentity . nat numValues . setupTable'
+setupTable :: Int -> Fn (s :> TPoint) s
+setupTable tableStart =
+  begin
+    . reserveSlots [tableStart .. tableStart + fromIntegral numValues - 1]
+    . (functionId (fromIntegral tableStart) . swap)
+    . (toJacobian . makeIdentity . nat numValues . setupTable')
   where
     setupTable' =
       fn
@@ -82,7 +88,7 @@ setupTable = toJacobian . makeIdentity . nat numValues . setupTable'
               (del #fId . del #p . del #acc . del #i)
               ( begin
                   . (pick #acc . p2b . pick #fId . defineConstant)
-                  . (roll #fId . add1)
+                  . (roll #fId . nat 1 . functionIdOffset)
                   . (pick #p . roll #acc . roll #p . EC.ecAddJ)
                   . (roll #i . nat1SubUnsafe . setupTable')
               )
@@ -120,7 +126,7 @@ ecMul =
       )
 
     tableLookup :: Fn (s :> TTab :> TNat) (s :> TPointJ)
-    tableLookup = add . getConstant . b2p
+    tableLookup = functionIdOffset . getConstant . b2p
 
     b2p :: Fn (s :> TBytes) (s :> TPointJ)
     b2p = cast

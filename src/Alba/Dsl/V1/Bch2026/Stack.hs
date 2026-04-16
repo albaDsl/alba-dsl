@@ -2,6 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.Stack
   ( TCode,
+    TFunctionId,
     TLambda,
     TLambdaUntyped,
     TRuntimeState,
@@ -15,6 +16,8 @@ import Data.Kind (Type)
 
 data TCode
 
+data TFunctionId
+
 data TLambda (args :: [Type]) (return :: [Type])
 
 data TLambdaUntyped
@@ -22,6 +25,8 @@ data TLambdaUntyped
 data TRuntimeState
 
 instance StackEntry TCode
+
+instance StackEntry TFunctionId
 
 instance StackEntry (TLambda (args :: [Type]) (return :: [Type]))
 

@@ -21,13 +21,20 @@ module Alba.Dsl.V1.Bch2026.Lang
     emptyProg,
     runEnv,
     reserveSlots,
+    functionId,
   )
 where
 
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
-import Alba.Dsl.V1.Bch2026.Stack (Env, TCode, TLambda, TLambdaUntyped)
-import Alba.Dsl.V1.Common.CompilerUtils (aop, aop', aops, aops')
+import Alba.Dsl.V1.Bch2026.Stack
+  ( Env,
+    TCode,
+    TFunctionId,
+    TLambda,
+    TLambdaUntyped,
+  )
+import Alba.Dsl.V1.Common.CompilerUtils (aop, aop', aops, aops', bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
   ( FunctionState,
     addCallSite,
@@ -40,7 +47,11 @@ import Alba.Dsl.V1.Common.FunctionState
     isRegistered,
     registerFunction,
   )
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (Absolute), OpcodeL3 (..))
+import Alba.Dsl.V1.Common.OpcodeL3
+  ( CodeL3,
+    FunctionId (Absolute),
+    OpcodeL3 (..),
+  )
 import Alba.Dsl.V1.Common.Stack
   ( Append,
     Fn,
@@ -52,7 +63,9 @@ import Alba.Dsl.V1.Common.Stack
   )
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
+import Alba.Vm.Common.VmInteger (integerToBytesUnsigned)
 import Control.Arrow ((>>>))
+import Control.Exception (assert)
 import Data.Maybe (fromMaybe)
 import Data.Sequence qualified as S
 import GHC.Stack (HasCallStack, withFrozenCallStack)
@@ -230,3 +243,9 @@ reserveSlot idx st =
         then st {fs = fromMaybe canNotHappen (registerFunction fId st.fs)}
         else error (printf "Already reserved absolute slot: %d\n" idx)
 
+-- Can be used with reserveSlot.
+functionId :: Int -> Fn s (s :> TFunctionId)
+functionId fId =
+  assert
+    (fId < 2 ^ (16 :: Int))
+    (aop (bytesToDataOp (integerToBytesUnsigned (fromIntegral fId))))

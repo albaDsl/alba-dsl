@@ -13,6 +13,7 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     TBytes,
     TCode,
+    TFunctionId,
     THash256,
     TInt,
     TLambda,
@@ -50,7 +51,7 @@ import Prelude (fromIntegral, undefined)
 importLibrary ::
   Fn
     ( s
-        :> TBytes
+        :> TFunctionId
         :> TLambda '[TBytes] '[TBytes]
         :> TNat
         :> TNat
@@ -86,9 +87,7 @@ b2c = cast
 
 -- Without transform.
 importLibrary' ::
-  Fn
-    (s :> TBytes :> TNat :> TNat :> TNat :> THash256)
-    s
+  Fn (s :> TFunctionId :> TNat :> TNat :> TNat :> THash256) s
 importLibrary' =
   fn
     ( begin

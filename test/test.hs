@@ -21,6 +21,7 @@ import TestInvalidStack (testInvalidStack)
 import TestLambdas (testLambdas)
 import TestLibEither (testLibEither)
 import TestLibMaybe (testLibMaybe)
+import TestLibMisc (testLibMisc)
 import TestLibTuple (testLibTuple)
 import TestLibVector (testLibVector)
 import TestLibauthVectors2025 (testLibauthVectors2025)
@@ -72,6 +73,7 @@ tests =
       testLibEither,
       testLibTuple,
       testLibMaybe,
+      testLibMisc,
       testLibVector,
       testLibauthVectors2025,
       testLibauthVectors2026,

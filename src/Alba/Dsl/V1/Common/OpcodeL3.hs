@@ -72,9 +72,7 @@ vmFunctionIdToByteString :: VmFunctionId -> B.ByteString
 vmFunctionIdToByteString (VmFunctionId x) = B.pack x
 
 -- 'Local': We consider 0-byte, 1-byte, and 2-byte identifiers as part of the
--- local Function Identifier space for the contract. We use the VM bytestring
--- representation of natural numbers (0, 1, 2, ...) as identifiers. Thus
--- some identifiers such as [0] and [1, 0] won't get used.
+-- local Function Identifier space for the contract.
 --
 -- 'ThreeByte16_8': Meant for external libraries that should not conflict with
 -- the local function space. These are three byte identifiers where two bytes
