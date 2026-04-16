@@ -286,14 +286,14 @@ optimize =
          in if c2 == c then c else f c2
     )
 
-writeFunctionTable :: CodeL1 -> FSR.FunctionTable -> IO ()
-writeFunctionTable code functions = do
+writeFunctionTable :: CompilationResult -> IO ()
+writeFunctionTable CompilationResult {..} = do
   let dir = ".function-tables"
       jsonFile = T.unpack (encodeHex (sha256 code)) <.> "json"
       txtFile = T.unpack (encodeHex (sha256 code)) <.> "txt"
   createDirectoryIfMissing False dir
-  B.writeFile (dir </> txtFile) (T.encodeUtf8 $ FTT.generateTable functions)
-  B.writeFile (dir </> jsonFile) (FTJ.generateTable functions)
+  B.writeFile (dir </> txtFile) (T.encodeUtf8 $ FTT.generateTable functionTable)
+  B.writeFile (dir </> jsonFile) (FTJ.generateTable functionTable)
   where
     sha256 :: B.ByteString -> B.ByteString
     sha256 x = convert (H.hash x :: H.Digest H.SHA256)

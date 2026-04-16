@@ -168,7 +168,7 @@ costOf prog =
           unsafePerformIO $
             do
               -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
-              -- writeFunctionTable cr.code cr.functionTable
+              -- writeFunctionTable cr
               pure tr.metrics.cost
         Left (err, Just tr) -> showLog tr (error (show err))
         Left (err, Nothing) -> error (show err)
@@ -190,7 +190,7 @@ turtleVmCostOf prog =
           unsafePerformIO $
             do
               -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
-              -- writeFunctionTable cr.code cr.functionTable
+              -- writeFunctionTable cr
               pure $ tr.metrics.cost `P.div` count
         Left (err, _) -> error (show err)
   where

@@ -63,7 +63,7 @@ isTrue res =
     Right tr -> do
       -- dumpLogToFile tr
       -- case tr.compilationResult of
-      --   Just r -> writeFunctionTable r.code r.functionTable
+      --   Just r -> writeFunctionTable r
       --   Nothing -> pure ()
       (tr.s, tr.alt) @?= (S.fromList [i2SeUnsafe 1], S.empty)
     Left (err, Just tr) -> do
