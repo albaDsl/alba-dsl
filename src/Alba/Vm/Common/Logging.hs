@@ -29,8 +29,7 @@ import Prelude hiding (log)
 data LogDisplayOpts = LogDisplayOpts
   { labels :: Maybe Labels,
     functionTable :: Maybe FunctionTable,
-    showMetrics :: Bool,
-    showUnexecuted :: Bool
+    showMetrics :: Bool
   }
 
 type FunctionTable = M.Map Text FunctionTableEntry
@@ -48,8 +47,7 @@ defaultDisplayOpts =
   LogDisplayOpts
     { labels = Nothing,
       functionTable = Nothing,
-      showMetrics = False,
-      showUnexecuted = False
+      showMetrics = False
     }
 
 logStart :: VmState -> VmState

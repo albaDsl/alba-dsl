@@ -47,19 +47,19 @@ logDataToText displayOpts (Just logData) =
 
 logEntryLine :: LogDisplayOpts -> LogEntry -> T.Text
 logEntryLine LogDisplayOpts {..} (Completed {..}) =
-  let (opStr, execStr :: T.Text) =
+  let opStr =
         case op of
-          Op op' -> (formatOp labels op', if exec then "+" else "-")
-          Start -> ("(Start Stack)", " ")
-          FunctionExit -> ("(Function Exit)", " ")
+          Op op' -> formatOp labels op'
+          Start -> "(Start Stack)"
+          FunctionExit -> "(Function Exit)"
       stack' = formatStack labels stack
       metrics' = formatMetrics metrics
-   in case (showUnexecuted || exec || op == Start, showMetrics) of
+   in case (exec || op == Start, showMetrics) of
         (True, True) ->
           T.pack $
-            printf "%s %-30s | %-20s | %s\n" execStr opStr metrics' stack'
+            printf " %-30s | %-20s | %s\n" opStr metrics' stack'
         (True, False) ->
-          T.pack $ printf "%s %-30s | %s\n" execStr opStr stack'
+          T.pack $ printf " %-30s | %s\n" opStr stack'
         _ -> T.empty
 logEntryLine LogDisplayOpts {..} (Failed {..}) =
   let (opStr, execStr :: T.Text) = (formatOp labels opcode, "+")
