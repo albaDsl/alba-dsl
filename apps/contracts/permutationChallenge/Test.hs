@@ -8,7 +8,8 @@ import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxOut (..))
 import Alba.Vm.Bch2026
-  ( LogDisplayOpts (..),
+  ( CodeL1,
+    LogDisplayOpts (..),
     defaultDisplayOpts,
     dumpVerifyScriptResult,
     mkTxContext,
@@ -29,17 +30,20 @@ contractTests ctx =
     testGroup
       "permutationChallenge"
       [ testCase "Can withdraw" $ do
+          code <- instantiate
           let contractOutpoint = OutPoint mockTxId 0
               tx =
                 withdrawTx'
                   ctx
-                  contractUtxo
+                  (contractUtxo code)
                   contractOutpoint
                   mockAddr
               coins =
-                Dc.deployTx.outputs <> Vc.deployTx.outputs <> [contractUtxo]
+                Dc.deployTx.outputs
+                  <> Vc.deployTx.outputs
+                  <> [contractUtxo code]
               context = fromJust $ mkTxContext tx inputId coins
-              res = verifyScript contractUtxo.scriptPubKey context params
+              res = verifyScript (contractUtxo code).scriptPubKey context params
           -- dumpVerifyScriptResult
           --   (defaultDisplayOpts {showMetrics = True})
           --   res
@@ -50,6 +54,6 @@ contractTests ctx =
     inputId = fromIntegral (Dc.numUtxos + Vc.numUtxos)
 
     -- The UTXO holding the funds protected by the permutation challenge.
-    contractUtxo :: TxOut
-    contractUtxo =
-      TxOut {value = 10_000, scriptPubKey = instantiate, tokenData = Nothing}
+    contractUtxo :: CodeL1 -> TxOut
+    contractUtxo code =
+      TxOut {value = 10_000, scriptPubKey = code, tokenData = Nothing}
