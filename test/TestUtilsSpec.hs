@@ -18,6 +18,7 @@ import Alba.Dsl.V1.BchSpec
   ( CompilationResult (..),
     FnA,
     Optimize (..),
+    Stack (..),
     compile',
   )
 import Alba.Vm.BchSpec qualified as BchSpec
@@ -43,7 +44,7 @@ import TestUtils
   )
 
 evaluateProg ::
-  FnA s '[] s' alt' ->
+  FnA s Base s' alt' ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProg prog = evaluateProgWithStack prog emptyStacks
 
@@ -51,7 +52,7 @@ emptyStacks :: (Seq a1, Seq a2)
 emptyStacks = (S.empty, S.empty)
 
 evaluateProgWithStack ::
-  FnA s '[] s' alt' ->
+  FnA s Base s' alt' ->
   (VmStack, VmStack) ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProgWithStack prog (s, alt) =

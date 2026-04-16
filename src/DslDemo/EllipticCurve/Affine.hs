@@ -5,6 +5,7 @@ module DslDemo.EllipticCurve.Affine (ecDouble, ecAdd, ecMul) where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Loop,
+    Stack (..),
     TNat,
     begin,
     del,
@@ -21,14 +22,13 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (halve, isOdd, isZero, nip)
 import DslDemo.EllipticCurve.AffineAdd (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.Point (TPoint, makeIdentity)
 import Prelude ()
 
-ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
+ecMul :: Fn (s :> TNat :> TPoint) (s :> TPoint)
 ecMul =
   fn
     ( begin
@@ -38,7 +38,7 @@ ecMul =
           (roll #n . roll #p . makeIdentity . opUntil loop . nip . nip)
     )
   where
-    loop :: Loop (s > TNat > TPoint > TPoint)
+    loop :: Loop (s :> TNat :> TPoint :> TPoint)
     loop =
       begin
         . ns3 #n #p #r

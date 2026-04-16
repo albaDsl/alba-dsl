@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
+    Stack (..),
     StackEntry,
     TBytes,
     begin,
@@ -36,7 +37,6 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
@@ -68,7 +68,7 @@ instance PackFs TBytes128 where
   sizeConst = fromIntegral packSize
   packFsRec = bytes128PackFs
 
-bytes128PackFs :: Fn s (s > TPackFs TBytes128)
+bytes128PackFs :: Fn s (s :> TPackFs TBytes128)
 bytes128PackFs =
   constant
     ( begin
@@ -87,7 +87,7 @@ packSize = 130
 sizeFieldSize :: Natural
 sizeFieldSize = 2
 
-packTBytes128 :: Fn (s > TBytes128) (s > TBytes)
+packTBytes128 :: Fn (s :> TBytes128) (s :> TBytes)
 packTBytes128 =
   fn
     ( begin
@@ -98,7 +98,7 @@ packTBytes128 =
         . (roll #size . natSubUnsafe . opNum2Bin . opCat . opCat)
     )
 
-unpackTBytes128 :: Fn (s > TBytes) (s > TBytes128)
+unpackTBytes128 :: Fn (s :> TBytes) (s :> TBytes128)
 unpackTBytes128 =
   fn
     ( begin
@@ -108,11 +108,11 @@ unpackTBytes128 =
         . fromRaw
     )
 
-bytes128 :: Bytes -> Fn s (s > TBytes128)
+bytes128 :: Bytes -> Fn s (s :> TBytes128)
 bytes128 x =
   assert (B.length x >= 0 && B.length x <= maxPayloadSize) (bytes x . fromRaw)
 
-fromBytes :: Fn (s > TBytes) (s > TBytes128)
+fromBytes :: Fn (s :> TBytes) (s :> TBytes128)
 fromBytes =
   fn
     ( begin
@@ -120,11 +120,11 @@ fromBytes =
         . (lessThanOrEqual . opVerify . fromRaw)
     )
 
-toBytes :: Fn (s > TBytes128) (s > TBytes)
+toBytes :: Fn (s :> TBytes128) (s :> TBytes)
 toBytes = toRaw
 
-toRaw :: Fn (s > TBytes128) (s > TBytes)
+toRaw :: Fn (s :> TBytes128) (s :> TBytes)
 toRaw = cast
 
-fromRaw :: Fn (s > TBytes) (s > TBytes128)
+fromRaw :: Fn (s :> TBytes) (s :> TBytes128)
 fromRaw = cast

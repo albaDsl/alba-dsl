@@ -8,6 +8,7 @@ import Alba.Dsl.V1.Bch2025
     FnA,
     FunctionTable,
     Optimize (..),
+    Stack (..),
     compile,
     outputScript,
     writeFunctionTable,
@@ -119,12 +120,12 @@ dumpLogToFile TestResult {..} =
   ML.dumpLogToFile compilationResult logData "log.html"
 
 evaluateProg ::
-  FnA s '[] s' alt' ->
+  FnA s Base s' alt' ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProg prog = evaluateProgWithStack prog (S.empty, S.empty)
 
 evaluateProgWithStack ::
-  FnA s '[] s' alt' ->
+  FnA s Base s' alt' ->
   (VmStack, VmStack) ->
   Either (ScriptError, Maybe TestResult) TestResult
 evaluateProgWithStack prog (s, alt) =

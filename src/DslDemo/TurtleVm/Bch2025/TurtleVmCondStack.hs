@@ -9,6 +9,7 @@ where
 import Alba.Dsl.V1.Bch2025
   ( Fn,
     N,
+    Stack (..),
     TBool,
     TBytes,
     begin,
@@ -29,7 +30,6 @@ import Alba.Dsl.V1.Bch2025
     opTrue,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
@@ -41,8 +41,8 @@ import Prelude (Int, pred)
 executeP ::
   Int ->
   Fn
-    (s > N "op" (TMaybe TBytes) > N "condStack" TBytes)
-    (s > TBytes > TBool)
+    (s :> N "op" (TMaybe TBytes) :> N "condStack" TBytes)
+    (s :> TBytes :> TBool)
 executeP maxCsDepth =
   begin
     . (roll #op)
@@ -57,7 +57,7 @@ executeP maxCsDepth =
       )
       (del #condStack . bytes [] . opFalse)
 
-condStackExecuteP :: Int -> Fn (s > TBytes) (s > TBool)
+condStackExecuteP :: Int -> Fn (s :> TBytes) (s :> TBool)
 condStackExecuteP maxCsDepth =
   toTyped
     ( begin
@@ -66,7 +66,7 @@ condStackExecuteP maxCsDepth =
         ∘ repeatProg (pred maxCsDepth) UT.opBoolAnd
     )
   where
-    check :: Fn (s > TBytes) (s > TBool > TBytes)
+    check :: Fn (s :> TBytes) (s :> TBool :> TBytes)
     check =
       begin
         . (opSize . nat 1 . opGreaterThanOrEqual)

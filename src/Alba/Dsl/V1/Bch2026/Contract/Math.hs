@@ -6,9 +6,17 @@ module Alba.Dsl.V1.Bch2026.Contract.Math
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2025.Contract.Prelude
+  ( halve,
+    ifZero,
+    isOdd,
+    isZero,
+    nat1SubUnsafe,
+  )
+import Alba.Dsl.V1.Bch2026
   ( Fn,
     N,
+    Stack (..),
     StackEntry,
     TBool,
     TInt,
@@ -19,34 +27,26 @@ import Alba.Dsl.V1.Bch2025
     op1,
     op2Drop,
     opDrop,
+    opDup,
+    opUntil,
     opWhen,
     pick,
     roll,
     unname,
   )
-import Alba.Dsl.V1.Bch2025.Contract.Prelude
-  ( halve,
-    ifZero,
-    isOdd,
-    isZero,
-    nat1SubUnsafe,
-  )
-import Alba.Dsl.V1.Bch2025.Ops (opDup)
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip, over, rot, swap)
-import Alba.Dsl.V1.Bch2026.Ops (opUntil)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Prelude ()
 
 -- 35 opcodes, 35 bytes.
-pow :: Fn (s > TInt > TNat) (s > TInt)
+pow :: Fn (s :> TInt :> TNat) (s :> TInt)
 pow = pow' mul
 
 -- The multiplication operator to use is provided as an argument.
 pow' ::
-  (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
-  Fn (s > TInt > TNat) (s > TInt)
+  (forall s'. Fn (s' :> TInt :> TInt) (s' :> TInt)) ->
+  Fn (s :> TInt :> TNat) (s :> TInt)
 pow' f =
   begin
     . opDup
@@ -56,8 +56,8 @@ pow' f =
   where
     fn ::
       Fn
-        (s > N "b" TInt > N "n" TNat > N "res" TInt)
-        (s > TInt > TNat > TInt > TBool)
+        (s :> N "b" TInt :> N "n" TNat :> N "res" TInt)
+        (s :> TInt :> TNat :> TInt :> TBool)
     fn =
       begin
         . roll #res -- <args> res
@@ -69,7 +69,7 @@ pow' f =
         . ex1 (opDup . isZero) -- b res' n zero?
         . rot -- b n zero? res'
         . swap -- b n res' zero?
-    square' :: Fn (s > TInt) (s > TInt)
+    square' :: Fn (s :> TInt) (s :> TInt)
     square' = opDup . f
 
 -- The multiplication operator to use is provided as an argument. The
@@ -78,8 +78,8 @@ pow' f =
 pow'' ::
   forall s t.
   (StackEntry t) =>
-  (forall s'. Fn (s' > TInt > TInt > t) (s' > TInt)) ->
-  Fn (s > TInt > TNat > t) (s > TInt)
+  (forall s'. Fn (s' :> TInt :> TInt :> t) (s' :> TInt)) ->
+  Fn (s :> TInt :> TNat :> t) (s :> TInt)
 pow'' f =
   begin
     . swap
@@ -98,8 +98,8 @@ pow'' f =
   where
     fn ::
       Fn
-        (s > N "b" TInt > N "n" TNat > N "res" TInt > N "data" t)
-        (s > TInt > TNat > TInt > t > TBool)
+        (s :> N "b" TInt :> N "n" TNat :> N "res" TInt :> N "data" t)
+        (s :> TInt :> TNat :> TInt :> t :> TBool)
     fn =
       begin
         . roll #res -- <args> res
@@ -112,10 +112,10 @@ pow'' f =
         . rot -- <args> b' n' zero? res'
         . roll #data -- b' n' zero? res' data
         . rot -- <args> b' n' res' data zero?
-    square' :: forall s'. Fn (s' > TInt > t) (s' > TInt)
+    square' :: forall s'. Fn (s' :> TInt :> t) (s' :> TInt)
     square' = over . swap . f
 
-factorial :: Fn (s > TNat) (s > TNat)
+factorial :: Fn (s :> TNat) (s :> TNat)
 factorial =
   begin
     . opDup
@@ -123,7 +123,7 @@ factorial =
       (opDrop . op1)
       (nat 1 . swap . opUntil (unname 2 fn) . opDrop)
   where
-    fn :: Fn (s > N "product" TNat > N "n" TNat) (s > TNat > TNat > TBool)
+    fn :: Fn (s :> N "product" TNat :> N "n" TNat) (s :> TNat :> TNat :> TBool)
     fn =
       begin
         . (roll #product . pick #n . mul)

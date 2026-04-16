@@ -40,7 +40,7 @@ senderWithdraw = scriptSig 1
 scriptSig :: Natural -> Ctx -> CodeL1 -> TxSignature -> CodeL1
 scriptSig fn ctx redeemScript sig = compile None args
   where
-    args :: Fn s (s > TBytes > TNat > TBytes)
+    args :: Fn s (s :> TBytes :> TNat :> TBytes)
     args =
       let s = marshal ctx sig
        in bytes s . nat fn . bytes redeemScript

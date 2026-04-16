@@ -22,7 +22,7 @@ testOpsStack =
       testCase "OpRoll" $ isTrue (evaluateProg progRoll)
     ]
 
-progDupDropNipOver :: Fn s (s > TBool)
+progDupDropNipOver :: Fn s (s :> TBool)
 progDupDropNipOver =
   begin
     ∘ one
@@ -33,9 +33,9 @@ progDupDropNipOver =
     ∘ opFalse
     ∘ opEqual
   where
-    one = op1 :: Fn s (s > TNat)
+    one = op1 :: Fn s (s :> TNat)
 
-progRotSwapTuck :: Fn s (s > TBool)
+progRotSwapTuck :: Fn s (s :> TBool)
 progRotSwapTuck =
   begin
     ∘ opTrue ---- t
@@ -51,9 +51,9 @@ progRotSwapTuck =
     ∘ int 2
     ∘ opNumEqual
   where
-    one = op1 :: Fn s (s > TNat)
+    one = op1 :: Fn s (s :> TNat)
 
-prog2Dup2Drop2Over :: Fn s (s > TBool)
+prog2Dup2Drop2Over :: Fn s (s :> TBool)
 prog2Dup2Drop2Over =
   begin
     ∘ op1 ------- 1
@@ -69,10 +69,10 @@ prog2Dup2Drop2Over =
     ∘ int 3
     ∘ opNumEqual
   where
-    three = op3 :: Fn s (s > TNat)
-    four = op4 :: Fn s (s > TNat)
+    three = op3 :: Fn s (s :> TNat)
+    four = op4 :: Fn s (s :> TNat)
 
-progAltStack :: Fn s (s > TBool)
+progAltStack :: Fn s (s :> TBool)
 progAltStack =
   begin
     ∘ op1
@@ -83,7 +83,7 @@ progAltStack =
     ∘ int 3
     ∘ opNumEqual
 
-progDifferentTypes :: Fn s (s > TBool)
+progDifferentTypes :: Fn s (s :> TBool)
 progDifferentTypes =
   begin
     ∘ int 1
@@ -93,7 +93,7 @@ progDifferentTypes =
     ∘ int 1
     ∘ opNumEqual
 
-progPick :: Fn s (s > TBool)
+progPick :: Fn s (s :> TBool)
 progPick =
   begin
     ∘ one
@@ -108,11 +108,11 @@ progPick =
     ∘ two
     ∘ opNumEqual
   where
-    one = op1 :: Fn s (s > TNat)
-    two = op2 :: Fn s (s > TNat)
-    three = op3 :: Fn s (s > TNat)
+    one = op1 :: Fn s (s :> TNat)
+    two = op2 :: Fn s (s :> TNat)
+    three = op3 :: Fn s (s :> TNat)
 
-progRoll :: Fn s (s > TBool)
+progRoll :: Fn s (s :> TBool)
 progRoll =
   begin
     ∘ opFalse
@@ -126,8 +126,8 @@ progRoll =
 -- Trying to access past the known stack won't compile.
 -- accessPastKnownStack ::
 --   Fn
---     (s > TBytes > TBool > TBool > TBool)
---     (s > TNat)
+--     (s :> TBytes :> TBool :> TBool :> TBool)
+--     (s :> TNat)
 -- accessPastKnownStack =
 --   begin
 --     ∘ opRoll @4

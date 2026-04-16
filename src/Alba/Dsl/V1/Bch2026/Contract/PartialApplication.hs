@@ -15,6 +15,7 @@ import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
+    Stack (..),
     StackEntry,
     TBytes,
     TInt,
@@ -27,7 +28,6 @@ import Alba.Dsl.V1.Bch2026
     opToAltStack,
     progCode,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
@@ -38,7 +38,7 @@ import Prelude (($))
 
 apply1 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s > t2 > TLambda '[t1] '[r1]) (s > TLambda '[] '[r1])
+  Env (s :> t2 :> TLambda '[t1] '[r1]) (s :> TLambda '[] '[r1])
 apply1 = toTyped applyTop
 
 applyTop :: FnU -- <arg> <lambda> -- <lambda'>
@@ -53,12 +53,12 @@ applyTop = fromTyped $ fn (toTyped f)
 
 apply2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[t1] '[r1])
+  Env (s :> t2 :> TLambda '[t1, t2] '[r1]) (s :> TLambda '[t1] '[r1])
 apply2 = toTyped applyTop
 
 apply2_2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s > t1 > t2 > TLambda '[t1, t2] '[r1]) (s > TLambda '[] '[r1])
+  Env (s :> t1 :> t2 :> TLambda '[t1, t2] '[r1]) (s :> TLambda '[] '[r1])
 apply2_2 = toTyped applyTop2
 
 applyTop2 :: FnU -- <argN-1> <argN> <lambda> -- <lambda'>
@@ -75,39 +75,39 @@ applyTop2 = fromTyped $ fn (toTyped f)
 
 apply3 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  Env (s > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1, t2] '[r1])
+  Env (s :> t3 :> TLambda '[t1, t2, t3] '[r1]) (s :> TLambda '[t1, t2] '[r1])
 apply3 = toTyped applyTop
 
 apply3_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  Env (s > t2 > t3 > TLambda '[t1, t2, t3] '[r1]) (s > TLambda '[t1] '[r1])
+  Env (s :> t2 :> t3 :> TLambda '[t1, t2, t3] '[r1]) (s :> TLambda '[t1] '[r1])
 apply3_2 = toTyped applyTop2
 
 apply4 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
   Env
-    (s > t4 > TLambda '[t1, t2, t3, t4] '[r1])
-    (s > TLambda '[t1, t2, t3] '[r1])
+    (s :> t4 :> TLambda '[t1, t2, t3, t4] '[r1])
+    (s :> TLambda '[t1, t2, t3] '[r1])
 apply4 = toTyped applyTop
 
 apply4_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
   Env
-    (s > t3 > t4 > TLambda '[t1, t2, t3, t4] '[r1])
-    (s > TLambda '[t1, t2] '[r1])
+    (s :> t3 :> t4 :> TLambda '[t1, t2, t3, t4] '[r1])
+    (s :> TLambda '[t1, t2] '[r1])
 apply4_2 = toTyped applyTop2
 
-freshId :: Env s (s > TBytes)
+freshId :: Env s (s :> TBytes)
 freshId = fn (opFromAltStack . dup . increment . opToAltStack . rt2b)
   where
-    increment :: Fn (s > TRuntimeState) (s > TRuntimeState)
+    increment :: Fn (s :> TRuntimeState) (s :> TRuntimeState)
     increment = rt2i . add1 . i2rt
 
-    i2rt :: Fn (s > TInt) (s > TRuntimeState)
+    i2rt :: Fn (s :> TInt) (s :> TRuntimeState)
     i2rt = cast
 
-    rt2i :: Fn (s > TRuntimeState) (s > TInt)
+    rt2i :: Fn (s :> TRuntimeState) (s :> TInt)
     rt2i = cast
 
-    rt2b :: Fn (s > TRuntimeState) (s > TBytes)
+    rt2b :: Fn (s :> TRuntimeState) (s :> TBytes)
     rt2b = cast

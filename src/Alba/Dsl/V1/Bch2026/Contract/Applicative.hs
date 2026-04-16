@@ -7,6 +7,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     begin,
     op2Drop,
@@ -14,7 +15,6 @@ import Alba.Dsl.V1.Bch2026
     opBoolAnd,
     opIf,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, rot, swap)
@@ -31,7 +31,7 @@ import Prelude ()
 
 liftA2Maybe ::
   (StackEntry a, StackEntry b) =>
-  Fn (s > TLambda '[a, b] '[c] > TMaybe a > TMaybe b) (s > TMaybe c)
+  Fn (s :> TLambda '[a, b] '[c] :> TMaybe a :> TMaybe b) (s :> TMaybe c)
 liftA2Maybe =
   fn
     ( begin
@@ -42,5 +42,5 @@ liftA2Maybe =
     )
 
 -- Used from contexts where it is expected to never fail.
-fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
+fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'

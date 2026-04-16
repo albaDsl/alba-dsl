@@ -6,6 +6,7 @@ import Alba.Dsl.V1.Bch2026
   ( CompilationResult (CompilationResult, code, functionTable),
     Fn,
     Optimize (O1),
+    Stack (..),
     StackEntry,
     TNat,
     begin,
@@ -15,7 +16,6 @@ import Alba.Dsl.V1.Bch2026
     op1Add,
     opSwap,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
@@ -70,20 +70,20 @@ showCase =
         . (int8Vector . MS.sort . drop)
     )
   where
-    int8Vector :: Fn s (s > TVector TInt8)
+    int8Vector :: Fn s (s :> TVector TInt8)
     int8Vector = int8 0 . int8 1 . V.empty . V.cons . V.cons
 
-    n2Int8 :: Fn (s > TNat) (s > TInt8)
+    n2Int8 :: Fn (s :> TNat) (s :> TInt8)
     n2Int8 = n2i . fromInt
 
-sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
+sort :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TVector a)
 sort = packFsRec @a . opSwap . sortF
 
-sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
+sortF :: (StackEntry a) => Fn (s :> TPackFs a :> TVector a) (s :> TVector a)
 sortF = invokeExt lib "DslDemo.MergeSort.MergeSort" "sortF"
 
-length :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TNat)
+length :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TNat)
 length = packFsRec @a . swap . lengthF
 
-lengthF :: Fn (s > TPackFs a > TVector a) (s > TNat)
+lengthF :: Fn (s :> TPackFs a :> TVector a) (s :> TNat)
 lengthF = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.TVector" "lengthF"

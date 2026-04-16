@@ -7,6 +7,7 @@ import Alba.Dsl.V1.Bch2025
   ( Bytes,
     Fn,
     Optimize (None),
+    Stack (..),
     TPubKey,
     TSig,
     bytes',
@@ -15,7 +16,6 @@ import Alba.Dsl.V1.Bch2025
     setScriptSig,
     signAll,
     (.),
-    type (>),
   )
 import Alba.Misc.Cmd (deployMsg, runInVm, showTx)
 import Alba.Misc.Haskoin
@@ -123,5 +123,5 @@ txTemplate fundingTx recvAddr =
       lockTime = 0
     }
 
-scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
+scriptSig :: Bytes -> Bytes -> Fn s (s :> TPubKey :> TSig)
 scriptSig pubKey sig = bytes' pubKey . bytes' sig

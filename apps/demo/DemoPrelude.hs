@@ -143,5 +143,5 @@ progFt prog = putStrLn (Dsl.progFt prog)
 plot :: [Integer] -> IO ()
 plot = plotWith (options {height = 10})
 
-cube :: Fn (s > TInt) (s > TInt)
+cube :: Fn (s :> TInt) (s :> TInt)
 cube = opDup ∘ opDup ∘ opMul ∘ opMul

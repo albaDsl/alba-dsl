@@ -7,13 +7,13 @@ module TestIntPushing (testIntPushing) where
 import Alba.Dsl.V1.Bch2025
   ( Fn,
     Optimize (None),
+    Stack (..),
     TInt,
     begin,
     compileL2,
     int,
     opAdd,
     (∘),
-    type (>),
   )
 import Alba.Dsl.V1.Common.ThUtils qualified as TH
 import Alba.Vm.Common (CodeL2, OpcodeL2 (..), i2SeUnsafe)
@@ -53,7 +53,7 @@ testIntPushing =
       testProperty "Push arbitrary integers" propInt
     ]
 
-progConstants :: Fn s (s > TInt)
+progConstants :: Fn s (s :> TInt)
 progConstants =
   begin
     ∘ $(TH.foldrInts 'fn 'id [1 .. 16])
@@ -84,7 +84,7 @@ progConstantsCode =
     ]
       <> replicate 15 OP_ADD
 
-progPushInt :: Fn s (s > TInt)
+progPushInt :: Fn s (s :> TInt)
 progPushInt =
   begin
     ∘ int 0x0100000000000002

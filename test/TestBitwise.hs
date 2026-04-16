@@ -33,7 +33,7 @@ testBitwise =
       testProperty "RShiftNum" propRShiftNum
     ]
 
-progBasic :: Fn s (s > TBool)
+progBasic :: Fn s (s :> TBool)
 progBasic =
   begin
     ∘ (int 0b101 ∘ nat 1 ∘ opRShiftNum ∘ int 0b10 ∘ opNumEqualVerify)
@@ -93,10 +93,10 @@ progBasic =
   where
     hash = "2bf7158cb3d8f419f1e19ee71df61927cc17017f37ea8820f3bd719d2b4f88f8"
 
-    b2i :: Fn (s > TBytes) (s > TInt)
+    b2i :: Fn (s :> TBytes) (s :> TInt)
     b2i = cast
 
-    i2b :: Fn (s > TInt) (s > TBytes)
+    i2b :: Fn (s :> TInt) (s :> TBytes)
     i2b = cast
 
 propInvert :: Bytes -> Bool
@@ -105,7 +105,7 @@ propInvert x =
       stack' = getStack $ evaluateProgWithStack prog (stack, S.empty)
    in stack' == stack
   where
-    prog :: Fn (s > TBytes) (s > TBytes)
+    prog :: Fn (s :> TBytes) (s :> TBytes)
     prog = opInvert ∘ opInvert
 
 -- Verifies that a stack element with the 'bitCount' left most bits cleared is
@@ -116,16 +116,16 @@ propShiftBinLeftAndBack x bitCount =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
-    prog :: Fn (s > TBytes) (s > TBool)
+    prog :: Fn (s :> TBytes) (s :> TBool)
     prog =
       begin
         ∘ (opDup ∘ createMask ∘ opAnd) -- clear leftmost bits.
         ∘ (opDup ∘ leftAndBack ∘ opEqual)
 
-    createMask :: Fn (s > TBytes) (s > TBytes)
+    createMask :: Fn (s :> TBytes) (s :> TBytes)
     createMask = opDup ∘ opInvert ∘ opOr ∘ leftAndBack
 
-    leftAndBack :: Fn (s > TBytes) (s > TBytes)
+    leftAndBack :: Fn (s :> TBytes) (s :> TBytes)
     leftAndBack =
       begin
         ∘ nat (fromIntegral bitCount)
@@ -141,16 +141,16 @@ propShiftBinRightAndBack x bitCount =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ b2SeUnsafe x, S.empty)
   where
-    prog :: Fn (s > TBytes) (s > TBool)
+    prog :: Fn (s :> TBytes) (s :> TBool)
     prog =
       begin
         ∘ (opDup ∘ createMask ∘ opAnd) -- clear rightmost bits.
         ∘ (opDup ∘ rightAndBack ∘ opEqual)
 
-    createMask :: Fn (s > TBytes) (s > TBytes)
+    createMask :: Fn (s :> TBytes) (s :> TBytes)
     createMask = opDup ∘ opInvert ∘ opOr ∘ rightAndBack
 
-    rightAndBack :: Fn (s > TBytes) (s > TBytes)
+    rightAndBack :: Fn (s :> TBytes) (s :> TBytes)
     rightAndBack =
       begin
         ∘ nat (fromIntegral bitCount)
@@ -163,7 +163,7 @@ propLShiftNum :: VmIntegerHalf -> Bool
 propLShiftNum (VmIntegerHalf x) =
   isTrue' $ evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
-    prog :: Fn (s > TInt) (s > TBool)
+    prog :: Fn (s :> TInt) (s :> TBool)
     prog = opDup ∘ int 2 ∘ opMul ∘ opSwap ∘ nat 1 ∘ opLShiftNum ∘ opNumEqual
 
 -- For positive integers, a numeric right shift by one is equal to division by
@@ -174,5 +174,5 @@ propRShiftNum (VmInteger x) =
     isTrue' $
       evaluateProgWithStack prog (S.singleton $ i2SeUnsafe x, S.empty)
   where
-    prog :: Fn (s > TInt) (s > TBool)
+    prog :: Fn (s :> TInt) (s :> TBool)
     prog = opDup ∘ int 2 ∘ opDiv ∘ opSwap ∘ nat 1 ∘ opRShiftNum ∘ opNumEqual

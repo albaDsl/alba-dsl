@@ -36,12 +36,12 @@ propNumEqualVerify x y =
     let s =
           getStack $
             evaluateProgWithStack
-              (opNumEqualVerify ∘ opTrue :: Fn (s > TInt > TInt) (s > TBool))
+              (opNumEqualVerify ∘ opTrue :: Fn (s :> TInt :> TInt) (s :> TBool))
               (S.fromList [i2SeUnsafe x, i2SeUnsafe x], S.empty)
         err =
           getErr $
             evaluateProgWithStack
-              (opNumEqualVerify ∘ opTrue :: Fn (s > TInt > TInt) (s > TBool))
+              (opNumEqualVerify ∘ opTrue :: Fn (s :> TInt :> TInt) (s :> TBool))
               (S.fromList [i2SeUnsafe x, i2SeUnsafe y], S.empty)
      in s == S.singleton (boolToStackElement True)
           && err == SeNumEqualVerify
@@ -52,12 +52,12 @@ propNumEquality x y =
       s =
         getStack $
           evaluateProgWithStack
-            (opNumEqual :: Fn (s > TInt > TInt) (s > TBool))
+            (opNumEqual :: Fn (s :> TInt :> TInt) (s :> TBool))
             stack
       s' =
         getStack $
           evaluateProgWithStack
-            ((opNumNotEqual ∘ opNot) :: Fn (s > TInt > TInt) (s > TBool))
+            ((opNumNotEqual ∘ opNot) :: Fn (s :> TInt :> TInt) (s :> TBool))
             stack
       expected = boolToStackElement (x == y)
    in s == S.singleton expected
@@ -68,7 +68,7 @@ propBytesEquality x y =
   let s =
         getStack $
           evaluateProgWithStack
-            (opEqual :: Fn (s > TBytes > TBytes) (s > TBool))
+            (opEqual :: Fn (s :> TBytes :> TBytes) (s :> TBool))
             (S.fromList [b2SeUnsafe x, b2SeUnsafe y], S.empty)
    in s == S.singleton (boolToStackElement (x == y))
 
@@ -91,11 +91,11 @@ propGreaterLessOrEqual x min max =
    in s == S.singleton (boolToStackElement $ x >= min && x <= max)
 
 progRange ::
-  (forall s'. Fn (s' > TInt > TInt) (s' > TBool)) ->
-  (forall s'. Fn (s' > TInt > TInt) (s' > TBool)) ->
+  (forall s'. Fn (s' :> TInt :> TInt) (s' :> TBool)) ->
+  (forall s'. Fn (s' :> TInt :> TInt) (s' :> TBool)) ->
   Fn
-    (s > N "x" TInt > N "min" TInt > N "max" TInt)
-    (s > TBool)
+    (s :> N "x" TInt :> N "min" TInt :> N "max" TInt)
+    (s :> TBool)
 progRange comp1 comp2 =
   begin
     ∘ (pick #x ∘ pick #min ∘ comp1)
@@ -109,7 +109,7 @@ propWithin x min max =
   let s =
         getStack $
           evaluateProgWithStack
-            (opWithin :: Fn (s > TInt > TInt > TInt) (s > TBool))
+            (opWithin :: Fn (s :> TInt :> TInt :> TInt) (s :> TBool))
             (S.fromList [i2SeUnsafe x, i2SeUnsafe min, i2SeUnsafe max], S.empty)
    in s == S.singleton (boolToStackElement $ x >= min && x < max)
 
@@ -118,6 +118,6 @@ propMinMax x y z =
   let s =
         getStack $
           evaluateProgWithStack
-            (opMin ∘ opMax :: Fn (s > TInt > TInt > TInt) (s > TInt))
+            (opMin ∘ opMax :: Fn (s :> TInt :> TInt :> TInt) (s :> TInt))
             (S.fromList [i2SeUnsafe x, i2SeUnsafe y, i2SeUnsafe z], S.empty)
    in s == S.singleton (i2SeUnsafe $ P.max x (P.min y z))

@@ -21,11 +21,11 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBool,
     opVerify,
     (.),
-    type (>),
   )
 import Data.Kind (Type)
 import Prelude ()
@@ -35,9 +35,9 @@ data TBlobEqRec (t :: Type)
 instance StackEntry (TBlobEqRec t)
 
 class (StackEntry a) => BlobEq a where
-  equal :: (StackEntry a) => Fn (s > a > a) (s > TBool)
+  equal :: (StackEntry a) => Fn (s :> a :> a) (s :> TBool)
 
-  equalVerify :: (StackEntry a) => Fn (s > a > a) s
+  equalVerify :: (StackEntry a) => Fn (s :> a :> a) s
   equalVerify = equal . opVerify
 
-  blobEqRec :: Fn s (s > TBlobEqRec a)
+  blobEqRec :: Fn s (s :> TBlobEqRec a)

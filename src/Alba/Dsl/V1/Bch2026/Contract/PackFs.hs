@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     Ref,
     Remove,
+    Stack (..),
     StackEntry,
     TBytes,
     TNat,
@@ -31,7 +32,6 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
 import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tupleM, untuple)
@@ -48,42 +48,39 @@ instance StackEntry (TPackFs t)
 
 class (StackEntry a) => PackFs a where
   sizeConst :: Natural
-  size :: Fn s (s > TNat)
-  pack :: (StackEntry a) => Fn (s > a) (s > TBytes)
-  unpack :: (StackEntry a) => Fn (s > TBytes) (s > a)
-  packFsRec :: Fn s (s > TPackFs a)
+  size :: Fn s (s :> TNat)
+  pack :: (StackEntry a) => Fn (s :> a) (s :> TBytes)
+  unpack :: (StackEntry a) => Fn (s :> TBytes) (s :> a)
+  packFsRec :: Fn s (s :> TPackFs a)
 
 mkPackFs ::
   Fn
-    (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
-    (s > TPackFs a)
+    (s :> TNat :> TLambda '[a] '[TBytes] :> TLambda '[TBytes] '[a])
+    (s :> TPackFs a)
 mkPackFs = fn mkPackFsM
 
 mkPackFsM ::
   Fn
-    (s > TNat > TLambda '[a] '[TBytes] > TLambda '[TBytes] '[a])
-    (s > TPackFs a)
+    (s :> TNat :> TLambda '[a] '[TBytes] :> TLambda '[TBytes] '[a])
+    (s :> TPackFs a)
 mkPackFsM = tupleM . tupleM . fromRaw
 
-getSize :: Fn (s > TPackFs a) (s > TNat)
+getSize :: Fn (s :> TPackFs a) (s :> TNat)
 getSize = fn (toRaw . fst)
 
-getPack :: Fn (s > TPackFs a) (s > TLambda '[a] '[TBytes])
+getPack :: Fn (s :> TPackFs a) (s :> TLambda '[a] '[TBytes])
 getPack = fn (toRaw . untuple . nip . fst)
 
-getUnpack :: Fn (s > TPackFs a) (s > TLambda '[TBytes] '[a])
+getUnpack :: Fn (s :> TPackFs a) (s :> TLambda '[TBytes] '[a])
 getUnpack = fn (toRaw . untuple . nip . snd)
 
-fromRaw ::
-  Fn
-    (s > TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a])))
-    (s > TPackFs a)
+type RawType a =
+  TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a]))
+
+fromRaw :: Fn (s :> RawType a) (s :> TPackFs a)
 fromRaw = cast
 
-toRaw ::
-  Fn
-    (s > TPackFs a)
-    (s > TTuple TNat (TTuple (TLambda '[a] '[TBytes]) (TLambda '[TBytes] '[a])))
+toRaw :: Fn (s :> TPackFs a) (s :> RawType a)
 toRaw = cast
 
 tcPick ::
@@ -93,7 +90,7 @@ tcPick ::
     Ref s idx ~ 'Just arg,
     UnName arg ~ TPackFs a
   ) =>
-  Fn s (s > TPackFs a)
+  Fn s (s :> TPackFs a)
 tcPick = pick #packFs
 
 tcRoll ::
@@ -104,7 +101,7 @@ tcRoll ::
     Remove s idx ~ s',
     UnName arg ~ TPackFs a
   ) =>
-  Fn s (s' > TPackFs a)
+  Fn s (s' :> TPackFs a)
 tcRoll = roll #packFs
 
 tcDrop ::
@@ -125,27 +122,27 @@ tcSize ::
     Ref s idx ~ 'Just arg,
     UnName arg ~ TPackFs a
   ) =>
-  Fn s (s > TNat)
+  Fn s (s :> TNat)
 tcSize = pick #packFs . getSize
 
 tcPack ::
   forall s a arg idx.
   ( StackEntry a,
     KnownNat idx,
-    FindName "packFs" (s > a) 0 ~ 'Just idx,
-    Ref (s > a) idx ~ 'Just arg,
+    FindName "packFs" (s :> a) 0 ~ 'Just idx,
+    Ref (s :> a) idx ~ 'Just arg,
     UnName arg ~ TPackFs a
   ) =>
-  Fn (s > a) (s > TBytes)
+  Fn (s :> a) (s :> TBytes)
 tcPack = pick #packFs . getPack . invoke1
 
 tcUnpack ::
   forall s a arg idx.
   ( StackEntry a,
     KnownNat idx,
-    FindName "packFs" (s > TBytes) 0 ~ 'Just idx,
-    Ref (s > TBytes) idx ~ 'Just arg,
+    FindName "packFs" (s :> TBytes) 0 ~ 'Just idx,
+    Ref (s :> TBytes) idx ~ 'Just arg,
     UnName arg ~ TPackFs a
   ) =>
-  Fn (s > TBytes) (s > a)
+  Fn (s :> TBytes) (s :> a)
 tcUnpack = pick #packFs . getUnpack . invoke1

@@ -10,6 +10,7 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Loop,
+    Stack (..),
     TBytes,
     TCode,
     THash256,
@@ -39,7 +40,6 @@ import Alba.Dsl.V1.Bch2026
     roll,
     un,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
@@ -49,7 +49,14 @@ import Prelude (fromIntegral, undefined)
 
 importLibrary ::
   Fn
-    (s > TBytes > TLambda '[TBytes] '[TBytes] > TNat > TNat > TNat > THash256)
+    ( s
+        :> TBytes
+        :> TLambda '[TBytes] '[TBytes]
+        :> TNat
+        :> TNat
+        :> TNat
+        :> THash256
+    )
     s
 importLibrary =
   fn
@@ -62,7 +69,7 @@ importLibrary =
         . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
-    loop :: Loop (s > TNat > TInt > TBytes)
+    loop :: Loop (s :> TNat :> TInt :> TBytes)
     loop =
       begin
         . ns3 #input #cnt #acc
@@ -74,13 +81,13 @@ importLibrary =
     libInit :: Fn s s
     libInit = undefined
 
-b2c :: Fn (s > TBytes) (s > TCode)
+b2c :: Fn (s :> TBytes) (s :> TCode)
 b2c = cast
 
 -- Without transform.
 importLibrary' ::
   Fn
-    (s > TBytes > TNat > TNat > TNat > THash256)
+    (s :> TBytes :> TNat :> TNat :> TNat :> THash256)
     s
 importLibrary' =
   fn
@@ -93,7 +100,7 @@ importLibrary' =
         . (pick #fId . opDefine . roll #fId . opInvoke libInit)
     )
   where
-    loop :: Loop (s > TNat > TInt > TBytes)
+    loop :: Loop (s :> TNat :> TInt :> TBytes)
     loop =
       begin
         . ns3 #input #cnt #acc
@@ -107,7 +114,7 @@ importLibrary' =
 
 -- Unwraps the 'simpleWrap' format from Bch2026.TxDsl. With simple wrapping the
 -- data chunk always starts at offset 2 and is 197 bytes long.
-simpleUnwrapProg :: Fn (s > TBytes) (s > TBytes)
+simpleUnwrapProg :: Fn (s :> TBytes) (s :> TBytes)
 simpleUnwrapProg =
   fn (nat 2 . opSplit . nip . nat size . opSplit . drop)
   where

@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TInt,
     begin,
@@ -34,7 +35,6 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     opWithin,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
@@ -88,7 +88,7 @@ instance PackFs TInt8 where
   unpack = opBin2Num . fromRaw
   packFsRec = int8PackFs
 
-int8PackFs :: Fn s (s > TPackFs TInt8)
+int8PackFs :: Fn s (s :> TPackFs TInt8)
 int8PackFs =
   constant
     ( begin
@@ -104,17 +104,17 @@ int8Max = 127
 int8Min :: Integer
 int8Min = -int8Max
 
-int8 :: Integer -> Fn s (s > TInt8)
+int8 :: Integer -> Fn s (s :> TInt8)
 int8 x = assert (x >= int8Min && x <= int8Max) (int x . fromRaw)
 
-fromRaw :: Fn (s > TInt) (s > TInt8)
+fromRaw :: Fn (s :> TInt) (s :> TInt8)
 fromRaw = cast
 
-toRaw :: Fn (s > TInt8) (s > TInt)
+toRaw :: Fn (s :> TInt8) (s :> TInt)
 toRaw = cast
 
-toRaw2 :: Fn (s > TInt8 > TInt8) (s > TInt > TInt)
+toRaw2 :: Fn (s :> TInt8 :> TInt8) (s :> TInt :> TInt)
 toRaw2 = castStack
 
-toRaw3 :: Fn (s > TInt8 > TInt8 > TInt8) (s > TInt > TInt > TInt)
+toRaw3 :: Fn (s :> TInt8 :> TInt8 :> TInt8) (s :> TInt :> TInt :> TInt)
 toRaw3 = castStack

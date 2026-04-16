@@ -4,12 +4,12 @@ module Contract (LastWill, Params, contract) where
 
 import Alba.Dsl.V1.Bch2025
   ( Append,
-    Base,
     CFn,
     Contract (..),
     Fn,
     FnC,
     N,
+    Stack (..),
     THash160,
     TNat,
     TPubKey,
@@ -36,7 +36,6 @@ import Alba.Dsl.V1.Bch2025
     timeSequence,
     (.),
     type (:|),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSub)
 import Data.Word (Word64)
@@ -48,24 +47,24 @@ type LastWill =
   Contract
     "LastWill"
     ( Base
-        > (Base > N "pubKey" TPubKey > N "sig" TSig)
-          :| (Base > N "pubKey" TPubKey > N "sig" TSig)
-          :| (Base > N "pubKey" TPubKey > N "sig" TSig)
+        :> (Base :> N "pubKey" TPubKey :> N "sig" TSig)
+        :| (Base :> N "pubKey" TPubKey :> N "sig" TSig)
+        :| (Base :> N "pubKey" TPubKey :> N "sig" TSig)
     )
     '["refresh", "withdraw", "inherit"]
     Params
 
 type Params =
   ( Base
-      > N "refreshHash" THash160
-      > N "withdrawHash" THash160
-      > N "inheritHash" THash160
+      :> N "refreshHash" THash160
+      :> N "withdrawHash" THash160
+      :> N "inheritHash" THash160
   )
 
 contract :: LastWill
 contract = MkContract $ entry3 refresh withdraw inherit
 
-refresh :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+refresh :: CFn (Append (Base :> N "pubKey" TPubKey :> N "sig" TSig) Params)
 refresh =
   begin
     . ( begin
@@ -85,7 +84,7 @@ refresh =
         . (nat (fromIntegral outputIndex) . opOutputValue)
         . opNumEqualVerify
 
-    subMinerFee :: Word64 -> Fn (s > TNat) (s > TNat)
+    subMinerFee :: Word64 -> Fn (s :> TNat) (s :> TNat)
     subMinerFee minerFee = nat (fromIntegral minerFee) . natSub
 
     verifyOutputScript :: Natural -> FnC
@@ -95,7 +94,7 @@ refresh =
         . (nat (fromIntegral outputIndex) . opOutputBytecode)
         . opEqualVerify
 
-withdraw :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+withdraw :: CFn (Append (Base :> N "pubKey" TPubKey :> N "sig" TSig) Params)
 withdraw =
   begin
     . ( begin
@@ -105,7 +104,7 @@ withdraw =
     . (del #refreshHash . del #inheritHash)
     . opTrue
 
-inherit :: CFn (Append (Base > N "pubKey" TPubKey > N "sig" TSig) Params)
+inherit :: CFn (Append (Base :> N "pubKey" TPubKey :> N "sig" TSig) Params)
 inherit =
   begin
     . ( begin
@@ -116,7 +115,7 @@ inherit =
     . (del #refreshHash . del #withdrawHash)
     . opTrue
 
-verifyAuthorized :: Fn (s > TSig > THash160 > TPubKey) s
+verifyAuthorized :: Fn (s :> TSig :> THash160 :> TPubKey) s
 verifyAuthorized = opDup . opHash160 . opRot . opEqualVerify . opCheckSigVerify
 
 verifySequence :: Natural -> FnC

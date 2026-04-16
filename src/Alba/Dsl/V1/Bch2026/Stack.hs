@@ -10,8 +10,7 @@ module Alba.Dsl.V1.Bch2026.Stack
 where
 
 import Alba.Dsl.V1.Bch2025.Stack (StackBytes, StackEntry)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (Base, FnA)
+import Alba.Dsl.V1.Common.Stack (FnA, Stack (..))
 import Data.Kind (Type)
 
 data TCode
@@ -32,5 +31,5 @@ instance StackEntry TRuntimeState
 
 instance StackBytes TCode
 
-type Env (s :: [Type]) (s' :: [Type]) =
-  FnA s (Base > TRuntimeState) s' (Base > TRuntimeState)
+type Env (s :: Stack) (s' :: Stack) =
+  FnA s (Base :> TRuntimeState) s' (Base :> TRuntimeState)

@@ -32,9 +32,8 @@ import Alba.Dsl.V1.Bch2025.Ops
     opWithin,
     opXor,
   )
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((∘))
-import Alba.Dsl.V1.Common.Stack
+import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TBytes, TInt)
 import Alba.Vm.Common.BasicTypes (Bytes)
 import Data.Bits (xor, (.&.), (.|.))
 import Data.ByteString qualified as B
@@ -66,7 +65,7 @@ data BoolExp where
   (:==) :: IntExp -> IntExp -> BoolExp
   (:/=) :: IntExp -> IntExp -> BoolExp
   (:<) :: IntExp -> IntExp -> BoolExp
-  (:>) :: IntExp -> IntExp -> BoolExp
+  (:>.) :: IntExp -> IntExp -> BoolExp
   (:<=) :: IntExp -> IntExp -> BoolExp
   (:>=) :: IntExp -> IntExp -> BoolExp
   Within :: IntExp -> IntExp -> IntExp -> BoolExp
@@ -77,7 +76,7 @@ infixr 3 :&&
 
 infixr 2 :||
 
-infix 4 :==, :/=, :>, :<, :>=, :<=
+infix 4 :==, :/=, :>., :<, :>=, :<=
 
 data BitExp where
   Bytes :: Bytes -> BitExp
@@ -90,7 +89,7 @@ infixl 7 :&
 
 infixl 5 :|
 
-intExp :: IntExp -> Fn s (s > TInt)
+intExp :: IntExp -> Fn s (s :> TInt)
 intExp = \case
   Int x -> int x
   e1 :+ e2 -> intExp e1 ∘ intExp e2 ∘ opAdd
@@ -105,7 +104,7 @@ intExp = \case
   Min e1 e2 -> intExp e1 ∘ intExp e2 ∘ opMin
   Max e1 e2 -> intExp e1 ∘ intExp e2 ∘ opMax
 
-boolExp :: BoolExp -> Fn s (s > TBool)
+boolExp :: BoolExp -> Fn s (s :> TBool)
 boolExp = \case
   Bool x -> if x then opTrue else opFalse
   e1 :&& e2 -> boolExp e1 ∘ boolExp e2 ∘ opBoolAnd
@@ -114,13 +113,13 @@ boolExp = \case
   (e1 :== e2) -> intExp e1 ∘ intExp e2 ∘ opNumEqual
   (e1 :/= e2) -> intExp e1 ∘ intExp e2 ∘ opNumNotEqual
   (e1 :< e2) -> intExp e1 ∘ intExp e2 ∘ opLessThan
-  (e1 :> e2) -> intExp e1 ∘ intExp e2 ∘ opGreaterThan
+  (e1 :>. e2) -> intExp e1 ∘ intExp e2 ∘ opGreaterThan
   (e1 :<= e2) -> intExp e1 ∘ intExp e2 ∘ opLessThanOrEqual
   (e1 :>= e2) -> intExp e1 ∘ intExp e2 ∘ opGreaterThanOrEqual
   Within e1 e2 e3 -> intExp e1 ∘ intExp e2 ∘ intExp e3 ∘ opWithin
   ZeroNotEqual e -> intExp e ∘ op0NotEqual
 
-bitExp :: BitExp -> Fn s (s > TBytes)
+bitExp :: BitExp -> Fn s (s :> TBytes)
 bitExp = \case
   Bytes x -> bytes x
   e1 :& e2 -> bitExp e1 ∘ bitExp e2 ∘ opAnd
@@ -159,7 +158,7 @@ evalBoolExp = \case
   e1 :== e2 -> (==) <$> evalIntExp e1 <*> evalIntExp e2
   e1 :/= e2 -> (/=) <$> evalIntExp e1 <*> evalIntExp e2
   e1 :< e2 -> (<) <$> evalIntExp e1 <*> evalIntExp e2
-  e1 :> e2 -> (>) <$> evalIntExp e1 <*> evalIntExp e2
+  e1 :>. e2 -> (>) <$> evalIntExp e1 <*> evalIntExp e2
   e1 :<= e2 -> (<=) <$> evalIntExp e1 <*> evalIntExp e2
   e1 :>= e2 -> (>=) <$> evalIntExp e1 <*> evalIntExp e2
   Within e1 e2 e3 ->

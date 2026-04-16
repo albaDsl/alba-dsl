@@ -47,7 +47,7 @@ inherit = scriptSig 2
 scriptSig :: Natural -> Ctx -> CodeL1 -> PubKey -> TxSignature -> CodeL1
 scriptSig fn ctx redeemScript pubKey sig = compile None args
   where
-    args :: Fn s (s > TPubKey > TSig > TNat > TBytes)
+    args :: Fn s (s :> TPubKey :> TSig :> TNat :> TBytes)
     args =
       let pk = marshal ctx (wrapPubKey False pubKey)
           s = marshal ctx sig

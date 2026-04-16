@@ -15,6 +15,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBool,
     TInt,
@@ -25,7 +26,6 @@ import Alba.Dsl.V1.Bch2026
     int,
     lambda1,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
@@ -64,22 +64,22 @@ instance BlobEq TPoint where
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-makePoint :: Fn (s > TInt > TInt) (s > TPoint)
+makePoint :: Fn (s :> TInt :> TInt) (s :> TPoint)
 makePoint = fn (tuple . right . fromRaw)
 
-pushPoint :: Integer -> Integer -> Fn s (s > TPoint)
+pushPoint :: Integer -> Integer -> Fn s (s :> TPoint)
 pushPoint x y = int x . int y . makePoint
 
-makeIdentity :: Fn s (s > TPoint)
+makeIdentity :: Fn s (s :> TPoint)
 makeIdentity = unit . left . fromRaw
 
-isIdentity :: Fn (s > TPoint) (s > TBool)
+isIdentity :: Fn (s :> TPoint) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXY :: Fn (s > TPoint) (s > TMaybe (TTuple TInt TInt))
+getXY :: Fn (s :> TPoint) (s :> TMaybe (TTuple TInt TInt))
 getXY = fn (lambda1 (drop . nothing) . lambda1 just . rot . toRaw . either)
 
-getXY' :: Fn (s > TPoint) (s > TInt > TInt)
+getXY' :: Fn (s :> TPoint) (s :> TInt :> TInt)
 getXY' =
   fn
     ( begin
@@ -89,14 +89,14 @@ getXY' =
   where
     err = lambda1 (drop . errPartialFunction)
 
-getX :: Fn (s > TPoint) (s > TInt)
+getX :: Fn (s :> TPoint) (s :> TInt)
 getX = getXY' . drop
 
-getY :: Fn (s > TPoint) (s > TInt)
+getY :: Fn (s :> TPoint) (s :> TInt)
 getY = getXY' . nip
 
-fromRaw :: Fn (s > TEither TUnit (TTuple TInt TInt)) (s > TPoint)
+fromRaw :: Fn (s :> TEither TUnit (TTuple TInt TInt)) (s :> TPoint)
 fromRaw = cast
 
-toRaw :: Fn (s > TPoint) (s > TEither TUnit (TTuple TInt TInt))
+toRaw :: Fn (s :> TPoint) (s :> TEither TUnit (TTuple TInt TInt))
 toRaw = cast

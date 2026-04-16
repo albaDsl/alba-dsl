@@ -4,6 +4,7 @@ module DslDemo.Exponentiation (pow) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     TInt,
     TNat,
     begin,
@@ -16,7 +17,6 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( div,
@@ -28,12 +28,12 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
   )
 import Prelude ()
 
-pow :: Fn (s > TInt > TNat) (s > TInt)
+pow :: Fn (s :> TInt :> TNat) (s :> TInt)
 pow = fn (powHelper mul)
 
 powHelper ::
-  (forall s'. Fn (s' > TInt > TInt) (s' > TInt)) ->
-  Fn (s > TInt > TNat) (s > TInt)
+  (forall s'. Fn (s' :> TInt :> TInt) (s' :> TInt)) ->
+  Fn (s :> TInt :> TNat) (s :> TInt)
 powHelper f =
   begin
     . (ns2 #b #n . pick #n)

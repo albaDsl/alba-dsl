@@ -18,7 +18,7 @@ testFunctionsLowLevel =
       testCase "Mixed" $ isTrue (evaluateProg progMixed)
     ]
 
-progAbsolute :: Fn s (s > TBool)
+progAbsolute :: Fn s (s :> TBool)
 progAbsolute =
   begin
     ∘ progCode (cube)
@@ -28,10 +28,10 @@ progAbsolute =
     ∘ int 27
     ∘ opNumEqual
 
-cube :: Fn (s > TInt) (s > TInt)
+cube :: Fn (s :> TInt) (s :> TInt)
 cube = opDup ∘ opDup ∘ opMul ∘ opMul
 
-progNamed :: Fn s (s > TBool)
+progNamed :: Fn s (s :> TBool)
 progNamed =
   begin
     ∘ progCode cube
@@ -41,7 +41,7 @@ progNamed =
     ∘ int 27
     ∘ opNumEqual
 
-progRaw :: Fn s (s > TBool)
+progRaw :: Fn s (s :> TBool)
 progRaw =
   begin
     ∘ progCode cube
@@ -53,7 +53,7 @@ progRaw =
     ∘ int 27
     ∘ opNumEqual
 
-progMixed :: Fn s (s > TBool)
+progMixed :: Fn s (s :> TBool)
 progMixed =
   begin
     ∘ progCode add1
@@ -68,8 +68,8 @@ progMixed =
     ∘ int 4097
     ∘ opNumEqual
   where
-    double :: Fn (s > TInt) (s > TInt)
+    double :: Fn (s :> TInt) (s :> TInt)
     double = fn (opDup ∘ opMul)
 
-    add1 :: Fn (s > TInt) (s > TInt)
+    add1 :: Fn (s :> TInt) (s :> TInt)
     add1 = op1Add

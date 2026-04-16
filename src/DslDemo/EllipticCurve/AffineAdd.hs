@@ -5,6 +5,7 @@ module DslDemo.EllipticCurve.AffineAdd (ecDouble, ecAdd) where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     N,
+    Stack (..),
     begin,
     del,
     ex1,
@@ -19,7 +20,6 @@ import Alba.Dsl.V1.Bch2026
     roll,
     un,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (dup, equal)
 import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
@@ -33,7 +33,7 @@ import DslDemo.EllipticCurve.Point
   )
 import Prelude ()
 
-ecDouble :: Fn (s > TPoint) (s > TPoint)
+ecDouble :: Fn (s :> TPoint) (s :> TPoint)
 ecDouble =
   fn
     ( begin
@@ -50,7 +50,7 @@ ecDouble =
         . (un #rx . makePoint)
     )
 
-ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
+ecAdd :: Fn (s :> TPoint :> TPoint) (s :> TPoint)
 ecAdd =
   begin
     . (ns2 #p #q . pick #p . isIdentity)
@@ -74,7 +74,7 @@ ecAdd =
 
     xCoordsEqual = pick #p . getX . pick #q . getX . equal
 
-    doAdd :: Fn (s > N "p" TPoint > N "q" TPoint) (s > TPoint)
+    doAdd :: Fn (s :> N "p" TPoint :> N "q" TPoint) (s :> TPoint)
     doAdd =
       begin
         . name2 #px #py (roll #p . getXY')

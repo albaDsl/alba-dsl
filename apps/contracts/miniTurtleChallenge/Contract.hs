@@ -3,11 +3,11 @@
 module Contract (MiniTurtleChallenge, contract) where
 
 import Alba.Dsl.V1.Bch2025
-  ( Base,
-    CFn,
+  ( CFn,
     Contract (..),
     Fn,
     N,
+    Stack (..),
     TBool,
     TBytes,
     begin,
@@ -32,7 +32,6 @@ import Alba.Dsl.V1.Bch2025
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
@@ -43,14 +42,14 @@ import Prelude hiding (drop, (.))
 type MiniTurtleChallenge =
   Contract
     "MiniTurtleChallenge"
-    (Base > TBytes)
+    (Base :> TBytes)
     '["withdraw"]
     Base
 
 contract :: MiniTurtleChallenge
 contract = MkContract withdraw
 
-withdraw :: CFn (Base > TBytes)
+withdraw :: CFn (Base :> TBytes)
 withdraw =
   begin
     . verifyProgramSize
@@ -58,13 +57,13 @@ withdraw =
     . (toTyped miniTurtleVm101 . int 5 . opNumEqualVerify)
     . opTrue
 
-verifyProgramSize :: Fn (s > TBytes) (s > TBytes)
+verifyProgramSize :: Fn (s :> TBytes) (s :> TBytes)
 verifyProgramSize =
   opSize . nat (fromIntegral progMaxSize) . opLessThanOrEqual . opVerify
 
 -- The same opcode/byte can not appear twice in a row. OP_1ADD may not follow
 -- OP_MUL.
-verifyBytecode :: Fn (s > TBytes) (s > TBytes)
+verifyBytecode :: Fn (s :> TBytes) (s :> TBytes)
 verifyBytecode = opDup . bytes [255] . opSwap . toTyped checkAll
   where
     checkAll :: FnU
@@ -72,8 +71,8 @@ verifyBytecode = opDup . bytes [255] . opSwap . toTyped checkAll
 
     check ::
       Fn
-        (s > N "lastOp" TBytes > N "ops" TBytes)
-        (s > TBytes > TBytes)
+        (s :> N "lastOp" TBytes :> N "ops" TBytes)
+        (s :> TBytes :> TBytes)
     check =
       begin
         . (pick #ops . isNotEmpty)
@@ -93,10 +92,10 @@ verifyBytecode = opDup . bytes [255] . opSwap . toTyped checkAll
 
     add1 = bytes [0x8B]
 
-    verifyNotEqual :: Fn (s > TBytes > TBytes) s
+    verifyNotEqual :: Fn (s :> TBytes :> TBytes) s
     verifyNotEqual = opEqual . opNot . opVerify
 
-    isNotEmpty :: Fn (s > TBytes) (s > TBool)
+    isNotEmpty :: Fn (s :> TBytes) (s :> TBool)
     isNotEmpty = opSize . nat 1 . opGreaterThanOrEqual . opNip
 
 progMaxSize :: Int

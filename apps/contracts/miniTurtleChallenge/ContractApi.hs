@@ -7,11 +7,11 @@ import Alba.Dsl.V1.Bch2025
     Contract (MkContract),
     Fn,
     Optimize (None, O1),
+    Stack (..),
     TBytes,
     bytes,
     compile,
     (.),
-    type (>),
   )
 import Alba.Misc.Haskoin (Address (..), scriptAddress)
 import Contract (contract)
@@ -28,5 +28,5 @@ instantiate _ctx =
 withdraw :: Ctx -> CodeL1 -> CodeL1 -> CodeL1
 withdraw _ctx solution redeemScript = compile None args
   where
-    args :: Fn s (s > TBytes > TBytes)
+    args :: Fn s (s :> TBytes :> TBytes)
     args = bytes solution . bytes redeemScript

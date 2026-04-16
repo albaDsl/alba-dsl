@@ -41,12 +41,12 @@ propToPushOp b =
   (B.length b <= 9997) ==>
     isTrue' (evaluateProgWithStack prog (S.singleton $ b2SeUnsafe b, S.empty))
 
-prog :: Fn (s > TBytes) (s > TBool)
+prog :: Fn (s :> TBytes) (s :> TBool)
 prog =
   begin
     ∘ (opDup ∘ toPushOp ∘ opDefineNamed "f")
     ∘ opInvokeNamed "f" f
     ∘ opEqual
   where
-    f :: Fn s (s > TBytes)
+    f :: Fn s (s :> TBytes)
     f = undefined

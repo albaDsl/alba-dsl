@@ -4,7 +4,7 @@ module Alba.Dsl.V1.Common.ContractDoc (produceDoc, Term, Doc (..)) where
 
 import Alba.Dsl.V1.Common.Contract (Contract)
 import Alba.Dsl.V1.Common.LangArgs (N)
-import Alba.Dsl.V1.Common.Stack (TBool, TInt, TPubKey, TSig, (:|))
+import Alba.Dsl.V1.Common.Stack (Stack (..), TBool, TInt, TPubKey, TSig, (:|))
 import Data.Kind (Type)
 import Data.Proxy (Proxy (..))
 import GHC.TypeLits
@@ -43,6 +43,7 @@ type family Demote k where
   Demote Symbol = String
   Demote [k] = [Demote k]
   Demote Type = Doc
+  Demote Stack = [Doc]
 
 class Term a where
   term :: Demote (KindOf a)
@@ -53,10 +54,10 @@ instance (KnownNat n) => Term (n :: Nat) where
 instance (KnownSymbol s) => Term (s :: Symbol) where
   term = symbolVal (Proxy @s)
 
-instance Term ('[] :: [k]) where
+instance Term (Base :: Stack) where
   term = []
 
-instance (Term a, Term as) => Term ((a ': as) :: [k]) where
+instance (Term a, Term as) => Term ((as :> a) :: Stack) where
   term = term @a : term @as
 
 instance Term (TInt :: Type) where
@@ -74,8 +75,8 @@ instance Term (TPubKey :: Type) where
 instance (Term t, KnownSymbol n) => Term (N (n :: Symbol) (t :: Type)) where
   term = DArg (term @t) (DStr (symbolVal (Proxy @n)))
 
-instance (Term a, Term b) => Term ((a :: [Type]) :| (b :: [Type])) where
+instance (Term a, Term b) => Term ((a :: Stack) :| (b :: Stack)) where
   term = DBranch (DList (term @a)) (DList (term @b))
 
-instance (Term a, Term b) => Term ((a :: [Type]) :| (b :: Type)) where
+instance (Term a, Term b) => Term ((a :: Stack) :| (b :: Type)) where
   term = DBranch (DList (term @a)) (term @b)

@@ -2,9 +2,10 @@
 
 module TestLibVector (testLibVector) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
+    Stack (..),
     StackEntry,
     TBool,
     TBytes,
@@ -23,25 +24,34 @@ import Alba.Dsl.V1.Bch2025
     pick,
     roll,
     (∘),
-    type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Applicative (liftA2Maybe)
-import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Error (errCanNotHappen)
-import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
-import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (packFsRec))
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, swap)
-import Alba.Dsl.V1.Bch2026.Contract.TBytes128
-  ( TBytes128,
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    Integral (..),
+    Ord (..),
+    PackFs (packFsRec),
+    TBytes128,
+    TInt64,
+    TInt8,
+    TMaybe,
     bytes128,
+    drop,
+    dup,
+    errCanNotHappen,
     fromBytes,
+    fromMaybe',
+    fst,
+    int64,
+    int8,
+    just,
+    liftA2Maybe,
+    nip,
+    nothing,
+    snd,
+    swap,
     toBytes,
+    tuple,
   )
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, fromMaybe', just, nothing)
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (fst, snd, tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.Lang
@@ -91,7 +101,7 @@ testLibVector =
       testProperty "folding" propFolding
     ]
 
-progLength :: Fn s (s > TBool)
+progLength :: Fn s (s :> TBool)
 progLength =
   begin
     ∘ (int64Vector ∘ V.length ∘ nat 3 ∘ equalVerify)
@@ -102,7 +112,7 @@ progLength =
     ∘ (bytes128Vector ∘ V.null ∘ opFalse ∘ equalVerify)
     ∘ opTrue
 
-progIndexing :: Fn s (s > TBool)
+progIndexing :: Fn s (s :> TBool)
 progIndexing =
   begin
     ∘ (int64Vector ∘ V.last ∘ fromJust ∘ int64 2 ∘ equalVerify)
@@ -134,7 +144,7 @@ progIndexing =
     ∘ (bytes128Vector ∘ nat 3 ∘ V.lookup ∘ nothing ∘ equalVerify)
     ∘ opTrue
 
-progSlicing :: Fn s (s > TBool)
+progSlicing :: Fn s (s :> TBool)
 progSlicing =
   begin
     ∘ (int64Vector ∘ testUncons int64)
@@ -257,14 +267,14 @@ progSlicing =
   where
     testUncons ::
       (BlobEq a, PackFs a) =>
-      (forall s'. Integer -> Fn s' (s' > a)) ->
-      Fn (s > V.TVector a) s
+      (forall s'. Integer -> Fn s' (s' :> a)) ->
+      Fn (s :> V.TVector a) s
     testUncons val =
       begin
         ∘ (V.uncons ∘ fromJust ∘ snd)
         ∘ (V.uncons ∘ fromJust ∘ fst ∘ val 1 ∘ equalVerify)
 
-progConstruction :: Fn s (s > TBool)
+progConstruction :: Fn s (s :> TBool)
 progConstruction =
   runEnv
     ( begin
@@ -291,7 +301,7 @@ progConstruction =
         ∘ opTrue
     )
 
-progConcatenation :: Fn s (s > TBool)
+progConcatenation :: Fn s (s :> TBool)
 progConcatenation =
   runEnv
     ( begin
@@ -302,10 +312,10 @@ progConcatenation =
           )
         ∘ ( begin
               ∘ ( (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate) ::
-                    Env s (s > V.TVector TInt64)
+                    Env s (s :> V.TVector TInt64)
                 )
               ∘ ( (nat 3 ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate) ::
-                    Env s (s > V.TVector TInt64)
+                    Env s (s :> V.TVector TInt64)
                 )
               ∘ V.append
               ∘ ( begin
@@ -318,7 +328,7 @@ progConcatenation =
         ∘ opTrue
     )
 
-progPermutation :: Fn s (s > TBool)
+progPermutation :: Fn s (s :> TBool)
 progPermutation =
   runEnv
     ( begin
@@ -340,7 +350,7 @@ progPermutation =
         ∘ opTrue
     )
 
-progMapping :: Fn s (s > TBool)
+progMapping :: Fn s (s :> TBool)
 progMapping =
   runEnv
     ( begin
@@ -367,10 +377,10 @@ progMapping =
         ∘ opTrue
     )
   where
-    int8to64 :: Fn (s > TInt8) (s > TInt64)
+    int8to64 :: Fn (s :> TInt8) (s :> TInt64)
     int8to64 = cast
 
-progZipping :: Fn s (s > TBool)
+progZipping :: Fn s (s :> TBool)
 progZipping =
   runEnv
     ( begin
@@ -433,7 +443,7 @@ progZipping =
         ∘ opTrue
     )
 
-progFiltering :: Fn s (s > TBool)
+progFiltering :: Fn s (s :> TBool)
 progFiltering =
   runEnv
     ( begin
@@ -446,7 +456,7 @@ progFiltering =
         ∘ opTrue
     )
 
-fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
+fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = lambda0 (errCanNotHappen) ∘ swap ∘ fromMaybe'
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -455,7 +465,7 @@ propReverse (BytesSize size) =
   let len = P.max 0 (size - overhead) `P.div` testVectorElemSize
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv (testVector len' ∘ dup ∘ V.reverse ∘ V.reverse ∘ equal)
 
@@ -467,7 +477,7 @@ propLength (BytesSize size) =
   let len = size `P.div` testVectorElemSize
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' = runEnv (nat len' ∘ testVector len' ∘ V.length ∘ opNumEqual)
 
 propLookup :: BytesSize -> BytesSize -> Property
@@ -477,7 +487,7 @@ propLookup (BytesSize size1) (BytesSize size2) =
         idx = P.max 0 ((size2 `P.div` testVectorElemSize) - 1)
      in isTrue' (evaluateProg (prog (fromIntegral len) (fromIntegral idx)))
   where
-    prog :: Natural -> Natural -> Fn s (s > TBool)
+    prog :: Natural -> Natural -> Fn s (s :> TBool)
     prog len' idx' =
       runEnv
         ( begin
@@ -490,7 +500,7 @@ propConsSnocAppend (BytesSize size) =
   let len = P.max 0 ((size `P.div` testVectorElemSize) - 2)
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -507,7 +517,7 @@ propHeadTailUncons (BytesSize size) =
     let len = size `P.div` testVectorElemSize
      in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -523,7 +533,7 @@ propLastInitUnsnoc (BytesSize size) =
     let len = size `P.div` testVectorElemSize
      in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -542,7 +552,7 @@ propTakeDropSplitAt (BytesSize size1) (BytesSize size2) =
         idx = size2 `P.div` testVectorElemSize
      in isTrue' (evaluateProg (prog (fromIntegral len) (fromIntegral idx)))
   where
-    prog :: Natural -> Natural -> Fn s (s > TBool)
+    prog :: Natural -> Natural -> Fn s (s :> TBool)
     prog len' idx' =
       runEnv
         ( begin
@@ -561,7 +571,7 @@ propZipUnzip (BytesSize size1) (BytesSize size2) =
         len2 = size2 `P.div` testVectorElemSize
      in isTrue' (evaluateProg (prog (fromIntegral len1) (fromIntegral len2)))
   where
-    prog :: Natural -> Natural -> Fn s (s > TBool)
+    prog :: Natural -> Natural -> Fn s (s :> TBool)
     prog len1' len2' =
       runEnv
         ( begin
@@ -580,7 +590,7 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
         len2 = size2 `P.div` testVectorElemSize
      in isTrue' (evaluateProg (prog (fromIntegral len1) (fromIntegral len2)))
   where
-    prog :: Natural -> Natural -> Fn s (s > TBool)
+    prog :: Natural -> Natural -> Fn s (s :> TBool)
     prog len1' len2' =
       runEnv
         ( begin
@@ -599,7 +609,7 @@ propFilterKeepAll (BytesSize size) =
   let len = P.max 0 ((size - overhead) `P.div` testVectorElemSize)
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -615,7 +625,7 @@ propFilterKeepNone (BytesSize size) =
   let len = size `P.div` testVectorElemSize
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -629,7 +639,7 @@ propMapComposition (BytesSize size) =
   let len = P.max 0 ((size - overhead) `P.div` testVectorElemSize)
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -639,10 +649,10 @@ propMapComposition (BytesSize size) =
             ∘ equal
         )
 
-    f :: Fn (s > TInt64) (s > TInt64)
+    f :: Fn (s :> TInt64) (s :> TInt64)
     f = int64 2 ∘ add
 
-    g :: Fn (s > TInt64) (s > TInt64)
+    g :: Fn (s :> TInt64) (s :> TInt64)
     g = int64 2 ∘ mul
 
     overhead :: Integer
@@ -654,7 +664,7 @@ propMapIdentity (BytesSize size) =
   let len = P.max 0 ((size - overhead) `P.div` testVectorElemSize)
    in isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -669,7 +679,7 @@ propFolding :: BytesSize -> Bool
 propFolding (BytesSize size) =
   isTrue' (evaluateProg (prog (fromIntegral len)))
   where
-    prog :: Natural -> Fn s (s > TBool)
+    prog :: Natural -> Fn s (s :> TBool)
     prog len' =
       runEnv
         ( begin
@@ -687,7 +697,7 @@ propFolding (BytesSize size) =
     sum = let n = len - 1 in n * (n + 1) `P.div` 2
 
 -- ## Test vectors.
-int64Vector :: Fn s (s > V.TVector TInt64)
+int64Vector :: Fn s (s :> V.TVector TInt64)
 int64Vector =
   fn
     ( begin
@@ -695,10 +705,10 @@ int64Vector =
         ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (8 * 3) ∘ equalVerify)
     )
 
-v2b :: Fn (s > V.TVector a) (s > TBytes)
+v2b :: Fn (s :> V.TVector a) (s :> TBytes)
 v2b = cast
 
-int8Vector :: Fn s (s > V.TVector TInt8)
+int8Vector :: Fn s (s :> V.TVector TInt8)
 int8Vector =
   fn
     ( begin
@@ -706,7 +716,7 @@ int8Vector =
         ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (1 * 3) ∘ equalVerify)
     )
 
-bytes128Vector :: Fn s (s > V.TVector TBytes128)
+bytes128Vector :: Fn s (s :> V.TVector TBytes128)
 bytes128Vector =
   fn
     ( begin
@@ -724,12 +734,12 @@ b1 = "a string that is a bit longer and keeps going"
 b2 :: Bytes
 b2 = ""
 
-testVector :: Natural -> Env s (s > V.TVector TInt64)
+testVector :: Natural -> Env s (s :> V.TVector TInt64)
 testVector len = nat len ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate
 
 testVectorElemSize :: Integer
 testVectorElemSize = 8
 
 -- ## bytes128Vector ops.
-addExclamation :: Fn (s > TBytes128) (s > TBytes128)
+addExclamation :: Fn (s :> TBytes128) (s :> TBytes128)
 addExclamation = toBytes ∘ bytes "!" ∘ opCat ∘ fromBytes

@@ -10,6 +10,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBool,
     TBytes,
@@ -22,27 +23,26 @@ import Alba.Dsl.V1.Bch2026
     opEqual,
     opEqualVerify,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (TBlobEqRec)
 import Prelude (undefined)
 
 mkBlobEqRec ::
   Fn
-    (s > TLambda '[a, a] '[TBool] > TLambda '[a, a] '[])
-    (s > TBlobEqRec a)
+    (s :> TLambda '[a, a] '[TBool] :> TLambda '[a, a] '[])
+    (s :> TBlobEqRec a)
 mkBlobEqRec = undefined -- FIXME: implement.
 
-blobEqEqual :: (StackEntry a) => Fn (s > a > a) (s > TBool)
+blobEqEqual :: (StackEntry a) => Fn (s :> a :> a) (s :> TBool)
 blobEqEqual = valsToBytes . opEqual
 
-valsToBytes :: Fn (s > a > a) (s > TBytes > TBytes)
+valsToBytes :: Fn (s :> a :> a) (s :> TBytes :> TBytes)
 valsToBytes = castStack
 
-blobEqEqualVerify :: (StackEntry a) => Fn (s > a > a) s
+blobEqEqualVerify :: (StackEntry a) => Fn (s :> a :> a) s
 blobEqEqualVerify = valsToBytes . opEqualVerify
 
-blobEqRecord :: forall a s. (StackEntry a) => Fn s (s > TBlobEqRec a)
+blobEqRecord :: forall a s. (StackEntry a) => Fn s (s :> TBlobEqRec a)
 blobEqRecord =
   constant
     ( begin

@@ -7,6 +7,7 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     LibData (..),
     Optimize (O1),
+    Stack (..),
     TBytes,
     bytes,
     compileLibrary,
@@ -15,7 +16,6 @@ import Alba.Dsl.V1.Bch2026
     simpleWrap,
     simpleWrapChunkSize,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as LZ
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop)
@@ -42,5 +42,5 @@ numUtxos = fromIntegral $ length deployTx.outputs
 showCase :: Fn s s
 showCase = bytes "0341421300" . LZ.decompress . drop
 
-decompress :: Fn (s > TBytes) (s > TBytes)
+decompress :: Fn (s :> TBytes) (s :> TBytes)
 decompress = invokeExt lib "Alba.Dsl.V1.Bch2026.Contract.LzssBit" "decompress"

@@ -68,14 +68,14 @@ ecMultiply code =
     Right _ -> error "ecMultiply"
     Left err -> error ("err: " <> show err)
 
-progMul :: Natural -> Fn s (s > TInt > TInt)
+progMul :: Natural -> Fn s (s :> TInt :> TInt)
 progMul scalar = nat scalar ∘ g ∘ EA.ecMul ∘ EA.getXY'
 
-progMulJacobian :: Natural -> Fn s (s > TInt > TInt)
+progMulJacobian :: Natural -> Fn s (s :> TInt :> TInt)
 progMulJacobian scalar =
   nat scalar ∘ g ∘ EJ.ecMul ∘ opDup ∘ EA.getX ∘ opSwap ∘ EA.getY
 
-progMulJacobianWindowed :: Natural -> Fn s (s > TInt > TInt)
+progMulJacobianWindowed :: Natural -> Fn s (s :> TInt :> TInt)
 progMulJacobianWindowed scalar =
   runEnv
     ( begin

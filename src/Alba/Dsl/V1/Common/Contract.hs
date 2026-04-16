@@ -2,30 +2,34 @@
 
 module Alba.Dsl.V1.Common.Contract (Contract (..), EntryFunction, AddFIdx) where
 
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.LangArgs (N)
-import Alba.Dsl.V1.Common.Stack (Base, CountStackBranches, S, TBool, TInt)
-import Alba.Dsl.V1.Common.TypeFamilies (Append)
-import Data.Kind (Type)
+import Alba.Dsl.V1.Common.Stack
+  ( Append,
+    CountStackBranches,
+    S,
+    Stack (..),
+    TBool,
+    TInt,
+  )
 import GHC.TypeLits (Nat, Symbol)
 
 data
   Contract
     (contractName :: Symbol)
-    (abi :: [Type])
+    (abi :: Stack)
     (functionNames :: [Symbol])
-    (params :: [Type])
+    (params :: Stack)
   where
   MkContract ::
     EntryFunction abi params -> Contract contractName abi functionNames params
 
-type family EntryFunction (abi :: [Type]) (params :: [Type]) where
+type family EntryFunction (abi :: Stack) (params :: Stack) where
   EntryFunction abi params =
-    S (Append (Append abi (AddFIdx (CountStackBranches abi))) params) '[] ->
-    S (Base > TBool) '[]
+    S (Append (Append abi (AddFIdx (CountStackBranches abi))) params) Base ->
+    S (Base :> TBool) Base
 
 -- The function index (fIdx) is used for selecting which contract function to
 -- dispatch to.
-type family AddFIdx (count :: Nat) :: [Type] where
-  AddFIdx 1 = '[]
-  AddFIdx _ = '[N "_fIdx" TInt]
+type family AddFIdx (count :: Nat) :: Stack where
+  AddFIdx 1 = Base
+  AddFIdx _ = Base :> N "_fIdx" TInt

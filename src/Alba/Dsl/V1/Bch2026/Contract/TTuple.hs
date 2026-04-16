@@ -10,8 +10,9 @@ module Alba.Dsl.V1.Bch2026.Contract.TTuple
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBytes,
     TNat,
@@ -28,7 +29,6 @@ import Alba.Dsl.V1.Bch2025
     opSplit,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
@@ -50,25 +50,25 @@ instance (BlobEq a, BlobEq b) => BlobEq (TTuple a b) where
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-tuple :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
+tuple :: (StackEntry a, StackEntry b) => Fn (s :> a :> b) (s :> TTuple a b)
 tuple = fn tupleM
 
-tupleM :: (StackEntry a, StackEntry b) => Fn (s > a > b) (s > TTuple a b)
+tupleM :: (StackEntry a, StackEntry b) => Fn (s :> a :> b) (s :> TTuple a b)
 tupleM =
   begin
     . (ns2 #fst #snd . roll #fst . valToBytes . addSizeTag . roll #snd)
     . (valToBytes . opCat . fromRaw)
   where
-    valToBytes :: Fn (s > a) (s > TBytes)
+    valToBytes :: Fn (s :> a) (s :> TBytes)
     valToBytes = cast
 
-    addSizeTag :: Fn (s > TBytes) (s > TBytes)
+    addSizeTag :: Fn (s :> TBytes) (s :> TBytes)
     addSizeTag = opSize . n2i . tagSize . opNum2Bin . swap . opCat
 
-tagSize :: Fn s (s > TNat)
+tagSize :: Fn s (s :> TNat)
 tagSize = nat 2
 
-untuple :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a > b)
+untuple :: (StackEntry a, StackEntry b) => Fn (s :> TTuple a b) (s :> a :> b)
 untuple =
   fn
     ( begin
@@ -76,17 +76,17 @@ untuple =
         . (bytesToVal . swap . bytesToVal . swap)
     )
   where
-    bytesToVal :: Fn (s > TBytes) (s > a)
+    bytesToVal :: Fn (s :> TBytes) (s :> a)
     bytesToVal = cast
 
-fst :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > a)
+fst :: (StackEntry a, StackEntry b) => Fn (s :> TTuple a b) (s :> a)
 fst = untuple . drop
 
-snd :: (StackEntry a, StackEntry b) => Fn (s > TTuple a b) (s > b)
+snd :: (StackEntry a, StackEntry b) => Fn (s :> TTuple a b) (s :> b)
 snd = untuple . nip
 
-toRaw :: Fn (s > TTuple a b) (s > TBytes)
+toRaw :: Fn (s :> TTuple a b) (s :> TBytes)
 toRaw = cast
 
-fromRaw :: Fn (s > TBytes) (s > TTuple a b)
+fromRaw :: Fn (s :> TBytes) (s :> TTuple a b)
 fromRaw = cast

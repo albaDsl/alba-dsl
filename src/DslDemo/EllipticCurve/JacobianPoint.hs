@@ -13,6 +13,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBool,
     TInt,
@@ -23,7 +24,6 @@ import Alba.Dsl.V1.Bch2026
     int,
     lambda1,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
@@ -61,22 +61,22 @@ instance BlobEq TPointJ where
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-makePoint :: Fn (s > TInt > TInt > TInt) (s > TPointJ)
+makePoint :: Fn (s :> TInt :> TInt :> TInt) (s :> TPointJ)
 makePoint = fn (tuple . tuple . right . fromRaw)
 
-pushPoint :: Integer -> Integer -> Integer -> Fn s (s > TPointJ)
+pushPoint :: Integer -> Integer -> Integer -> Fn s (s :> TPointJ)
 pushPoint x y z = int x . int y . int z . makePoint
 
-makeIdentity :: Fn s (s > TPointJ)
+makeIdentity :: Fn s (s :> TPointJ)
 makeIdentity = unit . left . fromRaw
 
-isIdentity :: Fn (s > TPointJ) (s > TBool)
+isIdentity :: Fn (s :> TPointJ) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXYZ :: Fn (s > TPointJ) (s > TMaybe (TTuple TInt (TTuple TInt TInt)))
+getXYZ :: Fn (s :> TPointJ) (s :> TMaybe (TTuple TInt (TTuple TInt TInt)))
 getXYZ = fn (lambda1 (drop . nothing) . lambda1 just . rot . toRaw . either)
 
-getXYZ' :: Fn (s > TPointJ) (s > TInt > TInt > TInt)
+getXYZ' :: Fn (s :> TPointJ) (s :> TInt :> TInt :> TInt)
 getXYZ' =
   fn
     ( begin
@@ -88,12 +88,12 @@ getXYZ' =
 
 fromRaw ::
   Fn
-    (s > TEither TUnit (TTuple TInt (TTuple TInt TInt)))
-    (s > TPointJ)
+    (s :> TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+    (s :> TPointJ)
 fromRaw = cast
 
 toRaw ::
   Fn
-    (s > TPointJ)
-    (s > TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+    (s :> TPointJ)
+    (s :> TEither TUnit (TTuple TInt (TTuple TInt TInt)))
 toRaw = cast

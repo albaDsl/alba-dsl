@@ -102,7 +102,7 @@ instance Arbitrary BoolExp where
             (:==) <$> goArith <*> goArith,
             (:/=) <$> goArith <*> goArith,
             (:<) <$> goArith <*> goArith,
-            (:>) <$> goArith <*> goArith,
+            (:>.) <$> goArith <*> goArith,
             (:<=) <$> goArith <*> goArith,
             (:>=) <$> goArith <*> goArith,
             Within <$> goArith <*> goArith <*> goArith,

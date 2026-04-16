@@ -21,9 +21,8 @@ import Alba.Dsl.V1.Bch2025.Ops
   )
 import Alba.Dsl.V1.Bch2025.Stack (THash160)
 import Alba.Dsl.V1.Common.Compile (Optimize (None), compile)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((∘))
-import Alba.Dsl.V1.Common.Stack (Fn, TBool, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TPubKey, TSig)
 import Alba.Misc.Haskoin
   ( Address (..),
     TxSignature (..),
@@ -49,10 +48,10 @@ outputScript (PubKeyAddress h) =
 outputScript (ScriptAddress h) =
   compile None (p2shScriptPubKey (toStrict $ encode h))
 
-p2shScriptPubKey :: B.ByteString -> Fn (s > THash160) (s > TBool)
+p2shScriptPubKey :: B.ByteString -> Fn (s :> THash160) (s :> TBool)
 p2shScriptPubKey scriptHash = opHash160 ∘ bytes' scriptHash ∘ opEqual
 
-p2pkhScriptPubKey :: B.ByteString -> Fn (s > TSig > TPubKey) (s > TBool)
+p2pkhScriptPubKey :: B.ByteString -> Fn (s :> TSig :> TPubKey) (s :> TBool)
 p2pkhScriptPubKey pubKeyHash =
   (opDup ∘ opHash160 ∘ bytes' pubKeyHash ∘ opEqualVerify ∘ opCheckSig)
 

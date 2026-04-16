@@ -20,7 +20,7 @@ testLibTuple =
       testCase "Nested" $ do isTrue (evaluateProg progNested)
     ]
 
-progBasics :: Fn s (s > TBool)
+progBasics :: Fn s (s :> TBool)
 progBasics =
   begin
     ∘ ( begin
@@ -39,7 +39,7 @@ progBasics =
       )
     ∘ opTrue
 
-progNested :: Fn s (s > TBool)
+progNested :: Fn s (s :> TBool)
 progNested =
   begin
     ∘ ( begin

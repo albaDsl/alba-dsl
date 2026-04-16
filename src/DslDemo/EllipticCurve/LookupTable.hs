@@ -9,6 +9,7 @@ where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     TBytes,
     TNat,
     cast,
@@ -17,19 +18,18 @@ import Alba.Dsl.V1.Bch2026
     opInvoke,
     opSwap,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Common.RuntimeLib (toPushOp)
 import Prelude (undefined)
 
-defineConstant :: Fn (s > TBytes > TNat) s
+defineConstant :: Fn (s :> TBytes :> TNat) s
 defineConstant = fn (n2b . opSwap . toPushOp . opSwap . opDefine)
 
-n2b :: Fn (s > TNat) (s > TBytes)
+n2b :: Fn (s :> TNat) (s :> TBytes)
 n2b = cast
 
-getConstant :: Fn (s > TNat) (s > TBytes)
+getConstant :: Fn (s :> TNat) (s :> TBytes)
 getConstant = n2b . opInvoke get
   where
-    get :: Fn s (s > TBytes)
+    get :: Fn s (s :> TBytes)
     get = undefined

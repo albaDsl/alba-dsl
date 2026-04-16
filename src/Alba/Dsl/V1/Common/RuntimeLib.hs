@@ -22,16 +22,15 @@ import Alba.Dsl.V1.Bch2025.Ops
   )
 import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Stack (TCode)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang (begin, (∘))
-import Alba.Dsl.V1.Common.Stack (Fn, TBool, TBytes, TNat, cast)
+import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TBytes, TNat, cast)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import Data.ByteString qualified as B
 import Numeric.Natural (Natural)
 
 -- Turns a byte value into an instruction for pushing that byte value. ToPushOp
 -- is 125 bytes in size.
-toPushOp :: Fn (s > TBytes) (s > TCode)
+toPushOp :: Fn (s :> TBytes) (s :> TCode)
 toPushOp =
   fn
     ( begin
@@ -64,35 +63,35 @@ toPushOp =
         ∘ b2c
     )
   where
-    simpleOpData :: forall s. Fn (s > TBytes) (s > TBytes)
+    simpleOpData :: forall s. Fn (s :> TBytes) (s :> TBytes)
     simpleOpData = bytes [0x01] ∘ opSwap ∘ opCat
 
-    numEq :: Natural -> Fn (s > TNat) (s > TBool)
+    numEq :: Natural -> Fn (s :> TNat) (s :> TBool)
     numEq x = nat x ∘ opNumEqual
 
-    numInRange :: Natural -> Natural -> Fn (s > TNat) (s > TBool)
+    numInRange :: Natural -> Natural -> Fn (s :> TNat) (s :> TBool)
     numInRange x y = nat x ∘ nat y ∘ opWithin
 
-    lessOrEq :: Natural -> Fn (s > TNat) (s > TBool)
+    lessOrEq :: Natural -> Fn (s :> TNat) (s :> TBool)
     lessOrEq x = nat x ∘ opLessThanOrEqual
 
-    bytesEq :: B.ByteString -> Fn (s > TBytes) (s > TBool)
+    bytesEq :: B.ByteString -> Fn (s :> TBytes) (s :> TBool)
     bytesEq x = bytes x ∘ opEqual
 
-    b2n :: Fn (s > TBytes) (s > TNat)
+    b2n :: Fn (s :> TBytes) (s :> TNat)
     b2n = cast
 
-    n2b :: Fn (s > TNat) (s > TBytes)
+    n2b :: Fn (s :> TNat) (s :> TBytes)
     n2b = cast
 
-    b2c :: Fn (s > TBytes) (s > TCode)
+    b2c :: Fn (s :> TBytes) (s :> TCode)
     b2c = cast
 
-    opcode :: OpcodeL1 -> Fn s (s > TBytes)
+    opcode :: OpcodeL1 -> Fn s (s :> TBytes)
     opcode op = bytes [(fromIntegral . fromEnum) op]
 
-    dropSign :: Fn (s > TNat) (s > TBytes)
+    dropSign :: Fn (s :> TNat) (s :> TBytes)
     dropSign = n2b ∘ nat 1 ∘ opSplit ∘ opDrop
 
-    assemblePushData :: Fn (s > TBytes > TBytes > TBytes) (s > TBytes)
+    assemblePushData :: Fn (s :> TBytes :> TBytes :> TBytes) (s :> TBytes)
     assemblePushData = opSwap ∘ opRot ∘ opCat ∘ opCat

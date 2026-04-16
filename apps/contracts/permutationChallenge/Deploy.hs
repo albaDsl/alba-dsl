@@ -7,6 +7,7 @@ import Alba.Dsl.V1.Bch2026
     CodeL1,
     Fn,
     Optimize (None),
+    Stack (..),
     TPubKey,
     TSig,
     bytes',
@@ -14,7 +15,6 @@ import Alba.Dsl.V1.Bch2026
     setScriptSig,
     signAll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
@@ -46,7 +46,7 @@ deployTx ctx net outpoint = do
 
     err2 = error "Couldn't load wallet funding Tx."
 
-    scriptSig :: Bytes -> Bytes -> Fn s (s > TPubKey > TSig)
+    scriptSig :: Bytes -> Bytes -> Fn s (s :> TPubKey :> TSig)
     scriptSig pubKey sig = bytes' pubKey . bytes' sig
 
 txTemplate :: CodeL1 -> OutPoint -> Word64 -> Tx

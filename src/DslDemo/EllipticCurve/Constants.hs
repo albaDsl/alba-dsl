@@ -6,7 +6,7 @@ import Alba.Dsl.V1.Bch2026
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import Numeric.Natural (Natural)
 
-g :: Fn s (s > TPoint)
+g :: Fn s (s :> TPoint)
 g = fn (pushPoint x y)
   where
     x = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798

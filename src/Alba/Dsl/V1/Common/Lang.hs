@@ -18,9 +18,7 @@ module Alba.Dsl.V1.Common.Lang
   )
 where
 
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
-import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (S), type (:|))
-import Alba.Dsl.V1.Common.TypeFamilies (Append)
+import Alba.Dsl.V1.Common.Stack (Append, Fn, FnA, S (S), Stack (..), type (:|))
 import Data.Kind (Type)
 import Prelude (id)
 import Prelude qualified as P
@@ -45,10 +43,10 @@ ex0 :: FnA s alt s alt -> FnA s alt s alt
 ex0 prog state = let (S c fs) = prog state in S c fs
 
 -- An expression that adds one element to the stack type.
-ex1 :: FnA s alt (s > t1) alt -> FnA s alt (s > t1) alt
+ex1 :: FnA s alt (s :> t1) alt -> FnA s alt (s :> t1) alt
 ex1 prog state = let (S c fs) = prog state in S c fs
 
-ex2 :: FnA s alt (s > t1 > t2) alt -> FnA s alt (s > t1 > t2) alt
+ex2 :: FnA s alt (s :> t1 :> t2) alt -> FnA s alt (s :> t1 :> t2) alt
 ex2 prog state = let (S c fs) = prog state in S c fs
 
 branch1 :: forall s. Fn s (Branch1 s)
@@ -75,46 +73,46 @@ branch7 (S c fs) = S c fs
 branch8 :: forall s. Fn s (Branch8 s)
 branch8 (S c fs) = S c fs
 
-type family Branch1 (xs :: [Type]) :: [Type] where
-  Branch1 (xs > (x1 :| _)) = Append xs x1
-  Branch1 (xs > x1) = Branch1 xs > x1
+type family Branch1 (xs :: Stack) :: Stack where
+  Branch1 (xs :> (x1 :| _)) = Append xs x1
+  Branch1 (xs :> x1) = Branch1 xs :> x1
 
-type family Branch2 (xs :: [Type]) :: [Type] where
-  Branch2 (xs > (x1 :| (x2 :: [Type]))) = Append xs x2
-  Branch2 (xs > (x1 :| (x2 :: Type))) = Branch1 (xs > x2)
-  Branch2 (xs > x1) = Branch2 xs > x1
+type family Branch2 (xs :: Stack) :: Stack where
+  Branch2 (xs :> (x1 :| (x2 :: Stack))) = Append xs x2
+  Branch2 (xs :> (x1 :| (x2 :: Type))) = Branch1 (xs :> x2)
+  Branch2 (xs :> x1) = Branch2 xs :> x1
 
-type family Branch3 (xs :: [Type]) :: [Type] where
-  Branch3 (xs > (x1 :| x2 :| (x3 :: [Type]))) = Append xs x3
-  Branch3 (xs > (x1 :| x2 :| (x3 :: Type))) = Branch1 (xs > x3)
-  Branch3 (xs > x1) = Branch3 xs > x1
+type family Branch3 (xs :: Stack) :: Stack where
+  Branch3 (xs :> (x1 :| x2 :| (x3 :: Stack))) = Append xs x3
+  Branch3 (xs :> (x1 :| x2 :| (x3 :: Type))) = Branch1 (xs :> x3)
+  Branch3 (xs :> x1) = Branch3 xs :> x1
 
-type family Branch4 (xs :: [Type]) :: [Type] where
-  Branch4 (xs > (x1 :| x2 :| x3 :| (x4 :: [Type]))) = Append xs x4
-  Branch4 (xs > (x1 :| x2 :| x3 :| (x4 :: Type))) = Branch1 (xs > x4)
-  Branch4 (xs > x1) = Branch4 xs > x1
+type family Branch4 (xs :: Stack) :: Stack where
+  Branch4 (xs :> (x1 :| x2 :| x3 :| (x4 :: Stack))) = Append xs x4
+  Branch4 (xs :> (x1 :| x2 :| x3 :| (x4 :: Type))) = Branch1 (xs :> x4)
+  Branch4 (xs :> x1) = Branch4 xs :> x1
 
-type family Branch5 (xs :: [Type]) :: [Type] where
-  Branch5 (xs > (x1 :| x2 :| x3 :| x4 :| (x5 :: [Type]))) = Append xs x5
-  Branch5 (xs > (x1 :| x2 :| x3 :| x4 :| (x5 :: Type))) = Branch1 (xs > x5)
-  Branch5 (xs > x1) = Branch5 xs > x1
+type family Branch5 (xs :: Stack) :: Stack where
+  Branch5 (xs :> (x1 :| x2 :| x3 :| x4 :| (x5 :: Stack))) = Append xs x5
+  Branch5 (xs :> (x1 :| x2 :| x3 :| x4 :| (x5 :: Type))) = Branch1 (xs :> x5)
+  Branch5 (xs :> x1) = Branch5 xs :> x1
 
-type family Branch6 (xs :: [Type]) :: [Type] where
-  Branch6 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| (x6 :: [Type]))) = Append xs x6
-  Branch6 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| (x6 :: Type))) =
-    Branch1 (xs > x6)
-  Branch6 (xs > x1) = Branch6 xs > x1
+type family Branch6 (xs :: Stack) :: Stack where
+  Branch6 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| (x6 :: Stack))) = Append xs x6
+  Branch6 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| (x6 :: Type))) =
+    Branch1 (xs :> x6)
+  Branch6 (xs :> x1) = Branch6 xs :> x1
 
-type family Branch7 (xs :: [Type]) :: [Type] where
-  Branch7 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| (x7 :: [Type]))) =
+type family Branch7 (xs :: Stack) :: Stack where
+  Branch7 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| (x7 :: Stack))) =
     Append xs x7
-  Branch7 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| (x7 :: Type))) =
-    Branch1 (xs > x7)
-  Branch7 (xs > x1) = Branch7 xs > x1
+  Branch7 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| (x7 :: Type))) =
+    Branch1 (xs :> x7)
+  Branch7 (xs :> x1) = Branch7 xs :> x1
 
-type family Branch8 (xs :: [Type]) :: [Type] where
-  Branch8 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| x7 :| (x8 :: [Type]))) =
+type family Branch8 (xs :: Stack) :: Stack where
+  Branch8 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| x7 :| (x8 :: Stack))) =
     Append xs x8
-  Branch8 (xs > (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| x7 :| (x8 :: Type))) =
-    Branch1 (xs > x8)
-  Branch8 (xs > x1) = Branch8 xs > x1
+  Branch8 (xs :> (x1 :| x2 :| x3 :| x4 :| x5 :| x6 :| x7 :| (x8 :: Type))) =
+    Branch1 (xs :> x8)
+  Branch8 (xs :> x1) = Branch8 xs :> x1

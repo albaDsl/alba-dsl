@@ -3,11 +3,11 @@
 module Contract (PermutationChallenge, contract) where
 
 import Alba.Dsl.V1.Bch2026
-  ( Base,
-    CFn,
+  ( CFn,
     Fn,
     FnC,
     LibData (..),
+    Stack (..),
     TBytes,
     THash256,
     begin,
@@ -17,13 +17,10 @@ import Alba.Dsl.V1.Bch2026
     nat,
     opBin2Num,
     (.),
-    type (>),
   )
-import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.ExternalLib (importLibrary')
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..), TInt8, importLibrary')
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Common.Contract (Contract (..))
 import Numeric.Natural (Natural)
@@ -32,7 +29,7 @@ import Prelude (fromIntegral)
 type PermutationChallenge =
   Contract
     "PermutationChallenge"
-    (Base > TBytes > TBytes)
+    (Base :> TBytes :> TBytes)
     '["withdraw"]
     Base
 
@@ -43,8 +40,8 @@ contract = MkContract withdraw
 -- rules.
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize withdraw
--- "26 opcodes, 137 bytes. Including function table: 41 opcodes, 201 bytes.\n"
-withdraw :: CFn (Base > TBytes > TBytes)
+-- "26 opcodes, 136 bytes. Including function table: 41 opcodes, 200 bytes.\n"
+withdraw :: CFn (Base :> TBytes :> TBytes)
 withdraw =
   begin
     . (opBin2Num . int 0 . equalVerify)
@@ -54,10 +51,10 @@ withdraw =
   where
     dcNumUtxos = fromIntegral Dc.numUtxos
 
-    target :: Fn s (s > TVector TInt8)
+    target :: Fn s (s :> TVector TInt8)
     target = bytes "     Saabeeeeeeehhhhllllorsssssssty" . b2v
 
-    b2v :: Fn (s > TBytes) (s > TVector TInt8)
+    b2v :: Fn (s :> TBytes) (s :> TVector TInt8)
     b2v = cast
 
 loadDecompressionLib :: Natural -> FnC
@@ -69,7 +66,7 @@ loadDecompressionLib startInput =
     numUtxos = fromIntegral Dc.numUtxos
     size = fromIntegral Dc.lib.deploySize
 
-b2h :: Fn (s > TBytes) (s > THash256)
+b2h :: Fn (s :> TBytes) (s :> THash256)
 b2h = cast
 
 loadVectorLib :: Natural -> FnC

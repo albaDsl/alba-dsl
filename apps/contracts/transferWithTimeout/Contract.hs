@@ -3,9 +3,9 @@
 module Contract (TransferWithTimeout, Params, contract) where
 
 import Alba.Dsl.V1.Bch2025
-  ( Base,
-    Contract (..),
+  ( Contract (..),
     N,
+    Stack (..),
     TNat,
     TPubKey,
     TSig,
@@ -19,19 +19,22 @@ import Alba.Dsl.V1.Bch2025
     roll,
     (.),
     type (:|),
-    type (>),
   )
 import Prelude hiding ((.))
 
 type TransferWithTimeout =
   Contract
     "TransferWithTimeout"
-    (Base > (Base > N "sig" TSig) :| (Base > N "sig" TSig))
+    (Base :> (Base :> N "sig" TSig) :| (Base :> N "sig" TSig))
     '["recipientWithdraw", "senderWithdraw"]
     Params
 
 type Params =
-  (Base > N "senderPub" TPubKey > N "recipientPub" TPubKey > N "timeout" TNat)
+  ( Base
+      :> N "senderPub" TPubKey
+      :> N "recipientPub" TPubKey
+      :> N "timeout" TNat
+  )
 
 contract :: TransferWithTimeout
 contract = MkContract $ entry2 recipientWithdraw senderWithdraw

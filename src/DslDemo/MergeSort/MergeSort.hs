@@ -2,8 +2,9 @@
 
 module DslDemo.MergeSort.MergeSort where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TBool,
     TInt,
@@ -23,7 +24,6 @@ import Alba.Dsl.V1.Bch2025
     roll,
     un,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( PackFs (..),
@@ -51,10 +51,10 @@ import Alba.Dsl.V1.Bch2026.Contract.TVector
 import Alba.Dsl.V1.Bch2026.Lang (fn, lambda0)
 import Prelude ()
 
-sort :: forall a s. (PackFs a) => Fn (s > TVector a) (s > TVector a)
+sort :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TVector a)
 sort = packFsRec @a . swap . sortF
 
-sortF :: (StackEntry a) => Fn (s > TPackFs a > TVector a) (s > TVector a)
+sortF :: (StackEntry a) => Fn (s :> TPackFs a :> TVector a) (s :> TVector a)
 sortF =
   fn
     ( begin
@@ -71,7 +71,7 @@ sortF =
         . del #pfs
     )
 
-halveF :: Fn (s > TPackFs a > TVector a) (s > TVector a > TVector a)
+halveF :: Fn (s :> TPackFs a :> TVector a) (s :> TVector a :> TVector a)
 halveF =
   fn
     ( begin
@@ -81,7 +81,7 @@ halveF =
 
 mergeF ::
   (StackEntry a) =>
-  Fn (s > TPackFs a > TVector a > TVector a) (s > TVector a)
+  Fn (s :> TPackFs a :> TVector a :> TVector a) (s :> TVector a)
 mergeF =
   fn
     ( begin
@@ -112,14 +112,14 @@ mergeF =
   where
     uncons' ::
       (StackEntry a) =>
-      Fn (s' > TPackFs a > TVector a) (s' > a > TVector a)
+      Fn (s' :> TPackFs a :> TVector a) (s' :> a :> TVector a)
     uncons' = unconsF . fromJust . untuple
 
     -- FIXME: cast.
-    toNum :: Fn (s' > a) (s' > TInt)
+    toNum :: Fn (s' :> a) (s' :> TInt)
     toNum = cast . opBin2Num
 
-    baseCases :: Fn (s' > TVector a > TVector a) (s' > TVector a > TBool)
+    baseCases :: Fn (s' :> TVector a :> TVector a) (s' :> TVector a :> TBool)
     baseCases =
       begin
         . (ns2 #xs #ys . pick #xs . null)
@@ -133,5 +133,5 @@ mergeF =
           )
 
 -- Used from contexts where it is expected to never fail.
-fromJust :: (StackEntry a) => Fn (s > TMaybe a) (s > a)
+fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'

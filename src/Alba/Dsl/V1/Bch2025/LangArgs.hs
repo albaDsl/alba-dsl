@@ -14,7 +14,6 @@ where
 import Alba.Dsl.V1.Bch2025.Ops (opDrop)
 import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, integerToDataOp)
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.LangArgs
   ( FindName,
@@ -23,7 +22,7 @@ import Alba.Dsl.V1.Common.LangArgs
     RemoveNamedArgs,
     UnName,
   )
-import Alba.Dsl.V1.Common.Stack (Fn, Ref, Remove, S (..))
+import Alba.Dsl.V1.Common.Stack (Fn, Ref, Remove, S (..), Stack (..))
 import Alba.Dsl.V1.Common.TermClass (Term (..))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Proxy (Proxy (..))
@@ -33,7 +32,7 @@ pick ::
   forall name s arg idx.
   Px name ->
   (KnownNat idx, FindName name s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
-  Fn s (s > UnName arg)
+  Fn s (s :> UnName arg)
 pick _name = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 pick' :: Integer -> S s alt -> S s' alt
@@ -47,7 +46,7 @@ pickN ::
   forall name s arg idx.
   Px name ->
   (KnownNat idx, FindName name s 0 ~ 'Just idx, Ref s idx ~ 'Just arg) =>
-  Fn s (s > arg)
+  Fn s (s :> arg)
 pickN _name = pick' (natVal (Proxy :: Proxy idx) :: Integer)
 
 roll ::
@@ -58,7 +57,7 @@ roll ::
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
-  Fn s (s' > UnName arg)
+  Fn s (s' :> UnName arg)
 roll _name = roll' (natVal (Proxy :: Proxy idx))
 
 roll' :: Integer -> S s alt -> S s' alt
@@ -77,7 +76,7 @@ rollN ::
     Ref s idx ~ 'Just arg,
     Remove s idx ~ s'
   ) =>
-  Fn s (s' > arg)
+  Fn s (s' :> arg)
 rollN _name = roll' (natVal (Proxy :: Proxy idx) :: Integer)
 
 del ::

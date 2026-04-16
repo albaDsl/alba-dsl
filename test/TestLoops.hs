@@ -42,13 +42,13 @@ testLoops =
       testProperty "Loops — pow" propPow
     ]
 
-progFactorial1 :: Fn s (s > TBool)
+progFactorial1 :: Fn s (s :> TBool)
 progFactorial1 = progFacTest fac
   where
-    fac :: Natural -> Fn s (s > TNat)
+    fac :: Natural -> Fn s (s :> TNat)
     fac n = nat n ∘ factorial
 
-progFacTest :: (forall s'. Natural -> Fn s' (s' > TNat)) -> Fn s (s > TBool)
+progFacTest :: (forall s'. Natural -> Fn s' (s' :> TNat)) -> Fn s (s :> TBool)
 progFacTest fac =
   begin
     ∘ (fac 0 ∘ nat 1 ∘ opNumEqual)
@@ -57,25 +57,25 @@ progFacTest fac =
     ∘ (fac 10 ∘ nat 3_628_800 ∘ opNumEqual)
     ∘ (opBoolAnd ∘ opBoolAnd ∘ opBoolAnd)
 
-progFactorial2 :: Fn s (s > TBool)
+progFactorial2 :: Fn s (s :> TBool)
 progFactorial2 = progFacTest fac
   where
-    fac :: Natural -> Fn s (s > TNat)
+    fac :: Natural -> Fn s (s :> TNat)
     fac n = nat 1 ∘ nat n ∘ iterate n (unname 2 f) ∘ opDrop
 
-    f :: Fn (s > N "product" TNat > N "n" TNat) (s > TNat > TNat)
+    f :: Fn (s :> N "product" TNat :> N "n" TNat) (s :> TNat :> TNat)
     f =
       begin
         ∘ (pick #n ∘ roll #product ∘ opMul)
         ∘ (roll #n ∘ nat1SubUnsafe)
 
-progFactorial3 :: Fn s (s > TBool)
+progFactorial3 :: Fn s (s :> TBool)
 progFactorial3 = progFacTest fac
   where
-    fac :: Natural -> Fn s (s > TNat)
+    fac :: Natural -> Fn s (s :> TNat)
     fac n = nat 1 ∘ iterate n (unname 1 f)
 
-    f :: FnA (s > N "product" TNat) (alt > TNat) (s > TNat) (alt > TNat)
+    f :: FnA (s :> N "product" TNat) (alt :> TNat) (s :> TNat) (alt :> TNat)
     f =
       begin
         ∘ (opFromAltStack ∘ opDup ∘ opToAltStack)
@@ -84,7 +84,7 @@ progFactorial3 = progFacTest fac
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
-progEllipticCurve :: Fn (s > TNat > TPoint) (s > TPoint) -> Fn s (s > TBool)
+progEllipticCurve :: Fn (s :> TNat :> TPoint) (s :> TPoint) -> Fn s (s :> TBool)
 progEllipticCurve ecMul =
   begin
     ∘ (nat 1 ∘ g ∘ ecMul)
@@ -134,8 +134,8 @@ progEllipticCurve ecMul =
     ∘ opTrue
 
 propEllipticCurve ::
-  (forall s. Fn (s > TPoint > TPoint) (s > TPoint)) ->
-  (forall s. Fn (s > TNat > TPoint) (s > TPoint)) ->
+  (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->
+  (forall s. Fn (s :> TNat :> TPoint) (s :> TPoint)) ->
   NonNegative Int ->
   NonNegative Int ->
   Bool

@@ -23,7 +23,7 @@ testArguments =
 
 -- Calling a function that expects named arguments without naming them at the
 -- call site.
-progUnnamedArgsAtCallSite :: Fn s (s > TBool)
+progUnnamedArgsAtCallSite :: Fn s (s :> TBool)
 progUnnamedArgsAtCallSite =
   begin
     ∘ nat 2
@@ -36,7 +36,7 @@ progUnnamedArgsAtCallSite =
 
 -- Calling a function that expects named arguments and also naming them at the
 -- call site.
-progNamedArgsAtCallSite :: Fn s (s > TBool)
+progNamedArgsAtCallSite :: Fn s (s :> TBool)
 progNamedArgsAtCallSite =
   begin
     ∘ name #"does-not-interfere" (nat 2)
@@ -53,8 +53,8 @@ progNamedArgsAtCallSite =
 -- may not expect named arguments.
 calculateProperties ::
   Fn
-    (s > N "w" TNat > N "h" TNat)
-    (s > TNat > TNat)
+    (s :> N "w" TNat :> N "h" TNat)
+    (s :> TNat :> TNat)
 calculateProperties =
   begin
     ∘ (pickN #w ∘ pickN #h)
@@ -63,10 +63,10 @@ calculateProperties =
     ∘ area
     ∘ (del #h ∘ del #w)
   where
-    area :: Fn (s > TNat > TNat) (s > TNat)
+    area :: Fn (s :> TNat :> TNat) (s :> TNat)
     area = opMul
 
-    perimeter :: Fn (s > N "w" TNat > N "h" TNat) (s > TNat)
+    perimeter :: Fn (s :> N "w" TNat :> N "h" TNat) (s :> TNat)
     perimeter =
       begin
         ∘ (pick #w ∘ roll #w ∘ opAdd)
@@ -74,13 +74,13 @@ calculateProperties =
         ∘ opAdd
 
 type MiscArgs s =
-  s > N "x1" TNat > N "x2" TNat > N "x3" TBool > N "x4" TBool > N "x5" TNat
+  s :> N "x1" TNat :> N "x2" TNat :> N "x3" TBool :> N "x4" TBool :> N "x5" TNat
 
 -- Exercising pick inside if statement.
-progIfArgPick :: Fn s (s > TBool)
+progIfArgPick :: Fn s (s :> TBool)
 progIfArgPick = nat 2 ∘ nat 4 ∘ opTrue ∘ opFalse ∘ nat 6 ∘ unname 5 f
   where
-    f :: Fn (MiscArgs s) (s > TBool)
+    f :: Fn (MiscArgs s) (s :> TBool)
     f =
       begin
         ∘ opTrue
@@ -93,10 +93,10 @@ progIfArgPick = nat 2 ∘ nat 4 ∘ opTrue ∘ opFalse ∘ nat 6 ∘ unname 5 f
         ∘ opNumEqual
 
 -- Exercising del / roll with various types on the stack.
-progArgRollDrop :: Fn s (s > TBool)
+progArgRollDrop :: Fn s (s :> TBool)
 progArgRollDrop = nat 2 ∘ nat 4 ∘ opTrue ∘ opFalse ∘ nat 6 ∘ unname 5 f
   where
-    f :: Fn (MiscArgs s) (s > TBool)
+    f :: Fn (MiscArgs s) (s :> TBool)
     f =
       begin
         ∘ (del #x3 ∘ del #x4 ∘ del #x1)
@@ -106,7 +106,7 @@ progArgRollDrop = nat 2 ∘ nat 4 ∘ opTrue ∘ opFalse ∘ nat 6 ∘ unname 5 
         ∘ opNumEqual
 
 -- Using name as a form of let-expression. Also returning a named stack item.
-namingStackItems :: Fn s (s > TBool)
+namingStackItems :: Fn s (s :> TBool)
 namingStackItems =
   begin
     ∘ momentum
@@ -115,7 +115,7 @@ namingStackItems =
     ∘ int 1250
     ∘ opNumEqual
   where
-    momentum :: Fn s (s > N "momentum" TInt)
+    momentum :: Fn s (s :> N "momentum" TInt)
     momentum =
       begin
         ∘ name #mass (int 100)
@@ -127,7 +127,7 @@ namingStackItems =
 
 -- Currently possible to have the same name in scope for more than one stack
 -- item. Avoid.
-duplicateName :: Fn s (s > TBool)
+duplicateName :: Fn s (s :> TBool)
 duplicateName =
   begin
     ∘ nat 10
@@ -138,8 +138,8 @@ duplicateName =
   where
     divide ::
       Fn
-        (s > N "n1" TNat > N "n1" TNat)
-        (s > TNat)
+        (s :> N "n1" TNat :> N "n1" TNat)
+        (s :> TNat)
     divide =
       begin
         ∘ (roll #n1)

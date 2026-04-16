@@ -27,7 +27,6 @@ import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
 import Alba.Dsl.V1.Bch2026.Stack (Env, TCode, TLambda, TLambdaUntyped)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aop', aops, aops')
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState
   ( FunctionState,
     addCallSite,
@@ -41,8 +40,14 @@ import Alba.Dsl.V1.Common.FunctionState
     registerFunction,
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId, OpcodeL3 (..))
-import Alba.Dsl.V1.Common.Stack (Fn, FnA, S (..))
-import Alba.Dsl.V1.Common.TypeFamilies (Append)
+import Alba.Dsl.V1.Common.Stack
+  ( Append,
+    Fn,
+    FnA,
+    ListToStack,
+    S (..),
+    Stack (..),
+  )
 import Alba.Misc.Utils (canNotHappen)
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Control.Arrow ((>>>))
@@ -88,7 +93,7 @@ pass1 ::
   (CodeL3, FunctionState)
 pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 
-constant :: (HasCallStack) => Fn s (s > a) -> Fn s (s > a)
+constant :: (HasCallStack) => Fn s (s :> a) -> Fn s (s :> a)
 constant prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerConstantId)
       fs = register prog fId st.fs
@@ -96,7 +101,7 @@ constant prog st =
 
 -- Runtime constants have a size limit of maxScriptElementSize - 4 (as of
 -- writing, 9996 bytes). See 'toPushOp'.
-runtimeConstant :: (HasCallStack) => Fn s (s > a) -> Fn s (s > a)
+runtimeConstant :: (HasCallStack) => Fn s (s :> a) -> Fn s (s :> a)
 runtimeConstant prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerRtConstantId)
       fs = register prog fId st.fs
@@ -104,40 +109,40 @@ runtimeConstant prog st =
 
 lambda0 ::
   (HasCallStack, StackEntry r1) =>
-  Fn s (s > r1) ->
-  Fn s' (s' > TLambda '[] '[r1])
+  Fn s (s :> r1) ->
+  Fn s' (s' :> TLambda '[] '[r1])
 lambda0 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
 
 lambda1 ::
   (HasCallStack, StackEntry t1, StackEntry r1) =>
-  Fn (s > t1) (s > r1) ->
-  Fn s' (s' > TLambda '[t1] '[r1])
+  Fn (s :> t1) (s :> r1) ->
+  Fn s' (s' :> TLambda '[t1] '[r1])
 lambda1 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
 
 lambda2 ::
   (HasCallStack, StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Fn (s > t1 > t2) (s > r1) ->
-  Fn s' (s' > TLambda '[t1, t2] '[r1])
+  Fn (s :> t1 :> t2) (s :> r1) ->
+  Fn s' (s' :> TLambda '[t1, t2] '[r1])
 lambda2 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
 
 lambda2_0 ::
   (HasCallStack, StackEntry t1, StackEntry t2) =>
-  Fn (s > t1 > t2) s ->
-  Fn s' (s' > TLambda '[t1, t2] '[])
+  Fn (s :> t1 :> t2) s ->
+  Fn s' (s' :> TLambda '[t1, t2] '[])
 lambda2_0 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
 
 lambda3 ::
   (HasCallStack, StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  Fn (s > t1 > t2 > t3) (s > r1) ->
-  Fn s' (s' > TLambda '[t1, t2, t3] '[r1])
+  Fn (s :> t1 :> t2 :> t3) (s :> r1) ->
+  Fn s' (s' :> TLambda '[t1, t2, t3] '[r1])
 lambda3 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
@@ -150,13 +155,13 @@ lambda4 ::
     StackEntry t4,
     StackEntry r1
   ) =>
-  Fn (s > t1 > t2 > t3 > t4) (s > r1) ->
-  Fn s' (s' > TLambda '[t1, t2, t3, t4] '[r1])
+  Fn (s :> t1 :> t2 :> t3 :> t4) (s :> r1) ->
+  Fn s' (s' :> TLambda '[t1, t2, t3, t4] '[r1])
 lambda4 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
 
-lambda :: (HasCallStack) => FnA s alt s' alt' -> Fn s'' (s'' > TLambdaUntyped)
+lambda :: (HasCallStack) => FnA s alt s' alt' -> Fn s'' (s'' :> TLambdaUntyped)
 lambda prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerLambdaId)
    in registerLambda fId prog st
@@ -169,29 +174,37 @@ registerLambda ::
 registerLambda fId prog st =
   (aop' (FunctionIndexRef {fId})) st {fs = register prog fId st.fs}
 
-invoke0 :: Fn (s > TLambda '[] ret) (Append s ret)
+invoke0 :: Fn (s :> TLambda '[] ret) (Append s (ListToStack ret))
 invoke0 = aop OP_INVOKE
 
-invoke1 :: Fn (s > t1 > TLambda '[t1] ret) (Append s ret)
+invoke1 :: Fn (s :> t1 :> TLambda '[t1] ret) (Append s (ListToStack ret))
 invoke1 = aop OP_INVOKE
 
-invoke2 :: Fn (s > t1 > t2 > TLambda '[t1, t2] ret) (Append s ret)
+invoke2 ::
+  Fn
+    (s :> t1 :> t2 :> TLambda '[t1, t2] ret)
+    (Append s (ListToStack ret))
 invoke2 = aop OP_INVOKE
 
-invoke3 :: Fn (s > t1 > t2 > t3 > TLambda '[t1, t2, t3] ret) (Append s ret)
+invoke3 ::
+  Fn
+    (s :> t1 :> t2 :> t3 :> TLambda '[t1, t2, t3] ret)
+    (Append s (ListToStack ret))
 invoke3 = aop OP_INVOKE
 
 invoke4 ::
-  Fn (s > t1 > t2 > t3 > t4 > TLambda '[t1, t2, t3, t4] ret) (Append s ret)
+  Fn
+    (s :> t1 :> t2 :> t3 :> t4 :> TLambda '[t1, t2, t3, t4] ret)
+    (Append s (ListToStack ret))
 invoke4 = aop OP_INVOKE
 
-invoke :: FnA s alt s' alt' -> FnA (s > TLambdaUntyped) alt s' alt'
+invoke :: FnA s alt s' alt' -> FnA (s :> TLambdaUntyped) alt s' alt'
 invoke _prog = aop OP_INVOKE
 
 progCode ::
   forall s s' s'' alt' alt''.
   (FnA s' alt' s'' alt'') ->
-  (Fn s (s > TCode))
+  (Fn s (s :> TCode))
 progCode prog st =
   let (c', fs') = pass1 S.empty st.fs prog
    in aop' (FunctionBody c') st {fs = fs'}

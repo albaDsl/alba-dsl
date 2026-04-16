@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     StackEntry,
     TInt,
     begin,
@@ -34,7 +35,6 @@ import Alba.Dsl.V1.Bch2026
     opVerify,
     opWithin,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
@@ -89,7 +89,7 @@ instance PackFs TInt64 where
   unpack = opBin2Num . fromRaw
   packFsRec = int64PackFs
 
-int64PackFs :: Fn s (s > TPackFs TInt64)
+int64PackFs :: Fn s (s :> TPackFs TInt64)
 int64PackFs =
   constant
     ( begin
@@ -105,17 +105,17 @@ int64Max = 9223372036854775807
 int64Min :: Integer
 int64Min = -int64Max
 
-int64 :: Integer -> Fn s (s > TInt64)
+int64 :: Integer -> Fn s (s :> TInt64)
 int64 x = assert (x >= int64Min && x <= int64Max) (int x . fromRaw)
 
-fromRaw :: Fn (s > TInt) (s > TInt64)
+fromRaw :: Fn (s :> TInt) (s :> TInt64)
 fromRaw = cast
 
-toRaw :: Fn (s > TInt64) (s > TInt)
+toRaw :: Fn (s :> TInt64) (s :> TInt)
 toRaw = cast
 
-toRaw2 :: Fn (s > TInt64 > TInt64) (s > TInt > TInt)
+toRaw2 :: Fn (s :> TInt64 :> TInt64) (s :> TInt :> TInt)
 toRaw2 = castStack
 
-toRaw3 :: Fn (s > TInt64 > TInt64 > TInt64) (s > TInt > TInt > TInt)
+toRaw3 :: Fn (s :> TInt64 :> TInt64 :> TInt64) (s :> TInt :> TInt :> TInt)
 toRaw3 = castStack

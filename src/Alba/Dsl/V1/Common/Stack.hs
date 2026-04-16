@@ -1,8 +1,8 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Common.Stack
-  ( S (..),
-    Base,
+  ( Stack (..),
+    S (..),
     F,
     FnA,
     Fn,
@@ -10,6 +10,9 @@ module Alba.Dsl.V1.Common.Stack
     CFn,
     CFnA,
     (:|),
+    Append,
+    Replicate,
+    ListToStack,
     CountStackBranches,
     Ref,
     Remove,
@@ -25,7 +28,6 @@ module Alba.Dsl.V1.Common.Stack
   )
 where
 
-import Alba.Dsl.V1.Common.FlippedCons (type (>))
 import Alba.Dsl.V1.Common.FunctionState (FunctionState)
 import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3)
 import Data.Kind (Type)
@@ -42,57 +44,73 @@ data TSig
 data TPubKey
 {- ORMOLU_ENABLE -}
 
-data S (s :: [Type]) (alt :: [Type]) = S
+data Stack
+  = Base -- Empty stack.
+  | Stack :> Type -- Cons operator.
+
+infixl 5 :>
+
+data S (s :: Stack) (alt :: Stack) = S
   { c :: CodeL3,
     fs :: FunctionState
   }
-
--- A stack with nothing on it.
-type Base = '[]
 
 -- Applies HasCallStack so the type can be used for a VM function.
 type F a = (HasCallStack) => a
 
 -- Function with main and alt stack types.
-type FnA (s :: [Type]) (alt :: [Type]) (s' :: [Type]) (alt' :: [Type]) =
+type FnA (s :: Stack) (alt :: Stack) (s' :: Stack) (alt' :: Stack) =
   F (S s alt -> S s' alt')
 
 -- Function with alt stack constant.
-type Fn (s :: [Type]) (s' :: [Type]) =
+type Fn (s :: Stack) (s' :: Stack) =
   forall alt. F (S s alt -> S s' alt)
 
 -- Function with both stacks constant.
 type FnC = forall s alt. F (S s alt -> S s alt)
 
 -- Contract function (entry point). Allows for a non-clean alt stack.
-type CFnA s a = F (S s Base -> S (Base > TBool) a)
+type CFnA s a = F (S s Base -> S (Base :> TBool) a)
 
 -- Contract function (entry point).
-type CFn s = F (S s Base -> S (Base > TBool) Base)
+type CFn s = F (S s Base -> S (Base :> TBool) Base)
 
-data (a :: [Type]) :| b :: Type
+data (a :: Stack) :| b :: Type
 
 infixr 9 :|
 
-type family CountStackBranches (stacks :: [Type]) :: Nat where
-  CountStackBranches (s > a :| (b :: [Type])) = 1 + CountStackBranches b
-  CountStackBranches (s > a :| (b :: Type)) = 1 + CountStackBranches '[b]
-  CountStackBranches (s > a) = 1
+type family Append s s' where
+  Append s Base = s
+  Append s (s' :> a) = (Append s s') :> a
 
-type family Ref (xs :: [Type]) (idx :: Nat) :: Maybe Type where
-  Ref '[] _ = TypeError ('Text "Access past known stack.")
-  Ref (xs > (_ :| _)) _ =
+type family Replicate (n :: Nat) (t :: Type) where
+  Replicate 0 _ = Base
+  Replicate n t = Replicate (n - 1) t :> t
+
+type family ListToStack (stack :: [Type]) :: Stack where
+  ListToStack '[] = 'Base
+  ListToStack (a ': s) = ListToStack s :> a
+
+type family CountStackBranches (stacks :: Stack) :: Nat where
+  CountStackBranches (s :> a :| (b :: Stack)) = 1 + CountStackBranches b
+  CountStackBranches (s :> a :| (b :: Type)) =
+    1 + CountStackBranches (Base :> b)
+  CountStackBranches (s :> a) = 1
+
+type family Ref (xs :: Stack) (idx :: Nat) :: Maybe Type where
+  Ref Base _ = TypeError ('Text "Access past known stack.")
+  Ref (xs :> (_ :| _)) _ =
     TypeError
       ('Text "Can't lookup named stack entries located below stack branches.")
-  Ref (xs > x) 0 = 'Just x
-  Ref (xs > x) idx = Ref xs (idx - 1)
+  Ref (xs :> x) 0 = 'Just x
+  Ref (xs :> x) idx = Ref xs (idx - 1)
 
-type family Remove (xs :: [Type]) (idx :: Nat) :: [Type] where
-  Remove '[] _ = '[]
-  Remove (xs > _) 0 = xs
-  Remove (xs > x) idx = Remove xs (idx - 1) > x
+type family Remove (xs :: Stack) (idx :: Nat) :: Stack where
+  Remove Base _ = Base
+  Remove (xs :> _) 0 = xs
+  Remove (xs :> x) idx = Remove xs (idx - 1) :> x
 
-cast :: Fn (s > t1) (s > t2)
+cast :: Fn (s :> t1) (s :> t2)
 cast (S c fs) = let state = S c fs in state
 
 castStack :: FnA s alt s' alt'

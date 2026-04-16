@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Lzss where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Loop,
+    Stack (..),
     TBool,
     TBytes,
     TInt,
@@ -38,7 +39,6 @@ import Alba.Dsl.V1.Bch2026
     un3,
     un6,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Error (error')
@@ -64,7 +64,7 @@ refLen = 2 -- Byte size of a reference.
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize decompress
 -- "2 opcodes, 2 bytes. Including function table: 8 opcodes, 194 bytes.\n"
-decompress :: Fn (s > TBytes) (s > TBytes)
+decompress :: Fn (s :> TBytes) (s :> TBytes)
 decompress =
   fn
     ( begin
@@ -73,7 +73,7 @@ decompress =
         . (nip . nip . nip . nip . nip)
     )
 
-decompressLoop :: Loop (s > TBytes > TNat > TNat > TNat > TBytes > TBytes)
+decompressLoop :: Loop (s :> TBytes :> TNat :> TNat :> TNat :> TBytes :> TBytes)
 decompressLoop =
   begin
     . ns6 #bs #n #i #k #flag #out
@@ -103,13 +103,13 @@ decompressLoop =
           . (roll #out . roll #off . roll #len . copyFromBack . opFalse)
       )
 
-copyFromBack :: Fn (s > TBytes > TNat > TNat) (s > TBytes)
+copyFromBack :: Fn (s :> TBytes :> TNat :> TNat) (s :> TBytes)
 copyFromBack =
   begin
     . (ns3 #bs #off #len . roll #bs . opSize . roll #off . natSubUnsafe)
     . (dup . roll #len . add . rot . opUntil loop . nip . nip)
   where
-    loop :: Loop (s > TNat > TNat > TBytes) -- start end acc
+    loop :: Loop (s :> TNat :> TNat :> TBytes) -- start end acc
     loop =
       begin
         . (ns3 #i #end #acc . pick #i . pick #end . equal)
@@ -120,25 +120,25 @@ copyFromBack =
               . (roll #acc . dup . roll #i . index . opCat . opFalse)
           )
 
-index :: Fn (s > TBytes > TNat) (s > TBytes)
+index :: Fn (s :> TBytes :> TNat) (s :> TBytes)
 index = fn (opSplit . nip . nat 1 . opSplit . drop)
 
 -- Shaves off a reference (two bytes) starting at the index.
-indexRef :: Fn (s > TBytes > TNat) (s > TBytes)
+indexRef :: Fn (s :> TBytes :> TNat) (s :> TBytes)
 indexRef = opSplit . nip . nat refLen . opSplit . drop
 
 -- TBytes is expected to be a single byte.
-testBit :: Fn (s > TBytes > TNat) (s > TBool)
+testBit :: Fn (s :> TBytes :> TNat) (s :> TBool)
 testBit =
   opRShiftBin . bytes [0x01] . opAnd . opBin2Num . op0 . equal . opNot
 
 -- Reference format: |offset:12|len:4|
-unpackRef :: Fn (s > TBytes) (s > TOff > TLen)
+unpackRef :: Fn (s :> TBytes) (s :> TOff :> TLen)
 unpackRef =
   begin
     . (dup . toSigned . nat lenBits . opRShiftNum . i2nUnsafe . add1)
     . (swap . nat 1 . opSplit . drop . bytes [0xf] . opAnd . opBin2Num)
     . (i2nUnsafe . nat minMatchLen . add)
   where
-    toSigned :: Fn (s > TBytes) (s > TInt)
+    toSigned :: Fn (s :> TBytes) (s :> TInt)
     toSigned = bytes [0] . opCat . opBin2Num

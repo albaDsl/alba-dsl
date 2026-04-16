@@ -7,6 +7,7 @@ import Alba.Dsl.V1.Bch2025
   ( CodeL1,
     Fn,
     Optimize (..),
+    Stack (..),
     TInt,
     begin,
     bytes,
@@ -17,7 +18,6 @@ import Alba.Dsl.V1.Bch2025
     outputScript,
     setScriptSig,
     (.),
-    type (>),
   )
 import Alba.Misc.Haskoin (Address)
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
@@ -40,7 +40,7 @@ withdrawTx ctx outpoint utxo redeemScript recvAddr =
 
 -- This solution is already public. There is a nice solution that is a fair
 -- amount shorter too.
-progSolution :: Fn s (s > TInt)
+progSolution :: Fn s (s :> TInt)
 progSolution =
   begin
     . bytes (compile None f)

@@ -14,12 +14,12 @@ testEval =
     [ testCase "Basics" $ isTrue (evaluateProg progBasics)
     ]
 
-progBasics :: Fn s (s > TBool)
+progBasics :: Fn s (s :> TBool)
 progBasics =
   begin
     ∘ (int 5 ∘ progCode square ∘ opEval square)
     ∘ (int 25 ∘ opNumEqualVerify)
     ∘ opTrue
   where
-    square :: Fn (s > TInt) (s > TInt)
+    square :: Fn (s :> TInt) (s :> TInt)
     square = opDup ∘ opMul

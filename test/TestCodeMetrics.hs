@@ -2,13 +2,16 @@
 
 module TestCodeMetrics (testCodeMetrics) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
+import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
     Fn,
     FnA,
     FnC,
     Optimize (O1),
     S,
+    Stack (..),
+    TLambda,
     begin,
     bytes,
     compile,
@@ -17,16 +20,17 @@ import Alba.Dsl.V1.Bch2025
     compressibilityStr,
     delCount,
     int,
+    lambda1,
+    lambda2,
     n2i,
     nat,
     ns2,
     opVerify,
     pick,
+    runEnv,
     sizeStr,
     (∘),
-    type (>),
   )
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
@@ -38,9 +42,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
-import Alba.Dsl.V1.Bch2026.Lang (lambda1, lambda2, runEnv)
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
-import Alba.Dsl.V1.Bch2026.Stack (TLambda)
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped, (.))
@@ -159,7 +161,7 @@ sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 ratio :: FnA s alt s' alt' -> String
 ratio prog = compressibilityStr (fst $ compileL2 O1 prog)
 
-costOf :: forall s s' alt'. FnA s '[] s' alt' -> Int
+costOf :: forall s s' alt'. FnA s Base s' alt' -> Int
 costOf prog =
   let cr = compile' O1 prog
       res = evaluateScript cr.code emptyStacks minimalContext
@@ -241,7 +243,7 @@ vectorOps =
               ∘ int 0
               ∘ ( begin
                     ∘ ( (lambda2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
-                          Fn s (s > TLambda '[TInt64, TInt8] '[TInt64])
+                          Fn s (s :> TLambda '[TInt64, TInt8] '[TInt64])
                       )
                     ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
                 )

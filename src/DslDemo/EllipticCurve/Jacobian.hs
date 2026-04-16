@@ -12,6 +12,7 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Loop,
+    Stack (..),
     TNat,
     begin,
     del,
@@ -29,7 +30,6 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (equal),
@@ -52,16 +52,16 @@ import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
 import Prelude ()
 
-ecAdd :: Fn (s > TPoint > TPoint) (s > TPoint)
+ecAdd :: Fn (s :> TPoint :> TPoint) (s :> TPoint)
 ecAdd = fn (toJacobian . swap . toJacobian . EC.ecAddJ . fromJacobian)
 
-ecDouble :: Fn (s > TPoint) (s > TPoint)
+ecDouble :: Fn (s :> TPoint) (s :> TPoint)
 ecDouble = fn (toJacobian . EC.ecDoubleJ . fromJacobian)
 
-ecMul :: Fn (s > TNat > TPoint) (s > TPoint)
+ecMul :: Fn (s :> TNat :> TPoint) (s :> TPoint)
 ecMul = fn (toJacobian . ecMulJ . fromJacobian)
 
-ecMulJ :: Fn (s > TNat > TPointJ) (s > TPointJ)
+ecMulJ :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
 ecMulJ =
   begin
     . (ns2 #n #p . pick #n . nat 0 . equal)
@@ -69,7 +69,7 @@ ecMulJ =
       (del #n . del #p . makeIdentity)
       (roll #n . roll #p . makeIdentity . opUntil loop . nip . nip)
   where
-    loop :: Loop (s > TNat > TPointJ > TPointJ)
+    loop :: Loop (s :> TNat :> TPointJ :> TPointJ)
     loop =
       begin
         . ns3 #n #p #r
@@ -77,7 +77,7 @@ ecMulJ =
         . (pick #n . halve . roll #p . EC.ecDoubleJ . roll #r2)
         . (roll #n . halve . isZero)
 
-toJacobian :: Fn (s > TPoint) (s > TPointJ)
+toJacobian :: Fn (s :> TPoint) (s :> TPointJ)
 toJacobian =
   fn
     ( begin
@@ -85,7 +85,7 @@ toJacobian =
         . opIf (del #p . makeIdentity) (roll #p . AP.getXY' . int 1 . makePoint)
     )
 
-fromJacobian :: Fn (s > TPointJ) (s > TPoint)
+fromJacobian :: Fn (s :> TPointJ) (s :> TPoint)
 fromJacobian =
   fn
     ( begin

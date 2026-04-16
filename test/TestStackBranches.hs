@@ -70,13 +70,13 @@ testStackBranches =
 progSimpleStackBranch ::
   Fn
     ( s
-        > ( (Base > N "b1" TBool)
-              :| (Base > N "b2" TBool > N "b3" TBool > N "int" TInt)
-          )
-        > N "choice" TNat
-        > N "bytes" TBytes
+        :> ( (Base :> N "b1" TBool)
+               :| (Base :> N "b2" TBool :> N "b3" TBool :> N "int" TInt)
+           )
+        :> N "choice" TNat
+        :> N "bytes" TBytes
     )
-    (s > TInt)
+    (s :> TInt)
 progSimpleStackBranch =
   begin
     ∘ (roll #bytes ∘ opSize ∘ op5 ∘ opNumEqualVerify ∘ opDrop)
@@ -86,61 +86,69 @@ progSimpleStackBranch =
       (branch2 ∘ del #b2 ∘ del #b3 ∘ roll #int ∘ int 29 ∘ opSub)
 
 {- ORMOLU_DISABLE -}
-type Args0 = '[N "x0" TInt]
-type Args1 = Append Args0 '[N "x1" TInt]
-type Args2 = Append Args1 '[N "x2" TInt]
-type Args3 = Append Args2 '[N "x3" TInt]
-type Args4 = Append Args3 '[N "x4" TInt]
-type Args5 = Append Args4 '[N "x5" TInt]
-type Args6 = Append Args5 '[N "x6" TInt]
-type Args7 = Append Args6 '[N "x7" TInt]
+type Args0 = Base :> N "x0" TInt
+type Args1 = Append Args0 (Base :> N "x1" TInt)
+type Args2 = Append Args1 (Base :> N "x2" TInt)
+type Args3 = Append Args2 (Base :> N "x3" TInt)
+type Args4 = Append Args3 (Base :> N "x4" TInt)
+type Args5 = Append Args4 (Base :> N "x5" TInt)
+type Args6 = Append Args5 (Base :> N "x6" TInt)
+type Args7 = Append Args6 (Base :> N "x7" TInt)
 type Param = N "param" TInt
 {- ORMOLU_ENABLE -}
 
 progEntry8 ::
   Fn
     ( s
-        > (Args0 :| Args1 :| Args2 :| Args3 :| Args4 :| Args5 :| Args6 :| Args7)
-        > N "_fIdx" TInt
-        > Param
+        :> ( Args0
+               :| Args1
+               :| Args2
+               :| Args3
+               :| Args4
+               :| Args5
+               :| Args6
+               :| Args7
+           )
+        :> N "_fIdx" TInt
+        :> Param
     )
-    (s > TInt)
+    (s :> TInt)
 progEntry8 = entry8 f0 f1 f2 f3 f4 f5 f6 f7
   where
-    f0 :: Fn (Append s (Append Args0 '[Param])) (s > TInt)
+    f0 :: Fn (Append s (Append Args0 (Base :> Param))) (s :> TInt)
     f0 =
       begin
         ∘ (roll #x0 ∘ roll #param)
         ∘ opAdd
-    f1 :: Fn (Append s (Append Args1 '[Param])) (s > TInt)
+    f1 :: Fn (Append s (Append Args1 (Base :> Param))) (s :> TInt)
     f1 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #param)
         ∘ (opAdd ∘ opAdd)
-    f2 :: Fn (Append s (Append Args2 '[Param])) (s > TInt)
+    f2 :: Fn (Append s (Append Args2 (Base :> Param))) (s :> TInt)
     f2 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #param)
         ∘ (opAdd ∘ opAdd ∘ opAdd)
-    f3 :: Fn (Append s (Append Args3 '[Param])) (s > TInt)
+    f3 :: Fn (Append s (Append Args3 (Base :> Param))) (s :> TInt)
     f3 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
         ∘ roll #param
         ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
-    f4 :: Fn (Append s (Append Args4 '[Param])) (s > TInt)
+    f4 :: Fn (Append s (Append Args4 (Base :> Param))) (s :> TInt)
     f4 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
         ∘ (roll #x4 ∘ roll #param)
         ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
-    f5 :: Fn (Append s (Append Args5 '[Param])) (s > TInt)
+    f5 :: Fn (Append s (Append Args5 (Base :> Param))) (s :> TInt)
     f5 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)
         ∘ (roll #x4 ∘ roll #x5 ∘ roll #param)
         ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
-    f6 :: Fn (Append s (Append Args6 '[Param])) (s > TInt)
+    f6 :: Fn (Append s (Append Args6 (Base :> Param))) (s :> TInt)
     f6 =
       begin
         ∘ (roll #x0 ∘ roll #x1 ∘ roll #x2 ∘ roll #x3)

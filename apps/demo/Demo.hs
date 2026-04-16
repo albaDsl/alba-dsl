@@ -46,7 +46,7 @@ f1 =
     . opMul
 
 -- Example 2. Implement a function that calculates x^2 - 2*x
-f2 :: S (s > TInt) alt -> S (s > TInt) alt
+f2 :: S (s :> TInt) alt -> S (s :> TInt) alt
 f2 =
   begin
     . opDup
@@ -66,7 +66,7 @@ prop2 :: Integer -> Property
 prop2 x = (ev (c f2) x >= 0) === True
 
 -- Example 3. Implement a function that calculates x^3 - x^2 + 2*x
-f3 :: S (s > TInt) alt -> S (s > TInt) alt
+f3 :: S (s :> TInt) alt -> S (s :> TInt) alt
 f3 =
   begin
     . ns #x
@@ -88,11 +88,11 @@ prop3 :: Integer -> Property
 prop3 x = ev (c f3) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 4. Demo of the recursive pow function.
-f4 :: S (s > TNat) alt -> S (s > TInt) alt
+f4 :: S (s :> TNat) alt -> S (s :> TInt) alt
 f4 = int 2 . opSwap . Exp.pow
 
 -- Example 5. Demo of the loops based pow function.
-f5 :: S (s > TNat) alt -> S (s > TInt) alt
+f5 :: S (s :> TNat) alt -> S (s :> TInt) alt
 f5 = int 2 . opSwap . pow
 
 -- Example 6. Secp256k1 point multiplication. Calculates n * G and returns the
@@ -100,12 +100,12 @@ f5 = int 2 . opSwap . pow
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c f6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-f6 :: S (s > TNat) alt -> S (s > TInt) alt
+f6 :: S (s :> TNat) alt -> S (s :> TInt) alt
 f6 = EC.g . EC.ecMul . EC.getX
 
 -- Example 7. Evaluating =f3= using turtleVm (Bch2025).
 -- evl (c f7)
-f7 :: Fn (s > TInt) (s > TInt)
+f7 :: Fn (s :> TInt) (s :> TInt)
 f7 = bytes (c f3) . toTyped (T25.turtleVm 20 5)
 
 prop4 :: Integer -> Property
@@ -113,7 +113,7 @@ prop4 x = ev (c f7) x === x ^ 3 - x ^ 2 + 2 * x
 
 -- Example 8. Evaluating =f3= using turtleVm (Bch2026).
 -- evl (c f8)
-f8 :: Fn (s > TInt) (s > TInt)
+f8 :: Fn (s :> TInt) (s :> TInt)
 f8 = bytes (c f3) . toTyped (T26.turtleVm 5)
 
 prop5 :: Integer -> Property
@@ -122,7 +122,7 @@ prop5 x = ev (c f8) x === x ^ 3 - x ^ 2 + 2 * x
 -- Example 9. Evaluate one solution to the miniTurtleVm101 challenge on
 -- miniTurtleVm101 running on top of turtleVm Bch2026.
 -- ev (c f9) 0
-f9 :: Fn (s > TInt) (s > TInt)
+f9 :: Fn (s :> TInt) (s :> TInt)
 f9 =
   begin
     . bytes solution
@@ -136,10 +136,10 @@ f9 =
 -- >>> import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 -- >>> Dsl.progSize f10
 -- "22 opcodes, 25 bytes. Including function table: 88 opcodes, 397 bytes.\n"
-f10 :: Fn (s > TInt) (s > TInt)
+f10 :: Fn (s :> TInt) (s :> TInt)
 f10 = runEnv (opDrop . f)
   where
-    f :: Env s (s > TInt)
+    f :: Env s (s :> TInt)
     f =
       begin
         . lambda2 (toInt . add)
@@ -147,5 +147,5 @@ f10 = runEnv (opDrop . f)
         . (nat 10 . lambda1 (add1 . toTInt8) . generate)
         . foldl
 
-    toTInt8 :: Fn (s > TNat) (s > TInt8)
+    toTInt8 :: Fn (s :> TNat) (s :> TInt8)
     toTInt8 = n2i . fromInt

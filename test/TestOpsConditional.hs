@@ -19,7 +19,7 @@ testOpsConditional =
       testCase "OpReturn" $ isErr (evaluateProg progReturn) SeOpReturn
     ]
 
-progIf :: Fn s (s > TBool)
+progIf :: Fn s (s :> TBool)
 progIf =
   begin
     ∘ opFalse
@@ -29,7 +29,7 @@ progIf =
   where
     addUp = op1 ∘ op2 ∘ opAdd
 
-progNotIf :: Fn s (s > TBool)
+progNotIf :: Fn s (s :> TBool)
 progNotIf =
   begin
     ∘ opFalse
@@ -39,7 +39,7 @@ progNotIf =
   where
     addUp = op1 ∘ op2 ∘ opAdd
 
-progNestedIf :: Fn s (s > TBool)
+progNestedIf :: Fn s (s :> TBool)
 progNestedIf =
   begin
     ∘ opTrue
@@ -57,5 +57,5 @@ progNestedIf =
 progVerify :: FnC
 progVerify = opFalse ∘ opVerify
 
-progReturn :: Fn s (s > TBytes)
+progReturn :: Fn s (s :> TBytes)
 progReturn = opReturn ∘ bytes "hello world!"

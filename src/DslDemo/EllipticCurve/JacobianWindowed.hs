@@ -11,6 +11,7 @@ where
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
+    Stack (..),
     TBytes,
     TNat,
     begin,
@@ -34,7 +35,6 @@ import Alba.Dsl.V1.Bch2026
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
@@ -71,7 +71,7 @@ type TFId = TNat -- Function Id
 
 type TTab = TFId -- Lookup table (represented by the base Function Id)
 
-setupTable :: Fn (s > TFId > TPoint) s
+setupTable :: Fn (s :> TFId :> TPoint) s
 setupTable = toJacobian . makeIdentity . nat numValues . setupTable'
   where
     setupTable' =
@@ -88,10 +88,10 @@ setupTable = toJacobian . makeIdentity . nat numValues . setupTable'
               )
         )
 
-    p2b :: Fn (s > TPointJ) (s > TBytes)
+    p2b :: Fn (s :> TPointJ) (s :> TBytes)
     p2b = cast
 
-ecMul :: Env (s > TTab > TNat) (s > TPoint)
+ecMul :: Env (s :> TTab :> TNat) (s :> TPoint)
 ecMul =
   fn
     ( begin
@@ -105,7 +105,7 @@ ecMul =
         . fromJacobian
     )
   where
-    f :: Fn (s > TInt8 > TPointJ > TTab) (s > TPointJ)
+    f :: Fn (s :> TInt8 :> TPointJ :> TTab) (s :> TPointJ)
     f =
       ( begin
           . ns3 #digit #q #tab
@@ -119,13 +119,13 @@ ecMul =
             (del #tab . del #digit . roll #q')
       )
 
-    tableLookup :: Fn (s > TTab > TNat) (s > TPointJ)
+    tableLookup :: Fn (s :> TTab :> TNat) (s :> TPointJ)
     tableLookup = add . getConstant . b2p
 
-    b2p :: Fn (s > TBytes) (s > TPointJ)
+    b2p :: Fn (s :> TBytes) (s :> TPointJ)
     b2p = cast
 
-doubleN :: Fn (s > TNat > TPointJ) (s > TPointJ)
+doubleN :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
 doubleN =
   opUntil
     ( begin
@@ -136,11 +136,11 @@ doubleN =
     )
     . nip
 
-digits :: Fn (s > TNat) (s > V.TVector TInt8)
+digits :: Fn (s :> TNat) (s :> V.TVector TInt8)
 digits =
   lambda1 (dup . ifZero (drop . nothing) (tup . just)) . swap . V.unfoldr
   where
-    tup :: Fn (s > TNat) (s > TTuple TInt8 TNat)
+    tup :: Fn (s :> TNat) (s :> TTuple TInt8 TNat)
     tup = dup . wmod . swap . wdiv . tuple
 
     wmod = nat numValues . mod . n2i . fromInt

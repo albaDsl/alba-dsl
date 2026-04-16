@@ -14,6 +14,7 @@ where
 import Alba.Dsl.V1.Bch2025
   ( Fn,
     FnA,
+    Stack (..),
     StackEntry,
     TBool,
     TBytes,
@@ -42,7 +43,6 @@ import Alba.Dsl.V1.Bch2025
     pick,
     roll,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
@@ -54,11 +54,11 @@ data TurtleVmState
 
 instance StackEntry TurtleVmState
 
-initState :: FnA (s > TBytes) alt s (alt > TurtleVmState)
+initState :: FnA (s :> TBytes) alt s (alt :> TurtleVmState)
 initState = bytes [] . tuple . putState
 
 getOp ::
-  FnA s (alt > TurtleVmState) (s > TMaybe TBytes) (alt > TurtleVmState)
+  FnA s (alt :> TurtleVmState) (s :> TMaybe TBytes) (alt :> TurtleVmState)
 getOp =
   begin
     . (getState . untuple . opSwap . opSize)
@@ -66,7 +66,7 @@ getOp =
       (opSwap . tuple . putState . nothing)
       (getOpBytes . opRot . tuple . putState . just)
 
-getOpBytes :: Fn (s > TBytes) (s > TBytes > TBytes)
+getOpBytes :: Fn (s :> TBytes) (s :> TBytes :> TBytes)
 getOpBytes =
   begin
     . name2 #op #rest (nat 1 . opSplit)
@@ -78,11 +78,15 @@ getOpBytes =
       )
       (roll #op . roll #rest)
   where
-    bytesToNat :: Fn (s > TBytes) (s > TNat)
+    bytesToNat :: Fn (s :> TBytes) (s :> TNat)
     bytesToNat = cast
 
 getOpAndCondStack ::
-  FnA s (alt > TurtleVmState) (s > TMaybe TBytes > TBytes) (alt > TurtleVmState)
+  FnA
+    s
+    (alt :> TurtleVmState)
+    (s :> TMaybe TBytes :> TBytes)
+    (alt :> TurtleVmState)
 getOpAndCondStack =
   begin
     . (getState . untuple . opSwap . opSize)
@@ -93,11 +97,12 @@ getOpAndCondStack =
           . (opSwap . just . opSwap)
       )
 
-getCondStack :: FnA s (alt > TurtleVmState) (s > TBytes) (alt > TurtleVmState)
+getCondStack ::
+  FnA s (alt :> TurtleVmState) (s :> TBytes) (alt :> TurtleVmState)
 getCondStack = getState . opDup . untuple . opNip . opSwap . putState
 
 putCondStack ::
-  Int -> FnA (s > TBool) (alt > TurtleVmState) s (alt > TurtleVmState)
+  Int -> FnA (s :> TBool) (alt :> TurtleVmState) s (alt :> TurtleVmState)
 putCondStack maxCsDepth =
   begin
     . (getState . untuple . opSize . maxCsDepth' . opLessThanOrEqual)
@@ -110,7 +115,7 @@ putCondStack maxCsDepth =
   where
     maxCsDepth' = nat (fromIntegral maxCsDepth)
 
-toggleCondStack :: FnA s (alt > TurtleVmState) s (alt > TurtleVmState)
+toggleCondStack :: FnA s (alt :> TurtleVmState) s (alt :> TurtleVmState)
 toggleCondStack =
   begin
     . (getState . untuple . opSize . nat 1 . opGreaterThanOrEqual)
@@ -123,7 +128,7 @@ toggleCondStack =
       )
       (vmError "E3") -- CondStack underflow
 
-dropCondStack :: FnA s (alt > TurtleVmState) s (alt > TurtleVmState)
+dropCondStack :: FnA s (alt :> TurtleVmState) s (alt :> TurtleVmState)
 dropCondStack =
   begin
     . (getState . untuple . opSize . nat 1 . opGreaterThanOrEqual)
@@ -131,14 +136,14 @@ dropCondStack =
       (nat 1 . opSplit . opNip . tuple . putState)
       (vmError "E4") -- CondStack underflow
 
-getState :: FnA s (alt > TurtleVmState) (s > TTuple) alt
+getState :: FnA s (alt :> TurtleVmState) (s :> TTuple) alt
 getState = opFromAltStack . toTuple
   where
-    toTuple :: Fn (s > TurtleVmState) (s > TTuple)
+    toTuple :: Fn (s :> TurtleVmState) (s :> TTuple)
     toTuple = cast
 
-putState :: FnA (s > TTuple) alt s (alt > TurtleVmState)
+putState :: FnA (s :> TTuple) alt s (alt :> TurtleVmState)
 putState = fromTuple . opToAltStack
   where
-    fromTuple :: Fn (s > TTuple) (s > TurtleVmState)
+    fromTuple :: Fn (s :> TTuple) (s :> TurtleVmState)
     fromTuple = cast

@@ -20,7 +20,7 @@ testLookupTables =
         isTrue (evaluateProg progEllipticCurve)
     ]
 
-progEllipticCurve :: Fn s (s > TBool)
+progEllipticCurve :: Fn s (s :> TBool)
 progEllipticCurve =
   runEnv
     ( begin

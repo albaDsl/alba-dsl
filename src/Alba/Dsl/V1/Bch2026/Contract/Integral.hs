@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Integral where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Stack (..),
     TInt,
     TNat,
     cast,
@@ -19,21 +20,20 @@ import Alba.Dsl.V1.Bch2026
     opNegate,
     opSub,
     (.),
-    type (>),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand
 import Prelude (error, id)
 
 class (Ord a) => Integral a where
-  add, sub, mul :: Fn (s > a > a) (s > a)
-  add1, sub1 :: Fn (s > a) (s > a)
-  div :: Fn (s > a > a) (s > a) -- Like haskell's quot.
-  mod :: Fn (s > a > a) (s > a) -- Like haskell's rem.
-  negate :: Fn (s > a) (s > a)
-  abs :: Fn (s > a) (s > a)
-  fromInt :: Fn (s > TInt) (s > a)
-  toInt :: Fn (s > a) (s > TInt)
+  add, sub, mul :: Fn (s :> a :> a) (s :> a)
+  add1, sub1 :: Fn (s :> a) (s :> a)
+  div :: Fn (s :> a :> a) (s :> a) -- Like haskell's quot.
+  mod :: Fn (s :> a :> a) (s :> a) -- Like haskell's rem.
+  negate :: Fn (s :> a) (s :> a)
+  abs :: Fn (s :> a) (s :> a)
+  fromInt :: Fn (s :> TInt) (s :> a)
+  toInt :: Fn (s :> a) (s :> TInt)
 
 instance Integral TInt where
   add = opAdd
