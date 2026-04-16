@@ -20,6 +20,7 @@ module Alba.Dsl.V1.Bch2026.Lang
     progCode,
     emptyProg,
     runEnv,
+    reserveSlots,
   )
 where
 
@@ -39,11 +40,12 @@ import Alba.Dsl.V1.Common.FunctionState
     isRegistered,
     registerFunction,
   )
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId, OpcodeL3 (..))
+import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (Absolute), OpcodeL3 (..))
 import Alba.Dsl.V1.Common.Stack
   ( Append,
     Fn,
     FnA,
+    FnC,
     ListToStack,
     S (..),
     Stack (..),
@@ -217,3 +219,14 @@ runEnv prog =
   aops' [RuntimeState, Opcode OP_TOALTSTACK]
     >>> prog
     >>> aops [OP_FROMALTSTACK, OP_DROP]
+
+reserveSlots :: [Int] -> FnC
+reserveSlots slots st = foldl (\st' idx -> reserveSlot idx st') st slots
+
+reserveSlot :: Int -> FnC
+reserveSlot idx st =
+  let fId = Absolute idx
+   in if not (isRegistered fId st.fs)
+        then st {fs = fromMaybe canNotHappen (registerFunction fId st.fs)}
+        else error (printf "Already reserved absolute slot: %d\n" idx)
+
