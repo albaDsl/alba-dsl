@@ -79,7 +79,7 @@ data (a :: Stack) :| b :: Type
 
 infixr 9 :|
 
-type family Append s s' where
+type family Append (s :: Stack) (s' :: Stack) where
   Append s Base = s
   Append s (s' :> a) = (Append s s') :> a
 
