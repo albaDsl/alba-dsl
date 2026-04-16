@@ -26,6 +26,9 @@ test: build
 	cabal run permutationChallenge -- test
 	cabal run -- test --quickcheck-tests 100 --quickcheck-max-ratio 100
 
+accept-metrics:
+	cabal run test -- -p "metrics" --accept
+
 benchmark:
 	cabal run benchmark1 -- --output benchmark1.html
 	cabal run benchmark2 -- --output benchmark2.html
