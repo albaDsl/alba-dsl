@@ -4,9 +4,10 @@
 module Alba.Dsl.V1.Common.Listing
   ( progSize,
     progList,
+    progList',
     progFt,
-    list,
     listStr,
+    listStrVert,
     sizeStr,
     compressibilityStr,
   )
@@ -35,20 +36,29 @@ progSize :: FnA s alt s' alt' -> String
 progSize prog =
   let (code, defs, _) = compileL2WithDetails (defOpts O1) prog
    in printf
-        "%s Including function table: %s\n"
+        "%s Total (with function table): %s\n"
         (sizeStr code)
         (sizeStr (defs <> code))
 
 progList :: FnA s alt s' alt' -> String
 progList prog = listStr (fst $ compileL2 O1 prog)
 
+progList' :: FnA s alt s' alt' -> String
+progList' prog = listStrVert (fst $ compileL2 O1 prog)
+
 progFt :: FnA s alt s' alt' -> String
 progFt prog =
   let cr = compile' O1 prog
    in T.unpack $ FTT.generateTable cr.functionTable
 
-list :: CodeL2 -> String
-list code = do
+listStr :: CodeL2 -> String
+listStr code | S.null code = ""
+listStr code =
+  let (op :<| code') = code
+   in show op <> " " <> listStr code'
+
+listStrVert :: CodeL2 -> String
+listStrVert code = do
   list' "" code <> printf "\n%s\n" (sizeStr code)
   where
     list' :: String -> CodeL2 -> String
@@ -65,12 +75,6 @@ list code = do
               OP_ENDIF -> drop 2 indent
               _ -> indent
        in opStr <> "\n" <> list' indent' code''
-
-listStr :: CodeL2 -> String
-listStr code | S.null code = ""
-listStr code =
-  let (op :<| code') = code
-   in show op <> " " <> listStr code'
 
 sizeStr :: CodeL2 -> String
 sizeStr code =
