@@ -20,8 +20,8 @@ error = opFalse . opVerify . castStack
 error' :: FnA s alt s' alt'
 error' = opFalse . opVerify . castStack
 
-errCanNotHappen :: FnA (s :> TBytes) alt s' alt'
+errCanNotHappen :: FnA s alt s' alt'
 errCanNotHappen = bytes "E0" . error
 
-errPartialFunction :: FnA (s :> TBytes) alt s' alt'
+errPartialFunction :: FnA s alt s' alt'
 errPartialFunction = bytes "E1" . error
