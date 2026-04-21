@@ -2,7 +2,6 @@
 
 module DemoPrelude
   ( module Dsl,
-    module Alba.Dsl.V1.Bch2026.Contract.Prelude,
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
@@ -15,15 +14,17 @@ module DemoPrelude
     evm,
     progSize,
     progList,
+    progList',
     progFt,
     plot,
     cube,
+    pow,
   )
 where
 
-import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progSize)
+import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progList', progSize)
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
-import Alba.Dsl.V1.Bch2026.Contract.Prelude
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (pow)
 import Alba.Misc.Logging (dumpLogToFile)
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026 hiding (FunctionTable)
@@ -118,7 +119,10 @@ evm code x = dump $ evaluateScript txCtx startState'
       dumpMetrics state
       printf "\nVM Limits are maxed out, so ignore the percentages above.\n"
       printf
-        "Based on the code size, our cost budget would have been: %d.\n"
+        ( "Based on the code size (%d bytes), our cost budget would\n"
+            <> "have been: %d.\n"
+        )
+        codeSize
         budget
       printf
         "So: %d / %d (%0.1f%%)\n"
@@ -128,14 +132,21 @@ evm code x = dump $ evaluateScript txCtx startState'
             / (fromIntegral budget :: Double)
             * 100
         )
+      printf
+        "Expressed in bytes the excution cost is: %d bytes.\n"
+        (state.metrics.cost `div` vmParamsStandard.costBudgetPerInputByte + 1)
       where
-        budget = B.length code * vmParamsStandard.costBudgetPerInputByte
+        codeSize = B.length code
+        budget = codeSize * vmParamsStandard.costBudgetPerInputByte
 
 progSize :: FnA s alt s' alt' -> IO ()
 progSize prog = putStrLn (Dsl.progSize prog)
 
 progList :: FnA s alt s' alt' -> IO ()
 progList prog = putStrLn (Dsl.progList prog)
+
+progList' :: FnA s alt s' alt' -> IO ()
+progList' prog = putStrLn (Dsl.progList' prog)
 
 progFt :: FnA s alt s' alt' -> IO ()
 progFt prog = putStrLn (Dsl.progFt prog)
