@@ -9,7 +9,6 @@ module DslDemo.EllipticCurve.Point
     getX,
     getY,
     getXY,
-    getXY',
   )
 where
 
@@ -19,39 +18,29 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TInt,
-    begin,
     cast,
-    emptyProg,
     fn,
     int,
-    lambda1,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     TEither,
-    TMaybe,
     TTuple,
     TUnit,
     blobEqEqual,
     blobEqEqualVerify,
     blobEqRecord,
     drop,
-    dup,
-    either,
     errPartialFunction,
-    fst,
+    ifLeft,
     isLeft,
-    just,
     left,
     nip,
-    nothing,
     right,
-    rot,
-    snd,
-    swap,
     tuple,
     unit,
+    untuple,
   )
 import Prelude (Integer)
 
@@ -76,24 +65,14 @@ makeIdentity = unit . left . fromRaw
 isIdentity :: Fn (s :> TPoint) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXY :: Fn (s :> TPoint) (s :> TMaybe (TTuple TInt TInt))
-getXY = fn (lambda1 (drop . nothing) . lambda1 just . rot . toRaw . either)
-
-getXY' :: Fn (s :> TPoint) (s :> TInt :> TInt)
-getXY' =
-  fn
-    ( begin
-        . (err . lambda1 emptyProg . rot . toRaw . either)
-        . (dup . fst . swap . snd)
-    )
-  where
-    err = lambda1 (drop . errPartialFunction)
+getXY :: Fn (s :> TPoint) (s :> TInt :> TInt)
+getXY = fn (toRaw . ifLeft (drop . errPartialFunction) untuple)
 
 getX :: Fn (s :> TPoint) (s :> TInt)
-getX = getXY' . drop
+getX = getXY . drop
 
 getY :: Fn (s :> TPoint) (s :> TInt)
-getY = getXY' . nip
+getY = getXY . nip
 
 fromRaw :: Fn (s :> TEither TUnit (TTuple TInt TInt)) (s :> TPoint)
 fromRaw = cast

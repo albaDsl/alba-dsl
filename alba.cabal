@@ -260,6 +260,7 @@ library
       DslDemo.EllipticCurve.Native.FieldElement,
       DslDemo.EllipticCurve.Native.Jacobian,
       DslDemo.EllipticCurve.Point,
+      DslDemo.EllipticCurve.PrecomputedGTables,
       DslDemo.EllipticCurve.LookupTable,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,

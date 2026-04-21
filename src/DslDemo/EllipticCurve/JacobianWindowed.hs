@@ -1,54 +1,56 @@
 -- Copyright (c) 2025 albaDsl
 
 module DslDemo.EllipticCurve.JacobianWindowed
-  ( setupTable,
+  ( TTable,
+    setupTableM,
     ecDouble,
     ecAdd,
-    ecMul,
+    ecMul4,
+    ecMul6,
   )
 where
 
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,
-    Stack (..),
-    TBytes,
-    TFunctionId,
+    Stack ((:>)),
+    StackEntry,
     TNat,
     begin,
-    cast,
     del,
     fn,
-    functionId,
     i2nUnsafe,
+    lambda0,
     lambda1,
+    lambda2,
     lambda3,
     n2i,
     name,
     nat,
     ns2,
     ns3,
-    ns4,
     op0,
     opFalse,
     opIf,
     opTrue,
     opUntil,
     pick,
-    reserveSlots,
     roll,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
-  ( BlobEq (..),
-    Integral (..),
-    Ord (..),
+  ( BlobEq (equal),
+    Integral (div, fromInt, mod, toInt),
+    Ord (greaterThan),
     TInt8,
+    TMaybe,
     TTuple,
+    apply2,
     apply3,
     drop,
     dup,
-    functionIdOffset,
+    errCanNotHappen,
+    fromMaybe',
     ifZero,
     just,
     nat1SubUnsafe,
@@ -57,6 +59,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     swap,
     tuple,
   )
+import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import DslDemo.EllipticCurve.Jacobian
   ( ecAdd,
@@ -66,94 +69,71 @@ import DslDemo.EllipticCurve.Jacobian
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
-import DslDemo.EllipticCurve.LookupTable (defineConstant, getConstant)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Numeric.Natural (Natural)
-import Prelude (Int, fromIntegral, (+), (-), (^))
+import Prelude ((^))
 
-type TTab = TFunctionId -- Lookup table (represented by the base Function Id)
+type TTable = TVector TPointJ
 
-setupTable :: Int -> Fn (s :> TPoint) s
-setupTable tableStart =
+setupTableM :: Natural -> Env (s :> TPoint) (s :> TTable)
+setupTableM windowSize =
+  (toJacobian . lambda2 EC.ecAddJ . apply2 . nat numValues . swap)
+    . (makeIdentity . V.iterateN)
+  where
+    numValues = 2 ^ windowSize
+
+ecMul4 :: Env (s :> TTable :> TNat) (s :> TPoint)
+ecMul4 = fn (ecMulM 4)
+
+ecMul6 :: Env (s :> TTable :> TNat) (s :> TPoint)
+ecMul6 = fn (ecMulM 6)
+
+ecMulM :: Natural -> Env (s :> TTable :> TNat) (s :> TPoint)
+ecMulM windowSize =
   begin
-    . reserveSlots [tableStart .. tableStart + fromIntegral numValues - 1]
-    . (functionId (fromIntegral tableStart) . swap)
-    . (toJacobian . makeIdentity . nat numValues . setupTable')
+    . (ns2 #tab #n . pick #n . nat 0 . equal)
+    . (opIf (del #tab . del #n . makeIdentity))
+      ( begin
+          . (roll #tab . lambda3 f . apply3)
+          . (makeIdentity . roll #n . digitsM windowSize . V.foldr)
+      )
+    . fromJacobian
   where
-    setupTable' =
-      fn
-        ( begin
-            . (ns4 #fId #p #acc #i . pick #i . op0 . equal)
-            . opIf
-              (del #fId . del #p . del #acc . del #i)
-              ( begin
-                  . (pick #acc . p2b . pick #fId . defineConstant)
-                  . (roll #fId . nat 1 . functionIdOffset)
-                  . (pick #p . roll #acc . roll #p . EC.ecAddJ)
-                  . (roll #i . nat1SubUnsafe . setupTable')
-              )
-        )
-
-    p2b :: Fn (s :> TPointJ) (s :> TBytes)
-    p2b = cast
-
-ecMul :: Env (s :> TTab :> TNat) (s :> TPoint)
-ecMul =
-  fn
-    ( begin
-        . (ns2 #tab #n . pick #n . nat 0 . equal)
-        . opIf
-          (del #tab . del #n . makeIdentity)
-          ( begin
-              . (roll #tab . lambda3 f . apply3)
-              . (makeIdentity . roll #n . digits . V.foldr)
-          )
-        . fromJacobian
-    )
-  where
-    f :: Fn (s :> TInt8 :> TPointJ :> TTab) (s :> TPointJ)
+    f :: Fn (s :> TInt8 :> TPointJ :> TTable) (s :> TPointJ)
     f =
       ( begin
-          . ns3 #digit #q #tab
-          . name #q' (nat windowSize . roll #q . doubleN)
+          . (ns3 #digit #q #tab . name #q' (nat windowSize . roll #q . doubleN))
           . (pick #digit . toInt . op0 . greaterThan)
           . opIf
             ( begin
                 . (roll #tab . roll #digit . toInt . i2nUnsafe)
-                . (tableLookup . roll #q' . EC.ecAddJ)
+                . (V.lookup . fromJust . roll #q' . EC.ecAddJ)
             )
             (del #tab . del #digit . roll #q')
       )
 
-    tableLookup :: Fn (s :> TTab :> TNat) (s :> TPointJ)
-    tableLookup = functionIdOffset . getConstant . b2p
-
-    b2p :: Fn (s :> TBytes) (s :> TPointJ)
-    b2p = cast
+    fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
+    fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
 
 doubleN :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
 doubleN =
   opUntil
     ( begin
         . (swap . dup . op0 . equal)
-        . opIf
-          (swap . opTrue)
-          (nat1SubUnsafe . swap . EC.ecDoubleJ . opFalse)
+        . opIf (swap . opTrue) (nat1SubUnsafe . swap . EC.ecDoubleJ . opFalse)
     )
     . nip
 
-digits :: Fn (s :> TNat) (s :> V.TVector TInt8)
-digits =
-  lambda1 (dup . ifZero (drop . nothing) (tup . just)) . swap . V.unfoldr
+digitsM :: Natural -> Env (s :> TNat) (s :> V.TVector TInt8)
+digitsM windowSize = lambda1 f . swap . V.unfoldr
   where
+    f :: Fn (s :> TNat) (s :> TMaybe (TTuple TInt8 TNat))
+    f = dup . ifZero (drop . nothing) (tup . just)
+
     tup :: Fn (s :> TNat) (s :> TTuple TInt8 TNat)
-    tup = dup . wmod . swap . wdiv . tuple
+    tup =
+      begin
+        . (dup . nat numValues . mod . n2i . fromInt)
+        . (swap . nat numValues . div . tuple)
 
-    wmod = nat numValues . mod . n2i . fromInt
-    wdiv = nat numValues . div
-
-windowSize :: Natural
-windowSize = 4
-
-numValues :: Natural
-numValues = 2 ^ windowSize
+    numValues = 2 ^ windowSize

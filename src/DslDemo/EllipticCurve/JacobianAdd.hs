@@ -26,7 +26,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal)
 import DslDemo.EllipticCurve.Field (feCube, feMul, feQuartic, feSquare, feSub)
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
-    getXYZ',
+    getXYZ,
     isIdentity,
     makeIdentity,
     makePoint,
@@ -41,7 +41,7 @@ ecDoubleJ =
         . opIf
           (roll #p)
           ( begin
-              . name3 #x #y #z (roll #p . getXYZ')
+              . name3 #x #y #z (roll #p . getXYZ)
               . name #s (pick #x . coeff 4 . pick #y . term2)
               . name #m (roll #x . feSquare . coeff 3)
               . name #x' (pick #m . feSquare . pick #s . coeff 2 . feSub)
@@ -71,8 +71,8 @@ doAdd :: Fn (s :> TPointJ :> TPointJ) (s :> TPointJ)
 doAdd =
   begin
     . ns2 #p1 #p2
-    . name3 #x1 #y1 #z1 (pick #p1 . getXYZ')
-    . name3 #x2 #y2 #z2 (roll #p2 . getXYZ')
+    . name3 #x1 #y1 #z1 (pick #p1 . getXYZ)
+    . name3 #x2 #y2 #z2 (roll #p2 . getXYZ)
     . name2 #u1 #u2 (roll #x1 . pick #z2 . term2 . roll #x2 . pick #z1 . term2)
     . name2 #s1 #s2 (roll #y1 . pick #z2 . term3 . roll #y2 . pick #z1 . term3)
     . (pick #u1 . pick #u2 . equal)

@@ -5,21 +5,24 @@ module TestCodeMetrics (testCodeMetrics) where
 import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
+    Env,
     Fn,
     FnA,
     FnC,
     Optimize (O1),
     S,
     Stack (..),
+    TBytes,
     TLambda,
+    TNat,
     begin,
     bytes,
+    cast,
     compile,
     compile',
     compileL2,
     compressibilityStr,
     delCount,
-    functionId,
     int,
     lambda1,
     lambda2,
@@ -37,7 +40,7 @@ import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup, swap)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (untuple)
@@ -55,8 +58,10 @@ import Data.Sequence qualified as S
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
+import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
-import DslDemo.EllipticCurve.Point (pushPoint)
+import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
+import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6)
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
@@ -67,7 +72,7 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
 import TestUtils2026 (emptyStacks, evaluateScript)
-import Prelude hiding (Integral (..), div, mod, (.))
+import Prelude hiding (Integral (..), div, drop, mod, (.))
 import Prelude qualified as P
 
 testCodeMetrics :: TestTree
@@ -91,10 +96,10 @@ codeSize =
       golden "EC scalar point multiply (Jacobian)" (sizeOf EJ.ecMul),
       golden
         "EC scalar point multiply (Windowed Jacobian)"
-        (sizeOf EJW.ecMul),
+        (sizeOf EJW.ecMul4),
       golden
         "EC scalar point multiply (Windowed Jacobian / tbl setup)"
-        (sizeOf (EJW.setupTable gTableIdx ∘ EJW.ecMul)),
+        (sizeOf (EJW.setupTableM 4 ∘ drop ∘ EJW.ecMul4)),
       golden "Vector ops" (sizeOf vectorOps),
       golden "LZSS" (sizeOf CLZ.decompress),
       golden "LZSS Bitstream" (sizeOf CLZB.decompress)
@@ -122,6 +127,10 @@ executionCost =
     "Execution Cost"
     [ golden "EC scalar point multiply (Windowed Jacobian demo)" $
         costOf' windowedMul,
+      golden "EC scalar point multiply (Windowed Jacobian 4 / precomp) " $
+        costOf' windowedMul4Precomputed,
+      golden "EC scalar point multiply (Windowed Jacobian 6 / precomp) " $
+        costOf' windowedMul6Precomputed,
       golden "Vector ops" $ costOf' vectorOps,
       golden "LZSS" $ costOf' decompressTest,
       golden "LZSS Bitstream" $ costOf' decompressTestBit
@@ -204,23 +213,30 @@ arithmetic :: FnC
 arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 
 windowedMul :: FnC
-windowedMul =
-  runEnv
-    ( begin
-        ∘ (g ∘ EJW.setupTable gTableIdx)
-        ∘ gTable
-        ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-        ∘ EJW.ecMul
-        ∘ pushPoint
-          0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-          0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-        ∘ (equal ∘ opVerify)
-    )
-  where
-    gTable = functionId gTableIdx
+windowedMul = runEnv (g ∘ EJW.setupTableM 4 ∘ verifyTestVector EJW.ecMul4)
 
-gTableIdx :: (P.Integral a) => a
-gTableIdx = 100
+verifyTestVector ::
+  (forall s'. Env (s' :> TTable :> TNat) (s' :> TPoint)) ->
+  Env (s :> TTable) s
+verifyTestVector ecMul =
+  begin
+    ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+    ∘ ecMul
+    ∘ pushPoint
+      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+      0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
+    ∘ (equal ∘ opVerify)
+
+windowedMul4Precomputed :: FnC
+windowedMul4Precomputed =
+  runEnv (bytes gTable4 ∘ b2v ∘ verifyTestVector EJW.ecMul4)
+
+b2v :: Fn (s :> TBytes) (s :> TTable)
+b2v = cast
+
+windowedMul6Precomputed :: FnC
+windowedMul6Precomputed =
+  runEnv (bytes gTable6 ∘ b2v ∘ verifyTestVector EJW.ecMul6)
 
 vectorOps :: FnC
 vectorOps =

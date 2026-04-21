@@ -69,24 +69,15 @@ ecMultiply code =
     Left err -> error ("err: " <> show err)
 
 progMul :: Natural -> Fn s (s :> TInt :> TInt)
-progMul scalar = nat scalar ∘ g ∘ EA.ecMul ∘ EA.getXY'
+progMul scalar = nat scalar ∘ g ∘ EA.ecMul ∘ EA.getXY
 
 progMulJacobian :: Natural -> Fn s (s :> TInt :> TInt)
 progMulJacobian scalar =
-  nat scalar ∘ g ∘ EJ.ecMul ∘ opDup ∘ EA.getX ∘ opSwap ∘ EA.getY
+  nat scalar ∘ g ∘ EJ.ecMul ∘ EA.getXY
 
 progMulJacobianWindowed :: Natural -> Fn s (s :> TInt :> TInt)
 progMulJacobianWindowed scalar =
-  runEnv
-    ( begin
-        ∘ (g ∘ EJW.setupTable gTableIdx)
-        ∘ (gTable ∘ nat scalar ∘ EJW.ecMul ∘ opDup ∘ EA.getX ∘ opSwap ∘ EA.getY)
-    )
-  where
-    gTable = functionId 100
-
-    gTableIdx :: (Integral a) => a
-    gTableIdx = 100
+  runEnv (g ∘ EJW.setupTableM 4 ∘ nat scalar ∘ EJW.ecMul4 ∘ EA.getXY)
 
 vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
 vmEval code =

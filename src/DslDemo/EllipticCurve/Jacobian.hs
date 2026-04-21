@@ -82,7 +82,7 @@ toJacobian =
   fn
     ( begin
         . (ns #p . pick #p . AP.isIdentity)
-        . opIf (del #p . makeIdentity) (roll #p . AP.getXY' . int 1 . makePoint)
+        . opIf (del #p . makeIdentity) (roll #p . AP.getXY . int 1 . makePoint)
     )
 
 fromJacobian :: Fn (s :> TPointJ) (s :> TPoint)
@@ -93,7 +93,7 @@ fromJacobian =
         . opIf
           (del #p . AP.makeIdentity)
           ( begin
-              . name3 #x #y #z (roll #p . JP.getXYZ')
+              . name3 #x #y #z (roll #p . JP.getXYZ)
               . (roll #x . pick #z . feSquare . feInv . feMul)
               . (roll #y . roll #z . feCube . feInv . feMul)
               . AP.makePoint

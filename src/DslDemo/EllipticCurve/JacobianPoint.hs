@@ -7,7 +7,6 @@ module DslDemo.EllipticCurve.JacobianPoint
     makeIdentity,
     isIdentity,
     getXYZ,
-    getXYZ',
   )
 where
 
@@ -19,36 +18,35 @@ import Alba.Dsl.V1.Bch2026
     TInt,
     begin,
     cast,
-    emptyProg,
+    constant,
     fn,
     int,
     lambda1,
+    nat,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
+    PackFs (..),
     TEither,
-    TMaybe,
+    TPackFs,
     TTuple,
     TUnit,
     blobEqEqual,
     blobEqEqualVerify,
     blobEqRecord,
     drop,
-    dup,
-    either,
     errPartialFunction,
-    fst,
+    ifLeft,
     isLeft,
-    just,
     left,
-    nothing,
+    mkPackFsM,
+    pad,
     right,
-    rot,
-    snd,
-    swap,
     tuple,
     unit,
+    unpad,
+    untuple,
   )
 import Prelude (Integer)
 
@@ -60,6 +58,21 @@ instance BlobEq TPointJ where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
+
+instance PackFs TPointJ where
+  sizeConst = 105 -- 104 + 1 for the pad tag.
+  size = nat (sizeConst @TPointJ)
+  pack = size @TPointJ . pad
+  unpack = unpad
+  packFsRec = int8PackFs
+
+int8PackFs :: Fn s (s :> TPackFs TPointJ)
+int8PackFs =
+  constant
+    ( begin
+        . (size @TPointJ . lambda1 (pack @TPointJ) . lambda1 (unpack @TPointJ))
+        . mkPackFsM
+    )
 
 makePoint :: Fn (s :> TInt :> TInt :> TInt) (s :> TPointJ)
 makePoint = fn (tuple . tuple . right . fromRaw)
@@ -73,18 +86,8 @@ makeIdentity = unit . left . fromRaw
 isIdentity :: Fn (s :> TPointJ) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXYZ :: Fn (s :> TPointJ) (s :> TMaybe (TTuple TInt (TTuple TInt TInt)))
-getXYZ = fn (lambda1 (drop . nothing) . lambda1 just . rot . toRaw . either)
-
-getXYZ' :: Fn (s :> TPointJ) (s :> TInt :> TInt :> TInt)
-getXYZ' =
-  fn
-    ( begin
-        . (err . lambda1 emptyProg . rot . toRaw . either . dup . fst . swap)
-        . (snd . dup . fst . swap . snd)
-    )
-  where
-    err = lambda1 (drop . errPartialFunction)
+getXYZ :: Fn (s :> TPointJ) (s :> TInt :> TInt :> TInt)
+getXYZ = fn (toRaw . ifLeft (drop . errPartialFunction) (untuple . untuple))
 
 fromRaw ::
   Fn

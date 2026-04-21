@@ -26,7 +26,7 @@ import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
 import DslDemo.EllipticCurve.Point
   ( TPoint,
     getX,
-    getXY',
+    getXY,
     isIdentity,
     makeIdentity,
     makePoint,
@@ -37,7 +37,7 @@ ecDouble :: Fn (s :> TPoint) (s :> TPoint)
 ecDouble =
   fn
     ( begin
-        . (ns #p . name2 #px #py (roll #p . getXY'))
+        . (ns #p . name2 #px #py (roll #p . getXY))
         . name
           #l
           ( begin
@@ -77,8 +77,8 @@ ecAdd =
     doAdd :: Fn (s :> N "p" TPoint :> N "q" TPoint) (s :> TPoint)
     doAdd =
       begin
-        . name2 #px #py (roll #p . getXY')
-        . name2 #qx #qy (roll #q . getXY')
+        . name2 #px #py (roll #p . getXY)
+        . name2 #qx #qy (roll #q . getXY)
         . name #xdiff (pick #px . pick #qx . feSub)
         . name #ydiff (pick #py . roll #qy . feSub)
         . name #l (roll #ydiff . roll #xdiff . feInv . feMul)
