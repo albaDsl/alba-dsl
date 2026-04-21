@@ -4,6 +4,8 @@ module Alba.Dsl.V1.Bch2026.Contract.Misc
   ( iterate,
     functionIdOffset,
     addToUnsigned,
+    pad,
+    unpad,
   )
 where
 
@@ -20,22 +22,27 @@ import Alba.Dsl.V1.Bch2026
     cast,
     fn,
     i2nUnsafe,
+    int,
+    n2i,
     nat,
+    ns2,
     opBin2Num,
     opCat,
     opFromAltStack,
     opGreaterThan,
     opIf,
     opNop,
+    opNum2Bin,
     opReverseBytes,
     opSize,
     opSplit,
     opToAltStack,
     opWhen,
+    roll,
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
-import Alba.Dsl.V1.Bch2026.Contract.Integral (add)
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (sub), add)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.Lang (begin, (.))
@@ -92,3 +99,35 @@ addToUnsigned = fn (toSigned . add . fromSigned)
 
     n2b :: Fn (s :> TNat) (s :> TBytes)
     n2b = cast
+
+pad :: Fn (s :> a :> TNat) (s :> TBytes)
+pad =
+  fn
+    ( begin
+        . (ns2 #val #toSize)
+        . (roll #val . valToBytes . opSize . toTag . swap . opCat . opSize)
+        . (roll #toSize . swap . sub . extend)
+    )
+  where
+    valToBytes :: Fn (s :> a) (s :> TBytes)
+    valToBytes = cast
+
+    toTag :: Fn (s :> TNat) (s :> TBytes)
+    toTag = n2i . tagSize . opNum2Bin
+
+    extend :: Fn (s :> TBytes :> TNat) (s :> TBytes)
+    extend = int 0 . swap . opNum2Bin . opCat
+
+tagSize :: Fn s (s :> TNat)
+tagSize = nat 1
+
+unpad :: Fn (s :> TBytes) (s :> a)
+unpad =
+  fn
+    ( begin
+        . (tagSize . opSplit . swap . opBin2Num . i2nUnsafe . opSplit . drop)
+        . bytesToVal
+    )
+  where
+    bytesToVal :: Fn (s :> TBytes) (s :> a)
+    bytesToVal = cast
