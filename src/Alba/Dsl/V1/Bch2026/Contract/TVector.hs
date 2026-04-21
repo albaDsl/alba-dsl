@@ -378,8 +378,8 @@ iterateNF = fn (swap . lambda2 f . apply2 . rot . rot . tuple . unfoldrF)
         . ifZero
           (delCount 3 . nothing)
           ( begin
-              . (name #val' (pick #val) . roll #cnt . nat1SubUnsafe)
-              . (rollN #val . roll #f . un #val . invoke1 . tuple . un #val')
+              . (roll #cnt . nat1SubUnsafe)
+              . (pickN #val . roll #f . un #val . invoke1 . tuple . un #val)
               . (tuple . just)
           )
 
@@ -409,13 +409,17 @@ unfoldrF = fn (empty . opUntil loop . nip . nip . nip)
     loop =
       begin
         . ns4 #packFs #f #val #acc
-        . (pickN #val . pick #f . un #val . invoke1)
+        . (rollN #val . pick #f . un #val . invoke1)
         . ifJust
           ( begin
-              . (del #val . name2 #a #b untuple . rollN #b . tcPick . roll #acc)
+              . (name2 #a #b untuple . rollN #b . tcPick . roll #acc)
               . (roll #a . snocF . un3 #packFs #f #b . opFalse)
           )
-          (un4 #packFs #f #val #acc . opTrue)
+          (un3 #packFs #f #acc . mockB . swap . opTrue)
+
+    -- Small optimization. This mock val gets deleted on loop exit anyway.
+    mockB :: forall s'. Fn s' (s' :> b)
+    mockB = bytes [] . cast
 
 -- ## Concatenation.
 cons :: forall a s. (PackFs a) => Fn (s :> a :> TVector a) (s :> TVector a)

@@ -18,6 +18,7 @@ import Alba.Dsl.V1.Bch2026
     op2Swap,
     opCat,
     opFalse,
+    opIf,
     opNumEqual,
     opSize,
     opTrue,
@@ -47,6 +48,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     liftA2Maybe,
     nip,
     nothing,
+    rot,
     snd,
     swap,
     toBytes,
@@ -67,7 +69,7 @@ import Numeric.Natural (Natural)
 import QuickCheckSupport (BytesSize (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
-import Test.Tasty.QuickCheck (Property, testProperty, (==>))
+import Test.Tasty.QuickCheck (NonNegative (..), Property, testProperty, (==>))
 import TestUtils2026 (evaluateProg, isTrue, isTrue')
 import Prelude hiding (drop, fst, max, min, snd, sum)
 import Prelude qualified as P
@@ -98,7 +100,8 @@ testLibVector =
       testProperty "filter: keep none" propFilterKeepNone,
       testProperty "map composed functions" propMapComposition,
       testProperty "map identity" propMapIdentity,
-      testProperty "folding" propFolding
+      testProperty "folding" propFolding,
+      testProperty "unfolding" propUnfolding
     ]
 
 progLength :: Fn s (s :> TBool)
@@ -695,6 +698,24 @@ propFolding (BytesSize size) =
 
     sum :: Integer
     sum = let n = len - 1 in n * (n + 1) `P.div` 2
+
+propUnfolding :: NonNegative Integer -> Property
+propUnfolding (NonNegative n) = (n <= 1000) ==> isTrue' (evaluateProg prog)
+  where
+    prog :: Fn s (s :> TBool)
+    prog =
+      runEnv
+        ( begin
+            ∘ lambda1
+              ( begin
+                  ∘ (dup ∘ int64 0 ∘ equal)
+                  ∘ opIf (drop ∘ nothing) (int64 1 ∘ swap ∘ sub1 ∘ tuple ∘ just)
+              )
+            ∘ (int64 n ∘ V.unfoldr)
+            ∘ (lambda2 add ∘ int64 0 ∘ rot ∘ V.foldl)
+            ∘ (int64 (fromIntegral n) ∘ equalVerify)
+            ∘ opTrue
+        )
 
 -- ## Test vectors.
 int64Vector :: Fn s (s :> V.TVector TInt64)
