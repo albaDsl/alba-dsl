@@ -745,7 +745,9 @@ b0 :: Bytes
 b0 = "hello world"
 
 b1 :: Bytes
-b1 = "a string that is a bit longer and keeps going"
+b1 =
+  "A string that is 128 bytes long. ABCDEFGHIJKLMNOPQRSTUVXYZ"
+    <> "ABCDEFGHIJKLMNOPQRSTUVXYZ ABCDEFGHIJKLMNOPQRSTUVXYZ ABCDEFGHIJKLMNOPQ"
 
 b2 :: Bytes
 b2 = ""

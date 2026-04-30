@@ -24,7 +24,6 @@ import Alba.Dsl.V1.Bch2026
     fn,
     i2nUnsafe,
     int,
-    n2i,
     nat,
     ns2,
     opBin2Num,
@@ -40,7 +39,9 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
+import Alba.Dsl.V1.Bch2026.Contract.Error (errPartialFunction)
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (sub), add)
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (lessThanOrEqual))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, fromAlt, swap, toAlt)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.Lang (begin, (.))
@@ -103,22 +104,29 @@ pad =
     valToBytes :: Fn (s :> a) (s :> TBytes)
     valToBytes = cast
 
+    -- Tag is stored as an unsigned integer.
     toTag :: Fn (s :> TNat) (s :> TBytes)
-    toTag = n2i . tagSize . opNum2Bin
+    toTag =
+      begin
+        . (dup . nat maxValLength . lessThanOrEqual)
+        . opIf (n2b . nat 1 . opSplit . drop) errPartialFunction
+
+    n2b :: Fn (s :> TNat) (s :> TBytes)
+    n2b = cast
 
     extend :: Fn (s :> TBytes :> TNat) (s :> TBytes)
     extend = int 0 . swap . opNum2Bin . opCat
+
+    maxValLength = 256
 
 tagSize :: Fn s (s :> TNat)
 tagSize = nat 1
 
 unpad :: Fn (s :> TBytes) (s :> a)
-unpad =
-  fn
-    ( begin
-        . (tagSize . opSplit . swap . opBin2Num . i2nUnsafe . opSplit . drop)
-        . bytesToVal
-    )
+unpad = fn (tagSize . opSplit . swap . toSigned . opSplit . drop . bytesToVal)
   where
+    toSigned :: Fn (s :> TBytes) (s :> TNat)
+    toSigned = bytes [0] . opCat . opBin2Num . i2nUnsafe
+
     bytesToVal :: Fn (s :> TBytes) (s :> a)
     bytesToVal = cast
