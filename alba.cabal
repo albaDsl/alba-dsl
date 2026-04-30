@@ -123,7 +123,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.TInt8,
       Alba.Dsl.V1.Bch2026.Contract.TMaybe,
       Alba.Dsl.V1.Bch2026.Contract.TTuple,
-      Alba.Dsl.V1.Bch2026.Contract.TTupleFs,
+      Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances,
       Alba.Dsl.V1.Bch2026.Contract.TUnit,
       Alba.Dsl.V1.Bch2026.Contract.TVector,
       Alba.Dsl.V1.Bch2026.ExternalLib,

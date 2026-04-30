@@ -153,8 +153,6 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     untuple,
   )
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe qualified as Maybe
-import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (TTupleFs, calcPackFs, tupleF)
-import Alba.Dsl.V1.Bch2026.Contract.TTupleFs qualified as TFS
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
 import Data.Kind (Type)
 import Prelude ()
@@ -493,33 +491,25 @@ mapF =
 
 zip ::
   forall a b s.
-  (PackFs a, PackFs b) =>
-  Env (s :> TVector a :> TVector b) (s :> TVector (TTupleFs a b))
-zip = packFsRec @a . packFsRec @b . opRoll 3 . opRoll 3 . zipF
+  (PackFs a, PackFs b, PackFs (TTuple a b)) =>
+  Env (s :> TVector a :> TVector b) (s :> TVector (TTuple a b))
+zip =
+  begin
+    . (ns2 #vecA #vecB . packFsRec @a . packFsRec @b . packFsRec @(TTuple a b))
+    . (roll #vecA . roll #vecB . zipF)
 
 zipF ::
   (StackEntry a, StackEntry b) =>
   Env
-    (s :> TPackFs a :> TPackFs b :> TVector a :> TVector b)
-    (s :> TVector (TTupleFs a b))
-zipF =
-  fn
-    ( begin
-        . (ns4 #pfsA #pfsB #vecA #vecB . pick #pfsA . pick #pfsB . op2Dup)
-        . (calcPackFs . roll #pfsA . roll #pfsB . lambda4 f . apply4_2)
-        . (roll #vecA . roll #vecB . zipWithF)
+    ( s
+        :> TPackFs a
+        :> TPackFs b
+        :> TPackFs (TTuple a b)
+        :> TVector a
+        :> TVector b
     )
-  where
-    f ::
-      (StackEntry a, StackEntry b) =>
-      Fn (s :> a :> b :> TPackFs a :> TPackFs b) (s :> TTupleFs a b)
-    f =
-      begin
-        . (ns4 #a #b #pfsA #pfsB . roll #pfsA . roll #pfsB . rollN #a)
-        . (rollN #b . un2 #a #b . tupleF)
-
-lambdaFst :: (StackEntry a) => Fn s (s :> TLambda '[TTuple a (TVector a)] '[a])
-lambdaFst = lambda1 fst
+    (s :> TVector (TTuple a b))
+zipF = fn (lambda2 tuple . rot . rot . zipWithF)
 
 zipWith ::
   forall a b c s.
@@ -567,43 +557,43 @@ zipWithF = fn (empty . opUntil loop . nip . nip . nip . nip . nip . nip)
               . (un6 #pfsB #pfsC #f #vecA #vecB #res)
           )
 
+    lambdaFst ::
+      (StackEntry a) =>
+      Fn s (s :> TLambda '[TTuple a (TVector a)] '[a])
+    lambdaFst = lambda1 fst
+
 unzip ::
   forall a b s.
-  (PackFs a, PackFs b) =>
-  Fn (s :> TVector (TTupleFs a b)) (s :> TVector a :> TVector b)
-unzip = packFsRec @a . packFsRec @b . op2Dup . calcPackFs . opRoll 3 . unzipF
+  (PackFs (TTuple a b), PackFs a, PackFs b) =>
+  Fn (s :> TVector (TTuple a b)) (s :> TVector a :> TVector b)
+unzip =
+  packFsRec @(TTuple a b) . packFsRec @a . packFsRec @b . opRoll 3 . unzipF
 
 type UnzipFArgs s a b =
-  s
-    :> TPackFs a
-    :> TPackFs b
-    :> TPackFs (TTupleFs a b)
-    :> TVector (TTupleFs a b)
+  s :> TPackFs (TTuple a b) :> TPackFs a :> TPackFs b :> TVector (TTuple a b)
 
 unzipF ::
   (StackEntry a, StackEntry b) =>
   Fn (UnzipFArgs s a b) (s :> TVector a :> TVector b)
 unzipF =
-  fn
-    (empty . empty . opUntil loop . rotDrop . rotDrop . rotDrop . rotDrop)
+  fn (empty . empty . opUntil loop . rotDrop . rotDrop . rotDrop . rotDrop)
   where
     loop ::
       (StackEntry a, StackEntry b) =>
       Loop (UnzipFArgs s a b :> TVector a :> TVector b)
     loop =
       begin
-        . ns6 #pfsA #pfsB #packFsTup #vec #resA #resB
-        . (pick #packFsTup . pick #vec . unconsF)
+        . ns6 #pfsTup #pfsA #pfsB #vec #resA #resB
+        . (pick #pfsTup . pick #vec . unconsF)
         . ifJust
           ( begin
               . del #vec
-              . (untuple . swap . pick #pfsA . pick #pfsB . rot)
-              . (TFS.untupleF . swap . ns2 #b #a)
+              . (untuple . swap . untuple . swap . ns2 #b #a)
               . (pick #pfsA . roll #resA . rot . un #a . snocF . swap)
               . (pick #pfsB . roll #resB . rot . un #b . snocF)
-              . (opFalse . un3 #pfsA #pfsB #packFsTup)
+              . (opFalse . un3 #pfsA #pfsB #pfsTup)
           )
-          (opTrue . un6 #pfsA #pfsB #packFsTup #vec #resA #resB)
+          (opTrue . un6 #pfsTup #pfsA #pfsB #vec #resA #resB)
 
     rotDrop ::
       (StackEntry a, StackEntry b, StackEntry c) =>

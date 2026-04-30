@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (packFsRec), TPackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
+import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt)

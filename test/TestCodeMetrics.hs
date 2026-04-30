@@ -43,7 +43,7 @@ import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.TTupleFs (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT

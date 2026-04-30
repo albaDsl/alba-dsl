@@ -15,7 +15,6 @@ import Alba.Dsl.V1.Bch2026
     n2i,
     name,
     nat,
-    op2Swap,
     opCat,
     opFalse,
     opIf,
@@ -26,11 +25,11 @@ import Alba.Dsl.V1.Bch2026
     roll,
     (∘),
   )
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     Integral (..),
     Ord (..),
-    PackFs (packFsRec),
     TBytes128,
     TInt64,
     TInt8,
@@ -54,7 +53,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     toBytes,
     tuple,
   )
-import Alba.Dsl.V1.Bch2026.Contract.TTupleFs qualified as TFS
+import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.Lang
   ( emptyProg,
@@ -389,42 +388,38 @@ progZipping =
     ( begin
         ∘ ( begin
               ∘ (int64Vector ∘ int8Vector ∘ V.zip)
-              ∘ (int64 0 ∘ int8 0 ∘ TFS.tuple)
-              ∘ (int64 1 ∘ int8 1 ∘ TFS.tuple)
-              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ (int64 0 ∘ int8 0 ∘ tuple)
+              ∘ (int64 1 ∘ int8 1 ∘ tuple)
+              ∘ (int64 2 ∘ int8 2 ∘ tuple)
               ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
         ∘ ( begin
               ∘ (int64Vector ∘ int8Vector ∘ V.zip)
               ∘ (V.unsnoc ∘ fromJust ∘ snd)
-              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ (int64 2 ∘ int8 2 ∘ tuple)
               ∘ equalVerify
           )
         ∘ ( begin
               ∘ (int64Vector ∘ bytes128Vector ∘ V.zip)
-              ∘ (int64 0 ∘ bytes128 b0 ∘ TFS.tuple)
-              ∘ (int64 1 ∘ bytes128 b1 ∘ TFS.tuple)
-              ∘ (int64 2 ∘ bytes128 b2 ∘ TFS.tuple)
+              ∘ (int64 0 ∘ bytes128 b0 ∘ tuple)
+              ∘ (int64 1 ∘ bytes128 b1 ∘ tuple)
+              ∘ (int64 2 ∘ bytes128 b2 ∘ tuple)
               ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
         ∘ ( begin
               ∘ (int64Vector ∘ bytes128Vector ∘ V.zip)
               ∘ (V.unsnoc ∘ fromJust ∘ snd)
-              ∘ (int64 2 ∘ bytes128 b2 ∘ TFS.tuple)
+              ∘ (int64 2 ∘ bytes128 b2 ∘ tuple)
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ lambda2
-                ( begin
-                    ∘ (packFsRec @TInt64 ∘ packFsRec @TInt8 ∘ op2Swap)
-                    ∘ TFS.tupleF
-                )
+              ∘ lambda2 tuple
               ∘ (int64Vector ∘ int8Vector ∘ V.zipWith)
-              ∘ (int64 0 ∘ int8 0 ∘ TFS.tuple)
-              ∘ (int64 1 ∘ int8 1 ∘ TFS.tuple)
-              ∘ (int64 2 ∘ int8 2 ∘ TFS.tuple)
+              ∘ (int64 0 ∘ int8 0 ∘ tuple)
+              ∘ (int64 1 ∘ int8 1 ∘ tuple)
+              ∘ (int64 2 ∘ int8 2 ∘ tuple)
               ∘ (V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
@@ -598,7 +593,7 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
       runEnv
         ( begin
             ∘ (name #vec1 (testVector len1') ∘ name #vec2 (testVector len2'))
-            ∘ (lambda2 TFS.tuple ∘ dup)
+            ∘ (lambda2 tuple ∘ dup)
             ∘ (pick #vec1 ∘ pick #vec2 ∘ V.zipWith ∘ V.unzip ∘ V.zipWith)
             ∘ name #minLen (nat len1' ∘ nat len2' ∘ min)
             ∘ (pick #minLen ∘ roll #vec1 ∘ V.take)
