@@ -87,7 +87,7 @@ main' opts ctx = do
             Just x -> x
             Nothing -> error "Invalid recipient."
           outpoint = OutPoint txId' (fromIntegral utxoIndex)
-          secKey = c.recipient.secKey
+          secKey = c.sender.secKey
           script = c.redeemScript
           tx = senderWithdrawTx ctx outpoint c.utxo script secKey c.tmo recvAddr
           displayOpts = defaultDisplayOpts {labels = Just c.labels, showMetrics}
