@@ -43,7 +43,6 @@ import Alba.Dsl.V1.Common.FunctionState
     getCallerFunctionId,
     getCallerLambdaId,
     getCallerRtConstantId,
-    getFunctionBody,
     isRegistered,
     registerFunction,
   )
@@ -91,14 +90,7 @@ register prog fId fs =
       let fs' = fromMaybe canNotHappen (registerFunction fId fs)
           (c, fs'') = pass1 S.empty fs' prog
        in fromMaybe canNotHappen (addFunctionBody fId c fs'')
-    else case getFunctionBody fId fs of
-      Just c ->
-        let (c', _) = pass1 S.empty fs prog
-         in if c == c'
-              then fromMaybe canNotHappen (addCallSite fId fs)
-              else error (printf "%s: code for body not constant." (show fId))
-      Nothing ->
-        fromMaybe canNotHappen (addCallSite fId fs)
+    else fromMaybe canNotHappen (addCallSite fId fs)
 
 pass1 ::
   forall s s' alt alt'.

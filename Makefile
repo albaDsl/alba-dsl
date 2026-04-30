@@ -1,10 +1,13 @@
 ## Copyright (c) 2025 albaDsl
 
-.PHONY: build clean alba test benchmark
+.PHONY: build plugins clean alba test benchmark
 
 build:
 	cabal build lib:bchn-secp256k1
 	cabal build
+
+plugins:
+	cabal build lib:plugins
 
 clean:
 	cabal clean
