@@ -15,6 +15,7 @@ module Alba.Dsl.V1.Common.Compile
   )
 where
 
+import Alba.Dsl.V1.Bch2026.Utils (lookupFunctionId)
 import Alba.Dsl.V1.Common.CashScriptOptimizerRules qualified as CS
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp)
 import Alba.Dsl.V1.Common.FunctionState
@@ -24,13 +25,12 @@ import Alba.Dsl.V1.Common.FunctionState
     startState,
   )
 import Alba.Dsl.V1.Common.FunctionState qualified as FS
-import Alba.Dsl.V1.Common.FunctionStateResolved
-  ( functionsSortedByIndex,
-    functionsSortedByIndexTopological,
-    getBaseVmFunctionId,
+import Alba.Dsl.V1.Common.FunctionStateResolvedIds
+  ( getBaseVmFunctionId,
     getVmFunctionId,
   )
-import Alba.Dsl.V1.Common.FunctionStateResolved qualified as FSR
+import Alba.Dsl.V1.Common.FunctionStateResolvedIds qualified as FSR
+import Alba.Dsl.V1.Common.FunctionTable qualified as FT
 import Alba.Dsl.V1.Common.FunctionTableJson qualified as FTJ
 import Alba.Dsl.V1.Common.FunctionTableText qualified as FTT
 import Alba.Dsl.V1.Common.OpcodeL3
@@ -86,7 +86,7 @@ data Optimize = None | O1
 
 data CompilationResult = CompilationResult
   { code :: !CodeL1,
-    functionTable :: !FSR.FunctionTable
+    functionTable :: !FT.FunctionTable
   }
   deriving (Eq, Show)
 
@@ -99,8 +99,7 @@ compile' ::
   (S s alt -> S s' alt') ->
   CompilationResult
 compile' level prog = do
-  let (code, fs) = compileL2 level prog
-      functionTable = fs.functionTable
+  let (code, functionTable) = compileL2 level prog
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 code), ..}
   where
     err = error "compile': internal error."
@@ -112,8 +111,7 @@ compileLibrary ::
   (S s alt -> S s' alt') ->
   CompilationResult
 compileLibrary level prefix prog =
-  let (_code, defs, fs) = compileL2WithDetails options prog
-      functionTable = fs.functionTable
+  let (_code, defs, functionTable) = compileL2WithDetails options prog
    in CompilationResult {code = fromMaybe err (codeL2ToCodeL1 defs), ..}
   where
     options = Options {fIdType = ThreeByte16_8 prefix, ..}
@@ -123,7 +121,7 @@ compileL2 ::
   forall s s' alt alt'.
   Optimize ->
   (S s alt -> S s' alt') ->
-  (CodeL2, FSR.FunctionState)
+  (CodeL2, FT.FunctionTable)
 compileL2 level prog =
   let (code, defs, fs) = compileL2WithDetails (defOpts level) prog
    in (defs <> code, fs)
@@ -135,7 +133,7 @@ compileL2WithDetails ::
   forall s s' alt alt'.
   Options ->
   (S s alt -> S s' alt') ->
-  (CodeL2, CodeL2, FSR.FunctionState)
+  (CodeL2, CodeL2, FT.FunctionTable)
 compileL2WithDetails opts prog =
   case opts.level of
     None -> compileL2' prog
@@ -146,10 +144,10 @@ compileL2WithDetails opts prog =
     compileL2' prog' = do
       let (code, fs) = pass1 S.empty startState prog'
           fs' = assignIndices opts (addSupportFunctions fs)
-          defs = functionDefinitions fs'
+          ft = FT.toFunctionTable (resolve opts fs') fs'
+          ftInit = functionTableInitCode ft
           code' = pass2 opts fs' code
-          defs' = pass2 opts fs' defs
-       in (code', defs', fs')
+       in (code', ftInit, ft)
 
 pass1 ::
   forall s s' alt alt'.
@@ -162,10 +160,7 @@ pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
 -- Use of 'iterate' is to get the call site count correct.
 addSupportFunctions :: FunctionState -> FunctionState
 addSupportFunctions fs =
-  iterate
-    (\fs' -> snd (pass1 S.empty fs' toPushOp))
-    fs
-    !! numRtConstants
+  iterate (\fs' -> snd (pass1 S.empty fs' toPushOp)) fs !! numRtConstants
   where
     numRtConstants :: Int
     numRtConstants =
@@ -189,46 +184,56 @@ assignIndices opts fs = FSR.toResolved opts.fIdType (mapFunctions assign fs)
         then nextFree (succ idx)
         else idx
 
-functionDefinitions :: FSR.FunctionState -> CodeL3
-functionDefinitions fs@FSR.FunctionState {functionTable} =
-  ( order
-      >>> filter (\(_, FSR.Function {code}) -> isJust code)
+resolve ::
+  Options ->
+  FSR.FunctionState ->
+  (FunctionId, FSR.Function) ->
+  (FunctionId, FT.Function)
+resolve opts fs (fId, FSR.Function {..}) =
+  let codeL2 = do
+        code' <- code
+        code'' <- case fId of
+          _
+            | isConstant fId ->
+                S.singleton . Opcode . bytesToDataOp
+                  <$> codeL2ToCodeL1
+                    ( S.singleton . bytesToDataOp $
+                        evaluateConstant fs fId code'
+                    )
+          _ | isRtConstant fId -> pure code'
+          _ -> pure $ S.fromList [FunctionBody code']
+        pure $ pass2 opts fs code''
+   in (fId, FT.Function {code = codeL2, ..})
+
+functionTableInitCode :: FT.FunctionTable -> CodeL2
+functionTableInitCode ft@(FT.FunctionTable ls) =
+  ( filter (\(_, FT.Function {code}) -> isJust code)
       >>> map def
       >>> foldr (S.><) S.empty
   )
-    functionTable
+    ls
   where
-    order :: FSR.FunctionTable -> [(FunctionId, FSR.Function)]
-    order ft =
-      functionsSortedByIndex
-        (M.filterWithKey (\k _ -> not $ isRtConstant k) ft)
-        <> filter
-          (\(k, _) -> isRtConstant k)
-          (functionsSortedByIndexTopological functionTable)
-
-    def :: (FunctionId, FSR.Function) -> CodeL3
-    def (fId, FSR.Function {..}) =
+    def :: (FunctionId, FT.Function) -> CodeL2
+    def (fId, FT.Function {..}) =
       let res = do
             code' <- code
             code'' <- case fId of
-              _
-                | isConstant fId ->
-                    S.singleton . Opcode . bytesToDataOp
-                      <$> codeL2ToCodeL1
-                        ( S.singleton . bytesToDataOp $
-                            evaluateConstant fs fId code'
-                        )
-              _
-                | isRtConstant fId ->
-                    pure $ code' <> (fst $ pass1 S.empty startState toPushOp)
-              _ -> pure $ S.fromList [FunctionBody code']
+              _ | isRtConstant fId -> pure $ code' <> invokeToPushOp
+              _ -> pure code'
             pure $
-              code'' <> S.fromList [FunctionIndexDef {fId}, Opcode OP_DEFINE]
-       in fromMaybe (err "internal error" fId) res
+              code'' <> S.fromList [vmFunctionIdToDataOp vmFId, OP_DEFINE]
+       in fromMaybe (err "Internal error" fId) res
 
     err :: String -> FunctionId -> a
-    err msg fId =
-      error (printf ("functionDefinitions: " <> msg <> ": %s") (show fId))
+    err msg fId = error (printf (msg <> ": %s") (show fId))
+
+    invokeToPushOp :: CodeL2
+    invokeToPushOp =
+      S.fromList
+        [ (bytesToDataOp . vmFunctionIdToByteString)
+            (lookupFunctionId ft "Alba.Dsl.V1.Common.RuntimeLib" "toPushOp"),
+          OP_INVOKE
+        ]
 
 evaluateConstant :: FSR.FunctionState -> FunctionId -> CodeL3 -> Bytes
 evaluateConstant fs fId code =
@@ -257,10 +262,10 @@ pass2 opts fs code = fst $ fromMaybe err (runStateT (mapM (f fs) code) 0)
     f :: FSR.FunctionState -> OpcodeL3 -> StateT Int Maybe OpcodeL2
     f fs' (FunctionIndexDef fId) = do
       vmFId <- lift $ getVmFunctionId fId fs'
-      pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
+      pure $ vmFunctionIdToDataOp vmFId
     f fs' (FunctionIndexRef fId) = do
       vmFId <- lift $ getVmFunctionId fId fs'
-      pure $ bytesToDataOp (vmFunctionIdToByteString vmFId)
+      pure $ vmFunctionIdToDataOp vmFId
     f fs' (FunctionBody body) = do
       let body' = pass2 opts fs' body
           body'' = case opts.level of
@@ -276,6 +281,9 @@ pass2 opts fs code = fst $ fromMaybe err (runStateT (mapM (f fs) code) 0)
     f _fs (Opcode op) = pure op
 
     err = error "Internal error."
+
+vmFunctionIdToDataOp :: VmFunctionId -> OpcodeL2
+vmFunctionIdToDataOp vmFId = bytesToDataOp (vmFunctionIdToByteString vmFId)
 
 optimize :: CodeL2 -> CodeL2
 optimize =

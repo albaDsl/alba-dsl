@@ -10,10 +10,9 @@ module Alba.Dsl.V1.Common.FunctionTableJson
   )
 where
 
-import Alba.Dsl.V1.Common.FunctionStateResolved
+import Alba.Dsl.V1.Common.FunctionTable
   ( Function (..),
-    FunctionTable,
-    functionsSortedByIndex,
+    FunctionTable (..),
   )
 import Alba.Dsl.V1.Common.OpcodeL3
   ( FunctionId (..),
@@ -63,7 +62,7 @@ generateTable functions =
       (tableEntries functions)
 
 tableEntries :: FunctionTable -> [FunctionTableEntry]
-tableEntries functions = toTableEntry <$> functionsSortedByIndex functions
+tableEntries (FunctionTable functions) = toTableEntry <$> functions
 
 toTableEntry :: (FunctionId, Function) -> FunctionTableEntry
 toTableEntry (fId, Function {..}) =

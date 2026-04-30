@@ -6,7 +6,7 @@ import Alba.Dsl.V1.Bch2025
   ( Bytes,
     Fn,
     FnA,
-    FunctionTable,
+    FunctionTable (..),
     TBytes,
     bytes,
     cast,
@@ -14,15 +14,9 @@ import Alba.Dsl.V1.Bch2025
   )
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
 import Alba.Dsl.V1.Bch2026.Stack (TFunctionId)
-import Alba.Dsl.V1.Common.FunctionStateResolved (Function (..))
-import Alba.Dsl.V1.Common.OpcodeL3
-  ( FunctionId (..),
-    VmFunctionId,
-    vmFunctionIdToByteString,
-  )
+import Alba.Dsl.V1.Bch2026.Utils (lookupFunctionId)
+import Alba.Dsl.V1.Common.OpcodeL3 (vmFunctionIdToByteString)
 import Alba.Dsl.V1.Common.Stack (Stack (..))
-import Data.Map qualified as M
-import Data.Maybe (mapMaybe)
 import Prelude hiding (drop)
 
 data LibData = LibData
@@ -47,24 +41,5 @@ invokeExt lib modName funName = bytes ref ∘ b2Fid ∘ opInvoke prog
 
     ref :: Bytes
     ref =
-      let res = mapMaybe f (M.assocs lib.functionTable)
-       in case res of
-            [vmFId] -> vmFunctionIdToByteString vmFId
-            _ -> err
-
-    f :: (FunctionId, Function) -> Maybe VmFunctionId
-    f (Standard m _l _c n, Function {vmFId})
-      | m == modName && n == funName = Just vmFId
-    f (Constant m _l _c n, Function {vmFId})
-      | m == modName && n == funName = Just vmFId
-    f (RuntimeConstant m _l _c n, Function {vmFId})
-      | m == modName && n == funName = Just vmFId
-    f _ = Nothing
-
-    err =
-      error
-        ( "invokeExt: can't find function: "
-            <> show modName
-            <> ":"
-            <> show funName
-        )
+      vmFunctionIdToByteString $
+        lookupFunctionId lib.functionTable modName funName

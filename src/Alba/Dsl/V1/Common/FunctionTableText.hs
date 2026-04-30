@@ -2,10 +2,9 @@
 
 module Alba.Dsl.V1.Common.FunctionTableText (generateTable) where
 
-import Alba.Dsl.V1.Common.FunctionStateResolved
+import Alba.Dsl.V1.Common.FunctionTable
   ( Function (..),
-    FunctionTable,
-    functionsSortedByIndex,
+    FunctionTable (..),
   )
 import Alba.Dsl.V1.Common.FunctionTableJson
   ( functionIdentifier,
@@ -13,19 +12,20 @@ import Alba.Dsl.V1.Common.FunctionTableJson
     functionType,
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (..))
-import Data.Sequence qualified as S
+import Alba.Vm.Common.OpcodeL2 (codeL2ToCodeL1)
+import Data.ByteString qualified as B
 import Data.Text (Text)
 import Data.Text qualified as T
 import Text.Printf (printf)
 
 generateTable :: FunctionTable -> Text
-generateTable functions =
+generateTable (FunctionTable functions) =
   let hline = replicate tableWidth '-' <> "\n"
-      functions' = functionsSortedByIndex functions
-   in line "Location" "Function" "Type" "Function ID" "Ops" "Sites"
+   in line "Location" "Function" "Type" "Function ID" "Bytes" "Sites"
         <> T.pack hline
-        <> foldr functionLine "" functions'
-        <> T.pack (printf "Functions total: %d\n" (length functions'))
+        <> foldr functionLine "" functions
+        <> T.pack hline
+        <> T.pack (printf "Function slots total: %d\n" (length functions))
 
 functionLine :: (FunctionId, Function) -> Text -> Text
 functionLine (fId, fun) acc =
@@ -56,8 +56,14 @@ functionLine' loc fName fType (Function {..}) =
     (trunc widthFunction fName)
     (trunc widthType fType)
     (trunc widthVmFid (functionIdentifier vmFId))
-    (trunc widthOps (maybe "-" (T.pack . show . S.length) code))
+    (trunc widthBytes (maybe "-" (T.pack . show) byteSize))
     (trunc widthSites (maybe "-" (T.pack . show) callSites))
+  where
+    byteSize :: Maybe Int
+    byteSize = do
+      code' <- code
+      codeL1 <- codeL2ToCodeL1 code'
+      pure $ B.length codeL1
 
 trunc :: Int -> Text -> Text
 trunc n str =
@@ -74,8 +80,8 @@ widthFunction = 30
 widthType :: Int
 widthType = 17
 
-widthOps :: Int
-widthOps = 5 :: Int
+widthBytes :: Int
+widthBytes = 5 :: Int
 
 widthVmFid :: Int
 widthVmFid = 20
@@ -88,7 +94,7 @@ tableWidth =
   widthLocation
     + widthFunction
     + widthType
-    + widthOps
+    + widthBytes
     + widthVmFid
     + widthSites
     + 6
@@ -113,7 +119,7 @@ line locStr funStr typeStr vmFIdStr opsStr sitesStr =
       typeStr
       widthVmFid
       vmFIdStr
-      widthOps
+      widthBytes
       opsStr
       widthSites
       sitesStr

@@ -1,26 +1,26 @@
 -- Copyright (c) 2026 albaDsl
 
-module Alba.Dsl.V1.Common.FunctionStateResolved
-  ( FunctionState (..),
-    FunctionTable,
+-- Ordering of entries in the FunctionTable datatype follows that of the
+-- function table initialization code. That is, the entries are sorted by index,
+-- except for the runtime constants which are at the end of the table and sorted
+-- in topological order.
+
+module Alba.Dsl.V1.Common.FunctionTable
+  ( FunctionTable (..),
     Function (..),
-    toResolved,
-    getVmFunctionId,
-    getBaseVmFunctionId,
-    functionsSortedByIndex,
-    functionsSortedByIndexTopological,
+    toFunctionTable,
   )
 where
 
-import Alba.Dsl.V1.Common.FunctionState qualified as FS
+import Alba.Dsl.V1.Common.FunctionStateResolvedIds qualified as FSR
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (..),
-    FunctionIdType (..),
     OpcodeL3 (FunctionIndexRef),
     VmFunctionId,
-    mkVmFunctionId,
+    isRtConstant,
   )
+import Alba.Vm.Common.OpcodeL2 (CodeL2)
 import Control.Arrow ((>>>))
 import Data.Array (assocs)
 import Data.Function (on)
@@ -30,56 +30,36 @@ import Data.List (sortBy, sortOn)
 import Data.Map qualified as M
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence qualified as S
-import Text.Printf (printf)
 
-newtype FunctionState = FunctionState
-  { functionTable :: FunctionTable
-  }
-  deriving (Show)
+data FunctionTable = FunctionTable [(FunctionId, Function)]
+  deriving (Eq, Show)
 
 data Function = Function
-  { code :: Maybe CodeL3,
-    index :: Int,
+  { code :: Maybe CodeL2,
     vmFId :: VmFunctionId,
     callSites :: Maybe Int
   }
   deriving (Eq, Show)
 
-type FunctionTable = M.Map FunctionId Function
+toFunctionTable ::
+  ((FunctionId, FSR.Function) -> (FunctionId, Function)) ->
+  FSR.FunctionState ->
+  FunctionTable
+toFunctionTable convert fs =
+  let sorted =
+        ( functionsSortedByIndex
+            (M.filterWithKey (\k _ -> not $ isRtConstant k) fs.functionTable)
+            <> filter
+              (\(k, _) -> isRtConstant k)
+              (functionsSortedByIndexTopological fs.functionTable)
+        )
+   in FunctionTable (convert <$> sorted)
 
-toResolved :: FunctionIdType -> FS.FunctionState -> FunctionState
-toResolved fIdType fs =
-  FunctionState {functionTable = M.map convert (FS.functionTableMap fs)}
-  where
-    convert :: FS.Function -> Function
-    convert f@FS.Function {..} = do
-      case index of
-        Just idx ->
-          Function {index = idx, vmFId = mkVmFunctionId fIdType idx, ..}
-        Nothing ->
-          error (printf "toResolved: Function has undefined index: %s" (show f))
-
-getVmFunctionId :: FunctionId -> FunctionState -> Maybe VmFunctionId
-getVmFunctionId fId FunctionState {functionTable} =
-  case M.lookup fId functionTable of
-    Just (Function {vmFId}) -> pure vmFId
-    Nothing -> Nothing
-
--- Base for runtime assigned function IDs.
-getBaseVmFunctionId :: FunctionIdType -> FunctionState -> VmFunctionId
-getBaseVmFunctionId Local FunctionState {functionTable} =
-  if M.null functionTable
-    then mkVmFunctionId Local 0
-    else
-      let maxIdx = maximum ((.index) <$> functionTable)
-       in mkVmFunctionId Local (succ maxIdx)
-getBaseVmFunctionId _ _ =
-  error "RuntimeState can't be initialized from libraries."
-
-functionsSortedByIndex :: FunctionTable -> [(FunctionId, Function)]
+functionsSortedByIndex :: FSR.FunctionTable -> [(FunctionId, FSR.Function)]
 functionsSortedByIndex = M.toList >>> sortBy (compare `on` ((.index) . snd))
 
-functionsSortedByIndexTopological :: FunctionTable -> [(FunctionId, Function)]
+functionsSortedByIndexTopological ::
+  FSR.FunctionTable -> [(FunctionId, FSR.Function)]
 functionsSortedByIndexTopological table | M.null table = []
 functionsSortedByIndexTopological table =
   let tableAsList = functionsSortedByIndex table
@@ -91,12 +71,12 @@ functionsSortedByIndexTopological table =
         if null (cyclicNodes graph)
           then G.reverseTopSort graph
           else err1
-      sortedFunctions = topsortedTable vertices tableAsList
+      sortedFunctions = topologicalSortedTable vertices tableAsList
    in sortedFunctions
   where
-    topsortedTable ::
-      [Int] -> [(FunctionId, Function)] -> [(FunctionId, Function)]
-    topsortedTable order tableAsList =
+    topologicalSortedTable ::
+      [Int] -> [(FunctionId, FSR.Function)] -> [(FunctionId, FSR.Function)]
+    topologicalSortedTable order tableAsList =
       let orderMap = M.fromList (zip order ([0 ..] :: [Int]))
           position idx = fromMaybe err2 (M.lookup idx orderMap)
        in sortOn (position . (.index) . snd) tableAsList
@@ -108,7 +88,8 @@ functionsSortedByIndexTopological table =
     err1 = err "cyclic dependency between constants."
     err2 = err "internal error."
 
-functionEdges :: FunctionTable -> (FunctionId, Function) -> Maybe [G.Edge]
+functionEdges ::
+  FSR.FunctionTable -> (FunctionId, FSR.Function) -> Maybe [G.Edge]
 functionEdges table (RuntimeConstant {}, function) = do
   c <- function.code
   (fmap . fmap) (function.index,) (refs c (Just []))
