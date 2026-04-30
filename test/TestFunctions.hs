@@ -41,18 +41,13 @@ testFunctions =
     ]
 
 progBasic :: Fn s (s :> TBool)
-progBasic =
-  begin
-    ∘ op3
-    ∘ cube
-    ∘ int 27
-    ∘ opNumEqual
+progBasic = op3 ∘ cube ∘ int 27 ∘ opNumEqual
   where
     cube :: Fn (s :> TInt) (s :> TInt)
     cube = fn (opDup ∘ opDup ∘ opMul ∘ opMul)
 
 -- Evaluate: polynomial(x) = x⁴ + 10x³ + 35x² + 50x + 24 for
--- x = 1, 2, 3, and 4.
+-- different x values.
 progNestedCalls1 :: Fn s (s :> TBool)
 progNestedCalls1 =
   begin
@@ -63,18 +58,17 @@ progNestedCalls1 =
     ∘ opTrue
   where
     polynomial :: F (S (s :> TInt) alt -> S (s :> TInt) alt)
-    polynomial = fn (unname 1 polynomial')
-
-    -- When using "S -> S" syntax, surround it in an 'F' for VM functions.
-    polynomial' :: F (S (s :> N "x" TInt) alt -> S (s :> TInt) alt)
-    polynomial' =
-      begin
-        ∘ (pick #x ∘ quartic)
-        ∘ (pick #x ∘ cube ∘ int 10 ∘ opMul)
-        ∘ (pick #x ∘ square ∘ int 35 ∘ opMul)
-        ∘ (roll #x ∘ int 50 ∘ opMul)
-        ∘ int 24
-        ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
+    polynomial =
+      fn
+        ( begin
+            ∘ ns #x
+            ∘ (pick #x ∘ quartic)
+            ∘ (pick #x ∘ cube ∘ int 10 ∘ opMul)
+            ∘ (pick #x ∘ square ∘ int 35 ∘ opMul)
+            ∘ (roll #x ∘ int 50 ∘ opMul)
+            ∘ int 24
+            ∘ (opAdd ∘ opAdd ∘ opAdd ∘ opAdd)
+        )
 
     quartic :: Fn (s :> TInt) (s :> TInt)
     quartic = fn (square ∘ square)
@@ -101,15 +95,14 @@ progFactorial =
     ∘ (opBoolAnd ∘ opBoolAnd ∘ opBoolAnd)
   where
     fac :: Fn (s :> TNat) (s :> TNat)
-    fac = fn (unname 1 fac')
-
-    fac' :: Fn (s :> N "n" TNat) (s :> TNat)
-    fac' =
-      begin
-        ∘ pick #n
-        ∘ ifZero
-          (nat 1 ∘ del #n)
-          (pick #n ∘ roll #n ∘ nat1SubUnsafe ∘ fac ∘ opMul)
+    fac =
+      fn
+        ( begin
+            ∘ (ns #n ∘ pick #n)
+            ∘ ifZero
+              (nat 1 ∘ del #n)
+              (pick #n ∘ roll #n ∘ nat1SubUnsafe ∘ fac ∘ opMul)
+        )
 
 progSort :: Fn s (s :> TBool)
 progSort =

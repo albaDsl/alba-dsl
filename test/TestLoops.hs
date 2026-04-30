@@ -61,24 +61,24 @@ progFactorial2 :: Fn s (s :> TBool)
 progFactorial2 = progFacTest fac
   where
     fac :: Natural -> Fn s (s :> TNat)
-    fac n = nat 1 ∘ nat n ∘ iterate n (unname 2 f) ∘ opDrop
+    fac n = nat 1 ∘ nat n ∘ iterate n f ∘ opDrop
 
-    f :: Fn (s :> N "product" TNat :> N "n" TNat) (s :> TNat :> TNat)
+    f :: Fn (s :> TNat :> TNat) (s :> TNat :> TNat)
     f =
       begin
-        ∘ (pick #n ∘ roll #product ∘ opMul)
+        ∘ (ns2 #product #n ∘ pick #n ∘ roll #product ∘ opMul)
         ∘ (roll #n ∘ nat1SubUnsafe)
 
 progFactorial3 :: Fn s (s :> TBool)
 progFactorial3 = progFacTest fac
   where
     fac :: Natural -> Fn s (s :> TNat)
-    fac n = nat 1 ∘ iterate n (unname 1 f)
+    fac n = nat 1 ∘ iterate n f
 
-    f :: FnA (s :> N "product" TNat) (alt :> TNat) (s :> TNat) (alt :> TNat)
+    f :: FnA (s :> TNat) (alt :> TNat) (s :> TNat) (alt :> TNat)
     f =
       begin
-        ∘ (opFromAltStack ∘ opDup ∘ opToAltStack)
+        ∘ (ns #product ∘ opFromAltStack ∘ opDup ∘ opToAltStack)
         ∘ (roll #product ∘ opMul)
 
 -- Test vectors from:
@@ -154,9 +154,6 @@ propPow b n =
   let expected = (fromIntegral b :: Integer) ^ (fromIntegral n :: Integer)
       prog =
         begin
-          ∘ int (fromIntegral b)
-          ∘ nat (fromIntegral n)
-          ∘ pow
-          ∘ int expected
-          ∘ opNumEqual
+          ∘ (int (fromIntegral b) ∘ nat (fromIntegral n) ∘ pow)
+          ∘ (int expected ∘ opNumEqual)
    in isTrue' $ evaluateProg prog

@@ -20,6 +20,7 @@ import Alba.Dsl.V1.Bch2026
     TNat,
     bytes,
     cast,
+    emptyProg,
     fn,
     i2nUnsafe,
     int,
@@ -28,22 +29,19 @@ import Alba.Dsl.V1.Bch2026
     ns2,
     opBin2Num,
     opCat,
-    opFromAltStack,
     opGreaterThan,
     opIf,
-    opNop,
     opNum2Bin,
     opReverseBytes,
     opSize,
     opSplit,
-    opToAltStack,
     opWhen,
     roll,
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (sub), add)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, fromAlt, swap, toAlt)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Numeric.Natural (Natural)
@@ -55,17 +53,10 @@ iterate ::
   FnA s (alt :> TNat) s (alt :> TNat) ->
   FnA s alt s alt
 iterate n f =
-  if n > 0
-    then nat (fromIntegral n) . opUntil body . drop
-    else opNop
+  if n > 0 then nat (fromIntegral n) . opUntil body . drop else emptyProg
   where
     body :: FnA (s :> TNat) alt (s :> TNat :> TBool) alt
-    body =
-      begin
-        . opToAltStack
-        . f
-        . (opFromAltStack . nat1SubUnsafe)
-        . (dup . nat 0 . equal)
+    body = toAlt . f . fromAlt . nat1SubUnsafe . dup . nat 0 . equal
 
 -- Only for use with Local function IDs which are unsigned integers.
 functionIdOffset :: Fn (s :> TFunctionId :> TNat) (s :> TFunctionId)
