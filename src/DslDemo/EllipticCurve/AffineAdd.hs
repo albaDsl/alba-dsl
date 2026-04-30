@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.AffineAdd (ecDouble, ecAdd) where
+module DslDemo.EllipticCurve.AffineAdd (ecDouble, ecAdd, ecNegate) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
@@ -22,7 +22,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (dup, equal)
-import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feSquare, feSub)
+import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feNeg, feSquare, feSub)
 import DslDemo.EllipticCurve.Point
   ( TPoint,
     getX,
@@ -87,3 +87,6 @@ ecAdd =
           #ry
           (roll #l . roll #px . pick #rx . feSub . feMul . roll #py . feSub)
         . (roll #rx . roll #ry . makePoint)
+
+ecNegate :: Fn (s :> TPoint) (s :> TPoint)
+ecNegate = getXY . feNeg . makePoint

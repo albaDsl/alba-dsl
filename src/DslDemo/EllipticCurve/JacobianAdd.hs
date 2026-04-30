@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.JacobianAdd (ecDoubleJ, ecAddJ) where
+module DslDemo.EllipticCurve.JacobianAdd (ecDoubleJ, ecAddJ, ecNegateJ) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
@@ -22,8 +22,15 @@ import Alba.Dsl.V1.Bch2026
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal)
-import DslDemo.EllipticCurve.Field (feCube, feMul, feQuartic, feSquare, feSub)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal, swap)
+import DslDemo.EllipticCurve.Field
+  ( feCube,
+    feMul,
+    feNeg,
+    feQuartic,
+    feSquare,
+    feSub,
+  )
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
     getXYZ,
@@ -110,3 +117,6 @@ term3 = feCube . feMul
 
 term4 :: Fn (s :> TInt :> TInt) (s :> TInt)
 term4 = feQuartic . feMul
+
+ecNegateJ :: Fn (s :> TPointJ) (s :> TPointJ)
+ecNegateJ = getXYZ . swap . feNeg . swap . makePoint

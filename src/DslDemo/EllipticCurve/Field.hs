@@ -3,6 +3,7 @@
 module DslDemo.EllipticCurve.Field
   ( feAdd,
     feSub,
+    feNeg,
     feMul,
     feSquare,
     feCube,
@@ -25,7 +26,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Math (pow')
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (add, dup, mod, mul, sub)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (add, dup, mod, mul, sub, swap)
 import DslDemo.EllipticCurve.Constants (p)
 import Prelude (fromIntegral)
 
@@ -34,6 +35,9 @@ feAdd = fn (add . primeModulus . mod)
 
 feSub :: Fn (s :> TInt :> TInt) (s :> TInt)
 feSub = fn (sub . primeModulus . add . primeModulus . mod)
+
+feNeg :: Fn (s :> TInt) (s :> TInt)
+feNeg = fn (int 0 . swap . feSub)
 
 feMul :: Fn (s :> TInt :> TInt) (s :> TInt)
 feMul = fn (mul . primeModulus . mod)

@@ -4,21 +4,16 @@ module TestLoops (testLoops) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
-  ( BlobEq (..),
-    factorial,
+  ( factorial,
     iterate,
     nat1SubUnsafe,
     pow,
   )
 import Data.Word (Word8)
-import DslDemo.EllipticCurve.Affine qualified as EA
-import DslDemo.EllipticCurve.Constants (g)
-import DslDemo.EllipticCurve.Jacobian qualified as EJ
-import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
-import Test.Tasty.QuickCheck (NonNegative (..), testProperty)
+import Test.Tasty.QuickCheck (testProperty)
 import TestUtils2026 (evaluateProg, isTrue, isTrue')
 import Prelude hiding (iterate)
 
@@ -29,16 +24,6 @@ testLoops =
     [ testCase "Loops - factorial 1" $ isTrue (evaluateProg progFactorial1),
       testCase "Loops - factorial 2" $ isTrue (evaluateProg progFactorial2),
       testCase "Loops - factorial 3" $ isTrue (evaluateProg progFactorial3),
-      testCase "Loops - elliptic curve - scalar multiply (Affine)" $
-        isTrue (evaluateProg (progEllipticCurve EA.ecMul)),
-      testCase "Loops - elliptic curve - scalar multiply (Jacobian)" $
-        isTrue (evaluateProg (progEllipticCurve EJ.ecMul)),
-      testProperty
-        "Loops — elliptic curve scalar multiply additivity (Affine)"
-        (propEllipticCurve EA.ecAdd EA.ecMul),
-      testProperty
-        "Loops — elliptic curve scalar multiply additivity (Jacobian)"
-        (propEllipticCurve EJ.ecAdd EJ.ecMul),
       testProperty "Loops — pow" propPow
     ]
 
@@ -80,74 +65,6 @@ progFactorial3 = progFacTest fac
       begin
         ∘ (ns #product ∘ opFromAltStack ∘ opDup ∘ opToAltStack)
         ∘ (roll #product ∘ opMul)
-
--- Test vectors from:
--- https://crypto.stackexchange.com/questions/784/
--- are-there-any-secp256k1-ecdsa-test-examples-available
-progEllipticCurve :: Fn (s :> TNat :> TPoint) (s :> TPoint) -> Fn s (s :> TBool)
-progEllipticCurve ecMul =
-  begin
-    ∘ (nat 1 ∘ g ∘ ecMul)
-    ∘ pushPoint
-      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-      0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
-    ∘ (equal ∘ opVerify)
-    ∘ (nat 2 ∘ g ∘ ecMul)
-    ∘ pushPoint
-      0xC6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5
-      0x1AE168FEA63DC339A3C58419466CEAEEF7F632653266D0E1236431A950CFE52A
-    ∘ (equal ∘ opVerify)
-    ∘ (nat 3 ∘ g ∘ ecMul)
-    ∘ pushPoint
-      0xF9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9
-      0x388F7B0F632DE8140FE337E62A37F3566500A99934C2231B6CB9FD7584B8E672
-    ∘ (equal ∘ opVerify)
-    ∘ (nat 4 ∘ g ∘ ecMul)
-    ∘ pushPoint
-      0xE493DBF1C10D80F3581E4904930B1404CC6C13900EE0758474FA94ABE8C4CD13
-      0x51ED993EA0D455B75642E2098EA51448D967AE33BFBDFE40CFE97BDC47739922
-    ∘ (equal ∘ opVerify)
-    ∘ ( nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD036412D
-          ∘ g
-          ∘ ecMul
-      )
-    ∘ pushPoint
-      0x4CE119C96E2FA357200B559B2F7DD5A5F02D5290AFF74B03F3E471B273211C97
-      0xED45D9234EF13E9DA259E05EF57BB3989E9D6B7D8E269698BAFD77106DCC1FF5
-    ∘ (equal ∘ opVerify)
-    ∘ ( nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD036412E
-          ∘ g
-          ∘ ecMul
-      )
-    ∘ pushPoint
-      0x2B4EA0A797A443D293EF5CFF444F4979F06ACFEBD7E86D277475656138385B6C
-      0x7A17643FC86BA26C4CBCF7C4A5E379ECE5FE09F3AFD9689C4A8F37AA1A3F60B5
-    ∘ (equal ∘ opVerify)
-    ∘ ( nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-          ∘ g
-          ∘ ecMul
-      )
-    ∘ pushPoint
-      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-      0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-    ∘ (equal ∘ opVerify)
-    ∘ opTrue
-
-propEllipticCurve ::
-  (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->
-  (forall s. Fn (s :> TNat :> TPoint) (s :> TPoint)) ->
-  NonNegative Int ->
-  NonNegative Int ->
-  Bool
-propEllipticCurve ecAdd ecMul (NonNegative a) (NonNegative b) =
-  let prog =
-        begin
-          ∘ (nat (fromIntegral a) ∘ g ∘ ecMul)
-          ∘ (nat (fromIntegral b) ∘ g ∘ ecMul)
-          ∘ ecAdd
-          ∘ (nat (fromIntegral (a + b)) ∘ g ∘ ecMul)
-          ∘ equal
-   in isTrue' $ evaluateProg prog
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =

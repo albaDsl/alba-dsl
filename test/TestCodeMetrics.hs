@@ -58,10 +58,11 @@ import Data.Sequence qualified as S
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
+import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
-import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6)
+import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6, gTableWNaf5)
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
@@ -100,6 +101,9 @@ codeSize =
       golden
         "EC scalar point multiply (Windowed Jacobian / tbl setup)"
         (sizeOf (EJW.setupTableM 4 ∘ drop ∘ EJW.ecMul4)),
+      golden
+        "EC scalar point multiply (wNAF / tbl setup)"
+        (sizeOf (EJWN.setupTable ∘ drop ∘ EJWN.ecMul)),
       golden "Vector ops" (sizeOf vectorOps),
       golden "LZSS" (sizeOf CLZ.decompress),
       golden "LZSS Bitstream" (sizeOf CLZB.decompress)
@@ -131,6 +135,9 @@ executionCost =
         costOf' windowedMul4Precomputed,
       golden "EC scalar point multiply (Windowed Jacobian 6 / precomp) " $
         costOf' windowedMul6Precomputed,
+      golden "EC scalar point multiply (wNAF 5)" $ costOf' wNaf5,
+      golden "EC scalar point multiply (wNAF 5 / precomp)" $
+        costOf' wNaf5Precomputed,
       golden "Vector ops" $ costOf' vectorOps,
       golden "LZSS" $ costOf' decompressTest,
       golden "LZSS Bitstream" $ costOf' decompressTestBit
@@ -237,6 +244,13 @@ b2v = cast
 windowedMul6Precomputed :: FnC
 windowedMul6Precomputed =
   runEnv (bytes gTable6 ∘ b2v ∘ verifyTestVector EJW.ecMul6)
+
+wNaf5 :: FnC
+wNaf5 = runEnv (g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul)
+
+wNaf5Precomputed :: FnC
+wNaf5Precomputed =
+  runEnv (bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul)
 
 vectorOps :: FnC
 vectorOps =
