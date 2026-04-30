@@ -15,21 +15,22 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     Stack ((:>)),
     StackEntry,
+    TInt,
     TNat,
     begin,
     del,
     fn,
     i2nUnsafe,
     lambda0,
-    lambda1,
     lambda2,
-    lambda3,
+    lambda4,
     n2i,
     name,
     nat,
     ns2,
-    ns3,
+    ns4,
     op0,
+    op2Drop,
     opFalse,
     opIf,
     opTrue,
@@ -46,8 +47,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     TMaybe,
     TTuple,
     apply2,
-    apply3,
-    drop,
+    apply4_2,
     dup,
     errCanNotHappen,
     fromMaybe',
@@ -94,15 +94,16 @@ ecMulM windowSize =
     . (ns2 #tab #n . pick #n . nat 0 . equal)
     . (opIf (del #tab . del #n . makeIdentity))
       ( begin
-          . (roll #tab . lambda3 f . apply3)
+          . (roll #tab . nat windowSize . lambda4 f . apply4_2)
           . (makeIdentity . roll #n . digitsM windowSize . V.foldr)
       )
     . fromJacobian
   where
-    f :: Fn (s :> TInt8 :> TPointJ :> TTable) (s :> TPointJ)
+    f :: Fn (s :> TInt8 :> TPointJ :> TTable :> TNat) (s :> TPointJ)
     f =
       ( begin
-          . (ns3 #digit #q #tab . name #q' (nat windowSize . roll #q . doubleN))
+          . (ns4 #digit #q #tab #numVals)
+          . (name #q' (roll #numVals . roll #q . doubleN))
           . (pick #digit . toInt . op0 . greaterThan)
           . opIf
             ( begin
@@ -125,15 +126,19 @@ doubleN =
     . nip
 
 digitsM :: Natural -> Env (s :> TNat) (s :> V.TVector TInt8)
-digitsM windowSize = lambda1 f . swap . V.unfoldr
+digitsM windowSize = nat numValues . lambda2 f . apply2 . swap . V.unfoldr
   where
-    f :: Fn (s :> TNat) (s :> TMaybe (TTuple TInt8 TNat))
-    f = dup . ifZero (drop . nothing) (tup . just)
+    numValues = 2 ^ windowSize
 
-    tup :: Fn (s :> TNat) (s :> TTuple TInt8 TNat)
+    f :: Fn (s :> TNat :> TNat) (s :> TMaybe (TTuple TInt8 TNat))
+    f = swap . dup . ifZero (op2Drop . nothing) (swap . tup . just)
+
+    tup :: Fn (s :> TNat :> TNat) (s :> TTuple TInt8 TNat)
     tup =
       begin
-        . (dup . nat numValues . mod . n2i . fromInt)
-        . (swap . nat numValues . div . tuple)
+        . ns2 #val #numVals
+        . (pick #val . pick #numVals . mod . n2i . conv)
+        . (roll #val . roll #numVals . div . tuple)
 
-    numValues = 2 ^ windowSize
+    conv :: Fn (s :> TInt) (s :> TInt8)
+    conv = fromInt
