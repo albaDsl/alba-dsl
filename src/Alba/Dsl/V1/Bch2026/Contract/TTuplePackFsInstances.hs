@@ -4,12 +4,25 @@
 module Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.Misc
+  ( Fn,
+    Stack ((:>)),
+    begin,
+    constant,
+    lambda1,
+    nat,
+    (.),
+  )
+import Alba.Dsl.V1.Bch2026.Contract.Misc (pad, unpad)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs
-import Alba.Dsl.V1.Bch2026.Contract.TBytes128
-import Alba.Dsl.V1.Bch2026.Contract.TInt64
-import Alba.Dsl.V1.Bch2026.Contract.TInt8
-import Alba.Dsl.V1.Bch2026.Contract.TTuple
+  ( PackFs (..),
+    TPackFs,
+    mkPackFsM,
+  )
+import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (TBytes128)
+import Alba.Dsl.V1.Bch2026.Contract.TInt16 (TInt16)
+import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64)
+import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple)
 import Numeric.Natural (Natural)
 import Prelude ((+))
 
@@ -90,5 +103,24 @@ tuplePackFs4 =
         . size @(TTuple TInt64 TInt64)
         . lambda1 (pack @(TTuple TInt64 TInt64))
         . lambda1 (unpack @(TTuple TInt64 TInt64))
+        . mkPackFsM
+    )
+
+instance PackFs (TTuple TInt16 TInt16) where
+  sizeConst = sizeConst @TInt16 + sizeConst @TInt16 + sizeFields
+  size = nat (sizeConst @(TTuple TInt16 TInt16))
+  pack = size @(TTuple TInt16 TInt16) . pad
+  unpack = unpad
+  packFsRec = tuplePackFs5
+
+tuplePackFs5 ::
+  (PackFs (TTuple TInt16 TInt16)) =>
+  Fn s (s :> TPackFs (TTuple TInt16 TInt16))
+tuplePackFs5 =
+  constant
+    ( begin
+        . size @(TTuple TInt16 TInt16)
+        . lambda1 (pack @(TTuple TInt16 TInt16))
+        . lambda1 (unpack @(TTuple TInt16 TInt16))
         . mkPackFsM
     )

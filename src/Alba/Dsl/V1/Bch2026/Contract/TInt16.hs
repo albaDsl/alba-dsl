@@ -1,6 +1,6 @@
--- Copyright (c) 2025 albaDsl
+-- Copyright (c) 2026 albaDsl
 
-module Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8) where
+module Alba.Dsl.V1.Bch2026.Contract.TInt16 (TInt16, int16) where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
@@ -49,16 +49,16 @@ import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
 import Prelude (Integer, undefined, (&&), (-), (<=), (>=), (^))
 
-data TInt8
+data TInt16
 
-instance StackEntry TInt8
+instance StackEntry TInt16
 
-instance BlobEq TInt8 where
+instance BlobEq TInt16 where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-instance Ord TInt8 where
+instance Ord TInt16 where
   lessThan = toRaw2 . opLessThan
   lessThanOrEqual = toRaw2 . opLessThanOrEqual
   greaterThan = toRaw2 . opGreaterThan
@@ -68,7 +68,7 @@ instance Ord TInt8 where
   within = toRaw3 . opWithin
   blobOrdRec = undefined -- FIXME: implement.
 
-instance Integral TInt8 where
+instance Integral TInt16 where
   add = toRaw2 . opAdd . fromInt
   add1 = toRaw . op1Add . fromInt
   sub = toRaw2 . opSub . fromInt
@@ -78,43 +78,44 @@ instance Integral TInt8 where
   mod = toRaw2 . opMod . fromInt
   negate = toRaw . opNegate . fromRaw
   abs = toRaw . opAbs . fromRaw
-  fromInt = fn (dup . int int8Min . int int8Max . opWithin . opVerify . fromRaw)
+  fromInt =
+    fn (dup . int int16Min . int int16Max . opWithin . opVerify . fromRaw)
   toInt = toRaw
 
-instance PackFs TInt8 where
-  sizeConst = 1
-  size = nat (sizeConst @TInt8)
-  pack = toRaw . size @TInt8 . opNum2Bin
+instance PackFs TInt16 where
+  sizeConst = 2
+  size = nat (sizeConst @TInt16)
+  pack = toRaw . size @TInt16 . opNum2Bin
   unpack = opBin2Num . fromRaw
-  packFsRec = int8PackFs
+  packFsRec = int16PackFs
 
-int8PackFs :: Fn s (s :> TPackFs TInt8)
-int8PackFs =
+int16PackFs :: Fn s (s :> TPackFs TInt16)
+int16PackFs =
   constant
     ( begin
-        . size @TInt8
-        . lambda1 (pack @TInt8)
-        . lambda1 (unpack @TInt8)
+        . size @TInt16
+        . lambda1 (pack @TInt16)
+        . lambda1 (unpack @TInt16)
         . mkPackFsM
     )
 
-int8Max :: Integer
-int8Max = 2 ^ (7 :: Integer) - 1
+int16Max :: Integer
+int16Max = 2 ^ (15 :: Integer) - 1
 
-int8Min :: Integer
-int8Min = -int8Max
+int16Min :: Integer
+int16Min = -int16Max
 
-int8 :: Integer -> Fn s (s :> TInt8)
-int8 x = assert (x >= int8Min && x <= int8Max) (int x . fromRaw)
+int16 :: Integer -> Fn s (s :> TInt16)
+int16 x = assert (x >= int16Min && x <= int16Max) (int x . fromRaw)
 
-fromRaw :: Fn (s :> TInt) (s :> TInt8)
+fromRaw :: Fn (s :> TInt) (s :> TInt16)
 fromRaw = cast
 
-toRaw :: Fn (s :> TInt8) (s :> TInt)
+toRaw :: Fn (s :> TInt16) (s :> TInt)
 toRaw = cast
 
-toRaw2 :: Fn (s :> TInt8 :> TInt8) (s :> TInt :> TInt)
+toRaw2 :: Fn (s :> TInt16 :> TInt16) (s :> TInt :> TInt)
 toRaw2 = castStack
 
-toRaw3 :: Fn (s :> TInt8 :> TInt8 :> TInt8) (s :> TInt :> TInt :> TInt)
+toRaw3 :: Fn (s :> TInt16 :> TInt16 :> TInt16) (s :> TInt :> TInt :> TInt)
 toRaw3 = castStack

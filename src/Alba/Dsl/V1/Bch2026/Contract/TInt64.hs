@@ -47,7 +47,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
-import Prelude (Integer, undefined, (&&), (<=), (>=))
+import Prelude (Integer, undefined, (&&), (-), (<=), (>=), (^))
 
 data TInt64
 
@@ -100,7 +100,7 @@ int64PackFs =
     )
 
 int64Max :: Integer
-int64Max = 9223372036854775807
+int64Max = 2 ^ (63 :: Integer) - 1
 
 int64Min :: Integer
 int64Min = -int64Max

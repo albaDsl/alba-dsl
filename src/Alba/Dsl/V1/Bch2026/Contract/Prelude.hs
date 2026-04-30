@@ -18,6 +18,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Prelude
     module Alba.Dsl.V1.Bch2026.Contract.Shorthand,
     module Alba.Dsl.V1.Bch2026.Contract.TBytes128,
     module Alba.Dsl.V1.Bch2026.Contract.TEither,
+    module Alba.Dsl.V1.Bch2026.Contract.TInt16,
     module Alba.Dsl.V1.Bch2026.Contract.TInt64,
     module Alba.Dsl.V1.Bch2026.Contract.TInt8,
     module Alba.Dsl.V1.Bch2026.Contract.TMaybe,
@@ -44,6 +45,7 @@ import Alba.Dsl.V1.Bch2026.Contract.PartialApplication
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand
 import Alba.Dsl.V1.Bch2026.Contract.TBytes128
 import Alba.Dsl.V1.Bch2026.Contract.TEither
+import Alba.Dsl.V1.Bch2026.Contract.TInt16
 import Alba.Dsl.V1.Bch2026.Contract.TInt64
 import Alba.Dsl.V1.Bch2026.Contract.TInt8
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe
