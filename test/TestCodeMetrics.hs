@@ -56,7 +56,7 @@ import Data.ByteString.Lazy.Char8 (pack)
 import Data.Char (isAlphaNum)
 import Data.Sequence qualified as S
 import DslDemo.EllipticCurve.Affine qualified as EA
-import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)

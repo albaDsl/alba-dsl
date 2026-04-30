@@ -17,10 +17,8 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TBool,
-    TInt,
     cast,
     fn,
-    int,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
@@ -42,7 +40,9 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     unit,
     untuple,
   )
-import Prelude (Integer)
+import DslDemo.EllipticCurve.Field (TFe, pushFe)
+import Numeric.Natural (Natural)
+import Prelude ()
 
 data TPoint
 
@@ -53,11 +53,11 @@ instance BlobEq TPoint where
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-makePoint :: Fn (s :> TInt :> TInt) (s :> TPoint)
+makePoint :: Fn (s :> TFe :> TFe) (s :> TPoint)
 makePoint = fn (tuple . right . fromRaw)
 
-pushPoint :: Integer -> Integer -> Fn s (s :> TPoint)
-pushPoint x y = int x . int y . makePoint
+pushPoint :: Natural -> Natural -> Fn s (s :> TPoint)
+pushPoint x y = pushFe x . pushFe y . makePoint
 
 makeIdentity :: Fn s (s :> TPoint)
 makeIdentity = unit . left . fromRaw
@@ -65,17 +65,17 @@ makeIdentity = unit . left . fromRaw
 isIdentity :: Fn (s :> TPoint) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXY :: Fn (s :> TPoint) (s :> TInt :> TInt)
+getXY :: Fn (s :> TPoint) (s :> TFe :> TFe)
 getXY = fn (toRaw . ifLeft (drop . errPartialFunction) untuple)
 
-getX :: Fn (s :> TPoint) (s :> TInt)
+getX :: Fn (s :> TPoint) (s :> TFe)
 getX = getXY . drop
 
-getY :: Fn (s :> TPoint) (s :> TInt)
+getY :: Fn (s :> TPoint) (s :> TFe)
 getY = getXY . nip
 
-fromRaw :: Fn (s :> TEither TUnit (TTuple TInt TInt)) (s :> TPoint)
+fromRaw :: Fn (s :> TEither TUnit (TTuple TFe TFe)) (s :> TPoint)
 fromRaw = cast
 
-toRaw :: Fn (s :> TPoint) (s :> TEither TUnit (TTuple TInt TInt))
+toRaw :: Fn (s :> TPoint) (s :> TEither TUnit (TTuple TFe TFe))
 toRaw = cast

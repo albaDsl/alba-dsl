@@ -5,12 +5,10 @@ module DslDemo.EllipticCurve.JacobianAdd (ecDoubleJ, ecAddJ, ecNegateJ) where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack (..),
-    TInt,
     begin,
     cond,
     del,
     fn,
-    int,
     name,
     name2,
     name3,
@@ -24,12 +22,14 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal, swap)
 import DslDemo.EllipticCurve.Field
-  ( feCube,
+  ( TFe,
+    feCube,
     feMul,
     feNeg,
     feQuartic,
     feSquare,
     feSub,
+    pushFe,
   )
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
@@ -38,7 +38,8 @@ import DslDemo.EllipticCurve.JacobianPoint
     makeIdentity,
     makePoint,
   )
-import Prelude (Integer)
+import Numeric.Natural (Natural)
+import Prelude ()
 
 ecDoubleJ :: Fn (s :> TPointJ) (s :> TPointJ)
 ecDoubleJ =
@@ -55,7 +56,7 @@ ecDoubleJ =
               . (name #y')
                 ( begin
                     . (roll #m . roll #s . pick #x' . feSub . feMul)
-                    . (int 8 . pick #y . term4 . feSub)
+                    . (pushFe 8 . pick #y . term4 . feSub)
                 )
               . name #z' (roll #y . roll #z . feMul . coeff 2)
               . (roll #x' . roll #y' . roll #z' . makePoint)
@@ -106,16 +107,16 @@ doAdd =
           . (roll #x3 . roll #y3 . roll #z3 . makePoint . del #p1)
       )
 
-coeff :: Integer -> Fn (s :> TInt) (s :> TInt)
-coeff c = int c . feMul
+coeff :: Natural -> Fn (s :> TFe) (s :> TFe)
+coeff c = pushFe c . feMul
 
-term2 :: Fn (s :> TInt :> TInt) (s :> TInt)
+term2 :: Fn (s :> TFe :> TFe) (s :> TFe)
 term2 = feSquare . feMul
 
-term3 :: Fn (s :> TInt :> TInt) (s :> TInt)
+term3 :: Fn (s :> TFe :> TFe) (s :> TFe)
 term3 = feCube . feMul
 
-term4 :: Fn (s :> TInt :> TInt) (s :> TInt)
+term4 :: Fn (s :> TFe :> TFe) (s :> TFe)
 term4 = feQuartic . feMul
 
 ecNegateJ :: Fn (s :> TPointJ) (s :> TPointJ)

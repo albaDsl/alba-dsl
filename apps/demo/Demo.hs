@@ -30,6 +30,7 @@ import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DemoPrelude
 import DslDemo.EllipticCurve.Constants qualified as EC
 import DslDemo.EllipticCurve.Field qualified as EC
+import DslDemo.EllipticCurve.G qualified as EC
 import DslDemo.EllipticCurve.Jacobian qualified as EC
 import DslDemo.EllipticCurve.Point qualified as EC
 import DslDemo.Exponentiation qualified as Exp
@@ -100,7 +101,7 @@ e5 = int 2 . opSwap . pow
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 -- ev (c e6) 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-e6 :: S (s :> TNat) alt -> S (s :> TInt) alt
+e6 :: S (s :> TNat) alt -> S (s :> EC.TFe) alt
 e6 = EC.g . EC.ecMul . EC.getX
 
 -- Example 7. Evaluating =e3= using turtleVm (Bch2025).

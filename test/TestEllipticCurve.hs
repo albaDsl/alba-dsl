@@ -7,7 +7,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, nip, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import DslDemo.EllipticCurve.Affine qualified as EA
-import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as WN
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)

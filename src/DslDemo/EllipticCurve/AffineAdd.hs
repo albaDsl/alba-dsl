@@ -10,7 +10,6 @@ import Alba.Dsl.V1.Bch2026
     del,
     ex1,
     fn,
-    int,
     name,
     name2,
     ns,
@@ -22,7 +21,15 @@ import Alba.Dsl.V1.Bch2026
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (dup, equal)
-import DslDemo.EllipticCurve.Field (feAdd, feInv, feMul, feNeg, feSquare, feSub)
+import DslDemo.EllipticCurve.Field
+  ( feAdd,
+    feInv,
+    feMul,
+    feNeg,
+    feSquare,
+    feSub,
+    pushFe,
+  )
 import DslDemo.EllipticCurve.Point
   ( TPoint,
     getX,
@@ -41,8 +48,8 @@ ecDouble =
         . name
           #l
           ( begin
-              . ex1 (int 3 . pick #px . feSquare . feMul)
-              . ex1 (int 2 . pick #py . feMul . feInv)
+              . ex1 (pushFe 3 . pick #px . feSquare . feMul)
+              . ex1 (pushFe 2 . pick #py . feMul . feInv)
               . feMul
           )
         . name #rx (pick #l . feSquare . pick #px . dup . feAdd . feSub)

@@ -2,7 +2,6 @@
 
 module TestFunctions (testFunctions) where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
@@ -10,11 +9,13 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     TInt8,
     apply2,
     apply3_2,
+    ifZero,
+    nat1SubUnsafe,
     swap,
   )
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector, generate, reverse)
 import Data.ByteString qualified as B
-import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub)
+import DslDemo.EllipticCurve.Field (feAdd, feCube, feMul, feSub, pushFe)
 import DslDemo.MergeSort.MergeSort qualified as MS
 import QuickCheckSupport (AsciiString (..))
 import Test.Tasty (TestTree, testGroup)
@@ -82,8 +83,8 @@ progNestedCalls1 =
 progNestedCalls2 :: Fn s (s :> TBool)
 progNestedCalls2 =
   begin
-    ∘ (int 3 ∘ int 7 ∘ feMul ∘ int 1 ∘ feAdd ∘ int 12 ∘ feSub ∘ feCube)
-    ∘ (int 1000 ∘ opNumEqual)
+    ∘ (pushFe 3 ∘ pushFe 7 ∘ feMul ∘ pushFe 1 ∘ feAdd ∘ pushFe 12 ∘ feSub)
+    ∘ (feCube ∘ pushFe 1000 ∘ equal)
 
 progFactorial :: Fn s (s :> TBool)
 progFactorial =

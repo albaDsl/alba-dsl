@@ -267,6 +267,7 @@ library
       DslDemo.EllipticCurve.AffineAdd,
       DslDemo.EllipticCurve.Constants,
       DslDemo.EllipticCurve.Field,
+      DslDemo.EllipticCurve.G,
       DslDemo.EllipticCurve.Jacobian,
       DslDemo.EllipticCurve.JacobianAdd,
       DslDemo.EllipticCurve.JacobianPoint,

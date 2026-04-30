@@ -13,7 +13,8 @@ import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence (Seq ((:|>)))
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Affine qualified as EA
-import DslDemo.EllipticCurve.Constants (g)
+import DslDemo.EllipticCurve.Field (TFe)
+import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
@@ -71,18 +72,18 @@ ecMultiply code =
     Right _ -> error "ecMultiply"
     Left err -> error ("err: " <> show err)
 
-progMul :: Natural -> Fn s (s :> TInt :> TInt)
+progMul :: Natural -> Fn s (s :> TFe :> TFe)
 progMul scalar = nat scalar ∘ g ∘ EA.ecMul ∘ EA.getXY
 
-progMulJacobian :: Natural -> Fn s (s :> TInt :> TInt)
+progMulJacobian :: Natural -> Fn s (s :> TFe :> TFe)
 progMulJacobian scalar =
   nat scalar ∘ g ∘ EJ.ecMul ∘ EA.getXY
 
-progMulJacobianWindowed :: Natural -> Fn s (s :> TInt :> TInt)
+progMulJacobianWindowed :: Natural -> Fn s (s :> TFe :> TFe)
 progMulJacobianWindowed scalar =
   runEnv (g ∘ EJW.setupTableM 4 ∘ nat scalar ∘ EJW.ecMul4 ∘ EA.getXY)
 
-progMulJacobianWNaf :: Natural -> Fn s (s :> TInt :> TInt)
+progMulJacobianWNaf :: Natural -> Fn s (s :> TFe :> TFe)
 progMulJacobianWNaf scalar =
   runEnv (g ∘ EJWN.setupTable ∘ nat scalar ∘ EJWN.ecMul ∘ EA.getXY)
 

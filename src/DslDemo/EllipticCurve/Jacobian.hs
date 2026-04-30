@@ -17,7 +17,6 @@ import Alba.Dsl.V1.Bch2026
     begin,
     del,
     fn,
-    int,
     name,
     name3,
     nat,
@@ -39,7 +38,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     nip,
     swap,
   )
-import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare)
+import DslDemo.EllipticCurve.Field (feCube, feInv, feMul, feSquare, pushFe)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint
   ( TPointJ,
@@ -82,7 +81,9 @@ toJacobian =
   fn
     ( begin
         . (ns #p . pick #p . AP.isIdentity)
-        . opIf (del #p . makeIdentity) (roll #p . AP.getXY . int 1 . makePoint)
+        . opIf
+          (del #p . makeIdentity)
+          (roll #p . AP.getXY . pushFe 1 . makePoint)
     )
 
 fromJacobian :: Fn (s :> TPointJ) (s :> TPoint)

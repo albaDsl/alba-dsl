@@ -15,12 +15,10 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TBool,
-    TInt,
     begin,
     cast,
     constant,
     fn,
-    int,
     lambda1,
     nat,
     (.),
@@ -48,7 +46,9 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     unpad,
     untuple,
   )
-import Prelude (Integer)
+import DslDemo.EllipticCurve.Field (TFe, pushFe)
+import Numeric.Natural (Natural)
+import Prelude ()
 
 data TPointJ
 
@@ -64,21 +64,21 @@ instance PackFs TPointJ where
   size = nat (sizeConst @TPointJ)
   pack = size @TPointJ . pad
   unpack = unpad
-  packFsRec = int8PackFs
+  packFsRec = pointPackFs
 
-int8PackFs :: Fn s (s :> TPackFs TPointJ)
-int8PackFs =
+pointPackFs :: Fn s (s :> TPackFs TPointJ)
+pointPackFs =
   constant
     ( begin
         . (size @TPointJ . lambda1 (pack @TPointJ) . lambda1 (unpack @TPointJ))
         . mkPackFsM
     )
 
-makePoint :: Fn (s :> TInt :> TInt :> TInt) (s :> TPointJ)
+makePoint :: Fn (s :> TFe :> TFe :> TFe) (s :> TPointJ)
 makePoint = fn (tuple . tuple . right . fromRaw)
 
-pushPoint :: Integer -> Integer -> Integer -> Fn s (s :> TPointJ)
-pushPoint x y z = int x . int y . int z . makePoint
+pushPoint :: Natural -> Natural -> Natural -> Fn s (s :> TPointJ)
+pushPoint x y z = pushFe x . pushFe y . pushFe z . makePoint
 
 makeIdentity :: Fn s (s :> TPointJ)
 makeIdentity = unit . left . fromRaw
@@ -86,17 +86,17 @@ makeIdentity = unit . left . fromRaw
 isIdentity :: Fn (s :> TPointJ) (s :> TBool)
 isIdentity = toRaw . isLeft
 
-getXYZ :: Fn (s :> TPointJ) (s :> TInt :> TInt :> TInt)
+getXYZ :: Fn (s :> TPointJ) (s :> TFe :> TFe :> TFe)
 getXYZ = fn (toRaw . ifLeft (drop . errPartialFunction) (untuple . untuple))
 
 fromRaw ::
   Fn
-    (s :> TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+    (s :> TEither TUnit (TTuple TFe (TTuple TFe TFe)))
     (s :> TPointJ)
 fromRaw = cast
 
 toRaw ::
   Fn
     (s :> TPointJ)
-    (s :> TEither TUnit (TTuple TInt (TTuple TInt TInt)))
+    (s :> TEither TUnit (TTuple TFe (TTuple TFe TFe)))
 toRaw = cast
