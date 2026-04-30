@@ -27,6 +27,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     name2,
     nat,
+    ns2,
     op2Drop,
     opCat,
     opEqual,
@@ -101,18 +102,18 @@ getCondStack = getState . dup . untuple . nip . swap . putState
 putCondStack ::
   Int -> FnA (s :> TBool) (alt :> TurtleVmState) s (alt :> TurtleVmState)
 putCondStack maxCsDepth =
-  fn
-    ( begin
-        . (getStateUnpackedWithSize . maxCsDepth' . opLessThanOrEqual)
-        . opIf
-          ( begin
-              . (rot . opIf (bytes [1]) (bytes [0]))
-              . (swap . opCat . tuple . putState)
-          )
-          (op2Drop . drop . vmError "E2") -- CondStack overflow
-    )
-  where
-    maxCsDepth' = nat (fromIntegral maxCsDepth)
+  begin
+    . (nat (fromIntegral maxCsDepth) . ns2 #bool #maxDepth)
+    . fn
+      ( begin
+          . (getStateUnpackedWithSize . roll #maxDepth . opLessThanOrEqual)
+          . opIf
+            ( begin
+                . (roll #bool . opIf (bytes [1]) (bytes [0]))
+                . (swap . opCat . tuple . putState)
+            )
+            (op2Drop . drop . vmError "E2") -- CondStack overflow
+      )
 
 getStateUnpackedWithSize ::
   FnA s (alt :> TurtleVmState) (s :> TBytes :> TBytes :> TNat) alt
