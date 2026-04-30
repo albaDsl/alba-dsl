@@ -357,6 +357,14 @@ executable permutationChallenge
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends: alba
 
+executable ellipticCurve
+  import: shared-properties
+  hs-source-dirs: apps/contracts/ellipticCurve
+  main-is: main.hs
+  other-modules: Contract, ContractApi, Opts, Params, Spend
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends: alba
+
 executable demo
   import: shared-properties
   main-is: main.hs
