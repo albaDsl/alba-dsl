@@ -2,6 +2,7 @@
 
 module DemoPrelude
   ( module Dsl,
+    module Alba.Dsl.V1.Bch2026.Contract.Prelude,
     module Alba.Vm.Bch2026,
     module Alba.Misc.Utils,
     module Test.QuickCheck,
@@ -18,13 +19,12 @@ module DemoPrelude
     progFt,
     plot,
     cube,
-    pow,
   )
 where
 
 import Alba.Dsl.V1.Bch2026 hiding (progFt, progList, progList', progSize)
 import Alba.Dsl.V1.Bch2026 qualified as Dsl
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (pow)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
 import Alba.Misc.Logging (dumpLogToFile)
 import Alba.Misc.Utils
 import Alba.Vm.Bch2026 hiding (FunctionTable)
@@ -37,7 +37,7 @@ import Data.Text.Chart (height, options, plotWith)
 import Numeric.Natural (Natural)
 import Test.QuickCheck hiding (function, generate, getSize, within)
 import Text.Printf (printf)
-import Prelude hiding (error, (.))
+import Prelude
 import Prelude qualified as P
 
 c :: (S s Base -> S s' alt') -> CodeL1
@@ -134,7 +134,7 @@ evm code x = dump $ evaluateScript txCtx startState'
         )
       printf
         "Expressed in bytes the excution cost is: %d bytes.\n"
-        (state.metrics.cost `div` vmParamsStandard.costBudgetPerInputByte + 1)
+        (state.metrics.cost `P.div` vmParamsStandard.costBudgetPerInputByte + 1)
       where
         codeSize = B.length code
         budget = codeSize * vmParamsStandard.costBudgetPerInputByte
