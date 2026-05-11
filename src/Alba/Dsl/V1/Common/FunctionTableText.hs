@@ -21,7 +21,7 @@ import Text.Printf (printf)
 generateTable :: FunctionTable -> Text
 generateTable (FunctionTable functions) =
   let hline = replicate tableWidth '-' <> "\n"
-   in line "Location" "Function" "Type" "Function ID" "Bytes" "Sites"
+   in line "Location" "Name" "Type" "Function ID" "Bytes" "Sites"
         <> T.pack hline
         <> foldr functionLine "" functions
         <> T.pack hline
