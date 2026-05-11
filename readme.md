@@ -1,97 +1,103 @@
-# albaDsl & albaVm
-
+# AlbaDsl & AlbaVm
 Experimental Haskell based tooling for Bitcoin Cash (BCH) contract development
 and testing.
 
-## albaDsl
+## AlbaDsl
+AlbaDsl is an *experimental* statically typed functional "Forth" for Bitcoin
+Cash contract programming, implemented as a *shallowly* embedded Domain Specific
+Language (DSL) in Haskell. It is not a traditional Forth at all. The syntax is
+all Haskell, the language features are limited to what is reasonably expressable
+on CashVM, and inspiration comes from Haskell and functional programming. But at
+the core is postfix notation, a stack for argument passing, and an extensible
+collection of words (functions) — like Forth.
 
-AlbaDsl is a shallowly embedded Domain Specific Language (DSL) for programming
-Bitcoin Cash Script (2025) in Haskell. It uses Haskell's type system to
-statically enforce the type of the input and output stacks of a given program.
-Stack items can be assigned names for easier reference. Haskell functions can be
-used as a form of statically typed parameterized macros. Collections of such
-macros can be grouped into libraries and complex contracts can be built from
-them. Standard Haskell tooling such as syntax highlighting, code formatting, and
-Language Server Protocol (LSP) can be used. When using the Haskell Language
-Server, it gives immediate feedback about type errors such as mismatched stack
-element types.
+AlbaDsl's abstraction mechanisms include macros (expressed using Haskell
+functions), functions (words), anonymous functions with partial application, and
+parametric polymorphism with type classes (to some degree). Collections of
+macros and functions can be grouped using standard Haskell modules and
+libraries. Contract complexity is managed by layering abstractions and taking
+advantage of the strong typing.
 
-Bitcoin Cash contracts written in albaDsl can be assembled into transactions and
-serialized into byte strings for publishing to the network using, for example,
-Bitcoin Cash Node [1].
+Haskell's type system is used to statically enforce the type of the input and
+output stacks of a given AlbaDsl expression. Stack items can be assigned names
+(at the type-level) for easy reference. On top of the basic types offered by
+CashVM (`TInt`, `TBytes`, `TBool`, etc.) aggregated types such as `TMaybe a`,
+`TEither a b`, `TTuple a b`, and `TVector a` are implemented in the base
+library. These types are modeled after the corresponding types in Haskell.
+Building on this, users can construct their own abstract types. Type information
+is removed at compile time and is not present in the final bytecode.
 
-## albaVm
+Since an AlbaDsl program is a Haskell program, standard Haskell tooling such as
+syntax highlighting, linting, code formatting, and Language Server Protocol
+(LSP) are supported out of the box. The Haskell Language Server gives immediate
+feedback about type errors such as mismatched stack element types and can be
+used to interrogate the type of the stack at a given position in an expression.
 
-AlbaVm is a Bitcoin Cash virtual machine written in Haskell. It supports the BCH
-2025 instruction set (including tokens, BigInts, and VM limits). It passes the
-Libauth [2] 2025 standard and non-standard "success vectors", and part of the
-non-standard and invalid "failure vectors" (correct failure reasons yet to be
-verified). AlbaVm can be used to evaluate arbitrary BCH byte code, and
-specifically albaDsl programs during development and testing.
+## AlbaVm
+AlbaVm is a Bitcoin Cash virtual machine written in Haskell. It supports the
+CashVm 2026 instruction set. It passes the Libauth 2026 tests and various
+additional property based tests. AlbaVm can be used to evaluate arbitrary BCH
+byte code, and specifically AlbaDsl programs during development and testing. 
 
-## Combining albaDsl & albaVm to verify contracts
-
-Given an albaDsl program 'p', the albaDsl compiler 'compile' and the albaVm
-evaluator 'eval', it is possible to combine them into a function 'g = eval
-(compile p)'. This function can be used to calculate the result of applying 'p'
-to arbitrary input stacks. Thus it can be used to write unit tests for the
-program. Such tests can make use of automatic property based testing via
-Haskell's QuickCheck [8]. Possibly, the LiquidHaskell [9] program verifier can
-also be used for verification.
-
-The example contracts in this repository (transferWithTimeout and lastWill)
-illustrate how contracts can be built and tested.
+By combining an AlbaDsl program/contract (`p`), the AlbaDsl compiler
+(`compile`), and the AlbaVm evaluator (`eval`), one can define a Haskell
+function `f = eval (compile p)`. This function can be tested using standard
+Haskell unit test frameworks and property based testing such as QuickCheck. This
+then serves as testing of `p`.
 
 ## Status
+This code is *experimental* and work in progress. The AlbaDsl language is not
+fleshed out and the syntax and feature set continues to evolve. AlbaVm needs to
+be further tested. Example contracts need further validation. There will be
+bugs. For licensing, see LICENSE.
 
-This code is *experimental*. The albaDsl syntax will continue to evolve and
-albaVm needs to be further tested. Example contracts need further validation.
-There will be bugs. For licensing, see LICENSE.
+## Demo Videos
+- Introduction to AlbaDsl & AlbaVm. ([Asciinema](https://asciinema.org/a/yhxjb0JEFGHHjlfe))
+  - Covers: Basic expressions, compilation and evaluation, type checking of
+    expressions, LSP interaction, parameterized macros, QuickCheck testing,
+    naming stack entries, and BigInt arithmetic.
+- Functions and constants in AlbaDsl. ([Asciinema](https://asciinema.org/a/olVYRCKvZEaoaz8z))
+  - Covers: Defining functions and constants, listing program bytecode, and listing
+    the function table.
 
-## Acknowledgments / Notes
+## Examples
+AlbaDsl example code:
+- wNAF elliptic curve scalar multiply on secp256k1.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/blob/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/DslDemo/EllipticCurve/JacobianWNaf.hs))
+- LZSS decompressor. Uses the CashVM 2026 bit shift operators.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/blob/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/Alba/Dsl/V1/Bch2026/Contract/LzssBit.hs))
+  ([BCR](https://bitcoincashresearch.org/t/albadsl-albavm-haskell-based-dsl-and-vm-for-bitcoin-cash-2025-contract-programming/1558/34?u=albadsl))
+- Vector library. Vector that can store any type that implements the PackFs type
+  class.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/blob/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/Alba/Dsl/V1/Bch2026/Contract/TVector.hs))
+  ([BCR](https://bitcoincashresearch.org/t/albadsl-albavm-haskell-based-dsl-and-vm-for-bitcoin-cash-2025-contract-programming/1558/32?u=albadsl))
+- MergeSort. Sorts a Vector of elements satisfying the Ord typeclass. Uses
+  recursion.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/blob/5bf90544fe49e3a0b25b35e4a19c10c2df1965b2/src/DslDemo/MergeSort/MergeSort.hs))
+- TurtleVm: a meta-circular evaluator for Bitcoin Cash Script on CashVM 2025.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/DslDemo/TurtleVm/Bch2025))
+  ([BCR](https://bitcoincashresearch.org/t/turtlevm-a-meta-circular-evaluator-for-bitcoin-cash-script-proof-of-concept/1638?u=albadsl))
+- Beginnings of a standard library supporting TTuple, TMaybe, TEither, and
+  some base type classes.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/Alba/Dsl/V1/Bch2026/Contract))
 
-For more mature and high-level contract languages for Bitcoin Cash contract
-programming, see CashScript [3] and Spedn [4]. Also see CashAssembly [2].
+Example AlbaDsl contracts:
+- Last will. Basic contract with three entry points.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/lastWill))
+- Elliptic Curve. Limited secp256k1 scalar multiply with a precomputed wNAF
+  table in a BCH 2026 transaction.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/ellipticCurve))
+- MiniTurtleVm Challenge. Meta-circular BCH Script evaluator inside a BCH 2025
+  Mainnet transaction.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/miniTurtleChallenge))
+  ([BCR](https://bitcoincashresearch.org/t/turtlevm-a-meta-circular-evaluator-for-bitcoin-cash-script-proof-of-concept/1638?u=albadsl))
+- Permutation Challenge. Illustrates shared libraries in read-only inputs on
+  BCH 2026.
+  ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/permutationChallenge))
+  ([BCR](https://bitcoincashresearch.org/t/albadsl-albavm-haskell-based-dsl-and-vm-for-bitcoin-cash-2025-contract-programming/1558/34?u=albadsl))
 
-AlbaDsl uses some of the CashScript [3] code optimization rules. 
-
-Bitcoin Cash Node [1] is a continuation of the Satoshi Bitcoin client. The
-AlbaDsl project's virtual machine, transactions, and validation, are modeled
-after it.
-
-Haskoin [6] is a Haskell library for Bitcoin and Bitcoin Cash development that
-this project depends on.
-
-Lorentz [5] is a Haskell EDSL for writing contracts for the Tezos stack based VM
-using similar techniques as albaDsl but taken a step further.
-
-For VM verification this project relies on the Libauth [2] transaction level
-test suites.
-
-This project depends on libSecp256k1 [7]. The Haskoin provided integration, but
-also via a direct integration to the Bitcoin Cash Node fork of libSecp256k1.
-
-Licho Last Will [10] is a covenant contract. An albaDsl interpretation of it is
-provided in the contract examples.
+Example AlbaVm HTML execution trace with function calls collapsed.
+ ([GitHub](https://albadsl.github.io/alba-dsl/log-2-functions.html))
 
 ## References
-
-[1] Bitcoin Cash Node. https://bitcoincashnode.org/en/
-
-[2] Libauth / CashAssembly. https://github.com/bitauth/libauth
-
-[3] CashScript. https://cashscript.org
-
-[4] Spedn. https://spedn.pl
-
-[5] Morley / Lorentz EDSL. https://gitlab.com/morley-framework/morley
-
-[6] Haskoin. https://github.com/haskoin/haskoin-core
-
-[7] libsecp256k1. https://github.com/bitcoin-core/secp256k1
-
-[8] QuickCheck. https://hackage.haskell.org/package/QuickCheck-2.15.0.1/docs/Test-QuickCheck.html
-
-[9] LiquidHaskell. https://ucsd-progsys.github.io/liquidhaskell/
-
-[10] Licho Last Will. https://github.com/KarolTrzeszczkowski/Electron-Cash-Last-Will-Plugin
+Original announcement: https://albadsl.github.io/alba-dsl/original-announcement.md

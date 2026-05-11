@@ -14,4 +14,4 @@ data CompilerVersion = CompilerVersion
 instance ToJSON CompilerVersion
 
 albaDslVersion :: String
-albaDslVersion = "0.01 (alpha)"
+albaDslVersion = "0.0.2 (alpha)"
