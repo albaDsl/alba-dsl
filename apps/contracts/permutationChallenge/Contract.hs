@@ -42,7 +42,7 @@ contract = MkContract withdraw
 -- rules.
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize withdraw
--- "26 opcodes, 136 bytes. Including function table: 41 opcodes, 200 bytes.\n"
+-- "27 opcodes, 132 bytes. Total (with fn-table): 45 opcodes, 200 bytes.\n"
 withdraw :: CFn (Base :> TBytes :> TBytes)
 withdraw =
   begin
@@ -54,7 +54,7 @@ withdraw =
     dcNumUtxos = fromIntegral Dc.numUtxos
 
     target :: Fn s (s :> TVector TInt8)
-    target = bytes "     Saabeeeeeeehhhhllllorsssssssty" . b2v
+    target = bytes "     Saabeeeeeehhhllllssssssty" . b2v
 
     b2v :: Fn (s :> TBytes) (s :> TVector TInt8)
     b2v = cast

@@ -14,6 +14,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     int,
     lambda1,
+    lambda2,
     nat,
     op1Add,
     op1Sub,
@@ -43,11 +44,11 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqRecord,
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
-import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
+import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..), mkOrdM)
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
-import Prelude (Integer, undefined, (&&), (-), (<=), (>=), (^))
+import Prelude (Integer, (&&), (-), (<=), (>=), (^))
 
 data TInt8
 
@@ -66,7 +67,7 @@ instance Ord TInt8 where
   min = toRaw2 . opMin . fromRaw
   max = toRaw2 . opMax . fromRaw
   within = toRaw3 . opWithin
-  blobOrdRec = undefined -- FIXME: implement.
+  ordRec = lambda2 (lessThanOrEqual @TInt8) . mkOrdM
 
 instance Integral TInt8 where
   add = toRaw2 . opAdd . fromInt

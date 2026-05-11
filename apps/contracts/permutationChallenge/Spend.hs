@@ -29,7 +29,7 @@ withdrawTx ctx net txId recvAddr = do
 
 withdrawTx' :: Ctx -> TxOut -> OutPoint -> Address -> Tx
 withdrawTx' ctx contractUtxo outpoint recvAddr =
-  let solution = compress "She sells seashells by the seashore"
+  let solution = compress "She sells seashells by the sea"
       tx = txTemplate outpoint (contractUtxo.value - spendFee) recvAddr
    in setScriptSig inputId (withdraw ctx solution) tx
   where

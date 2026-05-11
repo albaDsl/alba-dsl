@@ -8,7 +8,10 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TInt,
+    TLambda,
     TNat,
+    cast,
+    lambda2,
     opGreaterThan,
     opGreaterThanOrEqual,
     opLessThan,
@@ -16,11 +19,12 @@ import Alba.Dsl.V1.Bch2026
     opMax,
     opMin,
     opWithin,
+    (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
 import Data.Kind (Type)
-import Prelude (undefined)
+import Prelude ()
 
 data TOrdRec (t :: Type)
 
@@ -34,7 +38,20 @@ class (BlobEq a) => Ord a where
   min :: Fn (s :> a :> a) (s :> a)
   max :: Fn (s :> a :> a) (s :> a)
   within :: Fn (s :> a :> a :> a) (s :> TBool)
-  blobOrdRec :: Fn s (s :> TOrdRec a)
+  ordRec :: Fn s (s :> TOrdRec a)
+
+-- Only holds 'lessThanOrEqual' for now.
+mkOrdM :: Fn (s :> TLambda '[a, a] '[TBool]) (s :> TOrdRec a)
+mkOrdM = fromRaw
+
+getLessThanOrEqual :: Fn (s :> TOrdRec a) (s :> TLambda '[a, a] '[TBool])
+getLessThanOrEqual = toRaw
+
+fromRaw :: Fn (s :> TLambda '[a, a] '[TBool]) (s :> TOrdRec a)
+fromRaw = cast
+
+toRaw :: Fn (s :> TOrdRec a) (s :> TLambda '[a, a] '[TBool])
+toRaw = cast
 
 instance Ord TInt where
   lessThan = opLessThan
@@ -44,7 +61,7 @@ instance Ord TInt where
   min = opMin
   max = opMax
   within = opWithin
-  blobOrdRec = undefined -- FIXME: implement.
+  ordRec = lambda2 (lessThanOrEqual @TInt) . mkOrdM
 
 instance Ord TNat where
   lessThan = opLessThan
@@ -54,4 +71,4 @@ instance Ord TNat where
   min = opMin
   max = opMax
   within = opWithin
-  blobOrdRec = undefined -- FIXME: implement.
+  ordRec = lambda2 (lessThanOrEqual @TNat) . mkOrdM

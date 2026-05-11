@@ -36,7 +36,7 @@ progSize :: FnA s alt s' alt' -> String
 progSize prog =
   let (code, defs, _) = compileL2WithDetails (defOpts O1) prog
    in printf
-        "%s Total (with function table): %s\n"
+        "%s Total (with fn-table): %s\n"
         (sizeStr code)
         (sizeStr (defs <> code))
 

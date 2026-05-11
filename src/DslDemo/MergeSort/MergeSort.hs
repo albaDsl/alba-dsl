@@ -7,34 +7,41 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TBool,
-    TInt,
     begin,
-    cast,
     del,
+    fn,
+    invoke2,
+    lambda0,
     name,
     name2,
     nat,
     ns2,
     ns3,
-    opBin2Num,
+    ns4,
     opFalse,
     opIf,
+    opRoll,
     opTrue,
     pick,
+    pickN,
     roll,
     un,
+    un2,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
-  ( PackFs (..),
+  ( Ord,
+    PackFs (..),
     TMaybe,
+    TOrdRec,
     TPackFs,
     div,
     drop,
     errCanNotHappen,
     fromMaybe',
+    getLessThanOrEqual,
     greaterThan,
-    lessThanOrEqual,
+    ordRec,
     rot,
     swap,
     untuple,
@@ -48,27 +55,28 @@ import Alba.Dsl.V1.Bch2026.Contract.TVector
     splitAtF,
     unconsF,
   )
-import Alba.Dsl.V1.Bch2026.Lang (fn, lambda0)
 import Prelude ()
 
-sort :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TVector a)
-sort = packFsRec @a . swap . sortF
+sort :: forall a s. (Ord a, PackFs a) => Fn (s :> TVector a) (s :> TVector a)
+sort = ordRec @a . packFsRec @a . rot . sortF
 
-sortF :: (StackEntry a) => Fn (s :> TPackFs a :> TVector a) (s :> TVector a)
+sortF ::
+  (StackEntry a) =>
+  Fn (s :> TOrdRec a :> TPackFs a :> TVector a) (s :> TVector a)
 sortF =
   fn
     ( begin
-        . ns2 #pfs #vec
+        . ns3 #ord #pfs #vec
         . (pick #pfs . pick #vec . lengthF . nat 1 . greaterThan)
         . opIf
           ( begin
               . (pick #pfs . roll #vec . halveF)
-              . (pick #pfs . swap . sortF . swap)
-              . (pick #pfs . swap . sortF . swap)
-              . (pick #pfs . rot . rot . mergeF)
+              . (pick #ord . pick #pfs . rot . sortF . swap)
+              . (pick #ord . pick #pfs . rot . sortF . swap)
+              . (pick #ord . pick #pfs . opRoll 3 . opRoll 3 . mergeF)
           )
           (roll #vec)
-        . del #pfs
+        . (del #pfs . del #ord)
     )
 
 halveF :: Fn (s :> TPackFs a :> TVector a) (s :> TVector a :> TVector a)
@@ -81,19 +89,19 @@ halveF =
 
 mergeF ::
   (StackEntry a) =>
-  Fn (s :> TPackFs a :> TVector a :> TVector a) (s :> TVector a)
+  Fn (s :> TOrdRec a :> TPackFs a :> TVector a :> TVector a) (s :> TVector a)
 mergeF =
   fn
     ( begin
-        . (ns3 #pfs #xs #ys . pick #xs . pick #ys . baseCases)
+        . (ns4 #ord #pfs #xs #ys . pick #xs . pick #ys . baseCases)
         . opIf
           ( begin
               . drop
               . name2 #x #xRest (pick #pfs . pick #xs . uncons')
               . name2 #y #yRest (pick #pfs . pick #ys . uncons')
               . ( begin
-                    . (pick #x . toNum . pick #y . toNum)
-                    . lessThanOrEqual
+                    . (pickN #x . pickN #y . pick #ord . un2 #x #y)
+                    . (getLessThanOrEqual . invoke2)
                 )
               . opIf
                 ( begin
@@ -104,20 +112,16 @@ mergeF =
                     . (name #elem (roll #y) . roll #xs . roll #yRest)
                     . (del #ys . del #xRest . del #x)
                 )
-              . (pick #pfs . rot . rot . mergeF)
+              . (roll #ord . pick #pfs . opRoll 3 . opRoll 3 . mergeF)
               . (roll #pfs . rot . rot . un #elem . consF)
           )
-          (del #pfs . del #xs . del #ys)
+          (del #ys . del #xs . del #pfs . del #ord)
     )
   where
     uncons' ::
       (StackEntry a) =>
       Fn (s' :> TPackFs a :> TVector a) (s' :> a :> TVector a)
     uncons' = unconsF . fromJust . untuple
-
-    -- FIXME: cast.
-    toNum :: Fn (s' :> a) (s' :> TInt)
-    toNum = cast . opBin2Num
 
     baseCases :: Fn (s' :> TVector a :> TVector a) (s' :> TVector a :> TBool)
     baseCases =

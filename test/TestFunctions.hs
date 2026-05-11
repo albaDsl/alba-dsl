@@ -6,10 +6,12 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     Integral (..),
+    TInt64,
     TInt8,
     apply2,
     apply3_2,
     ifZero,
+    int64,
     nat1SubUnsafe,
     swap,
   )
@@ -109,12 +111,15 @@ progSort :: Fn s (s :> TBool)
 progSort =
   runEnv
     ( begin
-        ∘ (nat 10 ∘ lambda1 (op1Add ∘ toInt8) ∘ generate)
+        ∘ (nat 10 ∘ lambda1 (toInt64 ∘ base ∘ add) ∘ generate)
         ∘ (opDup ∘ reverse ∘ MS.sort ∘ equal)
     )
   where
-    toInt8 :: Fn (s :> TNat) (s :> TInt8)
-    toInt8 = n2i ∘ fromInt
+    toInt64 :: Fn (s :> TNat) (s :> TInt64)
+    toInt64 = n2i ∘ fromInt
+
+    base :: Fn s (s :> TInt64)
+    base = int64 (2 ^ (48 :: Integer))
 
 propSort :: AsciiString -> Property
 propSort (AsciiString xs) =
