@@ -4,7 +4,7 @@ module TestEllipticCurve (testEllipticCurve) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, nip, swap, tuple)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, fromInt, nip, swap, tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants qualified as C
@@ -54,8 +54,10 @@ testEllipticCurve =
 
     wnafGlvMul :: forall s. Env (s :> TNat :> TPoint) (s :> TPoint)
     wnafGlvMul =
-      (dup ∘ WNG.setupTable ∘ swap ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
+      (dup ∘ wsize ∘ WNG.setupTable ∘ swap ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable ∘ tuple)
         ∘ (swap ∘ WNG.ecMul)
+
+    wsize = int 6 ∘ fromInt
 
 progEllipticCurveBasicAffine :: Fn s (s :> TBool)
 progEllipticCurveBasicAffine =
@@ -81,9 +83,11 @@ progEllipticCurve5WNaf = runEnv (g ∘ WN.setupTable ∘ verifyTestVectors WN.ec
 progEllipticCurveWNafGlv :: Fn s (s :> TBool)
 progEllipticCurveWNafGlv =
   runEnv
-    ( (g ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
-        ∘ verifyTestVectors WNG.ecMul
+    ( (g ∘ wsize ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable)
+        ∘ (tuple ∘ verifyTestVectors WNG.ecMul)
     )
+  where
+    wsize = int 6 ∘ fromInt
 
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
@@ -203,8 +207,11 @@ propComparison (Bits256 n) =
           runEnv
             ( begin
                 ∘ (nat (fromIntegral n) ∘ g ∘ EJ.ecMul)
-                ∘ (g ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
+                ∘ (g ∘ wsize ∘ WNG.setupTable)
+                ∘ (g ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable ∘ tuple)
                 ∘ (nat (fromIntegral n) ∘ WNG.ecMul)
                 ∘ equal
             )
      in isTrue' $ evaluateProg prog
+  where
+    wsize = int 6 ∘ fromInt

@@ -1,17 +1,26 @@
 -- Copyright (c) 2026 albaDsl
 
-module DslDemo.EllipticCurve.Common (doubleN, mods, countTrailingZeros) where
+module DslDemo.EllipticCurve.Common
+  ( doubleN,
+    mods,
+    mods',
+    countTrailingZeros,
+  )
+where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack ((:>)),
     TInt,
     TNat,
+    del,
     fn,
     i2nUnsafe,
     int,
+    name,
     nat,
     ns,
+    ns2,
     op0,
     opFalse,
     opIf,
@@ -33,6 +42,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     mod,
     nip,
     over,
+    pow2,
     sub,
     sub1,
     swap,
@@ -60,6 +70,15 @@ mods windowSize =
   where
     full = int (2 ^ windowSize)
     half = int (2 ^ (windowSize - 1))
+
+mods' :: Fn (s :> TInt :> TNat) (s :> TInt)
+mods' =
+  ns2 #n #wsize
+    . name #full (pick #wsize . pow2)
+    . name #half (roll #wsize . sub1 . pow2)
+    . name #r (roll #n . pick #full . mod)
+    . (pick #r . roll #half . greaterThanOrEqual)
+    . (opIf (roll #r . roll #full . sub) (del #full . roll #r))
 
 countTrailingZeros :: Fn (s :> TInt) (s :> TNat)
 countTrailingZeros =

@@ -4,6 +4,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Math
     square,
     halve,
     signum,
+    pow2,
     pow,
     pow',
     factorial,
@@ -33,6 +34,7 @@ import Alba.Dsl.V1.Bch2026
     op2Drop,
     opDiv,
     opDup,
+    opLShiftNum,
     opLessThan,
     opMod,
     opMul,
@@ -76,6 +78,9 @@ signum =
           ]
           (del #n . op1)
     )
+
+pow2 :: Fn (s :> TNat) (s :> TInt)
+pow2 = fn (int 1 . swap . opLShiftNum)
 
 -- >>> import Alba.Dsl.V1.Bch2026
 -- >>> progSize pow

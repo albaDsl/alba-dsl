@@ -4,7 +4,7 @@
 module Main where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (tuple)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (fromInt, tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Vm.Bch2026
 -- import DslDemo.EllipticCurve.Native.Affine qualified as NA
@@ -157,8 +157,9 @@ progMulWNafGlv :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulWNafGlv =
   runEnv (tabG ∘ tabGPhi ∘ tuple ∘ opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
   where
-    tabG = constant (g ∘ EJWNG.setupTable)
-    tabGPhi = constant (quot1 EJWNG.phi' ∘ g ∘ EJWNG.setupTable ∘ V.map)
+    tabG = constant (g ∘ wsize ∘ EJWNG.setupTable)
+    tabGPhi = constant (g ∘ EJWNG.phi' ∘ wsize ∘ EJWNG.setupTable)
+    wsize = int 6 ∘ fromInt
 
 verify :: (Natural -> Point) -> [TestVal] -> ()
 verify mul vals =

@@ -25,6 +25,7 @@ import Alba.Dsl.V1.Bch2026
     name3,
     nat,
     ns2,
+    ns3,
     opIf,
     opRShiftNum,
     pick,
@@ -59,25 +60,25 @@ import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms (merge)
 import Alba.Dsl.V1.Bch2026.QuotationsB qualified as QB
-import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods)
+import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods')
 import DslDemo.EllipticCurve.Jacobian (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
 import DslDemo.EllipticCurve.Point (TPoint)
-import Prelude (Int)
+import Prelude ()
 
-type TMsmTerm = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
+type TWindowSize = TInt16
+
+type TMsmTerm = TTuple (TTuple TInt264 TWindowSize) (TQuotB '[TInt16] '[TPoint])
 
 type TTerm = TTuple TInt16 TInt16
 
 type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPoint])
 
-windowSize :: Int
-windowSize = 6
-
 fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = quot0 errCanNotHappen . swap . fromMaybe'
 
+-- Multi-scalar interleaved multiplication (MSM).
 ecMulInterleaved :: Bch.Fn (s :> V.TVector TMsmTerm) (s :> TPointJ)
 ecMulInterleaved =
   (name #sorted sorted . pick #sorted . V.null)
@@ -123,20 +124,21 @@ posOf :: Fn (s :> TTerm') (s :> TNat)
 posOf = fst . snd . toInt . i2nUnsafe
 
 -- In LSB first (ascending) order.
-terms :: Fn (s :> TInt264) (s :> TVector TTerm)
-terms = nat 0 . tuple . quot1 step . swap . V.unfoldr
+terms :: Fn (s :> TTuple TInt264 TWindowSize) (s :> TVector TTerm)
+terms =
+  untuple . swap . nat 0 . tuple . swap . quot2 step . apply2 . swap . V.unfoldr
   where
     step ::
       Fn
-        (s :> TTuple TInt264 TNat)
+        (s :> TTuple TInt264 TNat :> TWindowSize)
         (s :> TMaybe (TTuple TTerm (TTuple TInt264 TNat)))
     step =
-      (untuple . ns2 #m #base . pick #m . toInt)
-        . (ifZero (del #base . del #m . nothing))
+      (swap . untuple . ns3 #wsize #m #base . pick #m . toInt)
+        . (ifZero (del #base . del #m . del #wsize . nothing))
           ( (name #z (pick #m . toInt . countTrailingZeros))
               . (name #m' (roll #m . toInt . pick #z . opRShiftNum))
               . (name #pos (roll #base . roll #z . add))
-              . (name #d (pick #m' . mods windowSize))
+              . (name #d (pick #m' . roll #wsize . toInt . i2nUnsafe . mods'))
               . ( (pick #d . i2TInt16Unsafe . pick #pos . n2i . i2TInt16Unsafe)
                     . (tuple . roll #m' . roll #d . sub . i2Int264Unsafe)
                     . (roll #pos . tuple . tuple . just)
