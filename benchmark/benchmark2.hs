@@ -7,7 +7,7 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Vm.Bch2026
-import Criterion.Main (bench, bgroup, defaultMain, nf)
+import Criterion.Main (bench, bgroup, defaultMain, env, nf)
 import Crypto.Secp256k1 qualified as CS
 import Data.Bits (shiftR)
 import Data.ByteString qualified as B
@@ -65,28 +65,41 @@ main = do
         [ bench "Haskell native" $ nf (verify (\n -> NA.mul n NA.g)) testVals,
           bench "albaVM" $ nf (ecMultiply (compile O1 progMul)) testVals
         ],
-      bgroup
-        "EC multiply (Jacobian)"
-        [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
-          bench "Haskell native" $
-            nf (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g)) testVals,
-          bench "Haskell native (windowed)" $
-            nf (verify (\n -> NJ.fromJacobian $ NJW.ecMul n NJ.g)) testVals,
-          bench "Haskell native (wNAF)" $
-            nf (verify (\n -> NJ.fromJacobian $ NJWN.ecMul n NJ.g)) testVals,
-          bench "Haskell native (wNAF interleaved)" $
-            nf (verify (\n -> NJ.fromJacobian $ NJWNI.ecMul n NJ.g)) testVals,
-          bench "Haskell native (wNAF & GLV)" $
-            nf (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul n NJ.g)) testVals,
-          bench "albaVM" $
-            nf (ecMultiply (compile O1 progMulJacobian)) testVals,
-          bench "albaVM (windowed)" $
-            nf (ecMultiply (compile O1 progMulJacobianWindowed)) testVals,
-          bench "albaVM (wNAF / precomp)" $
-            nf (ecMultiply (compile O1 progMulJacobianWNaf)) testVals,
-          bench "albaVM (wNAF & GLV / precomp)" $
-            nf (ecMultiply (compile O1 progMulWNafGlv)) testVals
-        ]
+      env
+        ( pure
+            ( compile O1 progMulJacobian,
+              compile O1 progMulJacobianWindowed,
+              compile O1 progMulJacobianWNaf,
+              compile O1 progMulWNafGlv
+            )
+        )
+        $ \ ~( codeMulJacobian,
+               codeMulJacobianWindowed,
+               codeMulWNafGlv,
+               codeMulJacobianWNaf
+               ) ->
+            bgroup
+              "EC multiply (Jacobian)"
+              [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
+                bench "Haskell native" $
+                  nf (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g)) testVals,
+                bench "Haskell native (windowed)" $
+                  nf (verify (\n -> NJ.fromJacobian $ NJW.ecMul n NJ.g)) testVals,
+                bench "Haskell native (wNAF)" $
+                  nf (verify (\n -> NJ.fromJacobian $ NJWN.ecMul n NJ.g)) testVals,
+                bench "Haskell native (wNAF interleaved)" $
+                  nf (verify (\n -> NJ.fromJacobian $ NJWNI.ecMul n NJ.g)) testVals,
+                bench "Haskell native (wNAF & GLV)" $
+                  nf (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul n NJ.g)) testVals,
+                bench "albaVM" $
+                  nf (ecMultiply codeMulJacobian) testVals,
+                bench "albaVM (windowed)" $
+                  nf (ecMultiply codeMulJacobianWindowed) testVals,
+                bench "albaVM (wNAF / precomp)" $
+                  nf (ecMultiply codeMulJacobianWNaf) testVals,
+                bench "albaVM (wNAF & GLV / precomp)" $
+                  nf (ecMultiply codeMulWNafGlv) testVals
+              ]
     ]
 
 ecMultiply :: CodeL1 -> [TestVal] -> ()
