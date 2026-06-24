@@ -131,9 +131,9 @@ opDefineHeader LogDisplayOpts {..} prevEntry = do
            M.lookup fId ft
        ) of
     Just FunctionTableEntry {..} ->
-      T.pack $ printf "Function %s (%s)" functionId functionName
+      T.pack $ printf "Fn %s (%s)" functionId functionName
     Nothing ->
-      T.pack $ printf "Function %s definition" fId
+      T.pack $ printf "Fn %s definition" fId
 
 opInvokeHeader :: LogDisplayOpts -> Maybe LogEntry -> Text
 opInvokeHeader LogDisplayOpts {..} prevEntry = do

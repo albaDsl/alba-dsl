@@ -34,7 +34,7 @@ formatBytesWithLabels labels bytes =
 formatBytes :: B.ByteString -> T.Text
 formatBytes bytes =
   let str = encodeHex bytes
-      numChars = 4
+      numChars = 10
       cutOff = numChars * 2 + 3
    in case str of
         _ | T.null str -> "<:0>"
@@ -48,8 +48,7 @@ formatBytes bytes =
                   (size bytes)
         _ -> "<" <> str <> size bytes <> ">"
   where
-    size x | B.length x <= 999 = T.pack $ ":" <> show (B.length x)
-    size _ = ":XL"
+    size x = T.pack $ ":" <> show (B.length x)
 
 formatBytesFull :: B.ByteString -> T.Text
 formatBytesFull bytes =
