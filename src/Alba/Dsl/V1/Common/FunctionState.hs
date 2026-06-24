@@ -39,6 +39,8 @@ data Function = Function
   }
   deriving (Show)
 
+-- Base ordering on insertion order so it does not become based on how the
+-- FunctionId sorts in the Map.
 type FunctionTable = InsertionOrderMap FunctionId Function
 
 startState :: FunctionState

@@ -11,6 +11,7 @@ module Alba.Dsl.V1.Common.OpcodeL3
     vmFunctionIdToByteString,
     isConstant,
     isRtConstant,
+    isNotAConstant,
   )
 where
 
@@ -32,11 +33,11 @@ data OpcodeL3
 
 data FunctionId
   = Standard ModuleName LineNumber ColumnNumber FunctionName
-  | Constant ModuleName LineNumber ColumnNumber FunctionName
-  | RuntimeConstant ModuleName LineNumber ColumnNumber FunctionName
   | Quotation ModuleName LineNumber ColumnNumber FunctionName
   | Named String
   | Absolute Index
+  | Constant ModuleName LineNumber ColumnNumber FunctionName
+  | RuntimeConstant ModuleName LineNumber ColumnNumber FunctionName
   deriving (Eq, Ord, Show)
 
 type ModuleName = String
@@ -107,3 +108,11 @@ isConstant _ = False
 isRtConstant :: FunctionId -> Bool
 isRtConstant (RuntimeConstant _ _ _ _) = True
 isRtConstant _ = False
+
+isNotAConstant :: FunctionId -> Bool
+isNotAConstant (Standard _ _ _ _) = True
+isNotAConstant (Quotation _ _ _ _) = True
+isNotAConstant (Named _) = True
+isNotAConstant (Absolute _) = True
+isNotAConstant (Constant _ _ _ _) = False
+isNotAConstant (RuntimeConstant _ _ _ _) = False

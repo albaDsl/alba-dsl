@@ -144,7 +144,7 @@ compileL2WithDetails opts prog =
     compileL2' prog' = do
       let (code, fs) = pass1 S.empty startState prog'
           fs' = assignIndices opts (addSupportFunctions fs)
-          ft = FT.toFunctionTable (resolve opts fs') fs'
+          ft = FT.toFunctionTable (resolveRefs opts fs') fs'
           ftInit = functionTableInitCode ft
           code' = pass2 opts fs' code
        in (code', ftInit, ft)
@@ -184,12 +184,13 @@ assignIndices opts fs = FSR.toResolved opts.fIdType (mapFunctions assign fs)
         then nextFree (succ idx)
         else idx
 
-resolve ::
+resolveRefs ::
   Options ->
   FSR.FunctionState ->
+  FT.FunctionTable ->
   (FunctionId, FSR.Function) ->
   (FunctionId, FT.Function)
-resolve opts fs (fId, FSR.Function {..}) =
+resolveRefs opts fs table (fId, FSR.Function {..}) =
   let codeL2 = do
         code' <- code
         code'' <- case fId of
@@ -198,7 +199,7 @@ resolve opts fs (fId, FSR.Function {..}) =
                 S.singleton . Opcode . bytesToDataOp
                   <$> codeL2ToCodeL1
                     ( S.singleton . bytesToDataOp $
-                        evaluateConstant fs fId code'
+                        evaluateConstant fs fId table code'
                     )
           _ | isRtConstant fId -> pure code'
           _ -> pure $ S.fromList [FunctionBody code']
@@ -235,9 +236,10 @@ functionTableInitCode ft@(FT.FunctionTable ls) =
           OP_INVOKE
         ]
 
-evaluateConstant :: FSR.FunctionState -> FunctionId -> CodeL3 -> Bytes
-evaluateConstant fs fId code =
-  let code' = pass2 (defOpts None) fs code
+evaluateConstant ::
+  FSR.FunctionState -> FunctionId -> FT.FunctionTable -> CodeL3 -> Bytes
+evaluateConstant fs fId table code =
+  let code' = functionTableInitCode table <> pass2 (defOpts None) fs code
       code'' = fromMaybe err1 (codeL2ToCodeL1 code')
       state =
         (Bch2026.startState Bch2026.vmParamsStandard) {VmState.code = code''}

@@ -3,6 +3,7 @@
 module TestConstants (testConstants) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero, nat1SubUnsafe)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)
@@ -21,6 +22,7 @@ progCompileTime =
   begin
     ∘ (c1 ∘ int 3_628_800 ∘ opNumEqualVerify)
     ∘ (c2 ∘ int 3 ∘ opNumEqualVerify)
+    ∘ (c3 ∘ nat 3_628_800 ∘ opNumEqualVerify)
     ∘ opTrue
   where
     c1 :: Fn s (s :> TInt)
@@ -32,6 +34,19 @@ progCompileTime =
 
     c2 :: Fn s (s :> TInt)
     c2 = constant (int 2 ∘ int 3 ∘ opMul ∘ int 2 ∘ opDiv)
+
+    c3 :: Fn s (s :> TNat)
+    c3 = constant (nat 10 ∘ fac')
+
+    fac' :: Fn (s :> TNat) (s :> TNat)
+    fac' =
+      fn
+        ( begin
+            ∘ (ns #n ∘ pick #n)
+            ∘ ifZero
+              (nat 1 ∘ del #n)
+              (pick #n ∘ roll #n ∘ nat1SubUnsafe ∘ fac' ∘ opMul)
+        )
 
 -- Constants that reference eachother. Tests topological ordering of runtime
 -- initialization of constants.

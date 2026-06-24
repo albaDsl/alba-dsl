@@ -18,17 +18,15 @@ import Alba.Dsl.V1.Common.OpcodeL3
     FunctionId (..),
     OpcodeL3 (FunctionIndexRef),
     VmFunctionId,
-    isRtConstant,
+    isNotAConstant,
   )
 import Alba.Vm.Common.OpcodeL2 (CodeL2)
 import Control.Arrow ((>>>))
-import Data.Array (assocs)
 import Data.Function (on)
-import Data.Graph (Graph, Vertex)
-import Data.Graph qualified as G
-import Data.List (sortBy, sortOn)
+import Data.Graph (SCC (..), stronglyConnComp)
+import Data.List (sortBy)
+import Data.List.NonEmpty (toList)
 import Data.Map qualified as M
-import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence qualified as S
 
 data FunctionTable = FunctionTable [(FunctionId, Function)]
@@ -42,18 +40,18 @@ data Function = Function
   deriving (Eq, Show)
 
 toFunctionTable ::
-  ((FunctionId, FSR.Function) -> (FunctionId, Function)) ->
+  (FunctionTable -> (FunctionId, FSR.Function) -> (FunctionId, Function)) ->
   FSR.FunctionState ->
   FunctionTable
 toFunctionTable convert fs =
-  let sorted =
-        ( functionsSortedByIndex
-            (M.filterWithKey (\k _ -> not $ isRtConstant k) fs.functionTable)
-            <> filter
-              (\(k, _) -> isRtConstant k)
-              (functionsSortedByIndexTopological fs.functionTable)
+  let sorted = functionsSortedByIndexTopological fs.functionTable
+   in FunctionTable
+        ( reverse $
+            foldl
+              (\tab x -> (convert (FunctionTable tab) x : tab))
+              []
+              sorted
         )
-   in FunctionTable (convert <$> sorted)
 
 functionsSortedByIndex :: FSR.FunctionTable -> [(FunctionId, FSR.Function)]
 functionsSortedByIndex = M.toList >>> sortBy (compare `on` ((.index) . snd))
@@ -63,56 +61,38 @@ functionsSortedByIndexTopological ::
 functionsSortedByIndexTopological table | M.null table = []
 functionsSortedByIndexTopological table =
   let tableAsList = functionsSortedByIndex table
-      edges = fromJust $ mapM (functionEdges table) tableAsList
-      edges' = concat edges
-      maxFId = maximum ((.index) . snd <$> tableAsList)
-      graph = G.buildG (0, maxFId) edges'
-      vertices =
-        if null (cyclicNodes graph)
-          then G.reverseTopSort graph
-          else err1
-      sortedFunctions = topologicalSortedTable vertices tableAsList
-   in sortedFunctions
+      nodes = map (graphNode table) tableAsList
+      sorted = stronglyConnComp nodes
+   in if noCycles sorted
+        then concatMap convert sorted
+        else err1
   where
-    topologicalSortedTable ::
-      [Int] -> [(FunctionId, FSR.Function)] -> [(FunctionId, FSR.Function)]
-    topologicalSortedTable order tableAsList =
-      let orderMap = M.fromList (zip order ([0 ..] :: [Int]))
-          position idx = fromMaybe err2 (M.lookup idx orderMap)
-       in sortOn (position . (.index) . snd) tableAsList
+    convert :: SCC (FunctionId, FSR.Function) -> [(FunctionId, FSR.Function)]
+    convert (AcyclicSCC x) = [x]
+    convert (NECyclicSCC x) = toList x
 
-    err :: String -> a
-    err msg =
-      error ("functionsSortedByIndexTopological: " <> msg)
+    -- It is possible to write cyclic constant dependencies but they are not
+    -- allowed.
+    noCycles :: [SCC (FunctionId, FSR.Function)] -> Bool
+    noCycles [] = True
+    noCycles ((AcyclicSCC _) : rest) = noCycles rest
+    noCycles ((NECyclicSCC x) : rest) =
+      if (all (isNotAConstant . fst) (toList x))
+        then noCycles rest
+        else False
 
-    err1 = err "cyclic dependency between constants."
-    err2 = err "internal error."
+    err1 = error "Cyclic dependency between constants."
 
-functionEdges ::
-  FSR.FunctionTable -> (FunctionId, FSR.Function) -> Maybe [G.Edge]
-functionEdges table (RuntimeConstant {}, function) = do
-  c <- function.code
-  (fmap . fmap) (function.index,) (refs c (Just []))
+graphNode ::
+  FSR.FunctionTable ->
+  (FunctionId, FSR.Function) ->
+  ((FunctionId, FSR.Function), Int, [Int])
+graphNode table entry@(_, f) =
+  (entry, f.index, maybe [] (\x -> (refs x [])) f.code)
   where
-    refs :: CodeL3 -> Maybe [Int] -> Maybe [Int]
-    refs _ Nothing = Nothing
+    refs :: CodeL3 -> [Int] -> [Int]
     refs S.Empty acc = acc
     refs ((FunctionIndexRef fId') S.:<| rest) acc =
-      let index = M.lookup fId' table >>= \x -> pure x.index
-       in refs rest ((:) <$> index <*> acc)
+      let index = (M.findWithDefault (error "unexpected") fId' table).index
+       in refs rest (index : acc)
     refs (_ S.:<| rest) acc = refs rest acc
-functionEdges _ _ = Just []
-
--- ## Directed Graph cycles detection.
--- Code from:
--- https://stackoverflow.com/questions/8935323/
--- detecting-cycles-of-a-graphmaybe-directed-or-undirected-in-haskell
-
--- Calculates all the nodes that are part of cycles in a graph.
-cyclicNodes :: Graph -> [Vertex]
-cyclicNodes graph = map fst . filter isCyclicAssoc . assocs $ graph
-  where
-    isCyclicAssoc = uncurry reachableFromAny
-
-    reachableFromAny :: Vertex -> [Vertex] -> Bool
-    reachableFromAny node = elem node . concatMap (G.reachable graph)
