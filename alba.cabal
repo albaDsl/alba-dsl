@@ -276,6 +276,7 @@ library
       DslDemo.EllipticCurve.JacobianWNafGlv,
       DslDemo.EllipticCurve.JacobianWNafInterleaved,
       DslDemo.EllipticCurve.Native.Affine,
+      DslDemo.EllipticCurve.Native.BatchInvert,
       DslDemo.EllipticCurve.Native.Common,
       DslDemo.EllipticCurve.Native.FieldElement,
       DslDemo.EllipticCurve.Native.Glv,

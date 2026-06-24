@@ -7,8 +7,8 @@ module DslDemo.EllipticCurve.Native.JacobianWNafGlv
   )
 where
 
-import DslDemo.EllipticCurve.Native.Affine (Point)
 import DslDemo.EllipticCurve.Constants qualified as C
+import DslDemo.EllipticCurve.Native.Affine (Point)
 import DslDemo.EllipticCurve.Native.Glv (glvDecompose, phi)
 import DslDemo.EllipticCurve.Native.Jacobian (PointJ (..), ecNegate)
 import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved

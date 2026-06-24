@@ -37,10 +37,14 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     swap,
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
-import DslDemo.EllipticCurve.JacobianPoint (TPointJ, fromJacobian, toJacobian)
+import DslDemo.EllipticCurve.JacobianPoint
+  ( TPointJ,
+    fromJacobian,
+    makeIdentity,
+    toJacobian,
+  )
 import DslDemo.EllipticCurve.Point (TPoint)
 import Prelude ()
-import DslDemo.EllipticCurve.JacobianPoint (makeIdentity)
 
 ecAdd :: Fn (s :> TPoint :> TPoint) (s :> TPoint)
 ecAdd = fn (toJacobian . swap . toJacobian . EC.ecAddJ . fromJacobian)

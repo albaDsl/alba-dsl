@@ -22,7 +22,7 @@ import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
-import DslDemo.EllipticCurve.Native.Affine qualified as NA
+-- import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement)
 import DslDemo.EllipticCurve.Native.Jacobian (Point (..))
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
@@ -58,11 +58,13 @@ main :: IO ()
 main = do
   ctx <- CS.createContext
   defaultMain
-    [ bgroup
-        "EC multiply (Affine)"
-        [ bench "Haskell native" $ nf (verify (\n -> NA.mul n NA.g)) testVals,
-          bench "albaVM" $ nf (ecMultiply (compile O1 progMul)) testVals
-        ],
+    [
+      -- bgroup
+      --   "EC multiply (Affine)"
+      --   [ bench "Haskell native" $
+      --       nf (verify (\n -> NA.mul n NA.g)) testVals,
+      --     bench "albaVM" $ nf (ecMultiply (compile O1 progMul)) testVals
+      --   ],
       env
         ( pure
             ( compile O1 progMulJacobian,

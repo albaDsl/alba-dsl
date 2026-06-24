@@ -15,6 +15,7 @@ import Data.Vector qualified as V
 import Data.Vector.Mutable qualified as VM
 import DslDemo.EllipticCurve.Native.Affine (Point)
 import DslDemo.EllipticCurve.Native.Affine qualified as AP
+import DslDemo.EllipticCurve.Native.BatchInvert (toAffine)
 import DslDemo.EllipticCurve.Native.Common (countTrailingZeros, mods)
 import DslDemo.EllipticCurve.Native.Jacobian
   ( PointJ (..),
@@ -22,7 +23,6 @@ import DslDemo.EllipticCurve.Native.Jacobian
     ecAddMixed,
     ecDouble,
     ecDoubleN,
-    fromJacobian,
   )
 import GHC.ST (runST)
 import Numeric.Natural (Natural)
@@ -35,9 +35,8 @@ type Term' = (Integer, Natural, Integer -> Point)
 windowSize :: Int
 windowSize = 5
 
--- FIXME: Inefficient implementation.
 setupTable :: PointJ -> V.Vector Point
-setupTable p = V.map fromJacobian (V.iterateN numValues (`ecAdd` p2) p)
+setupTable p = toAffine (V.iterateN numValues (`ecAdd` p2) p)
   where
     numValues = 2 ^ (windowSize - 1)
     p2 = ecDouble p
