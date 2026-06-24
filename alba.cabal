@@ -132,6 +132,8 @@ library
       Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances,
       Alba.Dsl.V1.Bch2026.Contract.TUnit,
       Alba.Dsl.V1.Bch2026.Contract.TVector,
+      Alba.Dsl.V1.Bch2026.Contract.TVectorType,
+      Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe,
       Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms,
       Alba.Dsl.V1.Bch2026.Conversion,
       Alba.Dsl.V1.Bch2026.ExternalLib,

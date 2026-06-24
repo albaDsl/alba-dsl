@@ -99,7 +99,6 @@ import Alba.Dsl.V1.Bch2026
     opNotIf,
     opRoll,
     opSize,
-    opSplit,
     opTrue,
     opUntil,
     pick,
@@ -120,7 +119,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
-    Integral (add1, div, fromInt, mul),
+    Integral (add1, div, fromInt),
     Ord (..),
     PackFs (..),
     TMaybe,
@@ -129,15 +128,11 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     apply2,
     apply3,
     apply4,
-    blobEqEqual,
-    blobEqEqualVerify,
-    blobEqRecord,
     dup,
     errCanNotHappen,
     fromMaybe',
     fst,
     getPack,
-    getSize,
     ifJust,
     ifZero,
     just,
@@ -158,18 +153,10 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     untuple,
   )
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe qualified as Maybe
+import Alba.Dsl.V1.Bch2026.Contract.TVectorType (TVector)
+import Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe (splitAtUnsafeF)
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
-import Data.Kind (Type)
 import Prelude (Integer)
-
-data TVector (a :: Type)
-
-instance StackEntry (TVector a)
-
-instance (BlobEq a) => BlobEq (TVector a) where
-  equal = blobEqEqual
-  equalVerify = blobEqEqualVerify
-  blobEqRec = blobEqRecord
 
 -- ## Literals.
 intv :: forall a s. (PackFs a, Integral a) => [Integer] -> Fn s (s :> TVector a)
@@ -267,14 +254,6 @@ splitAtF =
           )
           (empty . roll #vec . delCount 2)
     )
-
-splitAtUnsafeF ::
-  Fn (s :> TPackFs a :> TNat :> TVector a) (s :> TVector a :> TVector a)
-splitAtUnsafeF = fn (toRaw . swap . rot . getSize . mul . opSplit . fixup)
-  where
-    -- Optimizer will take care of redundant swaps.
-    fixup :: Fn (s' :> TBytes :> TBytes) (s' :> TVector a :> TVector a)
-    fixup = fromRaw . swap . fromRaw . swap
 
 uncons ::
   forall a s.
