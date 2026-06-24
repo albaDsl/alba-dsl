@@ -7,7 +7,10 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Vm.Bch2026
-import Criterion.Main (bench, bgroup, defaultMain, env, nf)
+-- import DslDemo.EllipticCurve.Native.Affine qualified as NA
+
+import Control.DeepSeq (force)
+import Criterion.Main (bench, bgroup, defaultMain, nf)
 import Crypto.Secp256k1 qualified as CS
 import Data.Bits (shiftR)
 import Data.ByteString qualified as B
@@ -22,7 +25,6 @@ import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
--- import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement)
 import DslDemo.EllipticCurve.Native.Glv (phi)
 import DslDemo.EllipticCurve.Native.Jacobian (Point (..))
@@ -32,6 +34,7 @@ import DslDemo.EllipticCurve.Native.JacobianWNaf qualified as NJWN
 import DslDemo.EllipticCurve.Native.JacobianWNafGlv qualified as NJWNG
 import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved qualified as NJWNI
 import DslDemo.EllipticCurve.Point qualified as EA
+import GHC.IO (evaluate)
 import Numeric.Natural (Natural)
 
 data TestVal = TestVal
@@ -58,6 +61,13 @@ testVals =
 main :: IO ()
 main = do
   ctx <- CS.createContext
+  tableWNaf <- evaluate $ force $ NJWN.setupTable NJ.g
+  tableWNafInterleaved <- evaluate $ force $ NJWNI.setupTable NJ.g
+  tableWNafGlv <-
+    evaluate $ force $ (NJWNG.setupTable NJ.g, NJWNG.setupTable (phi NJ.g))
+  codeMulJacobian <- evaluate $ force $ compile O1 progMulJacobian
+  codeMulJacobianWNaf <- evaluate $ force $ compile O1 progMulJacobianWNaf
+  codeMulWNafGlv <- evaluate $ force $ compile O1 progMulWNafGlv
   defaultMain
     [ -- bgroup
       --   "EC multiply (Affine)"
@@ -65,52 +75,35 @@ main = do
       --       nf (verify (\n -> NA.mul n NA.g)) testVals,
       --     bench "albaVM" $ nf (ecMultiply (compile O1 progMul)) testVals
       --   ],
-      env
-        ( pure
-            ( NJWN.setupTable NJ.g,
-              NJWNI.setupTable NJ.g,
-              (NJWNG.setupTable NJ.g, NJWNG.setupTable (phi NJ.g)),
-              compile O1 progMulJacobian,
-              compile O1 progMulJacobianWNaf,
-              compile O1 progMulWNafGlv
-            )
-        )
-        $ \ ~( tableWNaf,
-               tableWNafInterleaved,
-               tableWNafGlv,
-               codeMulJacobian,
-               codeMulJacobianWNaf,
-               codeMulWNafGlv
-               ) ->
-            bgroup
-              "EC multiply (Jacobian)"
-              [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
-                bench "Haskell native" $
-                  nf
-                    (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g))
-                    testVals,
-                bench "Haskell native (wNAF)" $
-                  nf
-                    (verify (\n -> NJ.fromJacobian $ NJWN.ecMul tableWNaf n))
-                    testVals,
-                bench "Haskell native (wNAF interleaved)" $
-                  nf
-                    ( verify
-                        ( \n ->
-                            NJ.fromJacobian $ NJWNI.ecMul tableWNafInterleaved n
-                        )
-                    )
-                    testVals,
-                bench "Haskell native (wNAF & GLV)" $
-                  nf
-                    (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul tableWNafGlv n))
-                    testVals,
-                bench "albaVM" $ nf (ecMultiply codeMulJacobian) testVals,
-                bench "albaVM (wNAF)" $
-                  nf (ecMultiply codeMulJacobianWNaf) testVals,
-                bench "albaVM (wNAF & GLV)" $
-                  nf (ecMultiply codeMulWNafGlv) testVals
-              ]
+      bgroup
+        "EC multiply"
+        [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
+          bench "Haskell native" $
+            nf
+              (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g))
+              testVals,
+          bench "Haskell native (wNAF)" $
+            nf
+              (verify (\n -> NJ.fromJacobian $ NJWN.ecMul tableWNaf n))
+              testVals,
+          bench "Haskell native (wNAF interleaved)" $
+            nf
+              ( verify
+                  ( \n ->
+                      NJ.fromJacobian $ NJWNI.ecMul tableWNafInterleaved n
+                  )
+              )
+              testVals,
+          bench "Haskell native (wNAF & GLV)" $
+            nf
+              (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul tableWNafGlv n))
+              testVals,
+          bench "albaVM" $ nf (ecMultiply codeMulJacobian) testVals,
+          bench "albaVM (wNAF)" $
+            nf (ecMultiply codeMulJacobianWNaf) testVals,
+          bench "albaVM (wNAF & GLV)" $
+            nf (ecMultiply codeMulWNafGlv) testVals
+        ]
     ]
 
 ecMultiply :: CodeL1 -> [TestVal] -> ()
