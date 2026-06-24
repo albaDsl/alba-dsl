@@ -94,6 +94,7 @@ codeSize =
       golden
         "EC scalar point multiply (wNAF / tbl setup)"
         (sizeOf (EJWN.setupTable ∘ drop ∘ EJWN.ecMul)),
+      golden "EC scalar point multiply (wNAF & GLV)" (sizeOf EJWNG.ecMul),
       golden "Vector ops" (sizeOf vectorOps),
       golden "LZSS" (sizeOf CLZ.decompress),
       golden "LZSS Bitstream" (sizeOf CLZB.decompress)
