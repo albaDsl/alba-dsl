@@ -1,6 +1,12 @@
 -- Copyright (c) 2025 albaDsl
 
-module DslDemo.EllipticCurve.JacobianAdd (ecDoubleJ, ecAddJ, ecNegateJ) where
+module DslDemo.EllipticCurve.JacobianAdd
+  ( ecDoubleJ,
+    ecAddJ,
+    ecAddMixedJ,
+    ecNegateJ,
+  )
+where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
@@ -22,6 +28,7 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (cond, equal, swap)
 import DslDemo.EllipticCurve.Field
   ( TFe,
+    feAdd,
     feCube,
     feMul,
     feNeg,
@@ -37,6 +44,8 @@ import DslDemo.EllipticCurve.JacobianPoint
     makeIdentity,
     makePoint,
   )
+import DslDemo.EllipticCurve.Point (TPoint, getXY)
+import DslDemo.EllipticCurve.Point qualified as AP
 import Numeric.Natural (Natural)
 import Prelude ()
 
@@ -103,6 +112,60 @@ doAdd =
                 . (feMul . roll #s1 . pick #h . term3 . feSub)
             )
           . name #z3 (roll #h . roll #z1 . feMul . roll #z2 . feMul)
+          . (roll #x3 . roll #y3 . roll #z3 . makePoint . del #p1)
+      )
+
+ecAddMixedJ :: Fn (s :> TPointJ :> TPoint) (s :> TPointJ)
+ecAddMixedJ =
+  fn
+    ( begin
+        . ns2 #p1 #p2
+        . cond
+          [ ( pick #p1 . isIdentity,
+              del #p1 . roll #p2 . getXY . pushFe 1 . makePoint
+            ),
+            (pick #p2 . AP.isIdentity, roll #p1 . del #p2)
+          ]
+          (roll #p1 . roll #p2 . doAddMixed)
+    )
+
+-- https://hyperelliptic.org/EFD/g1p/data/shortw/jacobian-0/addition
+-- /madd-2007-bl
+doAddMixed :: Fn (s :> TPointJ :> TPoint) (s :> TPointJ)
+doAddMixed =
+  begin
+    . ns2 #p1 #p2
+    . name3 #x1 #y1 #z1 (pick #p1 . getXYZ)
+    . name2 #x2 #y2 (roll #p2 . getXY)
+    . name #z1z1 (pick #z1 . feSquare)
+    . name #u2 (roll #x2 . pick #z1z1 . feMul)
+    . name #s2 (roll #y2 . pick #z1 . pick #z1z1 . feMul . feMul)
+    . name #h (roll #u2 . pick #x1 . feSub)
+    . name #r (roll #s2 . pick #y1 . feSub . coeff 2)
+    . (pick #h . pushFe 0 . equal)
+    . opIf
+      ( begin
+          . (del #x1 . del #y1 . del #z1 . del #z1z1 . del #h)
+          . (roll #r . pushFe 0 . equal)
+          . opIf (roll #p1 . ecDoubleJ) (del #p1 . makeIdentity)
+      )
+      ( begin
+          . name #hh (pick #h . feSquare)
+          . name #i (pick #hh . coeff 4)
+          . name #j (pick #h . pick #i . feMul)
+          . name #v (roll #x1 . roll #i . feMul)
+          . (name #x3)
+            ( (pick #r . feSquare . pick #j . feSub . pick #v . coeff 2)
+                . feSub
+            )
+          . (name #y3)
+            ( (roll #v . pick #x3 . feSub . roll #r . feMul . roll #y1)
+                . (roll #j . feMul . coeff 2 . feSub)
+            )
+          . (name #z3)
+            ( (roll #z1 . roll #h . feAdd . feSquare . roll #z1z1 . feSub)
+                . (roll #hh . feSub)
+            )
           . (roll #x3 . roll #y3 . roll #z3 . makePoint . del #p1)
       )
 

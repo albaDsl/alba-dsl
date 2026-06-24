@@ -63,13 +63,14 @@ import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods)
 import DslDemo.EllipticCurve.Jacobian (ecAdd, ecDouble)
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
+import DslDemo.EllipticCurve.Point (TPoint)
 import Prelude (Int)
 
-type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPointJ])
+type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
 
 type TTerm = TTuple TInt16 TInt16
 
-type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPointJ])
+type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPoint])
 
 windowSize :: Int
 windowSize = 6
@@ -93,8 +94,8 @@ ecMulInterleaved =
         . name2 #acc #prevPos (roll #tup . untuple)
         . name3 #lookup #d #pos (roll #term . untuple . swap . untuple)
         . (roll #prevPos . pick #pos . sub . toInt . i2nUnsafe . roll #acc)
-        . (doubleN . roll #d . roll #lookup . QB.invoke1 . EC.ecAddJ . roll #pos)
-        . tuple
+        . (doubleN . roll #d . roll #lookup . QB.invoke1 . EC.ecAddMixedJ)
+        . (roll #pos . tuple)
 
     n2TInt16 :: Fn (s :> TNat) (s :> TInt16)
     n2TInt16 = n2i . fromInt
@@ -114,7 +115,7 @@ sorted =
 
     conv ::
       Fn
-        (s :> TQuotB '[TInt16] '[TPointJ])
+        (s :> TQuotB '[TInt16] '[TPoint])
         (s :> TQuotA '[TTerm] '[TTerm'])
     conv = quot2 tuple . apply2
 

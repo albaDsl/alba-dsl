@@ -7,20 +7,28 @@ module DslDemo.EllipticCurve.JacobianPoint
     makeIdentity,
     isIdentity,
     getXYZ,
+    toJacobian,
+    fromJacobian,
   )
 where
 
 import Alba.Dsl.V1.Bch2026
   ( Fn,
-    Stack (..),
+    Stack ((:>)),
     StackEntry,
     TBool,
     begin,
     cast,
     constant,
+    del,
     fn,
+    name3,
     nat,
+    ns,
+    opIf,
+    pick,
     quot1,
+    roll,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
@@ -46,7 +54,9 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     unpad,
     untuple,
   )
-import DslDemo.EllipticCurve.Field (TFe, pushFe)
+import DslDemo.EllipticCurve.Field (TFe, feCube, feInv, feMul, feSquare, pushFe)
+import DslDemo.EllipticCurve.Point (TPoint)
+import DslDemo.EllipticCurve.Point qualified as AP
 import Numeric.Natural (Natural)
 import Prelude ()
 
@@ -100,3 +110,28 @@ toRaw ::
     (s :> TPointJ)
     (s :> TEither TUnit (TTuple TFe (TTuple TFe TFe)))
 toRaw = cast
+
+toJacobian :: Fn (s :> TPoint) (s :> TPointJ)
+toJacobian =
+  fn
+    ( begin
+        . (ns #p . pick #p . AP.isIdentity)
+        . opIf
+          (del #p . makeIdentity)
+          (roll #p . AP.getXY . pushFe 1 . makePoint)
+    )
+
+fromJacobian :: Fn (s :> TPointJ) (s :> TPoint)
+fromJacobian =
+  fn
+    ( begin
+        . (ns #p . pick #p . isIdentity)
+        . opIf
+          (del #p . AP.makeIdentity)
+          ( begin
+              . name3 #x #y #z (roll #p . getXYZ)
+              . (roll #x . pick #z . feSquare . feInv . feMul)
+              . (roll #y . roll #z . feCube . feInv . feMul)
+              . AP.makePoint
+          )
+    )

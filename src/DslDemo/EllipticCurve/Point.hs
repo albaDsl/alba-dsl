@@ -18,11 +18,15 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     cast,
+    constant,
     fn,
+    nat,
+    quot1,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
+    PackFs (..),
     TEither,
     TTuple,
     TUnit,
@@ -34,10 +38,13 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     ifLeft,
     isLeft,
     left,
+    mkPackFsM,
     nip,
+    pad,
     right,
     tuple,
     unit,
+    unpad,
     untuple,
   )
 import DslDemo.EllipticCurve.Field (TFe, pushFe)
@@ -52,6 +59,13 @@ instance BlobEq TPoint where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
+
+instance PackFs TPoint where
+  sizeConst = 100
+  size = nat (sizeConst @TPoint)
+  pack = size @TPoint . pad
+  unpack = unpad
+  packFsRec = constant (size @TPoint . quot1 pack . quot1 unpack . mkPackFsM)
 
 makePoint :: Fn (s :> TFe :> TFe) (s :> TPoint)
 makePoint = fn (tuple . right . fromRaw)

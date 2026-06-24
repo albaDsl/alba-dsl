@@ -145,7 +145,7 @@ progMulWNafGlv =
   runEnv (tabG ∘ tabGPhi ∘ tuple ∘ opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
   where
     tabG = constant (g ∘ EJWNG.setupTable)
-    tabGPhi = constant (quot1 EJWNG.phi ∘ g ∘ EJWNG.setupTable ∘ V.map)
+    tabGPhi = constant (quot1 EJWNG.phi' ∘ g ∘ EJWNG.setupTable ∘ V.map)
 
 verify :: (Natural -> Point) -> [TestVal] -> ()
 verify mul vals =

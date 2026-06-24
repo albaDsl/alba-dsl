@@ -64,7 +64,7 @@ testEllipticCurve =
 
     wnafGlvMul :: forall s. Env (s :> TNat :> TPoint) (s :> TPoint)
     wnafGlvMul =
-      (WNG.setupTable ∘ dup ∘ quot1 WNG.phi ∘ swap ∘ V.map ∘ tuple)
+      (dup ∘ WNG.setupTable ∘ swap ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
         ∘ (swap ∘ WNG.ecMul)
 
 progEllipticCurveBasicAffine :: Fn s (s :> TBool)

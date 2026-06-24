@@ -7,6 +7,7 @@ module DslDemo.EllipticCurve.Native.JacobianWNafGlv
   )
 where
 
+import DslDemo.EllipticCurve.Native.Affine (Point)
 import DslDemo.EllipticCurve.Constants qualified as C
 import DslDemo.EllipticCurve.Native.Glv (glvDecompose, phi)
 import DslDemo.EllipticCurve.Native.Jacobian (PointJ (..), ecNegate)
@@ -24,12 +25,12 @@ ecMul k p =
       phiP = phi p
    in ecMulInterleaved [variableBase k1 p, variableBase k2 phiP]
 
-variableBase :: Integer -> PointJ -> (Integer, Integer -> PointJ)
+variableBase :: Integer -> PointJ -> (Integer, Integer -> Point)
 variableBase k p =
   let base = if k >= 0 then p else ecNegate p
    in (abs k, lookup (setupTable base))
 
--- fixedBase :: V.Vector PointJ -> Integer -> (Integer, Integer -> PointJ)
+-- fixedBase :: V.Vector PointJ -> Integer -> (Integer, Integer -> Point)
 -- fixedBase tab k
 --   | k >= 0 = (k, lookup tab)
 --   | otherwise = (-k, ecNegate . lookup tab)

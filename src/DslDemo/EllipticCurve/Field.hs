@@ -88,10 +88,10 @@ feQuartic :: Fn (s :> TFe) (s :> TFe)
 feQuartic = feSquare . feSquare
 
 feInv :: Fn (s :> TFe) (s :> TFe)
-feInv = fn (toRaw . primeModulusMinus2 . i2nUnsafe . pow' feMul' . fromRaw)
+feInv = fn (toRaw . primeModulusMinus2 . pow' feMul' . fromRaw)
   where
-    primeModulusMinus2 :: Fn s (s :> TInt)
-    primeModulusMinus2 = primeModulus . op2 . sub
+    primeModulusMinus2 :: Fn s (s :> TNat)
+    primeModulusMinus2 = primeModulus . op2 . sub . i2nUnsafe
 
     feMul' :: Fn (s :> TInt :> TInt) (s :> TInt)
     feMul' = fromRaw2 . feMul . toRaw

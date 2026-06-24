@@ -5,13 +5,16 @@ module DslDemo.EllipticCurve.Native.JacobianWNaf (ecMul) where
 import Data.Bits (Bits (shiftR))
 import Data.List (unfoldr)
 import Data.Vector qualified as V
+import DslDemo.EllipticCurve.Native.Affine (Point)
+import DslDemo.EllipticCurve.Native.Affine qualified as AP
 import DslDemo.EllipticCurve.Native.Common (countTrailingZeros, mods)
 import DslDemo.EllipticCurve.Native.Jacobian
   ( PointJ (..),
     ecAdd,
+    ecAddMixed,
     ecDouble,
     ecDoubleN,
-    ecNegate,
+    fromJacobian,
   )
 import Numeric.Natural (Natural)
 import Prelude hiding (lookup)
@@ -19,16 +22,17 @@ import Prelude hiding (lookup)
 windowSize :: Int
 windowSize = 5
 
-setupTable :: PointJ -> V.Vector PointJ
-setupTable p = V.iterateN numValues (`ecAdd` p2) p
+-- FIXME: Inefficient implementation.
+setupTable :: PointJ -> V.Vector Point
+setupTable p = V.map fromJacobian (V.iterateN numValues (`ecAdd` p2) p)
   where
     numValues = 2 ^ (windowSize - 1)
     p2 = ecDouble p
 
-lookup :: V.Vector PointJ -> Integer -> PointJ
+lookup :: V.Vector Point -> Integer -> Point
 lookup tab d
   | d > 0 = tab V.! fromIntegral ((d - 1) `div` 2)
-  | otherwise = ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
+  | otherwise = AP.ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
 
 ecMul :: Natural -> PointJ -> PointJ
 ecMul n p = foldr step PJIdentity (chunks (fromIntegral n))
@@ -36,7 +40,7 @@ ecMul n p = foldr step PJIdentity (chunks (fromIntegral n))
     tab = setupTable p
 
     step :: (Integer, Int) -> PointJ -> PointJ
-    step (d, k) acc = ecDoubleN (fromIntegral k) (ecAdd acc (lookup tab d))
+    step (d, k) acc = ecDoubleN (fromIntegral k) (ecAddMixed acc (lookup tab d))
 
 chunks :: Integer -> [(Integer, Int)]
 chunks n = unfoldr step n

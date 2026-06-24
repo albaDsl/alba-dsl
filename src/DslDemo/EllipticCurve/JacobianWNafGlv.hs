@@ -25,6 +25,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe qualified as V
 import Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms (countingSortDesc)
 import Alba.Dsl.V1.Bch2026.QuotationsB qualified as QB
+import DslDemo.EllipticCurve.AffineAdd qualified as AP
 import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods)
 import DslDemo.EllipticCurve.Constants qualified as C
 import DslDemo.EllipticCurve.Field (feMul, pushFe)
@@ -35,37 +36,37 @@ import DslDemo.EllipticCurve.Jacobian
     toJacobian,
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
-import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
+import DslDemo.EllipticCurve.JacobianPoint (TPointJ, fromJacobian)
 import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.JacobianWNafInterleaved (ecMulInterleaved)
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
 import Prelude (Int, fromIntegral, id, undefined, (-), (^))
 
-type TTable = TVector TPointJ
+type TTable = TVector TPoint
 
-type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPointJ])
+type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
 
 type TTerm = TTuple TInt16 TInt16
 
-type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPointJ])
+type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPoint])
 
 windowSize :: Int
 windowSize = 6
 
 setupTable :: Bch.Fn (s :> TPoint) (s :> TTable)
-setupTable =
-  fn
-    ( (toJacobian . ns #p . nat numValues . pick #p . EC.ecDoubleJ)
-        . (quot2 EC.ecAddJ . apply2 . roll #p . V.iterateN)
-    )
+setupTable = fn (vectorJ . quot1 fromJacobian . swap . V.map)
   where
+    vectorJ =
+      (toJacobian . ns #p . nat numValues . pick #p . EC.ecDoubleJ)
+        . (quot2 EC.ecAddJ . apply2 . roll #p . V.iterateN)
+
     numValues = 2 ^ (windowSize - 1)
 
-lookup :: Fn (s :> TTable :> TInt) (s :> TPointJ)
+lookup :: Fn (s :> TTable :> TInt) (s :> TPoint)
 lookup =
   (dup . int 0 . lessThan . rot . rot . abs . i2nUnsafe . sub1 . nat 2)
-    . (div . V.lookupUnsafe . swap . opWhen EC.ecNegateJ)
+    . (div . V.lookupUnsafe . swap . opWhen AP.ecNegate)
 
 ecMul :: Env (s :> TTuple TTable TTable :> TNat) (s :> TPoint)
 ecMul =
@@ -78,7 +79,7 @@ ecMul =
     fixedBase ::
       Env
         (s :> TTable :> TInt)
-        (s :> TTuple TInt264 (TQuotB '[TInt16] '[TPointJ]))
+        (s :> TTuple TInt264 (TQuotB '[TInt16] '[TPoint]))
     fixedBase =
       fn
         ( (dup . int 0 . greaterThanOrEqual)
@@ -92,11 +93,11 @@ ecMul =
     i2Int264 :: Fn (s :> TInt) (s :> TInt264)
     i2Int264 = fromInt
 
-    lookup' :: Fn (s :> TInt16 :> TTable) (s :> TPointJ)
+    lookup' :: Fn (s :> TInt16 :> TTable) (s :> TPoint)
     lookup' = swap . toInt . lookup
 
-    lookupNeg :: Fn (s :> TInt16 :> TTable) (s :> TPointJ)
-    lookupNeg = lookup' . EC.ecNegateJ
+    lookupNeg :: Fn (s :> TInt16 :> TTable) (s :> TPoint)
+    lookupNeg = lookup' . AP.ecNegate
 
 glvDecompose :: Fn (s :> TInt) (s :> TInt :> TInt)
 glvDecompose =

@@ -5,10 +5,11 @@
 -- for inspiration.
 
 module DslDemo.EllipticCurve.Native.Affine
-  ( g,
-    mul,
-    Point (..),
+  ( Point (..),
     FieldElement (..),
+    g,
+    mul,
+    ecNegate,
   )
 where
 
@@ -55,3 +56,7 @@ mul' n p r =
   let r' = if odd n then add r p else r
       p' = double p
    in mul' (n `div` 2) p' r'
+
+ecNegate :: Point -> Point
+ecNegate Identity = Identity
+ecNegate (P x y) = (P x (negate y))

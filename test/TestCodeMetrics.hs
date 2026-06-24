@@ -257,7 +257,7 @@ wNafGlvPrecomputed :: FnC
 wNafGlvPrecomputed = tabG ∘ tabGPhi ∘ tuple ∘ verifyTestVector EJWNG.ecMul
   where
     tabG = constant (g ∘ EJWNG.setupTable)
-    tabGPhi = constant (quot1 EJWNG.phi ∘ g ∘ EJWNG.setupTable ∘ V.map)
+    tabGPhi = constant (quot1 EJWNG.phi' ∘ g ∘ EJWNG.setupTable ∘ V.map)
 
 vectorOps :: FnC
 vectorOps =

@@ -9,6 +9,7 @@ module DslDemo.EllipticCurve.Native.Jacobian
     FieldElement (..),
     g,
     ecAdd,
+    ecAddMixed,
     ecDouble,
     ecDoubleN,
     ecNegate,
@@ -50,6 +51,26 @@ ecAdd p1@(PJ x1 y1 z1) (PJ x2 y2 z2) =
               y3 = r * (u1 * h ^ (2 :: Int) - x3) - s1 * h ^ (3 :: Int)
               z3 = h * z1 * z2
            in PJ x3 y3 z3
+
+-- https://hyperelliptic.org/EFD/g1p/data/shortw/jacobian-0/addition
+-- /madd-2007-bl
+ecAddMixed :: PointJ -> Point -> PointJ
+ecAddMixed PJIdentity (P x2 y2) = (PJ x2 y2 1)
+ecAddMixed p Identity = p
+ecAddMixed (PJ x1 y1 z1) (P x2 y2) =
+  let z1z1 = z1 ^ (2 :: Int)
+      u2 = x2 * z1z1
+      s2 = y2 * z1 * z1z1
+      h = u2 - x1
+      hh = h ^ (2 :: Int)
+      i = 4 * hh
+      j = h * i
+      r = 2 * (s2 - y1)
+      v = x1 * i
+      x3 = r ^ (2 :: Int) - j - 2 * v
+      y3 = r * (v - x3) - 2 * y1 * j
+      z3 = (z1 + h) ^ (2 :: Int) - z1z1 - hh
+   in PJ x3 y3 z3
 
 ecNegate :: PointJ -> PointJ
 ecNegate PJIdentity = PJIdentity

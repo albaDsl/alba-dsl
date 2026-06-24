@@ -13,13 +13,16 @@ import Data.Ord (comparing)
 import Data.STRef.Strict (newSTRef, readSTRef, writeSTRef)
 import Data.Vector qualified as V
 import Data.Vector.Mutable qualified as VM
+import DslDemo.EllipticCurve.Native.Affine (Point)
+import DslDemo.EllipticCurve.Native.Affine qualified as AP
 import DslDemo.EllipticCurve.Native.Common (countTrailingZeros, mods)
 import DslDemo.EllipticCurve.Native.Jacobian
   ( PointJ (..),
     ecAdd,
+    ecAddMixed,
     ecDouble,
     ecDoubleN,
-    ecNegate,
+    fromJacobian,
   )
 import GHC.ST (runST)
 import Numeric.Natural (Natural)
@@ -27,28 +30,29 @@ import Prelude hiding (lookup)
 
 type Term = (Integer, Natural)
 
-type Term' = (Integer, Natural, Integer -> PointJ)
+type Term' = (Integer, Natural, Integer -> Point)
 
 windowSize :: Int
 windowSize = 5
 
-setupTable :: PointJ -> V.Vector PointJ
-setupTable p = V.iterateN numValues (`ecAdd` p2) p
+-- FIXME: Inefficient implementation.
+setupTable :: PointJ -> V.Vector Point
+setupTable p = V.map fromJacobian (V.iterateN numValues (`ecAdd` p2) p)
   where
     numValues = 2 ^ (windowSize - 1)
     p2 = ecDouble p
 
-lookup :: V.Vector PointJ -> Integer -> PointJ
+lookup :: V.Vector Point -> Integer -> Point
 lookup tab d
   | d > 0 = tab V.! fromIntegral ((d - 1) `div` 2)
-  | otherwise = ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
+  | otherwise = AP.ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
 
 ecMul :: Natural -> PointJ -> PointJ
 ecMul n p = ecMulInterleaved [(fromIntegral n, \m -> lookup tab m)]
   where
     tab = setupTable p
 
-ecMulInterleaved :: V.Vector (Integer, Integer -> PointJ) -> PointJ
+ecMulInterleaved :: V.Vector (Integer, Integer -> Point) -> PointJ
 ecMulInterleaved sources
   | V.null sorted = PJIdentity
   | otherwise =
@@ -62,7 +66,7 @@ ecMulInterleaved sources
           maxIndex = posOf $ V.maximumBy (comparing posOf) terms'
        in countingSortDesc (succ maxIndex) posOf terms'
 
-    taggedTerms :: (Integer, Integer -> PointJ) -> V.Vector Term'
+    taggedTerms :: (Integer, Integer -> Point) -> V.Vector Term'
     taggedTerms (k, lookupFn) = V.map (\(d, p) -> (d, p, lookupFn)) (terms k)
 
     posOf :: Term' -> Int
@@ -70,7 +74,7 @@ ecMulInterleaved sources
 
     combine :: (PointJ, Natural) -> Term' -> (PointJ, Natural)
     combine (!acc, prevPos) (d, p, lookupFn) =
-      (ecAdd (ecDoubleN (prevPos - p) acc) (lookupFn d), p)
+      (ecAddMixed (ecDoubleN (prevPos - p) acc) (lookupFn d), p)
 
 terms :: Integer -> V.Vector Term
 terms n = V.reverse (V.unfoldr step (n, 0))
