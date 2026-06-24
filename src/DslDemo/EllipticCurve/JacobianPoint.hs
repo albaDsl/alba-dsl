@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026
     constant,
     del,
     fn,
+    name,
     name3,
     nat,
     ns,
@@ -60,7 +61,6 @@ import Alba.Dsl.V1.Bch2026.Contract.TTupleInt264
   )
 import DslDemo.EllipticCurve.Field
   ( TFe,
-    feCube,
     feInv,
     feMul,
     feSquare,
@@ -151,8 +151,10 @@ fromJacobian =
           (del #p . AP.makeIdentity)
           ( begin
               . name3 #x #y #z (roll #p . getXYZ)
-              . (roll #x . pick #z . feSquare . feInv . feMul)
-              . (roll #y . roll #z . feCube . feInv . feMul)
+              . (name #zInv (roll #z . feInv))
+              . (name #zInv2 (pick #zInv . feSquare))
+              . (roll #x . pick #zInv2 . feMul)
+              . (roll #y . roll #zInv2 . roll #zInv . feMul . feMul)
               . AP.makePoint
           )
     )
