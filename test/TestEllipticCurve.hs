@@ -4,8 +4,7 @@ module TestEllipticCurve (testEllipticCurve) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, fromInt, nip, swap, tuple)
-import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, fromInt, nip, rot, swap)
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Constants qualified as C
 import DslDemo.EllipticCurve.G (g)
@@ -54,37 +53,49 @@ testEllipticCurve =
 
     wnafGlvMul :: forall s. Env (s :> TNat :> TPoint) (s :> TPoint)
     wnafGlvMul =
-      (dup ∘ wsize ∘ WNG.setupTable ∘ swap ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable ∘ tuple)
-        ∘ (swap ∘ WNG.ecMul)
+      (dup ∘ wsize ∘ WNG.setupTable ∘ swap ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable)
+        ∘ (rot ∘ WNG.ecMul)
 
     wsize = int 6 ∘ fromInt
 
 progEllipticCurveBasicAffine :: Fn s (s :> TBool)
 progEllipticCurveBasicAffine =
-  runEnv (V.empty ∘ verifyTestVectors wrapMul)
+  runEnv (bogusTable ∘ bogusTable ∘ verifyTestVectors wrapMul)
   where
     wrapMul ::
       (StackEntry table) =>
-      (forall s'. Env (s' :> table :> TNat) (s' :> TPoint))
-    wrapMul = nip ∘ g ∘ EA.ecMul
+      (forall s'. Env (s' :> table :> table :> TNat) (s' :> TPoint))
+    wrapMul = nip ∘ nip ∘ g ∘ EA.ecMul
+
+    bogusTable = bytes []
 
 progEllipticCurveBasicJacobian :: Fn s (s :> TBool)
 progEllipticCurveBasicJacobian =
-  runEnv (V.empty ∘ verifyTestVectors wrapMul)
+  runEnv (bogusTable ∘ bogusTable ∘ verifyTestVectors wrapMul)
   where
     wrapMul ::
       (StackEntry table) =>
-      (forall s'. Env (s' :> table :> TNat) (s' :> TPoint))
-    wrapMul = nip ∘ g ∘ EJ.ecMul
+      (forall s'. Env (s' :> table :> table :> TNat) (s' :> TPoint))
+    wrapMul = nip ∘ nip ∘ g ∘ EJ.ecMul
+
+    bogusTable = bytes []
 
 progEllipticCurve5WNaf :: Fn s (s :> TBool)
-progEllipticCurve5WNaf = runEnv (g ∘ WN.setupTable ∘ verifyTestVectors WN.ecMul)
+progEllipticCurve5WNaf =
+  runEnv (bogusTable ∘ g ∘ WN.setupTable ∘ verifyTestVectors wrapMul)
+  where
+    wrapMul ::
+      (StackEntry table) =>
+      (forall s'. Env (s' :> table :> WN.TTable :> TNat) (s' :> TPoint))
+    wrapMul = rot ∘ drop ∘ WN.ecMul
+
+    bogusTable = bytes []
 
 progEllipticCurveWNafGlv :: Fn s (s :> TBool)
 progEllipticCurveWNafGlv =
   runEnv
     ( (g ∘ wsize ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable)
-        ∘ (tuple ∘ verifyTestVectors WNG.ecMul)
+        ∘ (verifyTestVectors WNG.ecMul)
     )
   where
     wsize = int 6 ∘ fromInt
@@ -93,93 +104,93 @@ progEllipticCurveWNafGlv =
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 verifyTestVectors ::
-  (StackEntry table) =>
-  (forall s'. Env (s' :> table :> TNat) (s' :> TPoint)) ->
-  Env (s :> table) (s :> TBool)
+  (StackEntry table, StackEntry table') =>
+  (forall s'. Env (s' :> table :> table' :> TNat) (s' :> TPoint)) ->
+  Env (s :> table :> table') (s :> TBool)
 verifyTestVectors ecMulN =
   begin
-    ∘ (dup ∘ nat 1 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 1 ∘ ecMulN)
     ∘ pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
       0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
     ∘ equalVerify
-    ∘ (dup ∘ nat 2 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 2 ∘ ecMulN)
     ∘ pushPoint
       0xC6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5
       0x1AE168FEA63DC339A3C58419466CEAEEF7F632653266D0E1236431A950CFE52A
     ∘ equalVerify
-    ∘ (dup ∘ nat 3 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 3 ∘ ecMulN)
     ∘ pushPoint
       0xF9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9
       0x388F7B0F632DE8140FE337E62A37F3566500A99934C2231B6CB9FD7584B8E672
     ∘ equalVerify
-    ∘ (dup ∘ nat 4 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 4 ∘ ecMulN)
     ∘ pushPoint
       0xE493DBF1C10D80F3581E4904930B1404CC6C13900EE0758474FA94ABE8C4CD13
       0x51ED993EA0D455B75642E2098EA51448D967AE33BFBDFE40CFE97BDC47739922
     ∘ equalVerify
-    ∘ (dup ∘ nat 9 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 9 ∘ ecMulN)
     ∘ pushPoint
       0xACD484E2F0C7F65309AD178A9F559ABDE09796974C57E714C35F110DFC27CCBE
       0xCC338921B0A7D9FD64380971763B61E9ADD888A4375F8E0F05CC262AC64F9C37
     ∘ equalVerify
-    ∘ (dup ∘ nat 12 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 12 ∘ ecMulN)
     ∘ pushPoint
       0xD01115D548E7561B15C38F004D734633687CF4419620095BC5B0F47070AFE85A
       0xA9F34FFDC815E0D7A8B64537E17BD81579238C5DD9A86D526B051B13F4062327
     ∘ equalVerify
-    ∘ (dup ∘ nat 13 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 13 ∘ ecMulN)
     ∘ pushPoint
       0xF28773C2D975288BC7D1D205C3748651B075FBC6610E58CDDEEDDF8F19405AA8
       0x0AB0902E8D880A89758212EB65CDAF473A1A06DA521FA91F29B5CB52DB03ED81
     ∘ equalVerify
-    ∘ (dup ∘ nat 15 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 15 ∘ ecMulN)
     ∘ pushPoint
       0xD7924D4F7D43EA965A465AE3095FF41131E5946F3C85F79E44ADBCF8E27E080E
       0x581E2872A86C72A683842EC228CC6DEFEA40AF2BD896D3A5C504DC9FF6A26B58
     ∘ equalVerify
-    ∘ (dup ∘ nat 16 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 16 ∘ ecMulN)
     ∘ pushPoint
       0xE60FCE93B59E9EC53011AABC21C23E97B2A31369B87A5AE9C44EE89E2A6DEC0A
       0xF7E3507399E595929DB99F34F57937101296891E44D23F0BE1F32CCE69616821
     ∘ equalVerify
-    ∘ (dup ∘ nat 20 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 20 ∘ ecMulN)
     ∘ pushPoint
       0x4CE119C96E2FA357200B559B2F7DD5A5F02D5290AFF74B03F3E471B273211C97
       0x12BA26DCB10EC1625DA61FA10A844C676162948271D96967450288EE9233DC3A
     ∘ equalVerify
-    ∘ (dup ∘ nat 112233445566778899 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 112233445566778899 ∘ ecMulN)
     ∘ pushPoint
       0xA90CC3D3F3E146DAADFC74CA1372207CB4B725AE708CEF713A98EDD73D99EF29
       0x5A79D6B289610C68BC3B47F3D72F9788A26A06868B4D8E433E1E2AD76FB7DC76
     ∘ equalVerify
-    ∘ (dup ∘ nat 112233445566778899112233445566778899 ∘ ecMulN)
+    ∘ (op2Dup ∘ nat 112233445566778899112233445566778899 ∘ ecMulN)
     ∘ pushPoint
       0xE5A2636BCFD412EBF36EC45B19BFB68A1BC5F8632E678132B885F7DF99C5E9B3
       0x736C1CE161AE27B405CAFD2A7520370153C2C861AC51D6C1D5985D9606B45F39
     ∘ equalVerify
-    ∘ dup
+    ∘ op2Dup
     ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD036412D
     ∘ ecMulN
     ∘ pushPoint
       0x4CE119C96E2FA357200B559B2F7DD5A5F02D5290AFF74B03F3E471B273211C97
       0xED45D9234EF13E9DA259E05EF57BB3989E9D6B7D8E269698BAFD77106DCC1FF5
     ∘ equalVerify
-    ∘ dup
+    ∘ op2Dup
     ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD036412E
     ∘ ecMulN
     ∘ pushPoint
       0x2B4EA0A797A443D293EF5CFF444F4979F06ACFEBD7E86D277475656138385B6C
       0x7A17643FC86BA26C4CBCF7C4A5E379ECE5FE09F3AFD9689C4A8F37AA1A3F60B5
     ∘ equalVerify
-    ∘ dup
+    ∘ op2Dup
     ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
     ∘ ecMulN
     ∘ pushPoint
       0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
       0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
     ∘ equalVerify
-    ∘ (drop ∘ opTrue)
+    ∘ (op2Drop ∘ opTrue)
 
 propAdditivity ::
   (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->
@@ -208,7 +219,7 @@ propComparison (Bits256 n) =
             ( begin
                 ∘ (nat (fromIntegral n) ∘ g ∘ EJ.ecMul)
                 ∘ (g ∘ wsize ∘ WNG.setupTable)
-                ∘ (g ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable ∘ tuple)
+                ∘ (g ∘ WNG.phi' ∘ wsize ∘ WNG.setupTable)
                 ∘ (nat (fromIntegral n) ∘ WNG.ecMul)
                 ∘ equal
             )

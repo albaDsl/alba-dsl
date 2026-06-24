@@ -59,9 +59,9 @@ setupTable =
         . (ns2 #numVals #p . roll #numVals . pick #p . EC.ecDoubleJ)
         . (quot2 EC.ecAddJ . apply2 . roll #p . V.iterateN)
 
-ecMul :: Env (s :> TTuple TTable TTable :> TNat) (s :> TPoint)
+ecMul :: Env (s :> TTable :> TTable :> TNat) (s :> TPoint)
 ecMul =
-  (swap . untuple . ns3 #n #tabP #tabPhiP)
+  (ns3 #tabP #tabPhiP #n)
     . (roll #n . n2i . glvDecompose)
     . (roll #tabPhiP . swap . fixedBase . swap)
     . (roll #tabP . swap . fixedBase)
@@ -91,9 +91,9 @@ ecMul =
 
     lookup :: Fn (s :> TTable' :> TInt) (s :> TPoint)
     lookup =
-       (dup . int 0 . lessThan . rot . rot . abs)
-         . (i2nUnsafe . sub1 . nat 2)
-         . (div . V.lookupUnsafe . swap . opWhen AP.ecNegate)
+      (dup . int 0 . lessThan . rot . rot . abs)
+        . (i2nUnsafe . sub1 . nat 2)
+        . (div . V.lookupUnsafe . swap . opWhen AP.ecNegate)
 
 glvDecompose :: Fn (s :> TInt) (s :> TInt :> TInt)
 glvDecompose =

@@ -37,11 +37,11 @@ import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..), nip)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..), nip, rot)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (tuple, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
@@ -139,9 +139,10 @@ executionCost =
     thousands :: Int -> String
     thousands = P.reverse P.. insertCommas P.. P.reverse P.. show
       where
-        insertCommas (x:y:z:xs@(_:_)) = x : y : z : ',' : insertCommas xs
-        insertCommas xs               = xs
-        
+        insertCommas (x : y : z : xs@(_ : _)) =
+          x : y : z : ',' : insertCommas xs
+        insertCommas xs = xs
+
 turtleVmEfficiency :: TestTree
 turtleVmEfficiency =
   testGroup
@@ -222,11 +223,15 @@ arithmetic :: FnC
 arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 
 plainMul :: FnC
-plainMul = bytes [] ∘ verifyTestVector (nip ∘ g ∘ EJ.ecMul)
+plainMul =
+  (bogusTable ∘ bogusTable)
+    ∘ verifyTestVector (nip ∘ nip ∘ g ∘ EJ.ecMul)
+  where
+    bogusTable = bytes []
 
 verifyTestVector ::
-  (forall s'. Env (s' :> table :> TNat) (s' :> TPoint)) ->
-  Fn (s :> table) s
+  (forall s'. Env (s' :> table :> table' :> TNat) (s' :> TPoint)) ->
+  Fn (s :> table :> table') s
 verifyTestVector ecMul =
   runEnv
     ( begin
@@ -239,13 +244,20 @@ verifyTestVector ecMul =
     )
 
 wNaf5 :: FnC
-wNaf5 = g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul
+wNaf5 =
+  bogusTable ∘ g ∘ EJWN.setupTable ∘ verifyTestVector (rot ∘ drop ∘ EJWN.ecMul)
+  where
+    bogusTable = bytes []
 
 wNaf5Precomputed :: FnC
-wNaf5Precomputed = constant (g ∘ EJWN.setupTable) ∘ verifyTestVector EJWN.ecMul
+wNaf5Precomputed =
+  (bogusTable ∘ constant (g ∘ EJWN.setupTable))
+    ∘ verifyTestVector (rot ∘ drop ∘ EJWN.ecMul)
+  where
+    bogusTable = bytes []
 
 wNafGlvPrecomputed :: FnC
-wNafGlvPrecomputed = tabG ∘ tabGPhi ∘ tuple ∘ verifyTestVector EJWNG.ecMul
+wNafGlvPrecomputed = tabG ∘ tabGPhi ∘ verifyTestVector EJWNG.ecMul
   where
     tabG = constant (g ∘ wsize ∘ EJWNG.setupTable)
     tabGPhi = constant (g ∘ EJWNG.phi' ∘ wsize ∘ EJWNG.setupTable)

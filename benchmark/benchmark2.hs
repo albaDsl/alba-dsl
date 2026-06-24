@@ -4,7 +4,7 @@
 module Main where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (fromInt, tuple)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (fromInt, rot, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Vm.Bch2026
 -- import DslDemo.EllipticCurve.Native.Affine qualified as NA
@@ -146,7 +146,7 @@ progMulJacobian = g ∘ EJ.ecMul ∘ EA.getXY
 
 progMulJacobianWNaf :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulJacobianWNaf =
-  runEnv (tabG ∘ opSwap ∘ EJWN.ecMul ∘ EA.getXY)
+  runEnv (tabG ∘ swap ∘ EJWN.ecMul ∘ EA.getXY)
   where
     tabG = constant (g ∘ EJWN.setupTable)
 
@@ -155,7 +155,7 @@ b2v = cast
 
 progMulWNafGlv :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulWNafGlv =
-  runEnv (tabG ∘ tabGPhi ∘ tuple ∘ opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
+  runEnv (tabG ∘ tabGPhi ∘ rot ∘ EJWNG.ecMul ∘ EA.getXY)
   where
     tabG = constant (g ∘ wsize ∘ EJWNG.setupTable)
     tabGPhi = constant (g ∘ EJWNG.phi' ∘ wsize ∘ EJWNG.setupTable)
