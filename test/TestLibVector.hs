@@ -472,31 +472,31 @@ progUpdates =
     ( begin
         ∘ ( begin
               ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (quot1 add1 ∘ nat 2 ∘ rot ∘ V.adjust)
+              ∘ (quot1 add1 ∘ nat 2 ∘ rot ∘ V.adjust ∘ fromJust)
               ∘ (int8 1 ∘ int8 2 ∘ int8 4 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
               ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (quot1 add1 ∘ nat 0 ∘ rot ∘ V.adjust)
+              ∘ (quot1 add1 ∘ nat 0 ∘ rot ∘ V.adjust ∘ fromJust)
               ∘ (int8 2 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
               ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (quot1 add1 ∘ nat 3 ∘ rot ∘ V.adjust)
+              ∘ (quot1 add1 ∘ nat 3 ∘ rot ∘ V.adjust ∘ fromJust)
               ∘ (int8 1 ∘ int8 2 ∘ int8 3 ∘ int8 5 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
               ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (nat 0 ∘ int8 10 ∘ rot ∘ V.updateElem)
+              ∘ (nat 0 ∘ int8 10 ∘ rot ∘ V.updateElem ∘ fromJust)
               ∘ (int8 10 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
               ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (nat 2 ∘ int8 10 ∘ rot ∘ V.updateElem)
+              ∘ (nat 2 ∘ int8 10 ∘ rot ∘ V.updateElem ∘ fromJust)
               ∘ (int8 1 ∘ int8 2 ∘ int8 10 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )

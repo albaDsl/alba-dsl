@@ -729,7 +729,7 @@ foldrF = fn (swap . opUntil loop . nip . nip . nip)
 updateElem ::
   forall a s.
   (PackFs a) =>
-  Fn (s :> TNat :> a :> TVector a) (s :> TVector a)
+  Fn (s :> TNat :> a :> TVector a) (s :> TMaybe (TVector a))
 updateElem =
   (ns3 #idx #val #vec . packFsRec @a . roll #idx . rollN #val . roll #vec)
     . (un #val . updateElemF)
@@ -737,34 +737,44 @@ updateElem =
 updateElemF ::
   forall a s.
   (StackEntry a) =>
-  Fn (s :> TPackFs a :> TNat :> a :> TVector a) (s :> TVector a)
+  Fn (s :> TPackFs a :> TNat :> a :> TVector a) (s :> TMaybe (TVector a))
 updateElemF =
   fn
     ( begin
         . ns4 #packFs #idx #val #vec
         . (tcPick . roll #idx . roll #vec . splitAtF)
-        . (tcPick . swap . unconsF . fromJust . untuple . nip)
-        . (tcRoll . rollN #val . rot . un #val . consF . append)
+        . (tcPick . swap . unconsF)
+        . ifJust
+          ( (untuple . nip . tcRoll . rollN #val . rot . un #val)
+              . (consF . append . just)
+          )
+          (opDrop . del #val . del #packFs . nothing)
     )
 
 -- Update element at a given position by applying a function.
 adjust ::
   forall a s.
   (PackFs a) =>
-  Fn (s :> TQuotA '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+  Fn (s :> TQuotA '[a] '[a] :> TNat :> TVector a) (s :> TMaybe (TVector a))
 adjust = packFsRec @a . opRoll 3 . opRoll 3 . opRoll 3 . adjustF
 
 adjustF ::
   (StackEntry a) =>
-  Fn (s :> TPackFs a :> TQuotA '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+  Fn
+    (s :> TPackFs a :> TQuotA '[a] '[a] :> TNat :> TVector a)
+    (s :> TMaybe (TVector a))
 adjustF =
   fn
     ( begin
         . ns4 #packFs #f #idx #vec
         . (tcPick . roll #idx . roll #vec . splitAtF)
-        . (tcPick . swap . unconsF . fromJust . untuple . ns2 #a #rest)
-        . (rollN #a . roll #f . un #a . invoke1 . ns #a')
-        . (tcRoll . rollN #a' . roll #rest . un #a' . consF . append)
+        . (tcPick . swap . unconsF)
+        . ifJust
+          ( (untuple . ns2 #a #rest . rollN #a . roll #f . un #a . invoke1)
+              . (ns #a' . tcRoll . rollN #a' . roll #rest . un #a' . consF)
+              . (append . just)
+          )
+          (opDrop . del #f . del #packFs . nothing)
     )
 
 -- ## Misc.
