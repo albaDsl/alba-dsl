@@ -12,7 +12,6 @@ import Alba.Dsl.V1.Bch2026
     TNat,
     begin,
     bytes,
-    cond,
     del,
     fn,
     i2nUnsafe,
@@ -41,6 +40,7 @@ import Alba.Dsl.V1.Bch2026
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
+import Alba.Dsl.V1.Bch2026.Contract.Conditionals (cond)
 import Alba.Dsl.V1.Bch2026.Contract.Error (error')
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))

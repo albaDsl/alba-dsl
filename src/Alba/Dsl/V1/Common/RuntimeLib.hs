@@ -2,15 +2,17 @@
 
 module Alba.Dsl.V1.Common.RuntimeLib (toPushOp) where
 
-import Alba.Dsl.V1.Bch2026.Lang (bytes, case', fn, nat)
+import Alba.Dsl.V1.Bch2026.Lang (bytes, fn, nat)
 import Alba.Dsl.V1.Bch2026.Ops
   ( op2Drop,
     opAdd,
     opAnd,
     opCat,
     opDrop,
+    opDup,
     opEqual,
     opFalse,
+    opIf,
     opLessThanOrEqual,
     opNumEqual,
     opRot,
@@ -20,7 +22,8 @@ import Alba.Dsl.V1.Bch2026.Ops
     opVerify,
     opWithin,
   )
-import Alba.Dsl.V1.Bch2026.Stack (TCode)
+import Alba.Dsl.V1.Bch2026.Stack (StackEntry, TCode)
+import Alba.Dsl.V1.Common (S)
 import Alba.Dsl.V1.Common.Lang (begin, (∘))
 import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TBytes, TNat, cast)
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
@@ -94,3 +97,17 @@ toPushOp =
 
     assemblePushData :: Fn (s :> TBytes :> TBytes :> TBytes) (s :> TBytes)
     assemblePushData = opSwap ∘ opRot ∘ opCat ∘ opCat
+
+-- Also appears in the Prelude but we don't want that dependency.
+case' ::
+  forall s t alt s' alt'.
+  (StackEntry t) =>
+  [ ( S (s :> t :> t) alt -> S (s :> t :> TBool) alt,
+      S (s :> t) alt -> S s' alt'
+    )
+  ] ->
+  (S (s :> t) alt -> S s' alt') ->
+  (S (s :> t) alt -> S s' alt')
+case' [] def st = def st
+case' ((test, result) : rest) def st =
+  (opDup ∘ test ∘ opIf result (case' rest def)) st

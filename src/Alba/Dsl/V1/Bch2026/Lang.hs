@@ -9,8 +9,6 @@ module Alba.Dsl.V1.Bch2026.Lang
     bytes',
     sigBytes,
     pubKeyBytes,
-    case',
-    cond,
     fn,
     constant,
     runtimeConstant,
@@ -35,7 +33,7 @@ module Alba.Dsl.V1.Bch2026.Lang
   )
 where
 
-import Alba.Dsl.V1.Bch2026.Ops (opDup, opIf, opInvoke)
+import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
 import Alba.Dsl.V1.Bch2026.Stack
   ( Env,
     StackBytes,
@@ -66,7 +64,6 @@ import Alba.Dsl.V1.Common.FunctionState
     isRegistered,
     registerFunction,
   )
-import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.OpcodeL3
   ( CodeL3,
     FunctionId (Absolute),
@@ -80,7 +77,6 @@ import Alba.Dsl.V1.Common.Stack
     ListToStack,
     S (..),
     Stack (..),
-    TBool,
     TBytes,
     TInt,
     TNat,
@@ -128,27 +124,6 @@ sigBytes x = aop (bytesToDataOp x)
 
 pubKeyBytes :: Bytes -> Fn s (s :> TPubKey)
 pubKeyBytes x = aop (bytesToDataOp x)
-
-case' ::
-  forall s t alt s' alt'.
-  (StackEntry t) =>
-  [ ( S (s :> t :> t) alt -> S (s :> t :> TBool) alt,
-      S (s :> t) alt -> S s' alt'
-    )
-  ] ->
-  (S (s :> t) alt -> S s' alt') ->
-  (S (s :> t) alt -> S s' alt')
-case' [] def st = def st
-case' ((test, result) : rest) def st =
-  (opDup ∘ test ∘ opIf result (case' rest def)) st
-
-cond ::
-  forall s alt s' alt'.
-  [(S s alt -> S (s :> TBool) alt, S s alt -> S s' alt')] ->
-  (S s alt -> S s' alt') ->
-  (S s alt -> S s' alt')
-cond [] def st = def st
-cond ((test, result) : rest) def st = (test ∘ opIf result (cond rest def)) st
 
 fn :: (HasCallStack) => FnA s alt s' alt' -> FnA s alt s' alt'
 fn prog st =

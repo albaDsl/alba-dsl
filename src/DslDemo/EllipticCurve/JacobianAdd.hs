@@ -6,7 +6,6 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack (..),
     begin,
-    cond,
     del,
     fn,
     name,
@@ -20,7 +19,7 @@ import Alba.Dsl.V1.Bch2026
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (equal, swap)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (cond, equal, swap)
 import DslDemo.EllipticCurve.Field
   ( TFe,
     feCube,

@@ -6,7 +6,6 @@ import TestBitwise (testBitwise)
 import TestCheckMultiSig (testCheckMultiSig)
 import TestCheckSig (testCheckSig)
 import TestCodeMetrics (testCodeMetrics)
-import TestCond (testCond)
 import TestConstants (testConstants)
 import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
@@ -20,6 +19,7 @@ import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
 import TestLambdas (testLambdas)
+import TestLibConditionals (testLibConditionals)
 import TestLibEither (testLibEither)
 import TestLibMaybe (testLibMaybe)
 import TestLibMisc (testLibMisc)
@@ -56,7 +56,6 @@ tests =
       testCheckMultiSig,
       testCheckSig,
       testCodeMetrics,
-      testCond,
       testConstants,
       testCustomTypes,
       testDataPushing,
@@ -70,6 +69,7 @@ tests =
       testIntrospection,
       testInvalidStack,
       testLambdas,
+      testLibConditionals,
       testLibEither,
       testLibTuple,
       testLibMaybe,

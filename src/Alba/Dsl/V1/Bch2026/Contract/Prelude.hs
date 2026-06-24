@@ -5,6 +5,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Prelude
     module Alba.Dsl.V1.Bch2026.Contract.BlobEq,
     module Alba.Dsl.V1.Bch2026.Contract.BlobEqClass,
     module Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils,
+    module Alba.Dsl.V1.Bch2026.Contract.Conditionals,
     module Alba.Dsl.V1.Bch2026.Contract.Error,
     module Alba.Dsl.V1.Bch2026.Contract.ExternalLib,
     module Alba.Dsl.V1.Bch2026.Contract.LzssBit,
@@ -31,6 +32,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEq
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
+import Alba.Dsl.V1.Bch2026.Contract.Conditionals
 import Alba.Dsl.V1.Bch2026.Contract.Error
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLib
 import Alba.Dsl.V1.Bch2026.Contract.Integral

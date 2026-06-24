@@ -1,21 +1,22 @@
 -- Copyright (c) 2025 albaDsl
 
-module TestCond (testCond) where
+module TestLibConditionals (testLibConditionals) where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Conditionals (case')
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils (evaluateProg, isTrue)
 
-testCond :: TestTree
-testCond =
+testLibConditionals :: TestTree
+testLibConditionals =
   testGroup
     "Cond"
-    [ testCase "Cond - Nats" $ isTrue (evaluateProg progCondNats),
-      testCase "Cond - Strings" $ isTrue (evaluateProg progCondStrings),
-      testCase "Cond - Strings - Default case" $
+    [ testCase "Case - Nats" $ isTrue (evaluateProg progCondNats),
+      testCase "Case - Strings" $ isTrue (evaluateProg progCondStrings),
+      testCase "Case - Strings - Default case" $
         isTrue (evaluateProg progCondStringsDefault),
-      testCase "Cond - Nested" $ isTrue (evaluateProg progCondNested)
+      testCase "Case - Nested" $ isTrue (evaluateProg progCondNested)
     ]
 
 progCondNats :: Fn s (s :> TBool)
