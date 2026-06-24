@@ -115,6 +115,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.Misc,
       Alba.Dsl.V1.Bch2026.Contract.Ord,
       Alba.Dsl.V1.Bch2026.Contract.PackFs,
+      Alba.Dsl.V1.Bch2026.Contract.PackFsCoreInstances,
       Alba.Dsl.V1.Bch2026.Contract.PartialApplicationA,
       Alba.Dsl.V1.Bch2026.Contract.PartialApplicationB,
       Alba.Dsl.V1.Bch2026.Contract.Prelude,
