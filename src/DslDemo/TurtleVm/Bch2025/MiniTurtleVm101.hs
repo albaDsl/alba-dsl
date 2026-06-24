@@ -7,10 +7,10 @@ module DslDemo.TurtleVm.Bch2025.MiniTurtleVm101
   )
 where
 
-import Alba.Dsl.V1.Bch2025 (Fn, FnA, Stack (..), begin, (.))
-import Alba.Dsl.V1.Bch2025 qualified as TY
-import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
-import Alba.Dsl.V1.Bch2025.OpsUntyped (op1, op1Add, opDrop, opIf, opMul)
+import Alba.Dsl.V1.Bch2026 (Fn, FnA, Stack (..), begin, (.))
+import Alba.Dsl.V1.Bch2026 qualified as TY
+import Alba.Dsl.V1.Bch2026.LangUntyped (repeatProg)
+import Alba.Dsl.V1.Bch2026.OpsUntyped (op1, op1Add, opDrop, opIf, opMul)
 import Alba.Dsl.V1.Common.CompilerUtils (aop)
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, (∘))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (OP_DEFINE, OP_INVOKE))

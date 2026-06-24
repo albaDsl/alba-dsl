@@ -2,7 +2,6 @@
 
 module TestCodeMetrics (testCodeMetrics) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
     Env,

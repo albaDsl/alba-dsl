@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2025.TurtleOpStack (turtleOpStack) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( op2Drop,
     op2Dup,
     op2Over,

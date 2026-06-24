@@ -2,9 +2,9 @@
 
 module DslDemo.TurtleVm.Bch2025.TurtleVm (turtleVm) where
 
-import Alba.Dsl.V1.Bch2025 qualified as TY
-import Alba.Dsl.V1.Bch2025.LangUntyped (int, repeatProg)
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026 qualified as TY
+import Alba.Dsl.V1.Bch2026.LangUntyped (int, repeatProg)
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( op0,
     opCheckDataSig,
     opCheckDataSigVerify,

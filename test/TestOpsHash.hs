@@ -2,7 +2,7 @@
 
 module TestOpsHash (testOpsHash) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Tx.Bch2025.Hash (hash160, hash256, ripemd160, sha1, sha256)
 import Alba.Vm.Bch2025 (b2SeUnsafe)
 import Data.Sequence qualified as S

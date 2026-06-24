@@ -6,7 +6,7 @@
 
 module Test (contractTests) where
 
-import Alba.Dsl.V1.Bch2025 (outputScript)
+import Alba.Dsl.V1.Bch2026 (outputScript)
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Misc.Wallet (genKey)

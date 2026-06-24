@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2026.TurtleOpIf (ifOp) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped (opFalse, opIf)
+import Alba.Dsl.V1.Bch2026.OpsUntyped (opFalse, opIf)
 import Alba.Dsl.V1.Common.Lang (begin)
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, (.))
 import DslDemo.TurtleVm.Bch2026.TurtleVmCondStack (condStackExecuteP)

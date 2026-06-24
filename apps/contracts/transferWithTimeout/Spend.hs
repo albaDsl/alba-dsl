@@ -2,7 +2,7 @@
 
 module Spend (senderWithdrawTx, recipientWithdrawTx) where
 
-import Alba.Dsl.V1.Bch2025 (CodeL1, outputScript, setScriptSig, signAll)
+import Alba.Dsl.V1.Bch2026 (CodeL1, outputScript, setScriptSig, signAll)
 import Alba.Misc.Haskoin (Address (..))
 import Alba.Tx.Bch2025 (OutPoint (..), Tx (..), TxIn (..), TxOut (..))
 import ContractApi (recipientWithdraw, senderWithdraw)

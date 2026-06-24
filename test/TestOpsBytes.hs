@@ -2,7 +2,7 @@
 
 module TestOpsBytes (testOpsBytes) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2025.VmParams qualified as VP
 import Alba.Vm.Common
   ( ScriptError (SePushSize),

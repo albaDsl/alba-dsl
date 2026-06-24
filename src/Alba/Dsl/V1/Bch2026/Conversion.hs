@@ -1,9 +1,9 @@
 -- Copyright (c) 2026 albaDsl
 
-module Alba.Dsl.V1.Bch2025.Conversion where
+module Alba.Dsl.V1.Bch2026.Conversion where
 
-import Alba.Dsl.V1.Bch2025.Lang (nat)
-import Alba.Dsl.V1.Bch2025.Ops (opDup, opGreaterThanOrEqual, opVerify)
+import Alba.Dsl.V1.Bch2026.Lang (nat)
+import Alba.Dsl.V1.Bch2026.Ops (opDup, opGreaterThanOrEqual, opVerify)
 import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TInt, TNat, cast)
 

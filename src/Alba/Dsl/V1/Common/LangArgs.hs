@@ -31,7 +31,7 @@ module Alba.Dsl.V1.Common.LangArgs
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Stack (StackEntry)
+import Alba.Dsl.V1.Bch2026.Stack (StackEntry)
 import Alba.Dsl.V1.Common.Stack
   ( Fn,
     FnA,

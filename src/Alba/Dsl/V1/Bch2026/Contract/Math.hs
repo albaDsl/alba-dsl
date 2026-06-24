@@ -1,37 +1,64 @@
 module Alba.Dsl.V1.Bch2026.Contract.Math
-  ( pow,
+  ( isEven,
+    isOdd,
+    square,
+    halve,
+    pow,
     pow',
     factorial,
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
+    Loop,
     Stack ((:>)),
+    StackNum,
+    TBool,
     TInt,
     TNat,
+    fn,
     int,
     name,
     nat,
     ns2,
     ns3,
+    op0,
+    op1,
+    op2,
     op2Drop,
+    opDiv,
+    opDup,
+    opMod,
+    opMul,
+    opNumEqual,
+    opUntil,
     opWhen,
     pick,
     roll,
     un,
   )
-import Alba.Dsl.V1.Bch2025.Contract.Math (halve, isOdd)
-import Alba.Dsl.V1.Bch2025.Contract.Misc
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Misc
   ( ifZero,
     isZero,
     nat1SubUnsafe,
   )
-import Alba.Dsl.V1.Bch2026 (Loop, fn, opUntil)
-import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, swap)
 import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Prelude ()
+
+isEven :: (StackNum x1) => Fn (s :> x1) (s :> TBool)
+isEven = op2 . opMod . op0 . opNumEqual
+
+isOdd :: (StackNum x1) => Fn (s :> x1) (s :> TBool)
+isOdd = op2 . opMod . op1 . opNumEqual
+
+square :: (StackNum x1) => Fn (s :> x1) (s :> x1)
+square = opDup . opMul
+
+halve :: (StackNum x1) => Fn (s :> x1) (s :> x1)
+halve = op2 . opDiv
 
 -- >>> import Alba.Dsl.V1.Bch2026
 -- >>> progSize pow

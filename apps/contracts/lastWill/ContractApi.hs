@@ -2,7 +2,24 @@
 
 module ContractApi (instantiate, refresh, withdraw, inherit) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
+  ( CodeL1,
+    Contract (MkContract),
+    Fn,
+    Optimize (None, O1),
+    Stack (Base, (:>)),
+    TBytes,
+    TNat,
+    TPubKey,
+    TSig,
+    begin,
+    bytes,
+    bytes',
+    compile,
+    name,
+    nat,
+    (.),
+  )
 import Alba.Misc.Haskoin
   ( Address (..),
     TxSignature,

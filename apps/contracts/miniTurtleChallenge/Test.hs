@@ -2,7 +2,7 @@
 
 module Test (contractTests) where
 
-import Alba.Dsl.V1.Bch2025 (outputScript)
+import Alba.Dsl.V1.Bch2026 (outputScript)
 import Alba.Misc.Haskoin (Address)
 import Alba.Misc.MockVals (mockAddr, mockTxId)
 import Alba.Tx.Bch2025 (OutPoint (..), TxOut (..))

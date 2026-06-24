@@ -13,9 +13,9 @@ module Alba.Dsl.V1.Common.LangDispatch
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Lang (int)
-import Alba.Dsl.V1.Bch2025.LangArgs (pick, roll)
-import Alba.Dsl.V1.Bch2025.Ops (opDrop, opIf, opNumEqual, opNumEqualVerify)
+import Alba.Dsl.V1.Bch2026.Lang (int)
+import Alba.Dsl.V1.Bch2026.LangArgs (pick, roll)
+import Alba.Dsl.V1.Bch2026.Ops (opDrop, opIf, opNumEqual, opNumEqualVerify)
 import Alba.Dsl.V1.Common.Lang
   ( begin,
     branch1,

@@ -2,7 +2,7 @@
 
 module TestTurtleVm2025 (testTurtleVm2025) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Common.StackUntyped (FnU, toTyped)
 import Alba.Vm.Bch2025
   ( ScriptError,

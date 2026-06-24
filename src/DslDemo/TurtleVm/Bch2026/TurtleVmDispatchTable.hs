@@ -2,7 +2,6 @@
 
 module DslDemo.TurtleVm.Bch2026.TurtleVmDispatchTable (initOpDispatch) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( FnC,
     begin,
@@ -11,6 +10,7 @@ import Alba.Dsl.V1.Bch2026
     progCode,
     (.),
   )
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (toTyped)
 import DslDemo.TurtleVm.Bch2026.TurtleOpAltStack (fromAltStack, toAltStack)
 import DslDemo.TurtleVm.Bch2026.TurtleOpIf (ifOp)

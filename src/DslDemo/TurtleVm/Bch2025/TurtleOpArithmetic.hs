@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2025.TurtleOpArithmetic (turtleOpArithmetic) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( op0NotEqual,
     op1Add,
     op1Sub,

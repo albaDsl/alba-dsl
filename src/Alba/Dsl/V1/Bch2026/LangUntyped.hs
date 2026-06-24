@@ -1,6 +1,6 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2025.LangUntyped
+module Alba.Dsl.V1.Bch2026.LangUntyped
   ( bytes,
     int,
     cond,
@@ -9,7 +9,7 @@ module Alba.Dsl.V1.Bch2025.LangUntyped
   )
 where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped (opDup, opIf)
+import Alba.Dsl.V1.Bch2026.OpsUntyped (opDup, opIf)
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp, integerToDataOp)
 import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
 import Alba.Dsl.V1.Common.StackUntyped (FnU, SU, (∘))

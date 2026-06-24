@@ -2,7 +2,7 @@
 
 module TestOpsOrdering (testOpsOrdering) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Common
   ( ScriptError (SeNumEqualVerify),
     b2SeUnsafe,

@@ -11,7 +11,7 @@ module Params
   )
 where
 
-import Alba.Dsl.V1.Bch2025 (days)
+import Alba.Dsl.V1.Bch2026 (days)
 import Alba.Misc.Haskoin (Network)
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.Wallet (getWallet)

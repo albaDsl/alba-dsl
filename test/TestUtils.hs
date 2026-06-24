@@ -3,7 +3,7 @@
 
 module TestUtils where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( CompilationResult (..),
     FnA,
     FunctionTable,

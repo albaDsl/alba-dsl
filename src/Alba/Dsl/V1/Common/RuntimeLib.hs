@@ -2,8 +2,8 @@
 
 module Alba.Dsl.V1.Common.RuntimeLib (toPushOp) where
 
-import Alba.Dsl.V1.Bch2025.Lang (bytes, case', nat)
-import Alba.Dsl.V1.Bch2025.Ops
+import Alba.Dsl.V1.Bch2026.Lang (bytes, case', fn, nat)
+import Alba.Dsl.V1.Bch2026.Ops
   ( op2Drop,
     opAdd,
     opAnd,
@@ -20,7 +20,6 @@ import Alba.Dsl.V1.Bch2025.Ops
     opVerify,
     opWithin,
   )
-import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Stack (TCode)
 import Alba.Dsl.V1.Common.Lang (begin, (∘))
 import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TBytes, TNat, cast)

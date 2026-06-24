@@ -9,8 +9,8 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmUtilsUntyped
   )
 where
 
-import Alba.Dsl.V1.Bch2025.LangUntyped (int)
-import Alba.Dsl.V1.Bch2025.OpsUntyped (opDrop, opDup, opIf, opNumEqual)
+import Alba.Dsl.V1.Bch2026.LangUntyped (int)
+import Alba.Dsl.V1.Bch2026.OpsUntyped (opDrop, opDup, opIf, opNumEqual)
 import Alba.Dsl.V1.Common.StackUntyped (FnU, SU, fromTyped, (.))
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils qualified as UT
 import Prelude (Integer)

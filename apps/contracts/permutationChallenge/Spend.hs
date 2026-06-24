@@ -2,10 +2,9 @@
 
 module Spend (withdrawTx, withdrawTx') where
 
-import Alba.Dsl.V1.Bch2025.TxDsl (outputScript, setScriptSig)
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Dc qualified as Dc
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
-import Alba.Dsl.V1.Bch2026.TxDsl (libraryInputs)
+import Alba.Dsl.V1.Bch2026.TxDsl (libraryInputs, outputScript, setScriptSig)
 import Alba.Dsl.V1.Common.LzssBit (compress)
 import Alba.Misc.Bchn (getTx)
 import Alba.Misc.Haskoin (Address, Network)

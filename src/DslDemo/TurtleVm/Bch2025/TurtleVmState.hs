@@ -11,7 +11,7 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmState
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     Stack (..),
@@ -44,7 +44,7 @@ import Alba.Dsl.V1.Bch2025
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero)
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 import DslDemo.TurtleVm.Bch2025.Tuple (TTuple, tuple, untuple)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isOpDataOp, vmError)

@@ -3,7 +3,7 @@
 
 module TestOpsArithmetic (testOpsArithmetic) where
 
-import Alba.Dsl.V1.Bch2025 hiding ((.))
+import Alba.Dsl.V1.Bch2026 hiding ((.))
 import Alba.Vm.Bch2025
   ( ScriptError (SeDivideByZero, SeModByZero),
     b2SeUnsafe,

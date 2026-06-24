@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2025.TurtleOpConstants (turtleOpConstants) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( op1,
     op10,
     op11,

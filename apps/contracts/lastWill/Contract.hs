@@ -2,7 +2,7 @@
 
 module Contract (LastWill, Params, contract) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Append,
     CFn,
     Contract (..),
@@ -37,7 +37,7 @@ import Alba.Dsl.V1.Bch2025
     (.),
     type (:|),
   )
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSub)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (natSub)
 import Data.Word (Word64)
 import Numeric.Natural (Natural)
 import Params (fee, inheritDelay, refreshDelay)

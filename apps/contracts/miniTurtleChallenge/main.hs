@@ -3,7 +3,7 @@
 
 module Main (main) where
 
-import Alba.Dsl.V1.Bch2025 (CodeL1, outputScript)
+import Alba.Dsl.V1.Bch2026 (CodeL1, outputScript)
 import Alba.Misc.Cmd (deployMsg, runInVm, showTx)
 import Alba.Misc.Haskoin (Network, addrToText, chipnet, mainnet, textToAddr)
 import Alba.Tx.Bch2025 (OutPoint (..), TxOut (..), hash160)

@@ -11,7 +11,6 @@ module Alba.Dsl.V1.Bch2026.Contract.PartialApplication
   )
 where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( Env,
     Fn,

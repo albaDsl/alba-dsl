@@ -2,7 +2,7 @@
 
 module TestDataPushing (testDataPushing) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Vm.Bch2025 (vmParamsStandard)
 import Alba.Vm.Common
   ( CodeL2,

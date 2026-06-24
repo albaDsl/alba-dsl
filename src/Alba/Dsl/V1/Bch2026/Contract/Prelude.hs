@@ -1,8 +1,7 @@
 -- Copyright (c) 2025 albaDsl
 
 module Alba.Dsl.V1.Bch2026.Contract.Prelude
-  ( module Alba.Dsl.V1.Bch2025.Contract.Prelude,
-    module Alba.Dsl.V1.Bch2026.Contract.Applicative,
+  ( module Alba.Dsl.V1.Bch2026.Contract.Applicative,
     module Alba.Dsl.V1.Bch2026.Contract.BlobEq,
     module Alba.Dsl.V1.Bch2026.Contract.BlobEqClass,
     module Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils,
@@ -27,7 +26,6 @@ module Alba.Dsl.V1.Bch2026.Contract.Prelude
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude
 import Alba.Dsl.V1.Bch2026.Contract.Applicative
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass

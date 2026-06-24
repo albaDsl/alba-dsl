@@ -2,7 +2,6 @@
 
 module Alba.Dsl.V1.Bch2026.Contract.LzssBit (decompress) where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Loop,
@@ -37,6 +36,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
+import Alba.Dsl.V1.Bch2026.Contract.Misc (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, rot, swap)
 import Numeric.Natural (Natural)

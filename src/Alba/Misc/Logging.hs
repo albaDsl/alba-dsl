@@ -2,7 +2,7 @@
 
 module Alba.Misc.Logging (dumpLogToFile) where
 
-import Alba.Dsl.V1.Bch2025 (CompilationResult (..), FunctionTable)
+import Alba.Dsl.V1.Bch2026 (CompilationResult (..), FunctionTable)
 import Alba.Dsl.V1.Common.FunctionTableJson
   ( FunctionTableEntry (..),
     tableEntries,

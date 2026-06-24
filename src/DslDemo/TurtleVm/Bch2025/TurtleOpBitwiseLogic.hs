@@ -5,7 +5,7 @@ module DslDemo.TurtleVm.Bch2025.TurtleOpBitwiseLogic
   )
 where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( opAnd,
     opEqual,
     opEqualVerify,

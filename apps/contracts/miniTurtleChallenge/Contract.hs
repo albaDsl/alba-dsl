@@ -2,7 +2,7 @@
 
 module Contract (MiniTurtleChallenge, contract) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( CFn,
     Contract (..),
     Fn,
@@ -33,8 +33,8 @@ import Alba.Dsl.V1.Bch2025
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
+import Alba.Dsl.V1.Bch2026.LangUntyped (repeatProg)
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (FnU, fromTyped, toTyped, (∘))
 import DslDemo.TurtleVm.Bch2025.MiniTurtleVm101 (miniTurtleVm101)
 import Prelude hiding (drop, (.))

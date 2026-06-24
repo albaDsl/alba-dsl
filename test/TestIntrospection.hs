@@ -2,7 +2,7 @@
 
 module TestIntrospection (testIntrospection) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Misc.MockVals (mockTxId)
 import Alba.Tx.Bch2025 (Hash256 (..), TxId (..))
 import Alba.Vm.Common (b2SeUnsafe, i2SeUnsafe)

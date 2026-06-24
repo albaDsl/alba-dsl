@@ -1,7 +1,14 @@
 -- Copyright (c) 2026 albaDsl
 
 module Alba.Dsl.V1.Bch2026.Contract.Misc
-  ( iterate,
+  ( natSub,
+    natSubUnsafe,
+    ifZero,
+    isZero,
+    null,
+    nat1Sub,
+    nat1SubUnsafe,
+    iterate,
     functionIdOffset,
     addToUnsigned,
     pad,
@@ -9,11 +16,11 @@ module Alba.Dsl.V1.Bch2026.Contract.Misc
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (nat1SubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     Stack (..),
+    StackNum,
     TBool,
     TBytes,
     TFunctionId,
@@ -22,31 +29,64 @@ import Alba.Dsl.V1.Bch2026
     cast,
     emptyProg,
     fn,
+    i2n,
     i2nUnsafe,
     int,
+    n2i,
     nat,
     ns2,
+    op0,
+    op1Sub,
     opBin2Num,
     opCat,
+    opEqual,
     opGreaterThan,
     opIf,
     opNum2Bin,
+    opNumEqual,
     opReverseBytes,
     opSize,
     opSplit,
+    opSub,
+    opSwap,
     opWhen,
     roll,
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.Error (errPartialFunction)
-import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (sub), add)
+import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..), add)
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (lessThanOrEqual))
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, fromAlt, swap, toAlt)
 import Alba.Dsl.V1.Bch2026.Ops (opUntil)
 import Alba.Dsl.V1.Common.Lang (begin, (.))
 import Numeric.Natural (Natural)
-import Prelude hiding (drop, iterate, (.))
+import Prelude hiding (drop, iterate, null, (.))
+
+natSub :: Fn (s :> TNat :> TNat) (s :> TNat)
+natSub = n2i . opSwap . n2i . opSwap . opSub . i2n
+
+natSubUnsafe :: Fn (s :> TNat :> TNat) (s :> TNat)
+natSubUnsafe = n2i . opSwap . n2i . opSwap . opSub . i2nUnsafe
+
+nat1Sub :: Fn (s :> TNat) (s :> TNat)
+nat1Sub = n2i . op1Sub . i2n
+
+nat1SubUnsafe :: Fn (s :> TNat) (s :> TNat)
+nat1SubUnsafe = n2i . op1Sub . i2nUnsafe
+
+ifZero ::
+  (StackNum x1) =>
+  FnA s alt s' alt' ->
+  FnA s alt s' alt' ->
+  FnA (s :> x1) alt s' alt'
+ifZero ifOps elseOps = isZero . opIf ifOps elseOps
+
+isZero :: (StackNum x1) => Fn (s :> x1) (s :> TBool)
+isZero = op0 . opNumEqual
+
+null :: Fn (s :> TBytes) (s :> TBool)
+null = bytes [] . opEqual
 
 iterate ::
   forall s alt.

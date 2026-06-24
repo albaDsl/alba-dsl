@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2025.Tuple (TTuple, tuple, untuple, fst, snd) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Prelude ()
 
 data TTuple

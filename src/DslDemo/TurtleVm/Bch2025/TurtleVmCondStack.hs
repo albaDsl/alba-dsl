@@ -6,7 +6,7 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmCondStack
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
     N,
     Stack (..),
@@ -31,8 +31,8 @@ import Alba.Dsl.V1.Bch2025
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2025.LangUntyped (repeatProg)
-import Alba.Dsl.V1.Bch2025.OpsUntyped qualified as UT
+import Alba.Dsl.V1.Bch2026.LangUntyped (repeatProg)
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.StackUntyped (fromTyped, toTyped, (∘))
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, ifJust)
 import DslDemo.TurtleVm.Bch2025.TurtleVmUtils (isConditionalOp, isSingleByteOp)

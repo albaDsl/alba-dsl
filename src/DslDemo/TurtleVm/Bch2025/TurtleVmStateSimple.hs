@@ -11,7 +11,7 @@ module DslDemo.TurtleVm.Bch2025.TurtleVmStateSimple
   )
 where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
   ( Fn,
     FnA,
     Stack (..),
@@ -34,7 +34,7 @@ import Alba.Dsl.V1.Bch2025
     opToAltStack,
     (.),
   )
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (ifZero)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero)
 import DslDemo.TurtleVm.Bch2025.Maybe (TMaybe, just, nothing)
 import Prelude (Int, fromIntegral)
 

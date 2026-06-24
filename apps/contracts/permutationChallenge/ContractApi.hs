@@ -2,7 +2,7 @@
 
 module ContractApi (instantiate, withdraw) where
 
-import Alba.Dsl.V1.Bch2025 (bytes, (.))
+import Alba.Dsl.V1.Bch2026 (bytes, (.))
 import Alba.Dsl.V1.Common.Compile
   ( CompilationResult (..),
     Optimize (None, O1),

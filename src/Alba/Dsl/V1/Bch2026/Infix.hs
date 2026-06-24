@@ -1,9 +1,9 @@
 -- Copyright (c) 2025 albaDsl
 
-module Alba.Dsl.V1.Bch2025.Infix where
+module Alba.Dsl.V1.Bch2026.Infix where
 
-import Alba.Dsl.V1.Bch2025.Lang (bytes, int)
-import Alba.Dsl.V1.Bch2025.Ops
+import Alba.Dsl.V1.Bch2026.Lang (bytes, int)
+import Alba.Dsl.V1.Bch2026.Ops
   ( op0NotEqual,
     op1Add,
     op1Sub,

@@ -8,7 +8,6 @@ module Alba.Dsl.V1.Bch2026.Contract.TBytes128
   )
 where
 
-import Alba.Dsl.V1.Bch2025.Contract.Prelude (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026
   ( Bytes,
     Fn,
@@ -44,6 +43,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Misc (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)

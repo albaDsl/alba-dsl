@@ -2,7 +2,7 @@
 
 module TestOpsStack (testOpsStack) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils (evaluateProg, isTrue)

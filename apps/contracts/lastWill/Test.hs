@@ -6,7 +6,7 @@
 
 module Test (contractTests) where
 
-import Alba.Dsl.V1.Bch2025 (outputScript, setScriptSig, signAll, timeSequence)
+import Alba.Dsl.V1.Bch2026 (outputScript, setScriptSig, signAll, timeSequence)
 import Alba.Misc.Haskoin (Address, scriptAddress)
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.MockVals (mockAddr, mockTxId)

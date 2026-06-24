@@ -2,7 +2,7 @@
 
 module TestDataSig (testDataSig) where
 
-import Alba.Dsl.V1.Bch2025
+import Alba.Dsl.V1.Bch2026
 import Alba.Misc.KeyPair (KeyPair (..))
 import Alba.Misc.Wallet (genKey)
 import Alba.Tx.Bch2025.Hash (sha256)

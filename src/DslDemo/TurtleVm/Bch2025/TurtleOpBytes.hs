@@ -2,7 +2,7 @@
 
 module DslDemo.TurtleVm.Bch2025.TurtleOpBytes (turtleOpBytes) where
 
-import Alba.Dsl.V1.Bch2025.OpsUntyped
+import Alba.Dsl.V1.Bch2026.OpsUntyped
   ( opBin2Num,
     opCat,
     opNum2Bin,

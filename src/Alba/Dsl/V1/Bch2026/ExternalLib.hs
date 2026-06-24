@@ -2,21 +2,15 @@
 
 module Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt) where
 
-import Alba.Dsl.V1.Bch2025
-  ( Bytes,
-    Fn,
-    FnA,
-    FunctionTable (..),
-    TBytes,
-    bytes,
-    cast,
-    (∘),
-  )
+import Alba.Dsl.V1.Bch2026.Lang (bytes)
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
 import Alba.Dsl.V1.Bch2026.Stack (TFunctionId)
 import Alba.Dsl.V1.Bch2026.Utils (lookupFunctionId)
+import Alba.Dsl.V1.Common.FunctionTable (FunctionTable (..))
+import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.OpcodeL3 (vmFunctionIdToByteString)
-import Alba.Dsl.V1.Common.Stack (Stack (..))
+import Alba.Dsl.V1.Common.Stack (Fn, FnA, Stack (..), TBytes, cast)
+import Alba.Vm.Common.BasicTypes (Bytes)
 import Prelude hiding (drop)
 
 data LibData = LibData
