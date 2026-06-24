@@ -58,7 +58,6 @@ import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
-import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
@@ -93,12 +92,6 @@ codeSize =
       golden "EC scalar point multiply (Affine)" (sizeOf EA.ecMul),
       golden "EC scalar point multiply (Jacobian)" (sizeOf EJ.ecMul),
       golden
-        "EC scalar point multiply (Windowed Jacobian)"
-        (sizeOf EJW.ecMul4),
-      golden
-        "EC scalar point multiply (Windowed Jacobian / tbl setup)"
-        (sizeOf (EJW.setupTableM 4 ∘ drop ∘ EJW.ecMul4)),
-      golden
         "EC scalar point multiply (wNAF / tbl setup)"
         (sizeOf (EJWN.setupTable ∘ drop ∘ EJWN.ecMul)),
       golden "Vector ops" (sizeOf vectorOps),
@@ -114,9 +107,6 @@ codeCompressibility =
     "Code Compressibility"
     [ golden "turtleVm 2025" $ ratio (toTyped (T2025.turtleVm 1 1)),
       golden "turtleVm 2026" $ ratio (toTyped (T2026.turtleVm 1)),
-      golden
-        "EC scalar point multiply (Windowed Jacobian demo)"
-        $ ratio windowedMul,
       golden "Vector ops" $ ratio vectorOps
     ]
   where
@@ -127,12 +117,6 @@ executionCost =
   testGroup
     "Execution Cost"
     [ golden "EC scalar point multiply (Jacobian)" $ costOf' plainMul,
-      golden "EC scalar point multiply (Windowed Jacobian demo)" $
-        costOf' windowedMul,
-      golden "EC scalar point multiply (Windowed Jacobian 4 / precomp) " $
-        costOf' windowedMul4Precomputed,
-      golden "EC scalar point multiply (Windowed Jacobian 6 / precomp) " $
-        costOf' windowedMul6Precomputed,
       golden "EC scalar point multiply (wNAF 5)" $ costOf' wNaf5,
       golden "EC scalar point multiply (wNAF 5 / precomp)" $
         costOf' wNaf5Precomputed,
@@ -222,9 +206,6 @@ arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 plainMul :: FnC
 plainMul = bytes [] ∘ verifyTestVector (nip ∘ g ∘ EJ.ecMul)
 
-windowedMul :: FnC
-windowedMul = g ∘ EJW.setupTableM 4 ∘ verifyTestVector EJW.ecMul4
-
 verifyTestVector ::
   (forall s'. Env (s' :> table :> TNat) (s' :> TPoint)) ->
   Fn (s :> table) s
@@ -238,14 +219,6 @@ verifyTestVector ecMul =
           0xabd5af5ca77ee717dcbf74a7d8133804abcd416b19f2ef36e1930869a889372b
         ∘ (equal ∘ opVerify)
     )
-
-windowedMul4Precomputed :: FnC
-windowedMul4Precomputed =
-  constant (g ∘ EJW.setupTableM 4) ∘ verifyTestVector EJW.ecMul4
-
-windowedMul6Precomputed :: FnC
-windowedMul6Precomputed =
-  constant (g ∘ EJW.setupTableM 6) ∘ verifyTestVector EJW.ecMul6
 
 wNaf5 :: FnC
 wNaf5 = g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul

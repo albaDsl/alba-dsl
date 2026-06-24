@@ -12,8 +12,6 @@ import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as WN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as WNG
-import DslDemo.EllipticCurve.JacobianWindowed (TTable)
-import DslDemo.EllipticCurve.JacobianWindowed qualified as W
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import QuickCheckSupport (Bits256 (..))
 import Test.Tasty (TestTree, testGroup)
@@ -30,14 +28,6 @@ testEllipticCurve =
         isTrue (evaluateProg progEllipticCurveBasicAffine),
       testCase "Scalar multiply (Jacobian)" $
         isTrue (evaluateProg progEllipticCurveBasicJacobian),
-      testCase "Scalar multiply windowed 4-bit" $
-        isTrue (evaluateProg progEllipticCurve4),
-      testCase "Scalar multiply windowed 6-bit" $
-        isTrue (evaluateProg progEllipticCurve6),
-      testCase "Scalar multiply windowed 4-bit / precomp" $
-        isTrue (evaluateProg progEllipticCurve4Precomp),
-      testCase "Scalar multiply windowed 6-bit / precomp" $
-        isTrue (evaluateProg progEllipticCurve6Precomp),
       testCase "Scalar multiply wNAF" $
         isTrue (evaluateProg progEllipticCurve5WNaf),
       testCase "Scalar multiply wNAF & GLV" $
@@ -71,21 +61,19 @@ progEllipticCurveBasicAffine :: Fn s (s :> TBool)
 progEllipticCurveBasicAffine =
   runEnv (V.empty ∘ verifyTestVectors wrapMul)
   where
-    wrapMul :: (forall s'. Env (s' :> TTable :> TNat) (s' :> TPoint))
+    wrapMul ::
+      (StackEntry table) =>
+      (forall s'. Env (s' :> table :> TNat) (s' :> TPoint))
     wrapMul = nip ∘ g ∘ EA.ecMul
 
 progEllipticCurveBasicJacobian :: Fn s (s :> TBool)
 progEllipticCurveBasicJacobian =
   runEnv (V.empty ∘ verifyTestVectors wrapMul)
   where
-    wrapMul :: (forall s'. Env (s' :> TTable :> TNat) (s' :> TPoint))
+    wrapMul ::
+      (StackEntry table) =>
+      (forall s'. Env (s' :> table :> TNat) (s' :> TPoint))
     wrapMul = nip ∘ g ∘ EJ.ecMul
-
-progEllipticCurve4 :: Fn s (s :> TBool)
-progEllipticCurve4 = runEnv (g ∘ W.setupTableM 4 ∘ verifyTestVectors W.ecMul4)
-
-progEllipticCurve6 :: Fn s (s :> TBool)
-progEllipticCurve6 = runEnv (g ∘ W.setupTableM 6 ∘ verifyTestVectors W.ecMul6)
 
 progEllipticCurve5WNaf :: Fn s (s :> TBool)
 progEllipticCurve5WNaf = runEnv (g ∘ WN.setupTable ∘ verifyTestVectors WN.ecMul)
@@ -188,14 +176,6 @@ verifyTestVectors ecMulN =
       0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
     ∘ equalVerify
     ∘ (drop ∘ opTrue)
-
-progEllipticCurve4Precomp :: Fn s (s :> TBool)
-progEllipticCurve4Precomp =
-  runEnv (constant (g ∘ W.setupTableM 4) ∘ verifyTestVectors W.ecMul4)
-
-progEllipticCurve6Precomp :: Fn s (s :> TBool)
-progEllipticCurve6Precomp =
-  runEnv (constant (g ∘ W.setupTableM 6) ∘ verifyTestVectors W.ecMul6)
 
 propAdditivity ::
   (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->

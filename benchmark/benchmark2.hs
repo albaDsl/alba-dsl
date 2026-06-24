@@ -22,7 +22,6 @@ import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
-import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement)
 import DslDemo.EllipticCurve.Native.Jacobian (Point (..))
@@ -31,7 +30,6 @@ import DslDemo.EllipticCurve.Native.JacobianPlain qualified as NJ
 import DslDemo.EllipticCurve.Native.JacobianWNaf qualified as NJWN
 import DslDemo.EllipticCurve.Native.JacobianWNafGlv qualified as NJWNG
 import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved qualified as NJWNI
-import DslDemo.EllipticCurve.Native.JacobianWindowed qualified as NJW
 import DslDemo.EllipticCurve.Point qualified as EA
 import Numeric.Natural (Natural)
 
@@ -68,13 +66,11 @@ main = do
       env
         ( pure
             ( compile O1 progMulJacobian,
-              compile O1 progMulJacobianWindowed,
               compile O1 progMulJacobianWNaf,
               compile O1 progMulWNafGlv
             )
         )
         $ \ ~( codeMulJacobian,
-               codeMulJacobianWindowed,
                codeMulWNafGlv,
                codeMulJacobianWNaf
                ) ->
@@ -83,18 +79,13 @@ main = do
               [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
                 bench "Haskell native" $
                   nf (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g)) testVals,
-                bench "Haskell native (windowed)" $
-                  nf (verify (\n -> NJ.fromJacobian $ NJW.ecMul n NJ.g)) testVals,
                 bench "Haskell native (wNAF)" $
                   nf (verify (\n -> NJ.fromJacobian $ NJWN.ecMul n NJ.g)) testVals,
                 bench "Haskell native (wNAF interleaved)" $
                   nf (verify (\n -> NJ.fromJacobian $ NJWNI.ecMul n NJ.g)) testVals,
                 bench "Haskell native (wNAF & GLV)" $
                   nf (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul n NJ.g)) testVals,
-                bench "albaVM" $
-                  nf (ecMultiply codeMulJacobian) testVals,
-                bench "albaVM (windowed)" $
-                  nf (ecMultiply codeMulJacobianWindowed) testVals,
+                bench "albaVM" $ nf (ecMultiply codeMulJacobian) testVals,
                 bench "albaVM (wNAF / precomp)" $
                   nf (ecMultiply codeMulJacobianWNaf) testVals,
                 bench "albaVM (wNAF & GLV / precomp)" $
@@ -139,10 +130,6 @@ progMul = g ∘ EA.ecMul ∘ EA.getXY
 
 progMulJacobian :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulJacobian = g ∘ EJ.ecMul ∘ EA.getXY
-
-progMulJacobianWindowed :: Fn (s :> TNat) (s :> TFe :> TFe)
-progMulJacobianWindowed =
-  runEnv (g ∘ EJW.setupTableM 4 ∘ opSwap ∘ EJW.ecMul4 ∘ EA.getXY)
 
 progMulJacobianWNaf :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulJacobianWNaf =
