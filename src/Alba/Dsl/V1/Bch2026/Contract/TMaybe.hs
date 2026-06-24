@@ -23,10 +23,8 @@ import Alba.Dsl.V1.Bch2026
     TBytes,
     TNat,
     TQuotA,
-    begin,
     bytes,
     cast,
-    constant,
     fn,
     invoke0,
     invoke1,
@@ -35,6 +33,7 @@ import Alba.Dsl.V1.Bch2026
     opIf,
     opSplit,
     quot1,
+    quot2,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -43,93 +42,33 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
     blobEqEqualVerify,
     blobEqRecord,
   )
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
-import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (TBytes128)
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64)
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8)
-import Data.ByteString qualified as B
+import Alba.Dsl.V1.Bch2026.Contract.Misc (pad, unpad)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), mkPackFsM)
+import Alba.Dsl.V1.Bch2026.Contract.PartialApplicationA (apply2)
+import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, swap)
 import Data.Kind (Type)
 import Numeric.Natural (Natural)
-import Prelude (fromIntegral, (+))
+import Prelude ((+))
 
 data TMaybe (a :: Type)
 
 instance StackEntry (TMaybe a)
 
-instance (BlobEq a) => BlobEq (TMaybe a) where
+instance {-# OVERLAPPABLE #-} (BlobEq a) => BlobEq (TMaybe a) where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
 
-instance PackFs (TMaybe TInt8) where
-  sizeConst = 1 + sizeConst @TInt8
-  size = nat (sizeConst @(TMaybe TInt8))
-  pack =
-    ifJust
-      (pack @TInt8 . just . toRaw)
-      (tagNothing . zeroes (sizeConst @TInt8) . opCat)
+instance (PackFs a) => PackFs (TMaybe a) where
+  sizeConst = overHead + sizeConst @a
     where
-      zeroes :: Natural -> Fn s (s :> TBytes)
-      zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw . ifJust (unpack @TInt8 . just) nothing
-  packFsRec = maybeInt8PackFs
-
-maybeInt8PackFs :: Fn s (s :> TPackFs (TMaybe TInt8))
-maybeInt8PackFs =
-  constant
-    ( begin
-        . size @(TMaybe TInt8)
-        . quot1 (pack @(TMaybe TInt8))
-        . quot1 (unpack @(TMaybe TInt8))
-        . mkPackFsM
-    )
-
-instance PackFs (TMaybe TInt64) where
-  sizeConst = 1 + sizeConst @TInt64
-  size = nat (sizeConst @(TMaybe TInt64))
-  pack =
-    ifJust
-      (pack @TInt64 . just . toRaw)
-      (tagNothing . zeroes (sizeConst @TInt64) . opCat)
-    where
-      zeroes :: Natural -> Fn s (s :> TBytes)
-      zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw . ifJust (unpack @TInt64 . just) nothing
-  packFsRec = maybeInt64PackFs
-
-maybeInt64PackFs :: Fn s (s :> TPackFs (TMaybe TInt64))
-maybeInt64PackFs =
-  constant
-    ( begin
-        . size @(TMaybe TInt64)
-        . quot1 (pack @(TMaybe TInt64))
-        . quot1 (unpack @(TMaybe TInt64))
-        . mkPackFsM
-    )
-
-instance PackFs (TMaybe TBytes128) where
-  sizeConst = 1 + sizeConst @TBytes128
-  size = nat (sizeConst @(TMaybe TBytes128))
-  pack =
-    ifJust
-      (pack @TBytes128 . just . toRaw)
-      (tagNothing . zeroes (sizeConst @TBytes128) . opCat)
-    where
-      zeroes :: Natural -> Fn s (s :> TBytes)
-      zeroes count = bytes (B.replicate (fromIntegral count) 0)
-  unpack = fromRaw . ifJust (unpack @TBytes128 . just) nothing
-  packFsRec = maybeBytes128PackFs
-
-maybeBytes128PackFs :: Fn s (s :> TPackFs (TMaybe TBytes128))
-maybeBytes128PackFs =
-  constant
-    ( begin
-        . size @(TMaybe TBytes128)
-        . quot1 (pack @(TMaybe TBytes128))
-        . quot1 (unpack @(TMaybe TBytes128))
-        . mkPackFsM
-    )
+      overHead :: Natural
+      overHead = 2 -- 1 byte (TMaybe) + 1 byte (pad size field).
+  size = nat (sizeConst @(TMaybe a))
+  pack = size @(TMaybe a) . pad
+  unpack = unpad
+  packFsRec =
+    size @(TMaybe a) . fn (dup . quot2 pad . apply2 . quot1 unpad . mkPackFsM)
 
 just :: Fn (s :> a) (s :> TMaybe a)
 just = fn (valToBytes . tagJust . swap . opCat . fromRaw)

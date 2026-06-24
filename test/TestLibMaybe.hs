@@ -3,24 +3,26 @@
 module TestLibMaybe (testLibMaybe) where
 
 import Alba.Dsl.V1.Bch2026
-import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Error (error)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
-import Alba.Dsl.V1.Bch2026.Contract.TBytes128 (bytes128)
-import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
-import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.TMaybe
-  ( TMaybe,
+import Alba.Dsl.V1.Bch2026.Contract.Prelude
+  ( BlobEq (..),
+    PackFs,
+    TInt64,
+    TInt8,
+    TMaybe,
+    bytes128,
+    dup,
+    error,
     fromMaybe,
     ifJust,
+    int64,
+    int8,
     isJust,
     isNothing,
     just,
     maybe,
     nothing,
+    swap,
   )
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
@@ -87,8 +89,8 @@ progBasics =
       (BlobEq a, StackEntry a, PackFs (TMaybe a)) => Fn (s :> a) s
     testPacking =
       begin
-        ∘ (dup ∘ just ∘ dup ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.uncons)
-        ∘ ifJust (untuple ∘ opDrop ∘ ifJust (equalVerify) fail) fail
+        ∘ (dup ∘ just ∘ nothing ∘ swap ∘ V.empty ∘ V.cons ∘ V.cons ∘ nat 1)
+        ∘ (V.lookup ∘ ifJust (ifJust (equalVerify) fail) fail)
 
     fail :: FnA s alt s' alt'
     fail = bytes "Fail" ∘ error

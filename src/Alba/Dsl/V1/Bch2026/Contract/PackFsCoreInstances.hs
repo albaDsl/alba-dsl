@@ -7,7 +7,6 @@ import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack (..),
     TQuotB,
-    begin,
     constant,
     nat,
     quot1,
@@ -32,10 +31,4 @@ packFsLambda ::
   (PackFs (TQuotB a b)) =>
   Fn s (s :> TPackFs (TQuotB a b))
 packFsLambda =
-  constant
-    ( begin
-        . size @(TQuotB a b)
-        . quot1 (pack @(TQuotB a b))
-        . quot1 (unpack @(TQuotB a b))
-        . mkPackFsM
-    )
+  constant (size @(TQuotB a b) . quot1 pack . quot1 unpack . mkPackFsM)

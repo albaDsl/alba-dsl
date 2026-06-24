@@ -7,7 +7,6 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TInt,
-    begin,
     cast,
     castStack,
     constant,
@@ -45,7 +44,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..), mkOrdM)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
 import Prelude (Integer, (&&), (-), (<=), (>=), (^))
@@ -88,17 +87,7 @@ instance PackFs TInt64 where
   size = nat (sizeConst @TInt64)
   pack = toRaw . size @TInt64 . opNum2Bin
   unpack = opBin2Num . fromRaw
-  packFsRec = int64PackFs
-
-int64PackFs :: Fn s (s :> TPackFs TInt64)
-int64PackFs =
-  constant
-    ( begin
-        . size @TInt64
-        . quot1 (pack @TInt64)
-        . quot1 (unpack @TInt64)
-        . mkPackFsM
-    )
+  packFsRec = constant (size @TInt64 . quot1 pack . quot1 unpack . mkPackFsM)
 
 int64Max :: Integer
 int64Max = 2 ^ (63 :: Integer) - 1

@@ -45,7 +45,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Misc (natSubUnsafe)
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..))
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip)
 import Control.Exception (assert)
 import Data.ByteString qualified as B
@@ -62,21 +62,11 @@ instance BlobEq TBytes128 where
   blobEqRec = blobEqRecord
 
 instance PackFs TBytes128 where
+  sizeConst = fromIntegral packSize
+  size = nat (sizeConst @TBytes128)
   pack = packTBytes128
   unpack = unpackTBytes128
-  size = nat (sizeConst @TBytes128)
-  sizeConst = fromIntegral packSize
-  packFsRec = bytes128PackFs
-
-bytes128PackFs :: Fn s (s :> TPackFs TBytes128)
-bytes128PackFs =
-  constant
-    ( begin
-        . size @TBytes128
-        . quot1 (pack @TBytes128)
-        . quot1 (unpack @TBytes128)
-        . mkPackFsM
-    )
+  packFsRec = constant (size @TBytes128 . quot1 pack . quot1 unpack . mkPackFsM)
 
 maxPayloadSize :: Int
 maxPayloadSize = 128

@@ -36,8 +36,7 @@ import Alba.Dsl.V1.Bch2026
     roll,
     (.),
   )
-import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tupleM, untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tupleM)
 import Data.Kind (Type)
 import GHC.TypeLits (KnownNat)
 import Numeric.Natural (Natural)
@@ -70,10 +69,10 @@ getSize :: Fn (s :> TPackFs a) (s :> TNat)
 getSize = fn (toRaw . fst)
 
 getPack :: Fn (s :> TPackFs a) (s :> TQuotA '[a] '[TBytes])
-getPack = fn (toRaw . untuple . nip . fst)
+getPack = fn (toRaw . snd . fst)
 
 getUnpack :: Fn (s :> TPackFs a) (s :> TQuotA '[TBytes] '[a])
-getUnpack = fn (toRaw . untuple . nip . snd)
+getUnpack = fn (toRaw . snd . snd)
 
 type RawType a =
   TTuple TNat (TTuple (TQuotA '[a] '[TBytes]) (TQuotA '[TBytes] '[a]))
@@ -84,6 +83,7 @@ fromRaw = cast
 toRaw :: Fn (s :> TPackFs a) (s :> RawType a)
 toRaw = cast
 
+-- ## Type class access functions.
 tcPick ::
   forall arg idx s a.
   ( KnownNat idx,

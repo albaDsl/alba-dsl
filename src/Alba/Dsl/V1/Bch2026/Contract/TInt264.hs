@@ -10,7 +10,6 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TInt,
-    begin,
     cast,
     castStack,
     constant,
@@ -48,7 +47,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..), mkOrdM)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
 import Prelude (Integer, (&&), (-), (<=), (>=), (^))
@@ -91,17 +90,7 @@ instance PackFs TInt264 where
   size = nat (sizeConst @TInt264)
   pack = toRaw . size @TInt264 . opNum2Bin
   unpack = opBin2Num . fromRaw
-  packFsRec = int264PackFs
-
-int264PackFs :: Fn s (s :> TPackFs TInt264)
-int264PackFs =
-  constant
-    ( begin
-        . size @TInt264
-        . quot1 (pack @TInt264)
-        . quot1 (unpack @TInt264)
-        . mkPackFsM
-    )
+  packFsRec = constant (size @TInt264 . quot1 pack . quot1 unpack . mkPackFsM)
 
 int264Max :: Integer
 int264Max = 2 ^ (263 :: Integer) - 1

@@ -7,7 +7,6 @@ import Alba.Dsl.V1.Bch2026
     Stack (..),
     StackEntry,
     TInt,
-    begin,
     cast,
     castStack,
     constant,
@@ -45,7 +44,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Ord (Ord (..), mkOrdM)
-import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), TPackFs, mkPackFsM)
+import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs (..), mkPackFsM)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (dup)
 import Control.Exception (assert)
 import Prelude (Integer, (&&), (-), (<=), (>=), (^))
@@ -87,17 +86,7 @@ instance PackFs TInt8 where
   size = nat (sizeConst @TInt8)
   pack = toRaw . size @TInt8 . opNum2Bin
   unpack = opBin2Num . fromRaw
-  packFsRec = int8PackFs
-
-int8PackFs :: Fn s (s :> TPackFs TInt8)
-int8PackFs =
-  constant
-    ( begin
-        . size @TInt8
-        . quot1 (pack @TInt8)
-        . quot1 (unpack @TInt8)
-        . mkPackFsM
-    )
+  packFsRec = constant (size @TInt8 . quot1 pack . quot1 unpack . mkPackFsM)
 
 int8Max :: Integer
 int8Max = 2 ^ (7 :: Integer) - 1
