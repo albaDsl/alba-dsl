@@ -4,19 +4,22 @@ module TestEllipticCurve (testEllipticCurve) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
-import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, nip, swap)
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (drop, dup, nip, swap, tuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import DslDemo.EllipticCurve.Affine qualified as EA
+import DslDemo.EllipticCurve.Constants qualified as C
 import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as WN
+import DslDemo.EllipticCurve.JacobianWNafGlv qualified as WNG
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as W
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6)
+import QuickCheckSupport (Bits256 (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
-import Test.Tasty.QuickCheck (Large (..), NonNegative (..), testProperty)
+import Test.Tasty.QuickCheck (Property, testProperty, withMaxSuccess, (==>))
 import TestUtils2026 (evaluateProg, isTrue, isTrue')
 import Prelude hiding (drop, iterate)
 
@@ -38,22 +41,32 @@ testEllipticCurve =
         isTrue (evaluateProg progEllipticCurve6Precomp),
       testCase "Scalar multiply wNAF" $
         isTrue (evaluateProg progEllipticCurve5WNaf),
+      testCase "Scalar multiply wNAF & GLV" $
+        isTrue (evaluateProg progEllipticCurveWNafGlv),
       testProperty
         "Scalar multiply additivity (Affine)"
-        (propAdditivity EA.ecAdd EA.ecMul),
+        (withMaxSuccess 5 $ propAdditivity EA.ecAdd EA.ecMul),
       testProperty
         "Scalar multiply additivity (Jacobian)"
-        (propAdditivity EJ.ecAdd EJ.ecMul),
+        (withMaxSuccess 10 $ propAdditivity EJ.ecAdd EJ.ecMul),
       testProperty
-        "Scalar multiply additivity (Jacobian wNAF)"
+        "Scalar multiply additivity (wNAF)"
         (propAdditivity EJ.ecAdd wnafMul),
       testProperty
-        "Scalar multiply comparison (wNAF / plain Jacobian)"
+        "Scalar multiply additivity (wNAF & GLV)"
+        (propAdditivity EJ.ecAdd wnafGlvMul),
+      testProperty
+        "Scalar multiply comparison (wNAF & GLV / plain Jacobian)"
         propComparison
     ]
   where
     wnafMul :: forall s. Env (s :> TNat :> TPoint) (s :> TPoint)
     wnafMul = WN.setupTable ∘ swap ∘ WN.ecMul
+
+    wnafGlvMul :: forall s. Env (s :> TNat :> TPoint) (s :> TPoint)
+    wnafGlvMul =
+      (WNG.setupTable ∘ dup ∘ quot1 WNG.phi ∘ swap ∘ V.map ∘ tuple)
+        ∘ (swap ∘ WNG.ecMul)
 
 progEllipticCurveBasicAffine :: Fn s (s :> TBool)
 progEllipticCurveBasicAffine =
@@ -78,12 +91,20 @@ progEllipticCurve6 = runEnv (g ∘ W.setupTableM 6 ∘ verifyTestVectors W.ecMul
 progEllipticCurve5WNaf :: Fn s (s :> TBool)
 progEllipticCurve5WNaf = runEnv (g ∘ WN.setupTable ∘ verifyTestVectors WN.ecMul)
 
+progEllipticCurveWNafGlv :: Fn s (s :> TBool)
+progEllipticCurveWNafGlv =
+  runEnv
+    ( (g ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
+        ∘ verifyTestVectors WNG.ecMul
+    )
+
 -- Test vectors from:
 -- https://crypto.stackexchange.com/questions/784/
 -- are-there-any-secp256k1-ecdsa-test-examples-available
 verifyTestVectors ::
-  (forall s'. Env (s' :> TTable :> TNat) (s' :> TPoint)) ->
-  Env (s :> TTable) (s :> TBool)
+  (StackEntry table) =>
+  (forall s'. Env (s' :> table :> TNat) (s' :> TPoint)) ->
+  Env (s :> table) (s :> TBool)
 verifyTestVectors ecMulN =
   begin
     ∘ (dup ∘ nat 1 ∘ ecMulN)
@@ -183,28 +204,31 @@ progEllipticCurve6Precomp =
 propAdditivity ::
   (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->
   (forall s. Env (s :> TNat :> TPoint) (s :> TPoint)) ->
-  NonNegative (Large Int) ->
-  NonNegative (Large Int) ->
-  Bool
-propAdditivity ecAdd ecMul (NonNegative (Large a)) (NonNegative (Large b)) =
-  let prog =
-        runEnv
-          ( begin
-              ∘ (nat (fromIntegral a) ∘ g ∘ ecMul)
-              ∘ (nat (fromIntegral b) ∘ g ∘ ecMul)
-              ∘ ecAdd
-              ∘ (nat (fromIntegral a + fromIntegral b) ∘ g ∘ ecMul)
-              ∘ equal
-          )
-   in isTrue' $ evaluateProg prog
+  Bits256 ->
+  Bits256 ->
+  Property
+propAdditivity ecAdd ecMul (Bits256 a) (Bits256 b) =
+  (a > 0 && a < C.n && b > 0 && b < C.n) ==>
+    let prog =
+          runEnv
+            ( begin
+                ∘ (nat (fromIntegral a) ∘ g ∘ ecMul)
+                ∘ (nat (fromIntegral b) ∘ g ∘ ecMul)
+                ∘ ecAdd
+                ∘ (nat (fromIntegral a + fromIntegral b) ∘ g ∘ ecMul)
+                ∘ equal
+            )
+     in isTrue' $ evaluateProg prog
 
-propComparison :: NonNegative (Large Int) -> Bool
-propComparison (NonNegative (Large n)) =
-  let prog =
-        runEnv
-          ( begin
-              ∘ (nat (fromIntegral n) ∘ g ∘ EJ.ecMul)
-              ∘ (g ∘ WN.setupTable ∘ nat (fromIntegral n) ∘ WN.ecMul)
-              ∘ equal
-          )
-   in isTrue' $ evaluateProg prog
+propComparison :: Bits256 -> Property
+propComparison (Bits256 n) =
+  (n > 0 && n < C.n) ==>
+    let prog =
+          runEnv
+            ( begin
+                ∘ (nat (fromIntegral n) ∘ g ∘ EJ.ecMul)
+                ∘ (g ∘ WNG.setupTable ∘ g ∘ WNG.phi' ∘ WNG.setupTable ∘ tuple)
+                ∘ (nat (fromIntegral n) ∘ WNG.ecMul)
+                ∘ equal
+            )
+     in isTrue' $ evaluateProg prog

@@ -3,6 +3,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Math
     isOdd,
     square,
     halve,
+    signum,
     pow,
     pow',
     factorial,
@@ -17,18 +18,22 @@ import Alba.Dsl.V1.Bch2026
     TBool,
     TInt,
     TNat,
+    del,
     fn,
     int,
     name,
     nat,
+    ns,
     ns2,
     ns3,
     op0,
     op1,
+    op1Negate,
     op2,
     op2Drop,
     opDiv,
     opDup,
+    opLessThan,
     opMod,
     opMul,
     opNumEqual,
@@ -38,6 +43,7 @@ import Alba.Dsl.V1.Bch2026
     roll,
     un,
   )
+import Alba.Dsl.V1.Bch2026.Contract.Conditionals (cond)
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Misc
   ( ifZero,
@@ -59,6 +65,15 @@ square = opDup . opMul
 
 halve :: (StackNum x1) => Fn (s :> x1) (s :> x1)
 halve = op2 . opDiv
+
+signum :: Fn (s :> TInt) (s :> TInt)
+signum =
+  ns #n
+    . cond
+      [ (pick #n . op0 . opLessThan, del #n . op1Negate),
+        (pick #n . op0 . opNumEqual, del #n . op0)
+      ]
+      (del #n . op1)
 
 -- >>> import Alba.Dsl.V1.Bch2026
 -- >>> progSize pow

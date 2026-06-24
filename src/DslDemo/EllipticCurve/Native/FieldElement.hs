@@ -2,7 +2,7 @@
 
 module DslDemo.EllipticCurve.Native.FieldElement (FieldElement (..)) where
 
-import DslDemo.EllipticCurve.Native.Constants (pMod)
+import DslDemo.EllipticCurve.Constants (p)
 
 newtype FieldElement = FieldElement Integer
   deriving (Eq, Show)
@@ -13,8 +13,8 @@ instance Num FieldElement where
   abs x = x
   signum _ = 1
   negate (FieldElement x) = fromInteger $ negate x
-  fromInteger x = FieldElement (x `mod` pMod)
+  fromInteger x = FieldElement (x `mod` p)
 
 instance Fractional FieldElement where
-  recip x = x ^ (pMod - 2)
+  recip x = x ^ (p - 2)
   fromRational _ = error "FieldElement: fromRational"

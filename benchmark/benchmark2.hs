@@ -4,6 +4,8 @@
 module Main where
 
 import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (tuple)
+import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Vm.Bch2026
 import Criterion.Main (bench, bgroup, defaultMain, nf)
 import Crypto.Secp256k1 qualified as CS
@@ -11,88 +13,101 @@ import Data.Bits (shiftR)
 import Data.ByteString qualified as B
 import Data.Maybe (fromJust, fromMaybe)
 import Data.Sequence (Seq ((:|>)))
+import Data.Sequence qualified as S
 import Data.Word (Word8)
 import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.Field (TFe)
 import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
+import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
+import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Native.Affine qualified as NA
+import DslDemo.EllipticCurve.Native.FieldElement (FieldElement)
+import DslDemo.EllipticCurve.Native.Jacobian (Point (..))
 import DslDemo.EllipticCurve.Native.Jacobian qualified as NJ
+import DslDemo.EllipticCurve.Native.JacobianPlain qualified as NJ
+import DslDemo.EllipticCurve.Native.JacobianWNaf qualified as NJWN
+import DslDemo.EllipticCurve.Native.JacobianWNafGlv qualified as NJWNG
+import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved qualified as NJWNI
+import DslDemo.EllipticCurve.Native.JacobianWindowed qualified as NJW
 import DslDemo.EllipticCurve.Point qualified as EA
+import DslDemo.EllipticCurve.PrecomputedGTables (gTableWNaf5, gPhiTableWNaf5)
 import Numeric.Natural (Natural)
 
-expectedX :: Integer
-expectedX = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+data TestVal = TestVal
+  { n :: Natural,
+    expected :: Point
+  }
 
-expectedY :: Integer
-expectedY = 0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
+testVals :: [TestVal]
+testVals =
+  [ TestVal
+      0x9d671cd581c69bc5e697f5e45bcd07c6741496c20e7cf878896cf21467d7d140
+      ( P
+          0x7fd942e0294483eccdd72e37bfb6b46e3770fe983ae36aa7f53ab95f7a967269
+          0xabd5af5ca77ee717dcbf74a7d8133804abcd416b19f2ef36e1930869a889372b
+      ),
+    TestVal
+      0xf29bf191de7591289abc1333e76fd005775d12f35d625de6f5e8154b16ee3313
+      ( P
+          0x6bdf8e90894d0f604b40c160d418b4a43ff6e4aef9e83510d5f07ff4a0a7a752
+          0x64aeeb049690e94c60b4c744092edfb642bb9ef99d7ba5179614737acb90e63e
+      )
+  ]
 
 main :: IO ()
 main = do
-  let n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
   ctx <- CS.createContext
   defaultMain
     [ bgroup
         "EC multiply (Affine)"
-        [ bench "Haskell native" $ nf ecMultiplyNative n,
-          bench "albaVM" $ nf ecMultiply (compile O1 (progMul n))
+        [ bench "Haskell native" $ nf (verify (\n -> NA.mul n NA.g)) testVals,
+          bench "albaVM" $ nf (ecMultiply (compile O1 progMul)) testVals
         ],
       bgroup
         "EC multiply (Jacobian)"
-        [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) n,
-          bench "Haskell native" $ nf ecMultiplyNativeJacobi n,
+        [ bench "libsecp256k1" $ nf (ecMultiplyLib ctx) testVals,
+          bench "Haskell native" $
+            nf (verify (\n -> NJ.fromJacobian $ NJ.ecMul n NJ.g)) testVals,
           bench "Haskell native (windowed)" $
-            nf ecMultiplyNativeJacobiWindowed n,
-          bench "albaVM" $ nf ecMultiply (compile O1 (progMulJacobian n)),
+            nf (verify (\n -> NJ.fromJacobian $ NJW.ecMul n NJ.g)) testVals,
+          bench "Haskell native (wNAF)" $
+            nf (verify (\n -> NJ.fromJacobian $ NJWN.ecMul n NJ.g)) testVals,
+          bench "Haskell native (wNAF interleaved)" $
+            nf (verify (\n -> NJ.fromJacobian $ NJWNI.ecMul n NJ.g)) testVals,
+          bench "Haskell native (wNAF & GLV)" $
+            nf (verify (\n -> NJ.fromJacobian $ NJWNG.ecMul n NJ.g)) testVals,
+          bench "albaVM" $
+            nf (ecMultiply (compile O1 progMulJacobian)) testVals,
           bench "albaVM (windowed)" $
-            nf ecMultiply (compile O1 (progMulJacobianWindowed n)),
-          bench "albaVM (wNAF)" $
-            nf ecMultiply (compile O1 (progMulJacobianWNaf n))
+            nf (ecMultiply (compile O1 progMulJacobianWindowed)) testVals,
+          bench "albaVM (wNAF / precomp)" $
+            nf (ecMultiply (compile O1 progMulJacobianWNaf)) testVals,
+          bench "albaVM (wNAF & GLV / precomp)" $
+            nf (ecMultiply (compile O1 progMulWNafGlv)) testVals
         ]
     ]
 
-ecMultiplyNative :: Natural -> ()
-ecMultiplyNative n =
-  if NA.mul n NA.g
-    == NA.P
-      (NA.FieldElement expectedX)
-      (NA.FieldElement expectedY)
-    then ()
-    else error "ecMultiplyNative"
-
-ecMultiply :: CodeL1 -> ()
+ecMultiply :: CodeL1 -> [TestVal] -> ()
 ecMultiply code =
-  case vmEval code of
-    Right (_ :|> x :|> y, _alt) ->
-      if se2iUnsafe x == expectedX && se2iUnsafe y == expectedY
-        then ()
-        else error "ecMultiply"
-    Right _ -> error "ecMultiply"
-    Left err -> error ("err: " <> show err)
+  verify
+    ( \n ->
+        case vmEval code (S.fromList [i2SeUnsafe (fromIntegral n)]) of
+          Right (_ :|> x :|> y, _alt) ->
+            P (fromIntegral $ se2iUnsafe x) (fromIntegral $ se2iUnsafe y)
+          Right _ -> undefined
+          Left err -> error ("err: " <> show err)
+    )
 
-progMul :: Natural -> Fn s (s :> TFe :> TFe)
-progMul scalar = nat scalar ∘ g ∘ EA.ecMul ∘ EA.getXY
-
-progMulJacobian :: Natural -> Fn s (s :> TFe :> TFe)
-progMulJacobian scalar =
-  nat scalar ∘ g ∘ EJ.ecMul ∘ EA.getXY
-
-progMulJacobianWindowed :: Natural -> Fn s (s :> TFe :> TFe)
-progMulJacobianWindowed scalar =
-  runEnv (g ∘ EJW.setupTableM 4 ∘ nat scalar ∘ EJW.ecMul4 ∘ EA.getXY)
-
-progMulJacobianWNaf :: Natural -> Fn s (s :> TFe :> TFe)
-progMulJacobianWNaf scalar =
-  runEnv (g ∘ EJWN.setupTable ∘ nat scalar ∘ EJWN.ecMul ∘ EA.getXY)
-
-vmEval :: CodeL1 -> Either ScriptError (VmStack, VmStack)
-vmEval code =
+vmEval :: CodeL1 -> VmStack -> Either ScriptError (VmStack, VmStack)
+vmEval code stack =
   let state =
         (startState (largerLimits vmParamsStandard))
           { code,
-            logData = Nothing
+            logData = Nothing,
+            s = stack
           }
    in case evaluateScript context state of
         Left (err, _) -> Left err
@@ -107,38 +122,48 @@ vmEval code =
 
     context = fromJust $ mkTxContext undefined 0 undefined
 
-ecMultiplyNativeJacobi :: Natural -> ()
-ecMultiplyNativeJacobi n =
-  if NJ.toAffine (NJ.mul n NJ.g)
-    == NJ.P
-      (NJ.FieldElement expectedX)
-      (NJ.FieldElement expectedY)
-    then ()
-    else error "ecMultiplyNativeJacobi"
+progMul :: Fn (s :> TNat) (s :> TFe :> TFe)
+progMul = g ∘ EA.ecMul ∘ EA.getXY
 
-ecMultiplyNativeJacobiWindowed :: Natural -> ()
-ecMultiplyNativeJacobiWindowed n =
-  if NJ.toAffine (NJ.mulWindowed n NJ.g)
-    == NJ.P
-      (NJ.FieldElement expectedX)
-      (NJ.FieldElement expectedY)
-    then ()
-    else error "ecMultiplyNativeJacobiWindowed"
+progMulJacobian :: Fn (s :> TNat) (s :> TFe :> TFe)
+progMulJacobian = g ∘ EJ.ecMul ∘ EA.getXY
 
-ecMultiplyLib :: CS.Ctx -> Natural -> ()
-ecMultiplyLib ctx n =
-  let secKey =
-        fromMaybe
-          (error "ecMultiplyLib")
-          (CS.secKey (B.reverse $ naturalToBytes n))
-      pubKey = CS.derivePubKey ctx secKey
-      (x, y) = B.splitAt 32 pubKey.get
-   in if naturalToBytes (fromIntegral expectedX) == x
-        && naturalToBytes (fromIntegral expectedY) == y
-        then ()
-        else error "ecMultiplyLib"
+progMulJacobianWindowed :: Fn (s :> TNat) (s :> TFe :> TFe)
+progMulJacobianWindowed =
+  runEnv (g ∘ EJW.setupTableM 4 ∘ opSwap ∘ EJW.ecMul4 ∘ EA.getXY)
 
--- Little endian.
+progMulJacobianWNaf :: Fn (s :> TNat) (s :> TFe :> TFe)
+progMulJacobianWNaf =
+  runEnv (bytes gTableWNaf5 ∘ b2v ∘ opSwap ∘ EJWN.ecMul ∘ EA.getXY)
+
+b2v :: Fn (s :> TBytes) (s :> V.TVector TPointJ)
+b2v = cast
+
+progMulWNafGlv :: Fn (s :> TNat) (s :> TFe :> TFe)
+progMulWNafGlv =
+  runEnv
+    ( (bytes gTableWNaf5 ∘ b2v ∘ bytes gPhiTableWNaf5 ∘ b2v ∘ tuple)
+        ∘ (opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
+    )
+
+verify :: (Natural -> Point) -> [TestVal] -> ()
+verify mul vals =
+  if all (\test -> mul test.n == test.expected) vals then () else undefined
+
+ecMultiplyLib :: CS.Ctx -> [TestVal] -> ()
+ecMultiplyLib ctx =
+  verify
+    ( \n ->
+        let secKey =
+              fromMaybe
+                (error "ecMultiplyLib")
+                (CS.secKey (B.reverse $ naturalToBytes n))
+            pubKey = CS.derivePubKey ctx secKey
+            (x, y) = B.splitAt 32 pubKey.get
+         in P (bytesToFieldElement x) (bytesToFieldElement y)
+    )
+
+-- ## Bytes/Integer conversions. Little endian.
 naturalToBytes :: Natural -> B.ByteString
 naturalToBytes 0 = B.empty
 naturalToBytes n = B.unfoldr f (fromIntegral n)
@@ -146,3 +171,10 @@ naturalToBytes n = B.unfoldr f (fromIntegral n)
     f :: Integer -> Maybe (Word8, Integer)
     f 0 = Nothing
     f x = Just (fromIntegral x, x `shiftR` 8)
+
+bytesToFieldElement :: B.ByteString -> FieldElement
+bytesToFieldElement b | B.null b = fromInteger 0
+bytesToFieldElement b = fromIntegral $ B.foldr f 0 b
+  where
+    f :: Word8 -> Natural -> Natural
+    f x acc = acc * 256 + fromIntegral x

@@ -27,10 +27,7 @@ import Alba.Dsl.V1.Bch2026
     ns4,
     op0,
     op2Drop,
-    opFalse,
     opIf,
-    opTrue,
-    opUntil,
     pick,
     quot0,
     quot2,
@@ -53,14 +50,13 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     fromMaybe',
     ifZero,
     just,
-    nat1SubUnsafe,
-    nip,
     nothing,
     swap,
     tuple,
   )
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
+import DslDemo.EllipticCurve.Common (doubleN)
 import DslDemo.EllipticCurve.Jacobian
   ( ecAdd,
     ecDouble,
@@ -115,15 +111,6 @@ ecMulM windowSize =
 
     fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
     fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'
-
-doubleN :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
-doubleN =
-  opUntil
-    ( begin
-        . (swap . dup . op0 . equal)
-        . opIf (swap . opTrue) (nat1SubUnsafe . swap . EC.ecDoubleJ . opFalse)
-    )
-    . nip
 
 digitsM :: Natural -> Fn (s :> TNat) (s :> V.TVector TInt8)
 digitsM windowSize = nat numValues . quot2 f . apply2 . swap . V.unfoldr

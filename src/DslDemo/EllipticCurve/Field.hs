@@ -59,10 +59,12 @@ instance BlobEq TFe where
   blobEqRec = blobEqRecord
 
 mkFe :: Fn (s :> TNat) (s :> TFe)
-mkFe = dup . nat 0 . nat (p - 1) . opWithin . opVerify . n2i . fromRaw
+mkFe =
+  dup . nat 0 . nat (fromIntegral p - 1) . opWithin . opVerify . n2i . fromRaw
 
 pushFe :: Natural -> Fn s (s :> TFe)
-pushFe x = assert (x >= 0 && x <= (p - 1)) (int (fromIntegral x) . fromRaw)
+pushFe x =
+  assert (x >= 0 && x <= (fromIntegral p - 1)) (int (fromIntegral x) . fromRaw)
 
 feAdd :: Fn (s :> TFe :> TFe) (s :> TFe)
 feAdd = fn (toRaw2 . add . primeModulus . mod . fromRaw)

@@ -4,24 +4,21 @@
 -- with 256 Bit Primes", Shay Gueron, Vlad Krasnov.
 
 module DslDemo.EllipticCurve.Native.Jacobian
-  ( g,
-    mul,
-    add,
-    double,
-    mulWindowed,
-    toAffine,
-    Point (..),
+  ( Point (..),
     PointJ (..),
     FieldElement (..),
+    g,
+    ecAdd,
+    ecDouble,
+    ecDoubleN,
+    ecNegate,
+    fromJacobian,
   )
 where
 
-import Data.Vector qualified as V
+import DslDemo.EllipticCurve.Native.Affine (Point (..))
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement (..))
 import Numeric.Natural (Natural)
-
-data Point = P !FieldElement !FieldElement | Identity
-  deriving (Eq, Show)
 
 data PointJ = PJ !FieldElement !FieldElement !FieldElement | PJIdentity
   deriving (Eq, Show)
@@ -33,10 +30,10 @@ g =
     0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
     1
 
-add :: PointJ -> PointJ -> PointJ
-add PJIdentity p = p
-add p PJIdentity = p
-add p1@(PJ x1 y1 z1) (PJ x2 y2 z2) =
+ecAdd :: PointJ -> PointJ -> PointJ
+ecAdd PJIdentity p = p
+ecAdd p PJIdentity = p
+ecAdd p1@(PJ x1 y1 z1) (PJ x2 y2 z2) =
   let u1 = x1 * z2 ^ (2 :: Int)
       u2 = x2 * z1 ^ (2 :: Int)
       s1 = y1 * z2 ^ (3 :: Int)
@@ -45,7 +42,7 @@ add p1@(PJ x1 y1 z1) (PJ x2 y2 z2) =
         then
           if s1 /= s2
             then PJIdentity
-            else double p1
+            else ecDouble p1
         else
           let h = u2 - u1
               r = s2 - s1
@@ -54,9 +51,13 @@ add p1@(PJ x1 y1 z1) (PJ x2 y2 z2) =
               z3 = h * z1 * z2
            in PJ x3 y3 z3
 
-double :: PointJ -> PointJ
-double PJIdentity = PJIdentity
-double (PJ x y z) =
+ecNegate :: PointJ -> PointJ
+ecNegate PJIdentity = PJIdentity
+ecNegate (PJ x y z) = (PJ x (Prelude.negate y) z)
+
+ecDouble :: PointJ -> PointJ
+ecDouble PJIdentity = PJIdentity
+ecDouble (PJ x y z) =
   let s = 4 * x * y ^ (2 :: Int)
       m = 3 * x ^ (2 :: Int)
       x' = m ^ (2 :: Int) - 2 * s
@@ -64,51 +65,13 @@ double (PJ x y z) =
       z' = 2 * y * z
    in PJ x' y' z'
 
-mul :: Natural -> PointJ -> PointJ
-mul _ PJIdentity = PJIdentity
-mul n p = mul' n p PJIdentity
+ecDoubleN :: Natural -> PointJ -> PointJ
+ecDoubleN 0 p = p
+ecDoubleN n p = ecDoubleN (pred n) (ecDouble p)
 
-mul' :: Natural -> PointJ -> PointJ -> PointJ
-mul' 0 _ r = r
-mul' n p r =
-  let r' = if odd n then add r p else r
-      p' = double p
-   in mul' (n `div` 2) p' r'
-
-windowSize :: Natural
-windowSize = 4
-
-numValues :: Natural
-numValues = 2 ^ windowSize
-
-mulWindowed :: Natural -> PointJ -> PointJ
-mulWindowed _ PJIdentity = PJIdentity
-mulWindowed n p = mulWindowed' table (digits n []) PJIdentity
-  where
-    table :: V.Vector PointJ
-    table = V.iterateN (fromIntegral numValues) (add p) PJIdentity
-
-    digits :: Natural -> [Natural] -> [Natural]
-    digits 0 acc = acc
-    digits x acc = digits (x `div` numValues) (x `rem` numValues : acc)
-
-mulWindowed' :: V.Vector PointJ -> [Natural] -> PointJ -> PointJ
-mulWindowed' _table [] q = q
-mulWindowed' table (digit : rest) q =
-  let q' = doubleN windowSize q
-      q'' =
-        if digit > 0
-          then add q' (table V.! fromIntegral digit)
-          else q'
-   in mulWindowed' table rest q''
-  where
-    doubleN :: Natural -> PointJ -> PointJ
-    doubleN 0 p = p
-    doubleN n p = doubleN (pred n) (double p)
-
-toAffine :: PointJ -> Point
-toAffine PJIdentity = Identity
-toAffine (PJ x y z) =
+fromJacobian :: PointJ -> Point
+fromJacobian PJIdentity = Identity
+fromJacobian (PJ x y z) =
   let x' = x / z ^ (2 :: Int)
       y' = y / z ^ (3 :: Int)
    in P x' y'

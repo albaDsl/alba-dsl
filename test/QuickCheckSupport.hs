@@ -105,3 +105,16 @@ asciiChar :: Gen Word8
 asciiChar = do
   x <- chooseInteger (0, 127)
   pure $ fromIntegral x
+
+newtype Bits256 = Bits256 Integer
+  deriving (Show)
+
+instance Arbitrary Bits256 where
+  arbitrary = do
+    x <-
+      chooseInteger
+        ( 0,
+          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        ) ::
+        Gen Integer
+    pure $ Bits256 x

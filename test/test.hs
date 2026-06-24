@@ -11,6 +11,7 @@ import TestCustomTypes (testCustomTypes)
 import TestDataPushing (testDataPushing)
 import TestDataSig (testDataSig)
 import TestEllipticCurve (testEllipticCurve)
+import TestEllipticCurveNative (testEllipticCurveNative)
 import TestEval (testEval)
 import TestFunctions (testFunctions)
 import TestFunctionsLowLevel (testFunctionsLowLevel)
@@ -63,6 +64,7 @@ tests =
       testDataPushing,
       testDataSig,
       testEllipticCurve,
+      testEllipticCurveNative,
       testEval,
       testFunctions,
       testFunctionsLowLevel,

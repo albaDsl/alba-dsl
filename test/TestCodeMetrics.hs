@@ -4,6 +4,7 @@ module TestCodeMetrics (testCodeMetrics) where
 
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
+    Env,
     Fn,
     FnA,
     FnC,
@@ -29,18 +30,19 @@ import Alba.Dsl.V1.Bch2026
     pick,
     quot1,
     quot2,
+    runEnv,
     sizeStr,
     (∘),
   )
-import Alba.Dsl.V1.Bch2026.Contract.BlobEq (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.ExternalLibs.Vc qualified as Vc
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
 import Alba.Dsl.V1.Bch2026.Contract.Lzss qualified as CLZ
 import Alba.Dsl.V1.Bch2026.Contract.LzssBit qualified as CLZB
+import Alba.Dsl.V1.Bch2026.Contract.Prelude (BlobEq (..), nip)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt64 (TInt64, int64)
 import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
+import Alba.Dsl.V1.Bch2026.Contract.TTuple (tuple, untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
 import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
@@ -56,10 +58,16 @@ import DslDemo.EllipticCurve.Affine qualified as EA
 import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
+import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
-import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6, gTableWNaf5)
+import DslDemo.EllipticCurve.PrecomputedGTables
+  ( gPhiTableWNaf5,
+    gTable4,
+    gTable6,
+    gTableWNaf5,
+  )
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
@@ -126,7 +134,8 @@ executionCost :: TestTree
 executionCost =
   testGroup
     "Execution Cost"
-    [ golden "EC scalar point multiply (Windowed Jacobian demo)" $
+    [ golden "EC scalar point multiply (Jacobian)" $ costOf' plainMul,
+      golden "EC scalar point multiply (Windowed Jacobian demo)" $
         costOf' windowedMul,
       golden "EC scalar point multiply (Windowed Jacobian 4 / precomp) " $
         costOf' windowedMul4Precomputed,
@@ -135,6 +144,8 @@ executionCost =
       golden "EC scalar point multiply (wNAF 5)" $ costOf' wNaf5,
       golden "EC scalar point multiply (wNAF 5 / precomp)" $
         costOf' wNaf5Precomputed,
+      golden "EC scalar point multiply (wNAF & GLV / precomp)" $
+        costOf' wNafGlvPrecomputed,
       golden "Vector ops" $ costOf' vectorOps,
       golden "LZSS" $ costOf' decompressTest,
       golden "LZSS Bitstream" $ costOf' decompressTestBit
@@ -216,20 +227,25 @@ turtleVmCostOf prog =
 arithmetic :: FnC
 arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 
+plainMul :: FnC
+plainMul = bytes [] ∘ verifyTestVector (nip ∘ g ∘ EJ.ecMul)
+
 windowedMul :: FnC
 windowedMul = g ∘ EJW.setupTableM 4 ∘ verifyTestVector EJW.ecMul4
 
 verifyTestVector ::
-  (forall s'. Fn (s' :> TTable :> TNat) (s' :> TPoint)) ->
-  Fn (s :> TTable) s
+  (forall s'. Env (s' :> table :> TNat) (s' :> TPoint)) ->
+  Fn (s :> table) s
 verifyTestVector ecMul =
-  begin
-    ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
-    ∘ ecMul
-    ∘ pushPoint
-      0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-      0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
-    ∘ (equal ∘ opVerify)
+  runEnv
+    ( begin
+        ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
+        ∘ ecMul
+        ∘ pushPoint
+          0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
+          0xB7C52588D95C3B9AA25B0403F1EEF75702E84BB7597AABE663B82F6F04EF2777
+        ∘ (equal ∘ opVerify)
+    )
 
 windowedMul4Precomputed :: FnC
 windowedMul4Precomputed = bytes gTable4 ∘ b2v ∘ verifyTestVector EJW.ecMul4
@@ -245,6 +261,11 @@ wNaf5 = g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul
 
 wNaf5Precomputed :: FnC
 wNaf5Precomputed = bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul
+
+wNafGlvPrecomputed :: FnC
+wNafGlvPrecomputed =
+  (bytes gTableWNaf5 ∘ b2v ∘ bytes gPhiTableWNaf5 ∘ b2v ∘ tuple)
+    ∘ verifyTestVector EJWNG.ecMul
 
 vectorOps :: FnC
 vectorOps =
