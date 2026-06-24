@@ -2,8 +2,9 @@
 
 module TestQuotationsB (testQuotationsB) where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026 hiding (invoke1, invoke2, quot1, quot2)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero)
+import Alba.Dsl.V1.Bch2026.QuotationsB (invoke1, invoke2, quot1, quot2)
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)

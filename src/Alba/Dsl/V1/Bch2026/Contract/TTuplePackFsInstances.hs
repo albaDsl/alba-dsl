@@ -8,8 +8,8 @@ import Alba.Dsl.V1.Bch2026
     Stack ((:>)),
     begin,
     constant,
-    quot1,
     nat,
+    quot1,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Misc (pad, unpad)

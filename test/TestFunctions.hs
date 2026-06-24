@@ -9,7 +9,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     TInt64,
     TInt8,
     apply2,
-    apply3_2,
+    apply3,
     ifZero,
     int64,
     nat1SubUnsafe,
@@ -142,7 +142,7 @@ progRuntimeFunctions =
         ∘ (int 5 ∘ swap ∘ invoke1 ∘ int 2 ∘ opNumEqualVerify)
         ∘ (int 3 ∘ int 2 ∘ opAdd ∘ f ∘ apply2)
         ∘ (int 9 ∘ swap ∘ invoke1 ∘ int 4 ∘ opNumEqualVerify)
-        ∘ (int 3 ∘ int 6 ∘ g ∘ apply3_2)
+        ∘ (int 3 ∘ int 6 ∘ g ∘ apply3 ∘ apply2)
         ∘ (int 4 ∘ swap ∘ invoke1 ∘ opTrue ∘ opEqualVerify)
         ∘ opTrue
     )

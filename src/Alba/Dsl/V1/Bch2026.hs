@@ -7,7 +7,7 @@ module Alba.Dsl.V1.Bch2026
     module Alba.Dsl.V1.Bch2026.Lang,
     module Alba.Dsl.V1.Bch2026.LangArgs,
     module Alba.Dsl.V1.Bch2026.Ops,
-    module Alba.Dsl.V1.Bch2026.QuotationsB,
+    module Alba.Dsl.V1.Bch2026.QuotationsA,
     module Alba.Dsl.V1.Bch2026.TxDsl,
     module Alba.Dsl.V1.Common,
     module Alba.Dsl.V1.Common.Compile,
@@ -28,7 +28,7 @@ import Alba.Dsl.V1.Bch2026.Infix
 import Alba.Dsl.V1.Bch2026.Lang
 import Alba.Dsl.V1.Bch2026.LangArgs
 import Alba.Dsl.V1.Bch2026.Ops
-import Alba.Dsl.V1.Bch2026.QuotationsB
+import Alba.Dsl.V1.Bch2026.QuotationsA
 import Alba.Dsl.V1.Bch2026.TxDsl
 import Alba.Dsl.V1.Common
 import Alba.Dsl.V1.Common.Compile

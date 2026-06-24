@@ -19,8 +19,8 @@ import Alba.Dsl.V1.Bch2026
     cast,
     constant,
     fn,
-    quot1,
     nat,
+    quot1,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude

@@ -14,22 +14,22 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TQuotB,
+    TQuotA,
     begin,
     castStack,
     constant,
-    quot2,
-    quot2_0,
     opEqual,
     opEqualVerify,
+    quot2,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (TBlobEqRec)
+import {-# SOURCE #-} Alba.Dsl.V1.Bch2026.Contract.TUnit (TUnit, unit)
 import Prelude (undefined)
 
 mkBlobEqRec ::
   Fn
-    (s :> TQuotB '[a, a] '[TBool] :> TQuotB '[a, a] '[])
+    (s :> TQuotA '[a, a] '[TBool] :> TQuotA '[a, a] '[TUnit])
     (s :> TBlobEqRec a)
 mkBlobEqRec = undefined -- FIXME: implement.
 
@@ -47,6 +47,6 @@ blobEqRecord =
   constant
     ( begin
         . quot2 (valsToBytes . opEqual)
-        . quot2_0 (valsToBytes . opEqualVerify)
+        . quot2 (valsToBytes . opEqualVerify . unit)
         . mkBlobEqRec
     )

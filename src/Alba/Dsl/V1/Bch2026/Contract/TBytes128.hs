@@ -21,7 +21,6 @@ import Alba.Dsl.V1.Bch2026
     fn,
     i2nUnsafe,
     int,
-    quot1,
     n2i,
     name,
     name2,
@@ -34,6 +33,7 @@ import Alba.Dsl.V1.Bch2026
     opSplit,
     opVerify,
     pick,
+    quot1,
     roll,
     (.),
   )

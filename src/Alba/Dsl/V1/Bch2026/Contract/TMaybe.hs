@@ -21,8 +21,8 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TQuotB,
     TNat,
+    TQuotA,
     begin,
     bytes,
     cast,
@@ -30,11 +30,11 @@ import Alba.Dsl.V1.Bch2026
     fn,
     invoke0,
     invoke1,
-    quot1,
     nat,
     opCat,
     opIf,
     opSplit,
+    quot1,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
@@ -155,7 +155,7 @@ split = toRaw . tagSize . opSplit
 fromMaybe :: (StackEntry a) => Fn (s :> a :> TMaybe a) (s :> a)
 fromMaybe = fn (contentAndBool . opIf nip drop)
 
-fromMaybe' :: (StackEntry a) => Fn (s :> TQuotB '[] '[a] :> TMaybe a) (s :> a)
+fromMaybe' :: (StackEntry a) => Fn (s :> TQuotA '[] '[a] :> TMaybe a) (s :> a)
 fromMaybe' = fn (contentAndBool . opIf nip (drop . invoke0))
 
 contentAndBool :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a :> TBool)
@@ -173,12 +173,12 @@ ifJust ifOps elseOps = contentAndBool . opIf ifOps (drop . elseOps)
 
 maybe ::
   (StackEntry a, StackEntry b) =>
-  Fn (s :> b :> TQuotB '[a] '[b] :> TMaybe a) (s :> b)
+  Fn (s :> b :> TQuotA '[a] '[b] :> TMaybe a) (s :> b)
 maybe = fn (ifJust (swap . invoke1 . nip) drop)
 
 map ::
   (StackEntry a) =>
-  Fn (s :> TQuotB '[a] '[b] :> TMaybe a) (s :> TMaybe b)
+  Fn (s :> TQuotA '[a] '[b] :> TMaybe a) (s :> TMaybe b)
 map = fn (ifJust (swap . invoke1 . just) (drop . nothing))
 
 tagSize :: Fn s (s :> TNat)

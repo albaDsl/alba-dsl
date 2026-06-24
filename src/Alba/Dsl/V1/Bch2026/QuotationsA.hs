@@ -4,7 +4,6 @@ module Alba.Dsl.V1.Bch2026.QuotationsA
   ( quot0,
     quot1,
     quot2,
-    quot2_0,
     quot3,
     quot4,
     invoke0,
@@ -52,14 +51,6 @@ quot2 ::
   Fn (s :> t1 :> t2) (s :> r1) ->
   Fn s' (s' :> TQuotA '[t1, t2] '[r1])
 quot2 prog st =
-  let fId = fromMaybe regErr (withFrozenCallStack getCallerQuotationId)
-   in registerQuot fId prog st
-
-quot2_0 ::
-  (HasCallStack, StackEntry t1, StackEntry t2) =>
-  Fn (s :> t1 :> t2) s ->
-  Fn s' (s' :> TQuotA '[t1, t2] '[])
-quot2_0 prog st =
   let fId = fromMaybe regErr (withFrozenCallStack getCallerQuotationId)
    in registerQuot fId prog st
 

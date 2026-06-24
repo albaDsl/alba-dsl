@@ -10,8 +10,7 @@ module DslDemo.EllipticCurve.JacobianWNaf
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( Env,
-    Fn,
+  ( Fn,
     Stack ((:>)),
     StackEntry,
     TInt,
@@ -20,10 +19,6 @@ import Alba.Dsl.V1.Bch2026
     fn,
     i2nUnsafe,
     int,
-    quot0,
-    quot1,
-    quot2,
-    quot3,
     n2i,
     name,
     name2,
@@ -39,6 +34,10 @@ import Alba.Dsl.V1.Bch2026
     opUntil,
     opWhen,
     pick,
+    quot0,
+    quot1,
+    quot2,
+    quot3,
     roll,
     (.),
   )
@@ -90,7 +89,7 @@ type TTable = TVector TPointJ
 windowSize :: Int
 windowSize = 5
 
-setupTable :: Bch.Env (s :> TPoint) (s :> TTable)
+setupTable :: Bch.Fn (s :> TPoint) (s :> TTable)
 setupTable =
   fn
     ( (toJacobian . ns #p . nat numValues . pick #p . dup . EC.ecAddJ)
@@ -99,7 +98,7 @@ setupTable =
   where
     numValues = 2 ^ (windowSize - 1) - 1
 
-ecMul :: Env (s :> TTable :> TNat) (s :> TPoint)
+ecMul :: Fn (s :> TTable :> TNat) (s :> TPoint)
 ecMul =
   fn
     ( (ns2 #tab #n . pick #n . nat 0 . equal)
@@ -127,7 +126,7 @@ ecMul =
     fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
     fromJust = quot0 errCanNotHappen . swap . fromMaybe'
 
-chunksM :: Env (s :> TNat) (s :> TTuple (V.TVector (TTuple TInt16 TInt16)) TNat)
+chunksM :: Fn (s :> TNat) (s :> TTuple (V.TVector (TTuple TInt16 TInt16)) TNat)
 chunksM =
   (n2i . ns #n)
     . (name #z0 (pick #n . countTrailingZeros))

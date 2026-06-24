@@ -13,8 +13,6 @@ import Alba.Dsl.V1.Bch2026
     constant,
     fn,
     int,
-    quot1,
-    quot2,
     nat,
     op1Add,
     op1Sub,
@@ -35,6 +33,8 @@ import Alba.Dsl.V1.Bch2026
     opSub,
     opVerify,
     opWithin,
+    quot1,
+    quot2,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))

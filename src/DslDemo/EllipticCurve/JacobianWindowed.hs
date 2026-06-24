@@ -11,8 +11,7 @@ module DslDemo.EllipticCurve.JacobianWindowed
 where
 
 import Alba.Dsl.V1.Bch2026
-  ( Env,
-    Fn,
+  ( Fn,
     Stack ((:>)),
     StackEntry,
     TInt,
@@ -21,9 +20,6 @@ import Alba.Dsl.V1.Bch2026
     del,
     fn,
     i2nUnsafe,
-    quot0,
-    quot2,
-    quot4,
     n2i,
     name,
     nat,
@@ -36,6 +32,9 @@ import Alba.Dsl.V1.Bch2026
     opTrue,
     opUntil,
     pick,
+    quot0,
+    quot2,
+    quot4,
     roll,
     (.),
   )
@@ -47,7 +46,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     TMaybe,
     TTuple,
     apply2,
-    apply4_2,
+    apply3,
+    apply4,
     dup,
     errCanNotHappen,
     fromMaybe',
@@ -75,26 +75,26 @@ import Prelude ((^))
 
 type TTable = TVector TPointJ
 
-setupTableM :: Natural -> Env (s :> TPoint) (s :> TTable)
+setupTableM :: Natural -> Fn (s :> TPoint) (s :> TTable)
 setupTableM windowSize =
   (toJacobian . quot2 EC.ecAddJ . apply2 . nat numValues . swap)
     . (makeIdentity . V.iterateN)
   where
     numValues = 2 ^ windowSize
 
-ecMul4 :: Env (s :> TTable :> TNat) (s :> TPoint)
+ecMul4 :: Fn (s :> TTable :> TNat) (s :> TPoint)
 ecMul4 = fn (ecMulM 4)
 
-ecMul6 :: Env (s :> TTable :> TNat) (s :> TPoint)
+ecMul6 :: Fn (s :> TTable :> TNat) (s :> TPoint)
 ecMul6 = fn (ecMulM 6)
 
-ecMulM :: Natural -> Env (s :> TTable :> TNat) (s :> TPoint)
+ecMulM :: Natural -> Fn (s :> TTable :> TNat) (s :> TPoint)
 ecMulM windowSize =
   begin
     . (ns2 #tab #n . pick #n . nat 0 . equal)
     . (opIf (del #tab . del #n . makeIdentity))
       ( begin
-          . (roll #tab . nat windowSize . quot4 f . apply4_2)
+          . (roll #tab . nat windowSize . quot4 f . apply4 . apply3)
           . (makeIdentity . roll #n . digitsM windowSize . V.foldr)
       )
     . fromJacobian
@@ -125,7 +125,7 @@ doubleN =
     )
     . nip
 
-digitsM :: Natural -> Env (s :> TNat) (s :> V.TVector TInt8)
+digitsM :: Natural -> Fn (s :> TNat) (s :> V.TVector TInt8)
 digitsM windowSize = nat numValues . quot2 f . apply2 . swap . V.unfoldr
   where
     numValues = 2 ^ windowSize

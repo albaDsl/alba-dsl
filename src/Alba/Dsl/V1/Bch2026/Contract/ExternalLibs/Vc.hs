@@ -15,6 +15,8 @@ import Alba.Dsl.V1.Bch2026
     nat,
     op1Add,
     opRot,
+    quot1,
+    quot2,
     (.),
   )
 import Alba.Dsl.V1.Bch2026.Contract.Integral (Integral (..))
@@ -26,8 +28,6 @@ import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt)
-import Alba.Dsl.V1.Bch2026.Lang (runEnv)
-import Alba.Dsl.V1.Bch2026.QuotationsB (quot1, quot2)
 import Alba.Dsl.V1.Bch2026.TxDsl
   ( libraryToTx,
     simpleWrap,
@@ -58,19 +58,17 @@ numUtxos = fromIntegral $ P.length deployTx.outputs
 
 showCase :: Fn s s
 showCase =
-  runEnv
-    ( begin
-        . (int8Vector . V.head . drop)
-        . (int8Vector . V.last . drop)
-        . (int8Vector . V.length . drop)
-        . (quot1 (drop . int8 2) . int8Vector . V.map . drop)
-        . (quot2 add . int8 0 . int8Vector . V.foldl . drop)
-        . (int8Vector . int8Vector . V.zip . drop)
-        . (quot2 add . int8Vector . int8Vector . V.zipWith . drop)
-        . (nat 10 . quot1 (op1Add . n2Int8) . V.generate)
-        . (quot1 (int8 3 . lessThan) . swap . V.filter . drop)
-        . (int8Vector . MS.sort . drop)
-    )
+  begin
+    . (int8Vector . V.head . drop)
+    . (int8Vector . V.last . drop)
+    . (int8Vector . V.length . drop)
+    . (quot1 (drop . int8 2) . int8Vector . V.map . drop)
+    . (quot2 add . int8 0 . int8Vector . V.foldl . drop)
+    . (int8Vector . int8Vector . V.zip . drop)
+    . (quot2 add . int8Vector . int8Vector . V.zipWith . drop)
+    . (nat 10 . quot1 (op1Add . n2Int8) . V.generate)
+    . (quot1 (int8 3 . lessThan) . swap . V.filter . drop)
+    . (int8Vector . MS.sort . drop)
   where
     int8Vector :: Fn s (s :> TVector TInt8)
     int8Vector = int8 0 . int8 1 . V.empty . V.cons . V.cons

@@ -6,17 +6,14 @@
 module Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms where
 
 import Alba.Dsl.V1.Bch2026
-  ( Env,
-    Fn,
+  ( Fn,
     Stack ((:>)),
     StackEntry,
-    TQuotB,
     TNat,
+    TQuotA,
     i2nUnsafe,
     int,
     invoke1,
-    quot0,
-    quot1,
     n2i,
     name,
     ns,
@@ -25,6 +22,8 @@ import Alba.Dsl.V1.Bch2026
     ns5,
     pick,
     pickN,
+    quot0,
+    quot1,
     roll,
     rollN,
     un,
@@ -44,7 +43,7 @@ import Prelude (undefined)
 countingSortDesc ::
   forall a s.
   (PackFs a) =>
-  Env (s :> TNat :> TQuotB '[a] '[TNat] :> TVector a) (s :> TVector a)
+  Fn (s :> TNat :> TQuotA '[a] '[TNat] :> TVector a) (s :> TVector a)
 countingSortDesc =
   ( ns3 #w #key #vec
       . name #n (pick #vec . V.length)

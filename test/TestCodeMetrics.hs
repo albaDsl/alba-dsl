@@ -2,10 +2,8 @@
 
 module TestCodeMetrics (testCodeMetrics) where
 
-import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
-    Env,
     Fn,
     FnA,
     FnC,
@@ -13,8 +11,8 @@ import Alba.Dsl.V1.Bch2026
     S,
     Stack (..),
     TBytes,
-    TQuotB,
     TNat,
+    TQuotA,
     begin,
     bytes,
     cast,
@@ -24,14 +22,13 @@ import Alba.Dsl.V1.Bch2026
     compressibilityStr,
     delCount,
     int,
-    quot1,
-    quot2,
     n2i,
     nat,
     ns2,
     opVerify,
     pick,
-    runEnv,
+    quot1,
+    quot2,
     sizeStr,
     (∘),
   )
@@ -46,6 +43,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped, (.))
@@ -219,11 +217,11 @@ arithmetic :: FnC
 arithmetic = int 2 ∘ int 3 ∘ add ∘ int 4 ∘ sub ∘ int 1 ∘ equalVerify
 
 windowedMul :: FnC
-windowedMul = runEnv (g ∘ EJW.setupTableM 4 ∘ verifyTestVector EJW.ecMul4)
+windowedMul = g ∘ EJW.setupTableM 4 ∘ verifyTestVector EJW.ecMul4
 
 verifyTestVector ::
-  (forall s'. Env (s' :> TTable :> TNat) (s' :> TPoint)) ->
-  Env (s :> TTable) s
+  (forall s'. Fn (s' :> TTable :> TNat) (s' :> TPoint)) ->
+  Fn (s :> TTable) s
 verifyTestVector ecMul =
   begin
     ∘ nat 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140
@@ -234,71 +232,66 @@ verifyTestVector ecMul =
     ∘ (equal ∘ opVerify)
 
 windowedMul4Precomputed :: FnC
-windowedMul4Precomputed =
-  runEnv (bytes gTable4 ∘ b2v ∘ verifyTestVector EJW.ecMul4)
+windowedMul4Precomputed = bytes gTable4 ∘ b2v ∘ verifyTestVector EJW.ecMul4
 
 b2v :: Fn (s :> TBytes) (s :> TTable)
 b2v = cast
 
 windowedMul6Precomputed :: FnC
-windowedMul6Precomputed =
-  runEnv (bytes gTable6 ∘ b2v ∘ verifyTestVector EJW.ecMul6)
+windowedMul6Precomputed = bytes gTable6 ∘ b2v ∘ verifyTestVector EJW.ecMul6
 
 wNaf5 :: FnC
-wNaf5 = runEnv (g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul)
+wNaf5 = g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul
 
 wNaf5Precomputed :: FnC
-wNaf5Precomputed =
-  runEnv (bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul)
+wNaf5Precomputed = bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul
 
 vectorOps :: FnC
 vectorOps =
-  runEnv
-    ( begin
-        ∘ (nat n ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-        ∘ (nat n ∘ quot1 add1 ∘ int8 1 ∘ V.iterateN)
-        ∘ ns2 #vec64 #vec8
-        ∘ ( begin
-              ∘ (quot2 (toInt ∘ fromInt ∘ add) ∘ nat 0)
-              ∘ (nat n ∘ int8 1 ∘ V.replicate)
-              ∘ (V.foldl ∘ nat n ∘ equalVerify)
-          )
-        ∘ (pick #vec64 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
-        ∘ (pick #vec8 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
-        ∘ ( begin
-              ∘ quot2 (untuple ∘ toInt ∘ swap ∘ toInt ∘ add ∘ add)
-              ∘ int 0
-              ∘ (pick #vec8 ∘ pick #vec8 ∘ V.zip)
-              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
-          )
-        ∘ ( begin
-              ∘ quot2 (toInt ∘ swap ∘ add)
-              ∘ int 0
-              ∘ ( begin
-                    ∘ ( (quot2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
-                          Fn s (s :> TQuotB '[TInt64, TInt8] '[TInt64])
-                      )
-                    ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
-                )
-              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
-          )
-        ∘ ( begin
-              ∘ (quot2 (toInt ∘ add) ∘ int 0)
-              ∘ (quot1 (int64 10 ∘ mul) ∘ pick #vec64 ∘ V.map)
-              ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1) * 5))
-              ∘ equalVerify
-          )
-        ∘ ( begin
-              ∘ quot2 (toInt ∘ add)
-              ∘ int 0
-              ∘ ( begin
-                    ∘ quot1 (int64 2 ∘ mod ∘ int64 0 ∘ equal)
-                    ∘ (pick #vec64 ∘ V.filter)
-                )
-              ∘ (V.foldl ∘ int 650 ∘ equalVerify)
-          )
-        ∘ delCount 2
-    )
+  begin
+    ∘ (nat n ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+    ∘ (nat n ∘ quot1 add1 ∘ int8 1 ∘ V.iterateN)
+    ∘ ns2 #vec64 #vec8
+    ∘ ( begin
+          ∘ (quot2 (toInt ∘ fromInt ∘ add) ∘ nat 0)
+          ∘ (nat n ∘ int8 1 ∘ V.replicate)
+          ∘ (V.foldl ∘ nat n ∘ equalVerify)
+      )
+    ∘ (pick #vec64 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
+    ∘ (pick #vec8 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
+    ∘ ( begin
+          ∘ quot2 (untuple ∘ toInt ∘ swap ∘ toInt ∘ add ∘ add)
+          ∘ int 0
+          ∘ (pick #vec8 ∘ pick #vec8 ∘ V.zip)
+          ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
+      )
+    ∘ ( begin
+          ∘ quot2 (toInt ∘ swap ∘ add)
+          ∘ int 0
+          ∘ ( begin
+                ∘ ( (quot2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
+                      Fn s (s :> TQuotA '[TInt64, TInt8] '[TInt64])
+                  )
+                ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
+            )
+          ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
+      )
+    ∘ ( begin
+          ∘ (quot2 (toInt ∘ add) ∘ int 0)
+          ∘ (quot1 (int64 10 ∘ mul) ∘ pick #vec64 ∘ V.map)
+          ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1) * 5))
+          ∘ equalVerify
+      )
+    ∘ ( begin
+          ∘ quot2 (toInt ∘ add)
+          ∘ int 0
+          ∘ ( begin
+                ∘ quot1 (int64 2 ∘ mod ∘ int64 0 ∘ equal)
+                ∘ (pick #vec64 ∘ V.filter)
+            )
+          ∘ (V.foldl ∘ int 650 ∘ equalVerify)
+      )
+    ∘ delCount 2
   where
     n :: Natural
     n = 50
