@@ -22,10 +22,18 @@ import Alba.Dsl.V1.Bch2026.Ops
     opVerify,
     opWithin,
   )
-import Alba.Dsl.V1.Bch2026.Stack (StackEntry, TCode)
 import Alba.Dsl.V1.Common (S)
 import Alba.Dsl.V1.Common.Lang (begin, (∘))
-import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TBytes, TNat, cast)
+import Alba.Dsl.V1.Common.Stack
+  ( Fn,
+    Stack (..),
+    StackEntry,
+    TBool,
+    TBytes,
+    TCode,
+    TNat,
+    cast,
+  )
 import Alba.Vm.Common.OpcodeL1 (OpcodeL1 (..))
 import Data.ByteString qualified as B
 import Numeric.Natural (Natural)

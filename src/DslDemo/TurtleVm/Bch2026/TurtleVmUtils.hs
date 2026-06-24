@@ -38,7 +38,7 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Error (error)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop)
 import Alba.Dsl.V1.Bch2026.Lang (fn, progCode)
-import Alba.Dsl.V1.Bch2026.Stack (TCode)
+import Alba.Dsl.V1.Common.Stack (TCode)
 import Prelude (Integer)
 
 vmError :: Bytes -> FnA s alt s' alt'

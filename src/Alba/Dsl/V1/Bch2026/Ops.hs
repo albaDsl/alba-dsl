@@ -3,22 +3,6 @@
 
 module Alba.Dsl.V1.Bch2026.Ops where
 
-import Alba.Dsl.V1.Bch2026.Stack
-  ( StackBool,
-    StackBytes,
-    StackEntry,
-    StackEquatable,
-    StackInt,
-    StackNat,
-    StackNum,
-    TCode,
-    TFunctionId,
-    THash160,
-    THash256,
-    TRipemd160,
-    TSha1,
-    TSha256,
-  )
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, aops', integerToDataOp)
 import Alba.Dsl.V1.Common.FunctionState (addCallSite, registerFunction)
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Absolute, Named), OpcodeL3 (..))
@@ -32,11 +16,25 @@ import Alba.Dsl.V1.Common.Stack
     Replicate,
     S (..),
     Stack (..),
+    StackBool,
+    StackBytes,
+    StackEntry,
+    StackEquatable,
+    StackInt,
+    StackNat,
+    StackNum,
     TBool,
     TBytes,
+    TCode,
+    TFunctionId,
+    THash160,
+    THash256,
     TInt,
     TNat,
     TPubKey,
+    TRipemd160,
+    TSha1,
+    TSha256,
     TSig,
   )
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))

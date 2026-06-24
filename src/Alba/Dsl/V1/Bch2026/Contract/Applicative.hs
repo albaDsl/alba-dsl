@@ -27,7 +27,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TMaybe
   )
 import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Quotations (invoke2, quot0)
-import Alba.Dsl.V1.Bch2026.Stack (TQuot)
+import Alba.Dsl.V1.Common.Stack (TQuot)
 import Prelude ()
 
 liftA2Maybe ::

@@ -21,14 +21,6 @@ module Alba.Dsl.V1.Bch2026.Lang
 where
 
 import Alba.Dsl.V1.Bch2026.Ops (opInvoke)
-import Alba.Dsl.V1.Bch2026.Stack
-  ( Env,
-    StackBytes,
-    StackInt,
-    StackNat,
-    TCode,
-    TFunctionId,
-  )
 import Alba.Dsl.V1.Bch2026.Utils (pass1, regErr, register)
 import Alba.Dsl.V1.Common.CompilerUtils
   ( aop,
@@ -47,12 +39,18 @@ import Alba.Dsl.V1.Common.FunctionState
   )
 import Alba.Dsl.V1.Common.OpcodeL3 (FunctionId (Absolute), OpcodeL3 (..))
 import Alba.Dsl.V1.Common.Stack
-  ( Fn,
+  ( Env,
+    Fn,
     FnA,
     FnC,
     S (..),
     Stack (..),
+    StackBytes,
+    StackInt,
+    StackNat,
     TBytes,
+    TCode,
+    TFunctionId,
     TInt,
     TNat,
     TPubKey,

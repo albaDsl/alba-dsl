@@ -4,7 +4,6 @@
 module Alba.Dsl.V1.Bch2026.LangArgs where
 
 import Alba.Dsl.V1.Bch2026.Ops (opDrop)
-import Alba.Dsl.V1.Bch2026.Stack (StackEntry)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aops, integerToDataOp)
 import Alba.Dsl.V1.Common.Lang ((∘))
 import Alba.Dsl.V1.Common.LangArgs
@@ -15,7 +14,15 @@ import Alba.Dsl.V1.Common.LangArgs
     UnName,
     UnNameSeveral,
   )
-import Alba.Dsl.V1.Common.Stack (Fn, Ref, Remove, S (..), Stack (..), TBool)
+import Alba.Dsl.V1.Common.Stack
+  ( Fn,
+    Ref,
+    Remove,
+    S (..),
+    Stack (..),
+    StackEntry,
+    TBool,
+  )
 import Alba.Dsl.V1.Common.TermClass (Term (..))
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Proxy (Proxy (..))

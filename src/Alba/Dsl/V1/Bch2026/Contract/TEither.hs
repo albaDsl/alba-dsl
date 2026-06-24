@@ -36,7 +36,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Alba.Dsl.V1.Bch2026.Lang (fn)
 import Alba.Dsl.V1.Bch2026.Quotations (invoke1)
-import Alba.Dsl.V1.Bch2026.Stack (TQuot)
+import Alba.Dsl.V1.Common.Stack (TQuot)
 import Data.Kind (Type)
 import Prelude ()
 

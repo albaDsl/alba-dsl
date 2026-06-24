@@ -17,7 +17,6 @@ module Alba.Dsl.V1.Bch2026.Quotations
   )
 where
 
-import Alba.Dsl.V1.Bch2026.Stack (StackEntry, TQuot, TQuotUntyped)
 import Alba.Dsl.V1.Bch2026.Utils (regErr, register)
 import Alba.Dsl.V1.Common.CompilerUtils (aop, aop')
 import Alba.Dsl.V1.Common.FunctionState (getCallerQuotationId)
@@ -29,6 +28,9 @@ import Alba.Dsl.V1.Common.Stack
     ListToStack,
     S (..),
     Stack (..),
+    StackEntry,
+    TQuot,
+    TQuotUntyped,
   )
 import Alba.Vm.Common.OpcodeL2 (OpcodeL2 (..))
 import Data.Maybe (fromMaybe)

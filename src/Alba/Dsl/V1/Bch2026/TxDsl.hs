@@ -26,10 +26,9 @@ import Alba.Dsl.V1.Bch2026.Ops
     opHash160,
     opTrue,
   )
-import Alba.Dsl.V1.Bch2026.Stack (THash160)
 import Alba.Dsl.V1.Common.Compile (Optimize (None), compile)
 import Alba.Dsl.V1.Common.Lang ((∘))
-import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, TPubKey, TSig)
+import Alba.Dsl.V1.Common.Stack (Fn, Stack (..), TBool, THash160, TPubKey, TSig)
 import Alba.Misc.Haskoin
   ( Address (..),
     TxSignature (..),
