@@ -35,8 +35,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     PackFs (..),
     TEither,
+    TInt264,
     TPackFs,
-    TTuple,
     TUnit,
     blobEqEqual,
     blobEqEqualVerify,
@@ -49,16 +49,29 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     mkPackFsM,
     pad,
     right,
-    tuple,
+    rot,
     unit,
     unpad,
-    untuple,
   )
-import DslDemo.EllipticCurve.Field (TFe, feCube, feInv, feMul, feSquare, pushFe)
+import Alba.Dsl.V1.Bch2026.Contract.TTupleInt264
+  ( TTupleInt264,
+    tupleInt264,
+    untupleInt264,
+  )
+import DslDemo.EllipticCurve.Field
+  ( TFe,
+    feCube,
+    feInv,
+    feMul,
+    feSquare,
+    fromTInt264,
+    pushFe,
+    toTInt264,
+  )
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
 import Numeric.Natural (Natural)
-import Prelude ()
+import Prelude ((*), (+))
 
 data TPointJ
 
@@ -70,11 +83,13 @@ instance BlobEq TPointJ where
   blobEqRec = blobEqRecord
 
 instance PackFs TPointJ where
-  sizeConst = 105 -- 104 + 1 for the pad tag.
+  sizeConst = (sizeConst @TInt264) * 3 + 1 + 1 -- tuples, either, and pad size.
   size = nat (sizeConst @TPointJ)
   pack = size @TPointJ . pad
   unpack = unpad
   packFsRec = pointPackFs
+
+type PointRaw = TEither TUnit (TTupleInt264 (TTupleInt264 TFe))
 
 pointPackFs :: Fn s (s :> TPackFs TPointJ)
 pointPackFs =
@@ -85,7 +100,11 @@ pointPackFs =
     )
 
 makePoint :: Fn (s :> TFe :> TFe :> TFe) (s :> TPointJ)
-makePoint = fn (tuple . tuple . right . fromRaw)
+makePoint =
+  fn
+    ( (rot . toTInt264 . rot . toTInt264 . rot . tupleInt264)
+        . (tupleInt264 . right . fromRaw)
+    )
 
 pushPoint :: Natural -> Natural -> Natural -> Fn s (s :> TPointJ)
 pushPoint x y z = pushFe x . pushFe y . pushFe z . makePoint
@@ -97,18 +116,20 @@ isIdentity :: Fn (s :> TPointJ) (s :> TBool)
 isIdentity = toRaw . isLeft
 
 getXYZ :: Fn (s :> TPointJ) (s :> TFe :> TFe :> TFe)
-getXYZ = fn (toRaw . ifLeft (drop . errPartialFunction) (untuple . untuple))
+getXYZ =
+  fn
+    ( toRaw
+        . ifLeft
+          (drop . errPartialFunction)
+          ( (untupleInt264 . untupleInt264 . rot . fromTInt264 . rot)
+              . (fromTInt264 . rot)
+          )
+    )
 
-fromRaw ::
-  Fn
-    (s :> TEither TUnit (TTuple TFe (TTuple TFe TFe)))
-    (s :> TPointJ)
+fromRaw :: Fn (s :> PointRaw) (s :> TPointJ)
 fromRaw = cast
 
-toRaw ::
-  Fn
-    (s :> TPointJ)
-    (s :> TEither TUnit (TTuple TFe (TTuple TFe TFe)))
+toRaw :: Fn (s :> TPointJ) (s :> PointRaw)
 toRaw = cast
 
 toJacobian :: Fn (s :> TPoint) (s :> TPointJ)

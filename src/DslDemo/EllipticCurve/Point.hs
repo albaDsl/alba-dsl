@@ -28,7 +28,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
     PackFs (..),
     TEither,
-    TTuple,
+    TInt264,
     TUnit,
     blobEqEqual,
     blobEqEqualVerify,
@@ -42,14 +42,18 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     nip,
     pad,
     right,
-    tuple,
+    swap,
     unit,
     unpad,
-    untuple,
   )
-import DslDemo.EllipticCurve.Field (TFe, pushFe)
+import Alba.Dsl.V1.Bch2026.Contract.TTupleInt264
+  ( TTupleInt264,
+    tupleInt264,
+    untupleInt264,
+  )
+import DslDemo.EllipticCurve.Field (TFe, fromTInt264, pushFe, toTInt264)
 import Numeric.Natural (Natural)
-import Prelude ()
+import Prelude ((*), (+))
 
 data TPoint
 
@@ -61,14 +65,16 @@ instance BlobEq TPoint where
   blobEqRec = blobEqRecord
 
 instance PackFs TPoint where
-  sizeConst = 100
+  sizeConst = (sizeConst @TInt264) * 2 + 1 + 1 -- tuple, either, and pad size.
   size = nat (sizeConst @TPoint)
   pack = size @TPoint . pad
   unpack = unpad
   packFsRec = constant (size @TPoint . quot1 pack . quot1 unpack . mkPackFsM)
 
+type PointRaw = TEither TUnit (TTupleInt264 TFe)
+
 makePoint :: Fn (s :> TFe :> TFe) (s :> TPoint)
-makePoint = fn (tuple . right . fromRaw)
+makePoint = fn (swap . toTInt264 . swap . tupleInt264 . right . fromRaw)
 
 pushPoint :: Natural -> Natural -> Fn s (s :> TPoint)
 pushPoint x y = pushFe x . pushFe y . makePoint
@@ -80,7 +86,13 @@ isIdentity :: Fn (s :> TPoint) (s :> TBool)
 isIdentity = toRaw . isLeft
 
 getXY :: Fn (s :> TPoint) (s :> TFe :> TFe)
-getXY = fn (toRaw . ifLeft (drop . errPartialFunction) untuple)
+getXY =
+  fn
+    ( toRaw
+        . ifLeft
+          (drop . errPartialFunction)
+          (untupleInt264 . swap . fromTInt264 . swap)
+    )
 
 getX :: Fn (s :> TPoint) (s :> TFe)
 getX = getXY . drop
@@ -88,8 +100,8 @@ getX = getXY . drop
 getY :: Fn (s :> TPoint) (s :> TFe)
 getY = getXY . nip
 
-fromRaw :: Fn (s :> TEither TUnit (TTuple TFe TFe)) (s :> TPoint)
+fromRaw :: Fn (s :> PointRaw) (s :> TPoint)
 fromRaw = cast
 
-toRaw :: Fn (s :> TPoint) (s :> TEither TUnit (TTuple TFe TFe))
+toRaw :: Fn (s :> TPoint) (s :> PointRaw)
 toRaw = cast

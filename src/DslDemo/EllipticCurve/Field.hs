@@ -13,6 +13,8 @@ module DslDemo.EllipticCurve.Field
     feQuartic,
     feInv,
     primeModulus,
+    toTInt264,
+    fromTInt264,
   )
 where
 
@@ -43,6 +45,7 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Math (pow')
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (add, dup, mod, mul, sub, swap)
+import Alba.Dsl.V1.Bch2026.Contract.TInt264 (TInt264)
 import Control.Exception (assert)
 import DslDemo.EllipticCurve.Constants (p)
 import Numeric.Natural (Natural)
@@ -110,3 +113,9 @@ toRaw = cast
 
 toRaw2 :: Fn (s :> TFe :> TFe) (s :> TInt :> TInt)
 toRaw2 = castStack
+
+toTInt264 :: Fn (s :> TFe) (s :> TInt264)
+toTInt264 = cast
+
+fromTInt264 :: Fn (s :> TInt264) (s :> TFe)
+fromTInt264 = cast
