@@ -2,6 +2,7 @@
 
 module Alba.Dsl.V1.Bch2026.Contract.TVector
   ( TVector,
+    intv,
     length,
     lengthF,
     null,
@@ -42,6 +43,7 @@ module Alba.Dsl.V1.Bch2026.Contract.TVector
     reverse,
     reverseF,
     map,
+    concatMap,
     mapF,
     zip,
     zipF,
@@ -55,6 +57,10 @@ module Alba.Dsl.V1.Bch2026.Contract.TVector
     foldlF,
     foldr,
     foldrF,
+    updateElem,
+    updateElemF,
+    adjust,
+    adjustF,
   )
 where
 
@@ -73,6 +79,7 @@ import Alba.Dsl.V1.Bch2026
     del,
     delCount,
     fn,
+    int,
     invoke1,
     invoke2,
     lambda0,
@@ -114,7 +121,7 @@ import Alba.Dsl.V1.Bch2026
   )
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( BlobEq (..),
-    Integral (add1, div, mul),
+    Integral (add1, div, fromInt, mul),
     Ord (..),
     PackFs (..),
     TMaybe,
@@ -155,7 +162,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe qualified as Maybe
 import Alba.Dsl.V1.Bch2026.LangArgs (Loop)
 import Data.Kind (Type)
-import Prelude ()
+import Prelude (Integer)
 
 data TVector (a :: Type)
 
@@ -165,6 +172,11 @@ instance (BlobEq a) => BlobEq (TVector a) where
   equal = blobEqEqual
   equalVerify = blobEqEqualVerify
   blobEqRec = blobEqRecord
+
+-- ## Literals.
+intv :: forall a s. (PackFs a, Integral a) => [Integer] -> Fn s (s :> TVector a)
+intv [] = empty
+intv (x : xs) = int x . fromInt . intv xs . cons
 
 -- ## Length.
 length :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TNat)
@@ -489,6 +501,34 @@ mapF =
         . (ns4 #vecB #a #pfsB #f . roll #pfsB . roll #vecB . rollN #a . roll #f)
         . (un #a . invoke1 . snocF)
 
+type CMapLambda a b = TLambda '[a] '[TVector b]
+
+concatMap ::
+  forall a b s.
+  (PackFs a, PackFs b) =>
+  Env (s :> CMapLambda a b :> TVector a) (s :> TVector b)
+concatMap = packFsRec @a . rot . rot . concatMapF
+
+concatMapF ::
+  forall a b s.
+  (StackEntry a, StackEntry b) =>
+  Env (s :> TPackFs a :> CMapLambda a b :> TVector a) (s :> TVector b)
+concatMapF =
+  fn
+    ( begin
+        . (ns3 #pfsA #f #vec . roll #pfsA . roll #f)
+        . (lambda3 f . apply3 . empty . roll #vec . foldlF)
+    )
+  where
+    f ::
+      (StackEntry a, StackEntry b) =>
+      Fn (s :> TVector b :> a :> CMapLambda a b) (s :> TVector b)
+    f =
+      begin
+        . (ns3 #vecB #a #f . roll #vecB . rollN #a . roll #f)
+        . (un #a . invoke1 . append)
+
+-- ## Zipping.
 zip ::
   forall a b s.
   (PackFs a, PackFs b, PackFs (TTuple a b)) =>
@@ -686,6 +726,48 @@ foldrF = fn (swap . opUntil loop . nip . nip . nip)
               . un3 #packFs #f #acc
           )
           (opTrue . un4 #packFs #f #vec #acc)
+
+-- ## Updates.
+updateElem ::
+  forall a s.
+  (PackFs a) =>
+  Fn (s :> TNat :> a :> TVector a) (s :> TVector a)
+updateElem =
+  (ns3 #idx #val #vec . packFsRec @a . roll #idx . rollN #val . roll #vec)
+    . (un #val . updateElemF)
+
+updateElemF ::
+  forall a s.
+  (StackEntry a) =>
+  Fn (s :> TPackFs a :> TNat :> a :> TVector a) (s :> TVector a)
+updateElemF =
+  fn
+    ( begin
+        . ns4 #packFs #idx #val #vec
+        . (tcPick . roll #idx . roll #vec . splitAtF)
+        . (tcPick . swap . unconsF . fromJust . untuple . nip)
+        . (tcRoll . rollN #val . rot . un #val . consF . append)
+    )
+
+-- Update element at a given position by applying a function.
+adjust ::
+  forall a s.
+  (PackFs a) =>
+  Fn (s :> TLambda '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+adjust = packFsRec @a . opRoll 3 . opRoll 3 . opRoll 3 . adjustF
+
+adjustF ::
+  (StackEntry a) =>
+  Fn (s :> TPackFs a :> TLambda '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+adjustF =
+  fn
+    ( begin
+        . ns4 #packFs #f #idx #vec
+        . (tcPick . roll #idx . roll #vec . splitAtF)
+        . (tcPick . swap . unconsF . fromJust . untuple . ns2 #a #rest)
+        . (rollN #a . roll #f . un #a . invoke1 . ns #a')
+        . (tcRoll . rollN #a' . roll #rest . un #a' . consF . append)
+    )
 
 -- ## Misc.
 -- Used from contexts where it is expected to never fail.

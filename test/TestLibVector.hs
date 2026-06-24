@@ -12,6 +12,7 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
+    i2nUnsafe,
     n2i,
     name,
     nat,
@@ -86,6 +87,7 @@ testLibVector =
       testCase "Mapping" $ do isTrue (evaluateProg progMapping),
       testCase "Zipping" $ do isTrue (evaluateProg progZipping),
       testCase "Filtering" $ do isTrue (evaluateProg progFiltering),
+      testCase "Updates" $ do isTrue (evaluateProg progUpdates),
       testProperty "reverse" propReverse,
       testProperty "length" propLength,
       testProperty "lookup" propLookup,
@@ -376,11 +378,23 @@ progMapping =
               ∘ (lambda1 int8to64 ∘ int8Vector ∘ V.map)
               ∘ (int64Vector ∘ equalVerify)
           )
+        ∘ ( begin
+              ∘ lambda1 (toInt ∘ i2nUnsafe ∘ takeVec ∘ V.take)
+              ∘ (inputVec ∘ V.concatMap)
+              ∘ V.intv [1, 2, 1, 1, 2, 3]
+              ∘ equalVerify
+          )
         ∘ opTrue
     )
   where
     int8to64 :: Fn (s :> TInt8) (s :> TInt64)
     int8to64 = cast
+
+    takeVec :: Fn s (s :> V.TVector TInt8)
+    takeVec = V.intv [1, 2, 3]
+
+    inputVec :: Fn s (s :> V.TVector TInt8)
+    inputVec = V.intv [0, 2, 1, 0, 3]
 
 progZipping :: Fn s (s :> TBool)
 progZipping =
@@ -450,6 +464,43 @@ progFiltering =
               ∘ (lambda1 (int8 3 ∘ lessThan) ∘ swap ∘ V.filter)
               ∘ (int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ equalVerify
+          )
+        ∘ opTrue
+    )
+
+progUpdates :: Fn s (s :> TBool)
+progUpdates =
+  runEnv
+    ( begin
+        ∘ ( begin
+              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (lambda1 add1 ∘ nat 2 ∘ rot ∘ V.adjust)
+              ∘ (int8 1 ∘ int8 2 ∘ int8 4 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ V.cons ∘ equalVerify)
+          )
+        ∘ ( begin
+              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (lambda1 add1 ∘ nat 0 ∘ rot ∘ V.adjust)
+              ∘ (int8 2 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ V.cons ∘ equalVerify)
+          )
+        ∘ ( begin
+              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (lambda1 add1 ∘ nat 3 ∘ rot ∘ V.adjust)
+              ∘ (int8 1 ∘ int8 2 ∘ int8 3 ∘ int8 5 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ V.cons ∘ equalVerify)
+          )
+        ∘ ( begin
+              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 0 ∘ int8 10 ∘ rot ∘ V.updateElem)
+              ∘ (int8 10 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ V.cons ∘ equalVerify)
+          )
+        ∘ ( begin
+              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 2 ∘ int8 10 ∘ rot ∘ V.updateElem)
+              ∘ (int8 1 ∘ int8 2 ∘ int8 10 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
+              ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ opTrue
     )
@@ -715,22 +766,14 @@ propUnfolding (NonNegative n) = (n <= 1000) ==> isTrue' (evaluateProg prog)
 -- ## Test vectors.
 int64Vector :: Fn s (s :> V.TVector TInt64)
 int64Vector =
-  fn
-    ( begin
-        ∘ (int64 0 ∘ int64 1 ∘ int64 2 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
-        ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (8 * 3) ∘ equalVerify)
-    )
+  fn (V.intv [0, 1, 2] ∘ dup ∘ v2b ∘ opSize ∘ nip ∘ nat (8 * 3) ∘ equalVerify)
 
 v2b :: Fn (s :> V.TVector a) (s :> TBytes)
 v2b = cast
 
 int8Vector :: Fn s (s :> V.TVector TInt8)
 int8Vector =
-  fn
-    ( begin
-        ∘ (int8 0 ∘ int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
-        ∘ (dup ∘ v2b ∘ opSize ∘ nip ∘ nat (1 * 3) ∘ equalVerify)
-    )
+  fn (V.intv [0, 1, 2] ∘ dup ∘ v2b ∘ opSize ∘ nip ∘ nat (1 * 3) ∘ equalVerify)
 
 bytes128Vector :: Fn s (s :> V.TVector TBytes128)
 bytes128Vector =
