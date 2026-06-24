@@ -4,7 +4,10 @@ module TestLoops (testLoops) where
 
 import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
-  ( factorial,
+  ( BlobEq (equalVerify),
+    Integral (add),
+    do',
+    factorial,
     iterate,
     nat1SubUnsafe,
     pow,
@@ -24,6 +27,7 @@ testLoops =
     [ testCase "Loops - factorial 1" $ isTrue (evaluateProg progFactorial1),
       testCase "Loops - factorial 2" $ isTrue (evaluateProg progFactorial2),
       testCase "Loops - factorial 3" $ isTrue (evaluateProg progFactorial3),
+      testCase "Loops - do" $ isTrue (evaluateProg progDo),
       testProperty "Loops — pow" propPow
     ]
 
@@ -65,6 +69,26 @@ progFactorial3 = progFacTest fac
       begin
         ∘ (ns #product ∘ opFromAltStack ∘ opDup ∘ opToAltStack)
         ∘ (roll #product ∘ opMul)
+
+progDo :: Fn s (s :> TBool)
+progDo =
+  begin
+    ∘ ( begin
+          ∘ (int 0 ∘ int 6 ∘ int 1)
+          ∘ do' (ns2 #sum #i ∘ roll #sum ∘ pick #i ∘ add ∘ roll #i ∘ int 1)
+          ∘ (int 15 ∘ equalVerify)
+      )
+    ∘ ( begin
+          ∘ (int 0 ∘ int 0 ∘ int 5)
+          ∘ do' (ns2 #sum #i ∘ roll #sum ∘ pick #i ∘ add ∘ roll #i ∘ int (-1))
+          ∘ (int 15 ∘ equalVerify)
+      )
+    ∘ ( begin
+          ∘ (int 0 ∘ int 21 ∘ int 0)
+          ∘ do' (ns2 #sum #i ∘ roll #sum ∘ pick #i ∘ add ∘ roll #i ∘ int 2)
+          ∘ (int 110 ∘ equalVerify)
+      )
+    ∘ opTrue
 
 propPow :: Int -> Word8 -> Bool
 propPow b n =

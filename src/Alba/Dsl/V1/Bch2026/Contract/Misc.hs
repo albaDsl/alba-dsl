@@ -13,6 +13,7 @@ module Alba.Dsl.V1.Bch2026.Contract.Misc
     addToUnsigned,
     pad,
     unpad,
+    do',
   )
 where
 
@@ -24,6 +25,7 @@ import Alba.Dsl.V1.Bch2026
     TBool,
     TBytes,
     TFunctionId,
+    TInt,
     TNat,
     bytes,
     cast,
@@ -33,15 +35,19 @@ import Alba.Dsl.V1.Bch2026
     i2nUnsafe,
     int,
     n2i,
+    name,
     nat,
     ns2,
+    ns3,
     op0,
     op1Sub,
+    op2Drop,
     opBin2Num,
     opCat,
     opEqual,
     opGreaterThan,
     opIf,
+    opLessThan,
     opNum2Bin,
     opNumEqual,
     opReverseBytes,
@@ -49,8 +55,11 @@ import Alba.Dsl.V1.Bch2026
     opSplit,
     opSub,
     opSwap,
+    opTrue,
     opWhen,
+    pick,
     roll,
+    un,
   )
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqClass (BlobEq (..))
 import Alba.Dsl.V1.Bch2026.Contract.BlobEqCoreInstances ()
@@ -170,3 +179,23 @@ unpad = fn (tagSize . opSplit . swap . toSigned . opSplit . drop . bytesToVal)
 
     bytesToVal :: Fn (s :> TBytes) (s :> a)
     bytesToVal = cast
+
+-- If the loop index is equal to the limit at start then the loop is not
+-- executed. The loop body expression is provided the loop index at the top of
+-- the stack and must leave it there followed by the increment/decrement.
+do' :: Fn (s :> TInt) (s :> TInt :> TInt) -> Fn (s :> TInt :> TInt) s
+do' body =
+  opUntil
+    ( ns2 #limit #idx
+        . (pick #idx . pick #limit . equal)
+        . opIf
+          (roll #limit . roll #idx . opTrue)
+          ( (roll #limit . toAlt . roll #idx . body . fromAlt)
+              . ns3 #idx #inc #limit
+              . pick #limit
+              . name #idx' (pick #idx . roll #inc . add)
+              . (roll #idx . pick #limit . sub . pick #idx' . roll #limit . sub)
+              . (mul . int 0 . opLessThan . un #idx')
+          )
+    )
+    . op2Drop
