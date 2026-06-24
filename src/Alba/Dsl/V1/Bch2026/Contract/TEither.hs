@@ -35,8 +35,8 @@ import Alba.Dsl.V1.Bch2026.Contract.BlobEqUtils
   )
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, nip, swap)
 import Alba.Dsl.V1.Bch2026.Lang (fn)
-import Alba.Dsl.V1.Bch2026.Quotations (invoke1)
-import Alba.Dsl.V1.Common.Stack (TQuot)
+import Alba.Dsl.V1.Bch2026.QuotationsB (invoke1)
+import Alba.Dsl.V1.Common.Stack (TQuotB)
 import Data.Kind (Type)
 import Prelude ()
 
@@ -83,7 +83,7 @@ ifLeft leftOps rightOps =
 
 either ::
   (StackEntry a, StackEntry b, StackEntry c) =>
-  Fn (s :> TQuot '[a] '[c] :> TQuot '[b] '[c] :> TEither a b) (s :> c)
+  Fn (s :> TQuotB '[a] '[c] :> TQuotB '[b] '[c] :> TEither a b) (s :> c)
 either = fn (ifLeft (nip . swap . invoke1) (swap . invoke1 . nip))
 
 tagSize :: Fn s (s :> TNat)

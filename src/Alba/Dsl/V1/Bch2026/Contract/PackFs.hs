@@ -36,8 +36,8 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (nip)
 import Alba.Dsl.V1.Bch2026.Contract.TTuple (TTuple, fst, snd, tupleM, untuple)
 import Alba.Dsl.V1.Bch2026.Lang (fn)
-import Alba.Dsl.V1.Bch2026.Quotations (invoke1)
-import Alba.Dsl.V1.Common.Stack (TQuot)
+import Alba.Dsl.V1.Bch2026.QuotationsB (invoke1)
+import Alba.Dsl.V1.Common.Stack (TQuotB)
 import Data.Kind (Type)
 import GHC.TypeLits (KnownNat)
 import Numeric.Natural (Natural)
@@ -56,27 +56,27 @@ class (StackEntry a) => PackFs a where
 
 mkPackFs ::
   Fn
-    (s :> TNat :> TQuot '[a] '[TBytes] :> TQuot '[TBytes] '[a])
+    (s :> TNat :> TQuotB '[a] '[TBytes] :> TQuotB '[TBytes] '[a])
     (s :> TPackFs a)
 mkPackFs = fn mkPackFsM
 
 mkPackFsM ::
   Fn
-    (s :> TNat :> TQuot '[a] '[TBytes] :> TQuot '[TBytes] '[a])
+    (s :> TNat :> TQuotB '[a] '[TBytes] :> TQuotB '[TBytes] '[a])
     (s :> TPackFs a)
 mkPackFsM = tupleM . tupleM . fromRaw
 
 getSize :: Fn (s :> TPackFs a) (s :> TNat)
 getSize = fn (toRaw . fst)
 
-getPack :: Fn (s :> TPackFs a) (s :> TQuot '[a] '[TBytes])
+getPack :: Fn (s :> TPackFs a) (s :> TQuotB '[a] '[TBytes])
 getPack = fn (toRaw . untuple . nip . fst)
 
-getUnpack :: Fn (s :> TPackFs a) (s :> TQuot '[TBytes] '[a])
+getUnpack :: Fn (s :> TPackFs a) (s :> TQuotB '[TBytes] '[a])
 getUnpack = fn (toRaw . untuple . nip . snd)
 
 type RawType a =
-  TTuple TNat (TTuple (TQuot '[a] '[TBytes]) (TQuot '[TBytes] '[a]))
+  TTuple TNat (TTuple (TQuotB '[a] '[TBytes]) (TQuotB '[TBytes] '[a]))
 
 fromRaw :: Fn (s :> RawType a) (s :> TPackFs a)
 fromRaw = cast

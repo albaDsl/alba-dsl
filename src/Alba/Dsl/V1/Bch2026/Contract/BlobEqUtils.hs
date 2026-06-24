@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TQuot,
+    TQuotB,
     begin,
     castStack,
     constant,
@@ -29,7 +29,7 @@ import Prelude (undefined)
 
 mkBlobEqRec ::
   Fn
-    (s :> TQuot '[a, a] '[TBool] :> TQuot '[a, a] '[])
+    (s :> TQuotB '[a, a] '[TBool] :> TQuotB '[a, a] '[])
     (s :> TBlobEqRec a)
 mkBlobEqRec = undefined -- FIXME: implement.
 

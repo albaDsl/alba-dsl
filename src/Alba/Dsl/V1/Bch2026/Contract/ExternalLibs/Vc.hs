@@ -27,7 +27,7 @@ import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt)
 import Alba.Dsl.V1.Bch2026.Lang (runEnv)
-import Alba.Dsl.V1.Bch2026.Quotations (quot1, quot2)
+import Alba.Dsl.V1.Bch2026.QuotationsB (quot1, quot2)
 import Alba.Dsl.V1.Bch2026.TxDsl
   ( libraryToTx,
     simpleWrap,

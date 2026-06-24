@@ -33,8 +33,8 @@ module Alba.Dsl.V1.Common.Stack
     TInt,
     TNat,
     TPubKey,
-    TQuot,
-    TQuotUntyped,
+    TQuotA,
+    TQuotB,
     TRipemd160,
     TRuntimeState,
     TSha1,
@@ -62,7 +62,8 @@ data THash256
 data TInt
 data TNat
 data TPubKey
-data TQuot (args :: [Type]) (return :: [Type])
+data TQuotA (args :: [Type]) (return :: [Type])
+data TQuotB (args :: [Type]) (return :: [Type])
 data TQuotUntyped
 data TRipemd160
 data TRuntimeState
@@ -111,7 +112,8 @@ instance StackBytes TSig
 instance StackBytes TPubKey
 instance StackEntry TCode
 instance StackEntry TFunctionId
-instance StackEntry (TQuot (args :: [Type]) (return :: [Type]))
+instance StackEntry (TQuotA (args :: [Type]) (return :: [Type]))
+instance StackEntry (TQuotB (args :: [Type]) (return :: [Type]))
 instance StackEntry TQuotUntyped
 instance StackEntry TRuntimeState
 instance StackBytes TCode

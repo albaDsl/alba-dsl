@@ -10,7 +10,7 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     Stack ((:>)),
     StackEntry,
-    TQuot,
+    TQuotB,
     TNat,
     i2nUnsafe,
     int,
@@ -44,7 +44,7 @@ import Prelude (undefined)
 countingSortDesc ::
   forall a s.
   (PackFs a) =>
-  Env (s :> TNat :> TQuot '[a] '[TNat] :> TVector a) (s :> TVector a)
+  Env (s :> TNat :> TQuotB '[a] '[TNat] :> TVector a) (s :> TVector a)
 countingSortDesc =
   ( ns3 #w #key #vec
       . name #n (pick #vec . V.length)

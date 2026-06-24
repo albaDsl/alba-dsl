@@ -6,14 +6,20 @@ module Alba.Dsl.V1.Bch2026.LangUntyped
     cond,
     concatProg,
     repeatProg,
+    fn,
   )
 where
 
-import Alba.Dsl.V1.Bch2026.OpsUntyped (opDup, opIf)
+import Alba.Dsl.V1.Bch2026.OpsUntyped (opDup, opIf, opInvoke)
+import Alba.Dsl.V1.Bch2026.Utils (regErr, register)
 import Alba.Dsl.V1.Common.CompilerUtils (bytesToDataOp, integerToDataOp)
-import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop)
-import Alba.Dsl.V1.Common.StackUntyped (FnU, SU, (∘))
+import Alba.Dsl.V1.Common.CompilerUtilsUntyped (aop, aop')
+import Alba.Dsl.V1.Common.FunctionState (getCallerFunctionId)
+import Alba.Dsl.V1.Common.OpcodeL3 (OpcodeL3 (..))
+import Alba.Dsl.V1.Common.StackUntyped (FnU, SU (..), toTyped, (∘))
 import Alba.Vm.Common.BasicTypes (Bytes)
+import Data.Maybe (fromMaybe)
+import GHC.Stack (HasCallStack, withFrozenCallStack)
 
 int :: Integer -> FnU
 int n = aop (integerToDataOp n)
@@ -34,3 +40,9 @@ concatProg p1 p2 st =
   let st' = p1 st
       st'' = p2 st'
    in st''
+
+fn :: (HasCallStack) => FnU -> FnU
+fn prog st =
+  let fId = fromMaybe regErr (withFrozenCallStack getCallerFunctionId)
+      fs = register (toTyped prog) fId st.fs
+   in opInvoke (aop' (FunctionIndexRef {fId}) st {fs = fs})

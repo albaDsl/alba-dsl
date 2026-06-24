@@ -107,12 +107,18 @@ isTarget n = case nameModule_maybe n of
 targets :: [Target]
 targets =
   [ ("Alba.Dsl.V1.Bch2026.Lang", "fn", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot0", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot1", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot2", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot2_0", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot3", [0]),
-    ("Alba.Dsl.V1.Bch2026.Quotations", "quot4", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot0", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot1", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot2", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot2_0", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot3", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsA", "quot4", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot0", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot1", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot2", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot2_0", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot3", [0]),
+    ("Alba.Dsl.V1.Bch2026.QuotationsB", "quot4", [0]),
     ("Alba.Dsl.V1.Bch2026.Lang", "constant", [0]),
     ("Alba.Dsl.V1.Bch2026.Lang", "runtimeConstant", [0])
   ]

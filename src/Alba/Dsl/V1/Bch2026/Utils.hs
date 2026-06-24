@@ -3,6 +3,7 @@
 module Alba.Dsl.V1.Bch2026.Utils where
 
 import Alba.Dsl.V1.Common (FnA)
+import Alba.Dsl.V1.Common.CompilerUtils (aop')
 import Alba.Dsl.V1.Common.FunctionState
   ( FunctionState,
     addCallSite,
@@ -11,11 +12,17 @@ import Alba.Dsl.V1.Common.FunctionState
     registerFunction,
   )
 import Alba.Dsl.V1.Common.FunctionTable (Function (..), FunctionTable (..))
-import Alba.Dsl.V1.Common.OpcodeL3 (CodeL3, FunctionId (..), VmFunctionId)
+import Alba.Dsl.V1.Common.OpcodeL3
+  ( CodeL3,
+    FunctionId (..),
+    OpcodeL3 (..),
+    VmFunctionId,
+  )
 import Alba.Dsl.V1.Common.Stack (S (..))
 import Alba.Misc.Utils (canNotHappen)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Sequence qualified as S
+import GHC.Stack (HasCallStack)
 
 register :: FnA s alt s' alt' -> FunctionId -> FunctionState -> FunctionState
 register prog fId fs =
@@ -34,6 +41,14 @@ pass1 ::
   (S s alt -> S s' alt') ->
   (CodeL3, FunctionState)
 pass1 code fs prog = let S c fs' = prog (S code fs) in (c, fs')
+
+registerQuot ::
+  (HasCallStack) =>
+  FunctionId ->
+  FnA s1 alt1 s1' alt1' ->
+  FnA s2 alt2 s2' alt2'
+registerQuot fId prog st =
+  (aop' (FunctionIndexRef {fId})) st {fs = register prog fId st.fs}
 
 regErr :: a
 regErr =

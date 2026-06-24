@@ -6,7 +6,6 @@ module Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack ((:>)),
-    TQuot,
     begin,
     constant,
     quot1,

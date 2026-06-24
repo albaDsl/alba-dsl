@@ -1,27 +1,42 @@
--- Copyright (c) 2025 albaDsl
+-- Copyright (c) 2026 albaDsl
 
-module TestQuotations (testQuotations) where
+module TestQuotationsA (testQuotationsA) where
 
-import Alba.Dsl.V1.Bch2026
+import Alba.Dsl.V1.Bch2026 hiding
+  ( invoke1,
+    invoke2,
+    invoke3,
+    quot1,
+    quot2,
+    quot3,
+  )
+import Alba.Dsl.V1.Bch2026.Contract.PartialApplicationA (apply2, apply3)
 import Alba.Dsl.V1.Bch2026.Contract.Prelude (ifZero)
+import Alba.Dsl.V1.Bch2026.QuotationsA
+  ( invoke1,
+    invoke2,
+    invoke3,
+    quot1,
+    quot2,
+    quot3,
+  )
 import Numeric.Natural (Natural)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils2026 (evaluateProg, isTrue)
-import Prelude hiding (quot)
 
-testQuotations :: TestTree
-testQuotations =
+testQuotationsA :: TestTree
+testQuotationsA =
   testGroup
-    "Quotations"
+    "Quotations (type A)"
     [ testCase "Basic quotation ops (quot1)" $ isTrue (evaluateProg progBasic1),
       testCase "Basic quotation ops (quot2)" $ isTrue (evaluateProg progBasic2),
       testCase "Basic quotation ops (quot3)" $ isTrue (evaluateProg progBasic3),
       testCase "Basic quotation ops (arg types)" $
         isTrue (evaluateProg progBasic4),
-      testCase "Untyped quotations" $ isTrue (evaluateProg progUntyped),
       testCase "Mapping a quotations" $ isTrue (evaluateProg progMapQuotation),
-      testCase "Nested quotations" $ isTrue (evaluateProg progNested)
+      testCase "Nested quotations" $ isTrue (evaluateProg progNested),
+      testCase "Partial Application" $ isTrue (evaluateProg progApplication)
     ]
 
 progBasic1 :: Fn s (s :> TBool)
@@ -52,17 +67,6 @@ progBasic4 =
     ∘ opNumEqualVerify
     ∘ opTrue
 
-progUntyped :: Fn s (s :> TBool)
-progUntyped =
-  begin
-    ∘ (int 3 ∘ quot cube ∘ opDup ∘ opToAltStack ∘ invoke cube)
-    ∘ (int 27 ∘ opNumEqual)
-    ∘ (int 5 ∘ opFromAltStack ∘ invoke cube)
-    ∘ (int 125 ∘ opNumEqual ∘ opBoolAnd)
-  where
-    cube :: Fn (s :> TInt) (s :> TInt)
-    cube = opDup ∘ opDup ∘ opMul ∘ opMul
-
 progMapQuotation :: Fn s (s :> TBool)
 progMapQuotation =
   begin
@@ -73,11 +77,11 @@ progMapQuotation =
     double = opBin2Num ∘ int 2 ∘ opMul ∘ nat 1 ∘ opNum2Bin
 
     mapVec ::
-      Natural -> Fn (s :> TQuot '[TBytes] '[TBytes] :> TBytes) (s :> TBytes)
+      Natural -> Fn (s :> TQuotA '[TBytes] '[TBytes] :> TBytes) (s :> TBytes)
     mapVec elemSize = mapVec' elemSize
 
     mapVec' ::
-      Natural -> Fn (s :> TQuot '[TBytes] '[TBytes] :> TBytes) (s :> TBytes)
+      Natural -> Fn (s :> TQuotA '[TBytes] '[TBytes] :> TBytes) (s :> TBytes)
     mapVec' elemSize =
       begin
         ∘ ns2 #f #vec
@@ -113,3 +117,18 @@ progNested = int 5 ∘ quot1 polynomial ∘ invoke1 ∘ int 132 ∘ opNumEqual
 
     cube :: Fn (s :> TInt) (s :> TInt)
     cube = opDup ∘ opDup ∘ opMul ∘ opMul
+
+progApplication :: Fn s (s :> TBool)
+progApplication =
+  ( begin
+      ∘ (int 1 ∘ int 2 ∘ opAdd ∘ f ∘ apply2)
+      ∘ (int 5 ∘ opSwap ∘ invoke1 ∘ int 2 ∘ opNumEqualVerify)
+      ∘ (int 3 ∘ int 2 ∘ opAdd ∘ f ∘ apply2)
+      ∘ (int 9 ∘ opSwap ∘ invoke1 ∘ int 4 ∘ opNumEqualVerify)
+      ∘ (int 6 ∘ g ∘ apply3 ∘ int 3 ∘ opSwap ∘ apply2)
+      ∘ (int 4 ∘ opSwap ∘ invoke1 ∘ opTrue ∘ opEqualVerify)
+      ∘ opTrue
+  )
+  where
+    f = quot2 opSub
+    g = quot3 opWithin

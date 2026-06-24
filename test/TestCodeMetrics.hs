@@ -13,7 +13,7 @@ import Alba.Dsl.V1.Bch2026
     S,
     Stack (..),
     TBytes,
-    TQuot,
+    TQuotB,
     TNat,
     begin,
     bytes,
@@ -276,7 +276,7 @@ vectorOps =
               ∘ int 0
               ∘ ( begin
                     ∘ ( (quot2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
-                          Fn s (s :> TQuot '[TInt64, TInt8] '[TInt64])
+                          Fn s (s :> TQuotB '[TInt64, TInt8] '[TInt64])
                       )
                     ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
                 )

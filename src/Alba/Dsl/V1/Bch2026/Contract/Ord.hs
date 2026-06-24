@@ -14,7 +14,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TInt,
-    TQuot,
+    TQuotB,
     TNat,
     cast,
     quot2,
@@ -47,16 +47,16 @@ class (BlobEq a) => Ord a where
   ordRec :: Fn s (s :> TOrdRec a)
 
 -- Only holds 'lessThanOrEqual' for now.
-mkOrdM :: Fn (s :> TQuot '[a, a] '[TBool]) (s :> TOrdRec a)
+mkOrdM :: Fn (s :> TQuotB '[a, a] '[TBool]) (s :> TOrdRec a)
 mkOrdM = fromRaw
 
-getLessThanOrEqual :: Fn (s :> TOrdRec a) (s :> TQuot '[a, a] '[TBool])
+getLessThanOrEqual :: Fn (s :> TOrdRec a) (s :> TQuotB '[a, a] '[TBool])
 getLessThanOrEqual = toRaw
 
-fromRaw :: Fn (s :> TQuot '[a, a] '[TBool]) (s :> TOrdRec a)
+fromRaw :: Fn (s :> TQuotB '[a, a] '[TBool]) (s :> TOrdRec a)
 fromRaw = cast
 
-toRaw :: Fn (s :> TOrdRec a) (s :> TQuot '[a, a] '[TBool])
+toRaw :: Fn (s :> TOrdRec a) (s :> TQuotB '[a, a] '[TBool])
 toRaw = cast
 
 instance Ord TInt where
