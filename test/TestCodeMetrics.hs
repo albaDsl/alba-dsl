@@ -11,16 +11,15 @@ import Alba.Dsl.V1.Bch2026
     Optimize (O1),
     S,
     Stack (..),
-    TBytes,
     TNat,
     TQuotA,
     begin,
     bytes,
-    cast,
     compile,
     compile',
     compileL2,
     compressibilityStr,
+    constant,
     delCount,
     int,
     n2i,
@@ -59,16 +58,8 @@ import DslDemo.EllipticCurve.G (g)
 import DslDemo.EllipticCurve.Jacobian qualified as EJ
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EJWN
 import DslDemo.EllipticCurve.JacobianWNafGlv qualified as EJWNG
-import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
-import DslDemo.EllipticCurve.PrecomputedGTables
-  ( gPhiTableWNaf6,
-    gTable4,
-    gTable6,
-    gTableWNaf5,
-    gTableWNaf6,
-  )
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
 import DslDemo.TurtleVm.Bch2026.TurtleVm qualified as T2026
@@ -249,24 +240,24 @@ verifyTestVector ecMul =
     )
 
 windowedMul4Precomputed :: FnC
-windowedMul4Precomputed = bytes gTable4 ∘ b2v ∘ verifyTestVector EJW.ecMul4
-
-b2v :: Fn (s :> TBytes) (s :> TTable)
-b2v = cast
+windowedMul4Precomputed =
+  constant (g ∘ EJW.setupTableM 4) ∘ verifyTestVector EJW.ecMul4
 
 windowedMul6Precomputed :: FnC
-windowedMul6Precomputed = bytes gTable6 ∘ b2v ∘ verifyTestVector EJW.ecMul6
+windowedMul6Precomputed =
+  constant (g ∘ EJW.setupTableM 6) ∘ verifyTestVector EJW.ecMul6
 
 wNaf5 :: FnC
 wNaf5 = g ∘ EJWN.setupTable ∘ verifyTestVector EJWN.ecMul
 
 wNaf5Precomputed :: FnC
-wNaf5Precomputed = bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul
+wNaf5Precomputed = constant (g ∘ EJWN.setupTable) ∘ verifyTestVector EJWN.ecMul
 
 wNafGlvPrecomputed :: FnC
-wNafGlvPrecomputed =
-  (bytes gTableWNaf6 ∘ b2v ∘ bytes gPhiTableWNaf6 ∘ b2v ∘ tuple)
-    ∘ verifyTestVector EJWNG.ecMul
+wNafGlvPrecomputed = tabG ∘ tabGPhi ∘ tuple ∘ verifyTestVector EJWNG.ecMul
+  where
+    tabG = constant (g ∘ EJWNG.setupTable)
+    tabGPhi = constant (quot1 EJWNG.phi ∘ g ∘ EJWNG.setupTable ∘ V.map)
 
 vectorOps :: FnC
 vectorOps =

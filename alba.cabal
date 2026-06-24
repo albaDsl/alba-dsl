@@ -287,7 +287,6 @@ library
       DslDemo.EllipticCurve.Native.JacobianWNafGlv,
       DslDemo.EllipticCurve.Native.JacobianWNafInterleaved,
       DslDemo.EllipticCurve.Point,
-      DslDemo.EllipticCurve.PrecomputedGTables,
       DslDemo.EllipticCurve.LookupTable,
       DslDemo.Exponentiation,
       DslDemo.MergeSort.MergeSort,

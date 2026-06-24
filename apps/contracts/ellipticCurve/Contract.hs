@@ -9,8 +9,7 @@ import Alba.Dsl.V1.Bch2026
     TBytes,
     TNat,
     begin,
-    bytes,
-    cast,
+    constant,
     int,
     opBin2Num,
     runEnv,
@@ -21,10 +20,10 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     swap,
   )
 import Alba.Dsl.V1.Common.Contract (Contract (..))
+import DslDemo.EllipticCurve.G qualified as EC
 import DslDemo.EllipticCurve.JacobianWNaf qualified as EC
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as EC
-import DslDemo.EllipticCurve.PrecomputedGTables (gTableWNaf5)
 import Prelude ()
 
 type EllipticCurve =
@@ -39,20 +38,18 @@ contract = MkContract withdraw
 --
 -- >>> import Alba.Dsl.V1.Bch2026 qualified as Dsl
 -- >>> Dsl.progSize withdraw
--- "16 opcodes, 1661 bytes.
--- Total (with function table): 169 opcodes, 2998 bytes.\n"
+-- "17 opcodes, 85 bytes. Total (with fn-table): 200 opcodes, 3143 bytes.\n"
 withdraw :: CFn (Base :> TNat :> TBytes)
 withdraw =
   runEnv
     ( begin
-        . (verifyFiller . bytes gTableWNaf5 . b2v . swap . EC.ecMul . target)
+        . (verifyFiller . tabG . swap . EC.ecMul . target)
         . equal
     )
   where
     verifyFiller = opBin2Num . int 0 . equalVerify
 
-    b2v :: Fn (s :> TBytes) (s :> EC.TTable)
-    b2v = cast
+    tabG = constant (EC.g . EC.setupTable)
 
     -- n = 4_000_000_000
     target :: Fn s (s :> TPoint)

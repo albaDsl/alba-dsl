@@ -15,7 +15,6 @@ import DslDemo.EllipticCurve.JacobianWNafGlv qualified as WNG
 import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as W
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
-import DslDemo.EllipticCurve.PrecomputedGTables (gTable4, gTable6)
 import QuickCheckSupport (Bits256 (..))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
@@ -192,14 +191,11 @@ verifyTestVectors ecMulN =
 
 progEllipticCurve4Precomp :: Fn s (s :> TBool)
 progEllipticCurve4Precomp =
-  runEnv (bytes gTable4 ∘ b2v ∘ verifyTestVectors W.ecMul4)
-
-b2v :: Fn (s :> TBytes) (s :> TTable)
-b2v = cast
+  runEnv (constant (g ∘ W.setupTableM 4) ∘ verifyTestVectors W.ecMul4)
 
 progEllipticCurve6Precomp :: Fn s (s :> TBool)
 progEllipticCurve6Precomp =
-  runEnv (bytes gTable6 ∘ b2v ∘ verifyTestVectors W.ecMul6)
+  runEnv (constant (g ∘ W.setupTableM 6) ∘ verifyTestVectors W.ecMul6)
 
 propAdditivity ::
   (forall s. Fn (s :> TPoint :> TPoint) (s :> TPoint)) ->

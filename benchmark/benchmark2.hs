@@ -33,7 +33,6 @@ import DslDemo.EllipticCurve.Native.JacobianWNafGlv qualified as NJWNG
 import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved qualified as NJWNI
 import DslDemo.EllipticCurve.Native.JacobianWindowed qualified as NJW
 import DslDemo.EllipticCurve.Point qualified as EA
-import DslDemo.EllipticCurve.PrecomputedGTables (gPhiTableWNaf6, gTableWNaf5, gTableWNaf6)
 import Numeric.Natural (Natural)
 
 data TestVal = TestVal
@@ -134,17 +133,19 @@ progMulJacobianWindowed =
 
 progMulJacobianWNaf :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulJacobianWNaf =
-  runEnv (bytes gTableWNaf5 ∘ b2v ∘ opSwap ∘ EJWN.ecMul ∘ EA.getXY)
+  runEnv (tabG ∘ opSwap ∘ EJWN.ecMul ∘ EA.getXY)
+  where
+    tabG = constant (g ∘ EJWN.setupTable)
 
 b2v :: Fn (s :> TBytes) (s :> V.TVector TPointJ)
 b2v = cast
 
 progMulWNafGlv :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulWNafGlv =
-  runEnv
-    ( (bytes gTableWNaf6 ∘ b2v ∘ bytes gPhiTableWNaf6 ∘ b2v ∘ tuple)
-        ∘ (opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
-    )
+  runEnv (tabG ∘ tabGPhi ∘ tuple ∘ opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
+  where
+    tabG = constant (g ∘ EJWNG.setupTable)
+    tabGPhi = constant (quot1 EJWNG.phi ∘ g ∘ EJWNG.setupTable ∘ V.map)
 
 verify :: (Natural -> Point) -> [TestVal] -> ()
 verify mul vals =
