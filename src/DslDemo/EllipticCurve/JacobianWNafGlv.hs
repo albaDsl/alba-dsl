@@ -22,6 +22,7 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
 import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe qualified as V
 import Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms (countingSortDesc)
 import Alba.Dsl.V1.Bch2026.QuotationsB qualified as QB
 import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods)
@@ -64,7 +65,7 @@ setupTable =
 lookup :: Fn (s :> TTable :> TInt) (s :> TPointJ)
 lookup =
   (dup . int 0 . lessThan . rot . rot . abs . i2nUnsafe . sub1 . nat 2)
-    . (div . V.lookup . fromJust . swap . opWhen EC.ecNegateJ)
+    . (div . V.lookupUnsafe . swap . opWhen EC.ecNegateJ)
 
 ecMul :: Env (s :> TTuple TTable TTable :> TNat) (s :> TPoint)
 ecMul =
@@ -96,9 +97,6 @@ ecMul =
 
     lookupNeg :: Fn (s :> TInt16 :> TTable) (s :> TPointJ)
     lookupNeg = lookup' . EC.ecNegateJ
-
-fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = quot0 errCanNotHappen . swap . fromMaybe'
 
 glvDecompose :: Fn (s :> TInt) (s :> TInt :> TInt)
 glvDecompose =

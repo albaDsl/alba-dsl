@@ -46,9 +46,9 @@ import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
 import Alba.Dsl.V1.Bch2026.Contract.Shorthand (drop, dup, nip, swap)
 import Alba.Dsl.V1.Bch2026.Contract.TInt16 (int16)
 import Alba.Dsl.V1.Bch2026.Contract.TMaybe (TMaybe, fromMaybe')
-import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
+import Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe qualified as V
 import Prelude ()
 
 -- Merge two vectors that are both sorted in ascending order to produce a new
@@ -72,18 +72,18 @@ merge = V.empty . opUntil loop . nip . nip . nip
             ),
             ( pick #emptyA,
               (del #key . del #emptyA . del #emptyB . roll #vecA . roll #vecB)
-                . (V.uncons . fromJust . untuple . swap . ns #b . roll #vecC)
+                . (V.unconsUnsafe . swap . ns #b . roll #vecC)
                 . (roll #b . V.snoc . opFalse)
             ),
             ( pick #emptyB,
-              (del #key . del #emptyA . del #emptyB . roll #vecA . V.uncons)
-                . (fromJust . untuple . swap . ns #a . roll #vecB . roll #vecC)
+              (del #key . del #emptyA . del #emptyB . roll #vecA)
+                . (V.unconsUnsafe . swap . ns #a . roll #vecB . roll #vecC)
                 . (roll #a . V.snoc . opFalse)
             )
           ]
           ( (del #emptyA . del #emptyB)
-              . name2 #a #vecA' (pick #vecA . V.uncons . fromJust . untuple)
-              . name2 #b #vecB' (pick #vecB . V.uncons . fromJust . untuple)
+              . name2 #a #vecA' (pick #vecA . V.unconsUnsafe)
+              . name2 #b #vecB' (pick #vecB . V.unconsUnsafe)
               . (pickN #a . pick #key . un #a . invoke1)
               . (pickN #b . roll #key . un #b . invoke1 . opLessThanOrEqual)
               . opIf
