@@ -12,11 +12,11 @@ the core is postfix notation, a stack for argument passing, and an extensible
 collection of words (functions) — like Forth.
 
 AlbaDsl's abstraction mechanisms include macros (expressed using Haskell
-functions), functions (words), anonymous functions with partial application, and
-parametric polymorphism with type classes (to some degree). Collections of
-macros and functions can be grouped using standard Haskell modules and
-libraries. Contract complexity is managed by layering abstractions and taking
-advantage of the strong typing.
+functions), functions/words, quotations (anonymous functions supporting partial
+application), and parametric polymorphism with type classes (to some degree).
+Collections of macros and functions can be grouped using standard Haskell
+modules and libraries. Contract complexity is managed by layering abstractions
+and taking advantage of the strong typing.
 
 Haskell's type system is used to statically enforce the type of the input and
 output stacks of a given AlbaDsl expression. Stack items can be assigned names
@@ -67,11 +67,11 @@ AlbaDsl example code:
 - LZSS decompressor. Uses the CashVM 2026 bit shift operators.
   ([GitHub](https://github.com/albaDsl/alba-dsl/blob/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/Alba/Dsl/V1/Bch2026/Contract/LzssBit.hs))
   ([BCR](https://bitcoincashresearch.org/t/albadsl-albavm-haskell-based-dsl-and-vm-for-bitcoin-cash-2025-contract-programming/1558/34?u=albadsl))
-- Vector library. Vector that can store any type that implements the PackFs type
-  class.
+- Vector library. Vectors that can store any type that implements the PackFs
+  type class.
   ([GitHub](https://github.com/albaDsl/alba-dsl/blob/b4b8b02fd1686c1ab068b2318796c8fdccddc673/src/Alba/Dsl/V1/Bch2026/Contract/TVector.hs))
   ([BCR](https://bitcoincashresearch.org/t/albadsl-albavm-haskell-based-dsl-and-vm-for-bitcoin-cash-2025-contract-programming/1558/32?u=albadsl))
-- MergeSort. Sorts a Vector of elements satisfying the Ord typeclass. Uses
+- MergeSort. Sorts a Vector of elements satisfying the Ord type class. Uses
   recursion.
   ([GitHub](https://github.com/albaDsl/alba-dsl/blob/5bf90544fe49e3a0b25b35e4a19c10c2df1965b2/src/DslDemo/MergeSort/MergeSort.hs))
 - TurtleVm: a meta-circular evaluator for Bitcoin Cash Script on CashVM 2025.
@@ -84,8 +84,8 @@ AlbaDsl example code:
 Example AlbaDsl contracts:
 - Last will. Basic contract with three entry points.
   ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/lastWill))
-- Elliptic Curve. Limited secp256k1 scalar multiply with a precomputed wNAF
-  table in a BCH 2026 transaction.
+- Elliptic Curve. Limited secp256k1 scalar multiply using wNAF and a precomputed
+  lookup table in a BCH 2026 transaction.
   ([GitHub](https://github.com/albaDsl/alba-dsl/tree/b4b8b02fd1686c1ab068b2318796c8fdccddc673/apps/contracts/ellipticCurve))
 - MiniTurtleVm Challenge. Meta-circular BCH Script evaluator inside a BCH 2025
   Mainnet transaction.
