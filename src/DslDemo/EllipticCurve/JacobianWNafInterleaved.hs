@@ -18,6 +18,7 @@ import Alba.Dsl.V1.Bch2026
     cast,
     del,
     i2n,
+    i2nUnsafe,
     n2i,
     name,
     name2,
@@ -43,10 +44,12 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
     apply2,
     errCanNotHappen,
     fromMaybe',
+    fst,
     ifJust,
     ifZero,
     just,
     nothing,
+    snd,
     tuple,
     untuple,
   )
@@ -79,7 +82,7 @@ ecMulInterleaved =
   (name #sorted sorted . pick #sorted . V.null)
     . (opIf (del #sorted . makeIdentity))
       ( name #pHi (pick #sorted . V.last . fromJust . posOf)
-          . (quot2 combine . makeIdentity . roll #pHi . n2Int16 . tuple)
+          . (quot2 combine . makeIdentity . roll #pHi . n2TInt16 . tuple)
           . (roll #sorted . V.foldr . untuple . toInt . i2n . swap . doubleN)
       )
   where
@@ -92,8 +95,8 @@ ecMulInterleaved =
         . (roll #prevPos . pick #pos . sub . toInt . i2n . roll #acc . doubleN)
         . (roll #d . roll #lookup . QB.invoke1 . EC.ecAddJ . roll #pos . tuple)
 
-    n2Int16 :: Fn (s :> TNat) (s :> TInt16)
-    n2Int16 = n2i . fromInt
+    n2TInt16 :: Fn (s :> TNat) (s :> TInt16)
+    n2TInt16 = n2i . fromInt
 
 sorted :: Fn (s :> V.TVector TScalarAndLookup) (s :> TVector TTerm')
 sorted =
@@ -106,9 +109,7 @@ sorted =
     step = taggedTerms . quot1 posOf . rot . rot . merge
 
     taggedTerms :: Fn (s :> TScalarAndLookup) (s :> TVector TTerm')
-    taggedTerms =
-      (untuple . ns2 #n #lookup . roll #lookup . conv)
-        . (roll #n . terms . V.map)
+    taggedTerms = untuple . conv . swap . terms . V.map
 
     conv ::
       Fn
@@ -117,7 +118,7 @@ sorted =
     conv = quot2 tuple . apply2
 
 posOf :: Fn (s :> TTerm') (s :> TNat)
-posOf = untuple . drop . untuple . nip . toInt . fromInt
+posOf = fst . snd . toInt . i2nUnsafe
 
 -- In LSB first (ascending) order.
 terms :: Fn (s :> TInt264) (s :> TVector TTerm)
@@ -134,11 +135,14 @@ terms = nat 0 . tuple . quot1 step . swap . V.unfoldr
               . (name #m' (roll #m . toInt . pick #z . opRShiftNum))
               . (name #pos (roll #base . roll #z . add))
               . (name #d (pick #m' . mods windowSize))
-              . ( (pick #d . fromInt . pick #pos . n2i . fromInt . tuple)
-                    . (roll #m' . roll #d . sub . i2Int264 . roll #pos . tuple)
-                    . (tuple . just)
+              . ( (pick #d . i2TInt16Unsafe . pick #pos . n2i . i2TInt16Unsafe)
+                    . (tuple . roll #m' . roll #d . sub . i2Int264Unsafe)
+                    . (roll #pos . tuple . tuple . just)
                 )
           )
 
-    i2Int264 :: Fn (s :> TInt) (s :> TInt264)
-    i2Int264 = cast
+    i2TInt16Unsafe :: Fn (s :> TInt) (s :> TInt16)
+    i2TInt16Unsafe = cast
+
+    i2Int264Unsafe :: Fn (s :> TInt) (s :> TInt264)
+    i2Int264Unsafe = cast
