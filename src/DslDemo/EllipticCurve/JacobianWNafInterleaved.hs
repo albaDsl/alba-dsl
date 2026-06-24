@@ -66,7 +66,7 @@ import DslDemo.EllipticCurve.JacobianPoint (TPointJ, makeIdentity)
 import DslDemo.EllipticCurve.Point (TPoint)
 import Prelude (Int)
 
-type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
+type TMsmTerm = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
 
 type TTerm = TTuple TInt16 TInt16
 
@@ -78,7 +78,7 @@ windowSize = 6
 fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = quot0 errCanNotHappen . swap . fromMaybe'
 
-ecMulInterleaved :: Bch.Fn (s :> V.TVector TScalarAndLookup) (s :> TPointJ)
+ecMulInterleaved :: Bch.Fn (s :> V.TVector TMsmTerm) (s :> TPointJ)
 ecMulInterleaved =
   (name #sorted sorted . pick #sorted . V.null)
     . (opIf (del #sorted . makeIdentity))
@@ -100,17 +100,17 @@ ecMulInterleaved =
     n2TInt16 :: Fn (s :> TNat) (s :> TInt16)
     n2TInt16 = n2i . fromInt
 
-sorted :: Fn (s :> V.TVector TScalarAndLookup) (s :> TVector TTerm')
+sorted :: Fn (s :> V.TVector TMsmTerm) (s :> TVector TTerm')
 sorted =
   V.uncons
     . ifJust
       (untuple . swap . taggedTerms . quot2 (step) . rot . rot . swap . V.foldl)
       V.empty
   where
-    step :: Fn (s :> TVector TTerm' :> TScalarAndLookup) (s :> TVector TTerm')
+    step :: Fn (s :> TVector TTerm' :> TMsmTerm) (s :> TVector TTerm')
     step = taggedTerms . quot1 posOf . rot . rot . merge
 
-    taggedTerms :: Fn (s :> TScalarAndLookup) (s :> TVector TTerm')
+    taggedTerms :: Fn (s :> TMsmTerm) (s :> TVector TTerm')
     taggedTerms = untuple . conv . swap . terms . V.map
 
     conv ::

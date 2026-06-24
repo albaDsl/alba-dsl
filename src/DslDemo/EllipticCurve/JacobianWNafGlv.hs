@@ -45,7 +45,7 @@ import Prelude (Int, fromIntegral, id, undefined, (-), (^))
 
 type TTable = TVector TPoint
 
-type TScalarAndLookup = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
+type TMsmTerm = TTuple TInt264 (TQuotB '[TInt16] '[TPoint])
 
 type TTerm = TTuple TInt16 TInt16
 
