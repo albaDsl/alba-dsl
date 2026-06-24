@@ -20,9 +20,16 @@ import QuickCheckSupport ()
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase)
 import TestUtils (evaluateScript, isErr)
+import TestUtils2026 qualified as TU2026
 import Prelude hiding (exp)
 
-data ArgCount = Args Int | ZeroArg | PushData | Special | UnusedOp
+data ArgCount
+  = Args Int
+  | Args2026 Int
+  | ZeroArg
+  | PushData
+  | Special
+  | UnusedOp
 
 testInvalidStack :: TestTree
 testInvalidStack =
@@ -36,6 +43,10 @@ testInvalidStack =
                 Args argCount' ->
                   isErr
                     (evaluateWithStack opcodeL1 (stack (pred argCount')))
+                    SeInvalidStackOperation
+                Args2026 argCount' ->
+                  isErr
+                    (evaluateWithStack2026 opcodeL1 (stack (pred argCount')))
                     SeInvalidStackOperation
                 _ -> pure ()
           )
@@ -68,6 +79,9 @@ testInvalidStack =
 
     evaluateWithStack op s =
       evaluateScript [fromIntegral $ fromEnum op] (s, S.empty) txContext
+
+    evaluateWithStack2026 op s =
+      TU2026.evaluateScript [fromIntegral $ fromEnum op] (s, S.empty) txContext
 
     multiSigStacks =
       [ S.empty,
@@ -182,12 +196,12 @@ opArgCount L1.OP_14 = ZeroArg
 opArgCount L1.OP_15 = ZeroArg
 opArgCount L1.OP_16 = ZeroArg
 opArgCount L1.OP_NOP = ZeroArg
-opArgCount L1.OP_VER_OP_EVAL = UnusedOp -- FIXME: TBD, change to 1-arg.
+opArgCount L1.OP_VER_OP_EVAL = UnusedOp
 opArgCount L1.OP_IF = Args 1
 opArgCount L1.OP_NOTIF = Args 1
-opArgCount L1.OP_VERIF_OP_BEGIN = UnusedOp -- FIXME: TBD, change to 1-arg.
-opArgCount L1.OP_VERNOTIF_OP_UNTIL = UnusedOp -- FIXME: TBD, change to 1-arg.
-opArgCount L1.OP_ELSE = ZeroArg
+opArgCount L1.OP_BEGIN = Special -- FIXME
+opArgCount L1.OP_UNTIL = Special -- FIXME
+opArgCount L1.OP_ELSE = Special
 opArgCount L1.OP_ENDIF = ZeroArg
 opArgCount L1.OP_VERIFY = Args 1
 opArgCount L1.OP_RETURN = ZeroArg
@@ -221,12 +235,12 @@ opArgCount L1.OP_OR = Args 2
 opArgCount L1.OP_XOR = Args 2
 opArgCount L1.OP_EQUAL = Args 2
 opArgCount L1.OP_EQUALVERIFY = Args 2
-opArgCount L1.OP_RESERVED1_OP_DEFINE = UnusedOp -- FIXME: TBD, change to 2-arg.
-opArgCount L1.OP_RESERVED2_OP_INVOKE = UnusedOp -- FIXME: TBD, change to 1-arg.
+opArgCount L1.OP_DEFINE = Args2026 2
+opArgCount L1.OP_INVOKE = Args2026 1
 opArgCount L1.OP_1ADD = Args 1
 opArgCount L1.OP_1SUB = Args 1
-opArgCount L1.OP_2MUL_OP_LSHIFTNUM = UnusedOp
-opArgCount L1.OP_2DIV_OP_RSHIFTNUM = UnusedOp
+opArgCount L1.OP_LSHIFTNUM = Args2026 2
+opArgCount L1.OP_RSHIFTNUM = Args2026 2
 opArgCount L1.OP_NEGATE = Args 1
 opArgCount L1.OP_ABS = Args 1
 opArgCount L1.OP_NOT = Args 1
@@ -236,8 +250,8 @@ opArgCount L1.OP_SUB = Args 2
 opArgCount L1.OP_MUL = Args 2
 opArgCount L1.OP_DIV = Args 2
 opArgCount L1.OP_MOD = Args 2
-opArgCount L1.OP_LSHIFT_OP_LSHIFTBIN = UnusedOp
-opArgCount L1.OP_RSHIFT_OP_RSHIFTBIN = UnusedOp
+opArgCount L1.OP_LSHIFTBIN = Args2026 2
+opArgCount L1.OP_RSHIFTBIN = Args2026 2
 opArgCount L1.OP_BOOLAND = Args 2
 opArgCount L1.OP_BOOLOR = Args 2
 opArgCount L1.OP_NUMEQUAL = Args 2
