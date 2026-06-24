@@ -33,7 +33,10 @@ import Alba.Dsl.V1.Bch2026
     n2i,
     nat,
     op2,
+    opGreaterThanOrEqual,
+    opLessThan,
     opVerify,
+    opWhen,
     opWithin,
     (.),
   )
@@ -70,10 +73,17 @@ pushFe x =
   assert (x >= 0 && x <= (fromIntegral p - 1)) (int (fromIntegral x) . fromRaw)
 
 feAdd :: Fn (s :> TFe :> TFe) (s :> TFe)
-feAdd = fn (toRaw2 . add . primeModulus . mod . fromRaw)
+feAdd = fn (toRaw2 . add . reduceAdd . fromRaw)
+  where
+    reduceAdd :: Fn (s :> TInt) (s :> TInt)
+    reduceAdd =
+      dup . primeModulus . opGreaterThanOrEqual . opWhen (primeModulus . sub)
 
 feSub :: Fn (s :> TFe :> TFe) (s :> TFe)
-feSub = fn (toRaw2 . sub . primeModulus . add . primeModulus . mod . fromRaw)
+feSub = fn (toRaw2 . sub . reduceSub . fromRaw)
+  where
+    reduceSub :: Fn (s :> TInt) (s :> TInt)
+    reduceSub = dup . int 0 . opLessThan . opWhen (primeModulus . add)
 
 feNeg :: Fn (s :> TFe) (s :> TFe)
 feNeg = fn (int 0 . fromRaw . swap . feSub)
