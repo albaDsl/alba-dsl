@@ -7,6 +7,7 @@ module Alba.Dsl.V1.Common.OpcodeL3
     FunctionIdType (..),
     VmFunctionId,
     mkVmFunctionId,
+    localIdMaxLength,
     vmFunctionIdToByteString,
     isConstant,
     isRtConstant,
@@ -79,18 +80,21 @@ vmFunctionIdToByteString (VmFunctionId x) = B.pack x
 -- (16-bits) are used as the library prefix.
 mkVmFunctionId :: FunctionIdType -> Int -> VmFunctionId
 mkVmFunctionId Local x
-  | x < 2 ^ (16 :: Int) =
+  | x < 2 ^ (localIdMaxLength * 8 :: Int) =
       let bytes = integerToBytesUnsigned (fromIntegral x)
        in VmFunctionId (B.unpack bytes)
   | otherwise = errIndexLimit
 mkVmFunctionId (ThreeByte16_8 prefix) x
-  | x == 0 && idLength prefix == 2 = (prefix <> VmFunctionId [0])
-  | x < 256 && idLength prefix == 2 =
+  | x == 0 && idLength prefix == localIdMaxLength = (prefix <> VmFunctionId [0])
+  | x < 256 && idLength prefix == localIdMaxLength =
       let bytes = integerToBytesUnsigned (fromIntegral x)
        in (prefix <> VmFunctionId (B.unpack bytes))
   | otherwise = errIndexLimit
   where
     idLength (VmFunctionId str) = length str
+
+localIdMaxLength :: Int
+localIdMaxLength = 2
 
 errIndexLimit :: a
 errIndexLimit =
