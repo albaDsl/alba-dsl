@@ -50,7 +50,7 @@ type TTerm = TTuple TInt16 TInt16
 type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPointJ])
 
 windowSize :: Int
-windowSize = 5
+windowSize = 6
 
 setupTable :: Bch.Fn (s :> TPoint) (s :> TTable)
 setupTable =

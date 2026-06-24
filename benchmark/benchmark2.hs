@@ -33,7 +33,7 @@ import DslDemo.EllipticCurve.Native.JacobianWNafGlv qualified as NJWNG
 import DslDemo.EllipticCurve.Native.JacobianWNafInterleaved qualified as NJWNI
 import DslDemo.EllipticCurve.Native.JacobianWindowed qualified as NJW
 import DslDemo.EllipticCurve.Point qualified as EA
-import DslDemo.EllipticCurve.PrecomputedGTables (gTableWNaf5, gPhiTableWNaf5)
+import DslDemo.EllipticCurve.PrecomputedGTables (gPhiTableWNaf6, gTableWNaf5, gTableWNaf6)
 import Numeric.Natural (Natural)
 
 data TestVal = TestVal
@@ -142,7 +142,7 @@ b2v = cast
 progMulWNafGlv :: Fn (s :> TNat) (s :> TFe :> TFe)
 progMulWNafGlv =
   runEnv
-    ( (bytes gTableWNaf5 ∘ b2v ∘ bytes gPhiTableWNaf5 ∘ b2v ∘ tuple)
+    ( (bytes gTableWNaf6 ∘ b2v ∘ bytes gPhiTableWNaf6 ∘ b2v ∘ tuple)
         ∘ (opSwap ∘ EJWNG.ecMul ∘ EA.getXY)
     )
 

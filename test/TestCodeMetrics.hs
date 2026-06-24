@@ -63,10 +63,11 @@ import DslDemo.EllipticCurve.JacobianWindowed (TTable)
 import DslDemo.EllipticCurve.JacobianWindowed qualified as EJW
 import DslDemo.EllipticCurve.Point (TPoint, pushPoint)
 import DslDemo.EllipticCurve.PrecomputedGTables
-  ( gPhiTableWNaf5,
+  ( gPhiTableWNaf6,
     gTable4,
     gTable6,
     gTableWNaf5,
+    gTableWNaf6,
   )
 import DslDemo.MergeSort.MergeSort (sort)
 import DslDemo.TurtleVm.Bch2025.TurtleVm qualified as T2025
@@ -264,7 +265,7 @@ wNaf5Precomputed = bytes gTableWNaf5 ∘ b2v ∘ verifyTestVector EJWN.ecMul
 
 wNafGlvPrecomputed :: FnC
 wNafGlvPrecomputed =
-  (bytes gTableWNaf5 ∘ b2v ∘ bytes gPhiTableWNaf5 ∘ b2v ∘ tuple)
+  (bytes gTableWNaf6 ∘ b2v ∘ bytes gPhiTableWNaf6 ∘ b2v ∘ tuple)
     ∘ verifyTestVector EJWNG.ecMul
 
 vectorOps :: FnC

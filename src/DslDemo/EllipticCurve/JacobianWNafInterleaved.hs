@@ -72,7 +72,7 @@ type TTerm = TTuple TInt16 TInt16
 type TTerm' = TTuple (TTuple TInt16 TInt16) (TQuotB '[TInt16] '[TPointJ])
 
 windowSize :: Int
-windowSize = 5
+windowSize = 6
 
 fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
 fromJust = quot0 errCanNotHappen . swap . fromMaybe'
