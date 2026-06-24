@@ -25,6 +25,7 @@ import Alba.Dsl.V1.Bch2026
 import Alba.Dsl.V1.Bch2026.Contract.Prelude
   ( Integral (add1, mod),
     Ord (..),
+    drop,
     dup,
     equal,
     ifZero,
@@ -44,11 +45,12 @@ import Prelude (Int, (-), (^))
 doubleN :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
 doubleN =
   fn
-    ( opUntil
-        ( (swap . dup . op0 . equal)
-            . opIf (swap . opTrue) (sub1 . swap . EC.ecDoubleJ . opFalse)
-        )
-        . nip
+    ( swap
+        . opUntil
+          ( (dup . op0 . equal)
+              . opIf opTrue (sub1 . swap . EC.ecDoubleJ . swap . opFalse)
+          )
+        . drop
     )
 
 mods :: Int -> Fn (s :> TInt) (s :> TInt)

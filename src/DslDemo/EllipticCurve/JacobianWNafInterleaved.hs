@@ -92,8 +92,9 @@ ecMulInterleaved =
       ns2 #term #tup
         . name2 #acc #prevPos (roll #tup . untuple)
         . name3 #lookup #d #pos (roll #term . untuple . swap . untuple)
-        . (roll #prevPos . pick #pos . sub . toInt . i2n . roll #acc . doubleN)
-        . (roll #d . roll #lookup . QB.invoke1 . EC.ecAddJ . roll #pos . tuple)
+        . (roll #prevPos . pick #pos . sub . toInt . i2nUnsafe . roll #acc)
+        . (doubleN . roll #d . roll #lookup . QB.invoke1 . EC.ecAddJ . roll #pos)
+        . tuple
 
     n2TInt16 :: Fn (s :> TNat) (s :> TInt16)
     n2TInt16 = n2i . fromInt
