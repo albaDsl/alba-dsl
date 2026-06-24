@@ -68,7 +68,10 @@ import System.IO.Unsafe (unsafePerformIO)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsString)
 import TestUtils (TestResult (..), minimalContext, showLog)
-import TestUtils2026 (emptyStacks, evaluateScript)
+import TestUtils2026 (emptyStacks)
+import TestUtils2026 qualified as Tu2026
+import TestUtilsSpec qualified as TuSpec
+import Text.Printf (printf)
 import Prelude hiding (Integral (..), div, drop, mod, (.))
 import Prelude qualified as P
 
@@ -129,15 +132,25 @@ executionCost =
     ]
   where
     golden = goldenTest "execution_cost"
-    costOf' prog = show $ costOf prog
+    costOf' prog =
+      let (cost, cost') = costOf prog
+       in printf "%s (BchSpec: %s)" (thousands cost) (thousands cost')
 
+    thousands :: Int -> String
+    thousands = P.reverse P.. insertCommas P.. P.reverse P.. show
+      where
+        insertCommas (x:y:z:xs@(_:_)) = x : y : z : ',' : insertCommas xs
+        insertCommas xs               = xs
+        
 turtleVmEfficiency :: TestTree
 turtleVmEfficiency =
   testGroup
     "TurtleVm efficiency"
     [ golden
         "TurtleVm 2026"
-        (show (turtleVmCostOf arithmetic `P.div` costOf arithmetic))
+        ( let (cost, _) = costOf arithmetic
+           in show (turtleVmCostOf arithmetic `P.div` cost)
+        )
     ]
   where
     golden = goldenTest "turtlevm_efficiency"
@@ -163,19 +176,23 @@ sizeOf prog = sizeStr (fst $ compileL2 O1 prog)
 ratio :: FnA s alt s' alt' -> String
 ratio prog = compressibilityStr (fst $ compileL2 O1 prog)
 
-costOf :: forall s s' alt'. FnA s Base s' alt' -> Int
+costOf :: forall s s' alt'. FnA s Base s' alt' -> (Int, Int)
 costOf prog =
   let cr = compile' O1 prog
-      res = evaluateScript cr.code emptyStacks minimalContext
-   in case res of
-        Right tr ->
+      (res, res') =
+        ( Tu2026.evaluateScript cr.code emptyStacks minimalContext,
+          TuSpec.evaluateScript cr.code emptyStacks minimalContext
+        )
+   in case (res, res') of
+        (Right tr, Right tr') ->
           unsafePerformIO $
             do
               -- ML.dumpLogToFile (Just cr) tr.logData "log.html"
               -- writeFunctionTable cr
-              pure tr.metrics.cost
-        Left (err, Just tr) -> showLog tr (error (show err))
-        Left (err, Nothing) -> error (show err)
+              pure (tr.metrics.cost, tr'.metrics.cost)
+        (Left (err, Just tr), _) -> showLog tr (error (show err))
+        (Left (err, Nothing), _) -> error (show err)
+        (_, _) -> undefined
 
 -- We evaluate 'prog' many times and calculate the average in order to amortize
 -- the cost of 'turtleVmInit' and reduce its effect on the cost number.
@@ -188,7 +205,7 @@ turtleVmCostOf prog =
           O1
           (toTyped $ T2026.turtleVmInit 10 . consumeAll T2026.turtleVmEval)
       stacks = (S.fromList $ replicate count (b2SeUnsafe code), S.empty)
-      res = evaluateScript cr.code stacks minimalContext
+      res = Tu2026.evaluateScript cr.code stacks minimalContext
    in case res of
         Right tr ->
           unsafePerformIO $
