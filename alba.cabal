@@ -120,6 +120,7 @@ library
       Alba.Dsl.V1.Bch2026.Contract.TBytes128,
       Alba.Dsl.V1.Bch2026.Contract.TEither,
       Alba.Dsl.V1.Bch2026.Contract.TInt16,
+      Alba.Dsl.V1.Bch2026.Contract.TInt264,
       Alba.Dsl.V1.Bch2026.Contract.TInt64,
       Alba.Dsl.V1.Bch2026.Contract.TInt8,
       Alba.Dsl.V1.Bch2026.Contract.TMaybe,
