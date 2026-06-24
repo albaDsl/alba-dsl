@@ -25,6 +25,7 @@ import TestLibMaybe (testLibMaybe)
 import TestLibMisc (testLibMisc)
 import TestLibTuple (testLibTuple)
 import TestLibVector (testLibVector)
+import TestLibVectorAlgorithms (testLibVectorAlgorithms)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
 import TestLibauthVectorsSpec (testLibauthVectorsSpec)
@@ -75,6 +76,7 @@ tests =
       testLibMaybe,
       testLibMisc,
       testLibVector,
+      testLibVectorAlgorithms,
       testLibauthVectors2025,
       testLibauthVectors2026,
       testLibauthVectorsSpec,
