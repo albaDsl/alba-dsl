@@ -68,12 +68,14 @@ halve = op2 . opDiv
 
 signum :: Fn (s :> TInt) (s :> TInt)
 signum =
-  ns #n
-    . cond
-      [ (pick #n . op0 . opLessThan, del #n . op1Negate),
-        (pick #n . op0 . opNumEqual, del #n . op0)
-      ]
-      (del #n . op1)
+  fn
+    ( ns #n
+        . cond
+          [ (pick #n . op0 . opLessThan, del #n . op1Negate),
+            (pick #n . op0 . opNumEqual, del #n . op0)
+          ]
+          (del #n . op1)
+    )
 
 -- >>> import Alba.Dsl.V1.Bch2026
 -- >>> progSize pow
