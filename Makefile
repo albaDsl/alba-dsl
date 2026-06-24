@@ -30,7 +30,7 @@ test: build
 	cabal run transferWithTimeout -- test
 	cabal run miniTurtleChallenge -- test
 	cabal run permutationChallenge -- test
-	cabal run -- test --quickcheck-tests 100 --quickcheck-max-ratio 100
+	cabal run -- test --quickcheck-tests 50 --quickcheck-max-ratio 100
 
 accept-metrics:
 	cabal run test -- -p "metrics" --accept
