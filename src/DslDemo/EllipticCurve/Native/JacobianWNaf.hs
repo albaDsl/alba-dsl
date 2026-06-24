@@ -1,6 +1,6 @@
 -- Copyright (c) 2026 albaDsl
 
-module DslDemo.EllipticCurve.Native.JacobianWNaf (ecMul) where
+module DslDemo.EllipticCurve.Native.JacobianWNaf (ecMul, setupTable) where
 
 import Data.Bits (Bits (shiftR))
 import Data.List (unfoldr)
@@ -19,26 +19,26 @@ import DslDemo.EllipticCurve.Native.Jacobian
 import Numeric.Natural (Natural)
 import Prelude hiding (lookup)
 
+type Table = V.Vector Point
+
 windowSize :: Int
 windowSize = 5
 
 -- FIXME: Inefficient implementation.
-setupTable :: PointJ -> V.Vector Point
+setupTable :: PointJ -> Table
 setupTable p = toAffine (V.iterateN numValues (`ecAdd` p2) p)
   where
     numValues = 2 ^ (windowSize - 1)
     p2 = ecDouble p
 
-lookup :: V.Vector Point -> Integer -> Point
+lookup :: Table -> Integer -> Point
 lookup tab d
   | d > 0 = tab V.! fromIntegral ((d - 1) `div` 2)
   | otherwise = AP.ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
 
-ecMul :: Natural -> PointJ -> PointJ
-ecMul n p = foldr step PJIdentity (chunks (fromIntegral n))
+ecMul :: Table -> Natural -> PointJ
+ecMul tab n = foldr step PJIdentity (chunks (fromIntegral n))
   where
-    tab = setupTable p
-
     step :: (Integer, Int) -> PointJ -> PointJ
     step (d, k) acc = ecDoubleN (fromIntegral k) (ecAddMixed acc (lookup tab d))
 

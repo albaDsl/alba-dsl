@@ -51,6 +51,7 @@ common shared-properties
       bytestring,
       containers,
       crypton,
+      deepseq,
       dhall,
       directory,
       entropy,

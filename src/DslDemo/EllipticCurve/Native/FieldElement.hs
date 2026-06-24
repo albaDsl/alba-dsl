@@ -2,10 +2,12 @@
 
 module DslDemo.EllipticCurve.Native.FieldElement (FieldElement (..)) where
 
+import Control.DeepSeq (NFData)
 import DslDemo.EllipticCurve.Constants (p)
+import GHC.Generics (Generic)
 
-newtype FieldElement = FieldElement Integer
-  deriving (Eq, Show)
+data FieldElement = FieldElement Integer
+  deriving (Eq, Show, NFData, Generic)
 
 instance Num FieldElement where
   FieldElement x + FieldElement y = fromInteger $ x + y

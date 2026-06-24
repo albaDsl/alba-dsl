@@ -13,11 +13,13 @@ module DslDemo.EllipticCurve.Native.Affine
   )
 where
 
+import Control.DeepSeq (NFData)
 import DslDemo.EllipticCurve.Native.FieldElement (FieldElement (..))
+import GHC.Generics (Generic)
 import Numeric.Natural (Natural)
 
 data Point = P !FieldElement !FieldElement | Identity
-  deriving (Eq, Show)
+  deriving (Eq, Show, NFData, Generic)
 
 g :: Point
 g =

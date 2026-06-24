@@ -1,7 +1,8 @@
 -- Copyright (c) 2026 albaDsl
 
 module DslDemo.EllipticCurve.Native.JacobianWNafInterleaved
-  ( ecMul,
+  ( Table,
+    ecMul,
     ecMulInterleaved,
     setupTable,
     lookup,
@@ -28,6 +29,8 @@ import GHC.ST (runST)
 import Numeric.Natural (Natural)
 import Prelude hiding (lookup)
 
+type Table = V.Vector Point
+
 type Term = (Integer, Natural)
 
 type Term' = (Integer, Natural, Integer -> Point)
@@ -35,21 +38,19 @@ type Term' = (Integer, Natural, Integer -> Point)
 windowSize :: Int
 windowSize = 5
 
-setupTable :: PointJ -> V.Vector Point
+setupTable :: PointJ -> Table
 setupTable p = toAffine (V.iterateN numValues (`ecAdd` p2) p)
   where
     numValues = 2 ^ (windowSize - 1)
     p2 = ecDouble p
 
-lookup :: V.Vector Point -> Integer -> Point
+lookup :: Table -> Integer -> Point
 lookup tab d
   | d > 0 = tab V.! fromIntegral ((d - 1) `div` 2)
   | otherwise = AP.ecNegate (tab V.! fromIntegral ((-d - 1) `div` 2))
 
-ecMul :: Natural -> PointJ -> PointJ
-ecMul n p = ecMulInterleaved [(fromIntegral n, \m -> lookup tab m)]
-  where
-    tab = setupTable p
+ecMul :: Table -> Natural -> PointJ
+ecMul tab n = ecMulInterleaved [(fromIntegral n, \m -> lookup tab m)]
 
 ecMulInterleaved :: V.Vector (Integer, Integer -> Point) -> PointJ
 ecMulInterleaved sources
