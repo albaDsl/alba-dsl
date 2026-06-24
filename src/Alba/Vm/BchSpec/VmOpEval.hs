@@ -16,9 +16,9 @@ evalOpEval ::
 evalOpEval op st@(VmState {code, signedCode, s, exec}) =
   case op of
     OP_EVAL -> Just $ do
-      (s' :|> lambda) <- pure s
-      let lambda' = stackElementToBytes lambda
+      (s' :|> code') <- pure s
+      let code'' = stackElementToBytes code'
           entry = Eval {callerCode = code, callerSignedCode = signedCode}
           exec' = condStackPush exec entry
-      pure st {code = lambda', signedCode = lambda', s = s', exec = exec'}
+      pure st {code = code'', signedCode = code'', s = s', exec = exec'}
     _ -> Nothing

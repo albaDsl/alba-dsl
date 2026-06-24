@@ -15,8 +15,8 @@ module Alba.Dsl.V1.Bch2026.Stack
     TSha256,
     TCode,
     TFunctionId,
-    TLambda,
-    TLambdaUntyped,
+    TQuot,
+    TQuotUntyped,
     TRuntimeState,
     Env,
   )
@@ -43,8 +43,8 @@ data THash160
 data THash256
 data TCode
 data TFunctionId
-data TLambda (args :: [Type]) (return :: [Type])
-data TLambdaUntyped
+data TQuot (args :: [Type]) (return :: [Type])
+data TQuotUntyped
 data TRuntimeState
 
 class StackEntry a
@@ -87,8 +87,8 @@ instance StackBytes TSig
 instance StackBytes TPubKey
 instance StackEntry TCode
 instance StackEntry TFunctionId
-instance StackEntry (TLambda (args :: [Type]) (return :: [Type]))
-instance StackEntry TLambdaUntyped
+instance StackEntry (TQuot (args :: [Type]) (return :: [Type]))
+instance StackEntry TQuotUntyped
 instance StackEntry TRuntimeState
 instance StackBytes TCode
 

@@ -82,8 +82,8 @@ functionLongName fId =
       format moduleName line column functionName
     RuntimeConstant moduleName line column functionName ->
       format moduleName line column functionName
-    Lambda moduleName line column _ ->
-      format moduleName line column "<lambda>"
+    Quotation moduleName line column _ ->
+      format moduleName line column "<quotation>"
     Named name -> T.pack name
     Absolute idx -> T.pack (printf "<absolute %d>" idx)
   where
@@ -106,6 +106,6 @@ functionType fId =
     Standard {} -> "Function"
     Constant {} -> "Constant"
     RuntimeConstant {} -> "Runtime Constant"
-    Lambda {} -> "Lambda"
+    Quotation {} -> "Quotation"
     Named {} -> "Named"
     Absolute {} -> "Absolute"

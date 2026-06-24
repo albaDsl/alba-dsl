@@ -77,9 +77,9 @@ progBasics =
     testEither =
       begin
         ∘ dup
-        ∘ (r ∘ lambda1 (drop ∘ int 1) ∘ lambda1 (drop ∘ int 2) ∘ rot ∘ either)
+        ∘ (r ∘ quot1 (drop ∘ int 1) ∘ quot1 (drop ∘ int 2) ∘ rot ∘ either)
         ∘ swap
-        ∘ (l ∘ lambda1 (drop ∘ int 2) ∘ lambda1 (drop ∘ int 1) ∘ rot ∘ either)
+        ∘ (l ∘ quot1 (drop ∘ int 2) ∘ quot1 (drop ∘ int 1) ∘ rot ∘ either)
         ∘ (opAdd ∘ int 4 ∘ equalVerify)
       where
         l :: Fn (s :> a) (s :> TEither a TInt8)

@@ -14,12 +14,12 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TLambda,
+    TQuot,
     begin,
     castStack,
     constant,
-    lambda2,
-    lambda2_0,
+    quot2,
+    quot2_0,
     opEqual,
     opEqualVerify,
     (.),
@@ -29,7 +29,7 @@ import Prelude (undefined)
 
 mkBlobEqRec ::
   Fn
-    (s :> TLambda '[a, a] '[TBool] :> TLambda '[a, a] '[])
+    (s :> TQuot '[a, a] '[TBool] :> TQuot '[a, a] '[])
     (s :> TBlobEqRec a)
 mkBlobEqRec = undefined -- FIXME: implement.
 
@@ -46,7 +46,7 @@ blobEqRecord :: forall a s. (StackEntry a) => Fn s (s :> TBlobEqRec a)
 blobEqRecord =
   constant
     ( begin
-        . lambda2 (valsToBytes . opEqual)
-        . lambda2_0 (valsToBytes . opEqualVerify)
+        . quot2 (valsToBytes . opEqual)
+        . quot2_0 (valsToBytes . opEqualVerify)
         . mkBlobEqRec
     )

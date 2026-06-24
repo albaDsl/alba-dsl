@@ -26,7 +26,8 @@ import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (..), invokeExt)
-import Alba.Dsl.V1.Bch2026.Lang (lambda1, lambda2, runEnv)
+import Alba.Dsl.V1.Bch2026.Lang (runEnv)
+import Alba.Dsl.V1.Bch2026.Quotations (quot1, quot2)
 import Alba.Dsl.V1.Bch2026.TxDsl
   ( libraryToTx,
     simpleWrap,
@@ -62,12 +63,12 @@ showCase =
         . (int8Vector . V.head . drop)
         . (int8Vector . V.last . drop)
         . (int8Vector . V.length . drop)
-        . (lambda1 (drop . int8 2) . int8Vector . V.map . drop)
-        . (lambda2 add . int8 0 . int8Vector . V.foldl . drop)
+        . (quot1 (drop . int8 2) . int8Vector . V.map . drop)
+        . (quot2 add . int8 0 . int8Vector . V.foldl . drop)
         . (int8Vector . int8Vector . V.zip . drop)
-        . (lambda2 add . int8Vector . int8Vector . V.zipWith . drop)
-        . (nat 10 . lambda1 (op1Add . n2Int8) . V.generate)
-        . (lambda1 (int8 3 . lessThan) . swap . V.filter . drop)
+        . (quot2 add . int8Vector . int8Vector . V.zipWith . drop)
+        . (nat 10 . quot1 (op1Add . n2Int8) . V.generate)
+        . (quot1 (int8 3 . lessThan) . swap . V.filter . drop)
         . (int8Vector . MS.sort . drop)
     )
   where

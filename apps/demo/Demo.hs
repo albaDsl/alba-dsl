@@ -145,9 +145,9 @@ e10 = runEnv (opDrop . f)
     f :: Env s (s :> TInt)
     f =
       begin
-        . lambda2 (toInt . add)
+        . quot2 (toInt . add)
         . int 0
-        . (nat 10 . lambda1 (add1 . toTInt8) . generate)
+        . (nat 10 . quot1 (add1 . toTInt8) . generate)
         . foldl
 
     toTInt8 :: Fn (s :> TNat) (s :> TInt8)

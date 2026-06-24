@@ -34,7 +34,7 @@ data FunctionId
   = Standard ModuleName LineNumber ColumnNumber FunctionName
   | Constant ModuleName LineNumber ColumnNumber FunctionName
   | RuntimeConstant ModuleName LineNumber ColumnNumber FunctionName
-  | Lambda ModuleName LineNumber ColumnNumber FunctionName
+  | Quotation ModuleName LineNumber ColumnNumber FunctionName
   | Named String
   | Absolute Index
   deriving (Eq, Ord, Show)

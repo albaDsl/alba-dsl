@@ -107,12 +107,12 @@ isTarget n = case nameModule_maybe n of
 targets :: [Target]
 targets =
   [ ("Alba.Dsl.V1.Bch2026.Lang", "fn", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda0", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda1", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda2", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda2_0", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda3", [0]),
-    ("Alba.Dsl.V1.Bch2026.Lang", "lambda4", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot0", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot1", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot2", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot2_0", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot3", [0]),
+    ("Alba.Dsl.V1.Bch2026.Quotations", "quot4", [0]),
     ("Alba.Dsl.V1.Bch2026.Lang", "constant", [0]),
     ("Alba.Dsl.V1.Bch2026.Lang", "runtimeConstant", [0])
   ]
@@ -213,7 +213,7 @@ reportSourceError sp fn _ frees = do
             <+> text "is not a closed expression."
         )
           $$ nest 2 (text "Captured local names:" <+> ppr (Set.toList frees))
-          $$ text "An fn/lambda/constant body must be a closed expression. It"
+          $$ text "An fn/quot/constant body must be a closed expression. It"
           <+> text "can't reference \"Haskell function\" arguments"
           <+> text "directly or indirectly."
       diag = mkPlainError noHints msg

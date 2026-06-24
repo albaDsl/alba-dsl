@@ -21,7 +21,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TLambda,
+    TQuot,
     TNat,
     begin,
     bytes,
@@ -30,7 +30,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     invoke0,
     invoke1,
-    lambda1,
+    quot1,
     nat,
     opCat,
     opIf,
@@ -80,8 +80,8 @@ maybeInt8PackFs =
   constant
     ( begin
         . size @(TMaybe TInt8)
-        . lambda1 (pack @(TMaybe TInt8))
-        . lambda1 (unpack @(TMaybe TInt8))
+        . quot1 (pack @(TMaybe TInt8))
+        . quot1 (unpack @(TMaybe TInt8))
         . mkPackFsM
     )
 
@@ -103,8 +103,8 @@ maybeInt64PackFs =
   constant
     ( begin
         . size @(TMaybe TInt64)
-        . lambda1 (pack @(TMaybe TInt64))
-        . lambda1 (unpack @(TMaybe TInt64))
+        . quot1 (pack @(TMaybe TInt64))
+        . quot1 (unpack @(TMaybe TInt64))
         . mkPackFsM
     )
 
@@ -126,8 +126,8 @@ maybeBytes128PackFs =
   constant
     ( begin
         . size @(TMaybe TBytes128)
-        . lambda1 (pack @(TMaybe TBytes128))
-        . lambda1 (unpack @(TMaybe TBytes128))
+        . quot1 (pack @(TMaybe TBytes128))
+        . quot1 (unpack @(TMaybe TBytes128))
         . mkPackFsM
     )
 
@@ -155,7 +155,7 @@ split = toRaw . tagSize . opSplit
 fromMaybe :: (StackEntry a) => Fn (s :> a :> TMaybe a) (s :> a)
 fromMaybe = fn (contentAndBool . opIf nip drop)
 
-fromMaybe' :: (StackEntry a) => Fn (s :> TLambda '[] '[a] :> TMaybe a) (s :> a)
+fromMaybe' :: (StackEntry a) => Fn (s :> TQuot '[] '[a] :> TMaybe a) (s :> a)
 fromMaybe' = fn (contentAndBool . opIf nip (drop . invoke0))
 
 contentAndBool :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a :> TBool)
@@ -173,12 +173,12 @@ ifJust ifOps elseOps = contentAndBool . opIf ifOps (drop . elseOps)
 
 maybe ::
   (StackEntry a, StackEntry b) =>
-  Fn (s :> b :> TLambda '[a] '[b] :> TMaybe a) (s :> b)
+  Fn (s :> b :> TQuot '[a] '[b] :> TMaybe a) (s :> b)
 maybe = fn (ifJust (swap . invoke1 . nip) drop)
 
 map ::
   (StackEntry a) =>
-  Fn (s :> TLambda '[a] '[b] :> TMaybe a) (s :> TMaybe b)
+  Fn (s :> TQuot '[a] '[b] :> TMaybe a) (s :> TMaybe b)
 map = fn (ifJust (swap . invoke1 . just) (drop . nothing))
 
 tagSize :: Fn s (s :> TNat)

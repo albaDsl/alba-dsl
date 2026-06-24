@@ -2,6 +2,7 @@
 
 module TestCodeMetrics (testCodeMetrics) where
 
+import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Bch2026
   ( CompilationResult (code),
     Env,
@@ -12,7 +13,7 @@ import Alba.Dsl.V1.Bch2026
     S,
     Stack (..),
     TBytes,
-    TLambda,
+    TQuot,
     TNat,
     begin,
     bytes,
@@ -23,8 +24,8 @@ import Alba.Dsl.V1.Bch2026
     compressibilityStr,
     delCount,
     int,
-    lambda1,
-    lambda2,
+    quot1,
+    quot2,
     n2i,
     nat,
     ns2,
@@ -45,7 +46,6 @@ import Alba.Dsl.V1.Bch2026.Contract.TInt8 (TInt8, int8)
 import Alba.Dsl.V1.Bch2026.Contract.TTuple (untuple)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.ExternalLib (LibData (code))
-import Alba.Dsl.V1.Bch2026.OpsUntyped qualified as UT
 import Alba.Dsl.V1.Common.Lzss qualified as LZ
 import Alba.Dsl.V1.Common.LzssBit qualified as LZB
 import Alba.Dsl.V1.Common.StackUntyped (toTyped, (.))
@@ -255,44 +255,44 @@ vectorOps :: FnC
 vectorOps =
   runEnv
     ( begin
-        ∘ (nat n ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-        ∘ (nat n ∘ lambda1 add1 ∘ int8 1 ∘ V.iterateN)
+        ∘ (nat n ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+        ∘ (nat n ∘ quot1 add1 ∘ int8 1 ∘ V.iterateN)
         ∘ ns2 #vec64 #vec8
         ∘ ( begin
-              ∘ (lambda2 (toInt ∘ fromInt ∘ add) ∘ nat 0)
+              ∘ (quot2 (toInt ∘ fromInt ∘ add) ∘ nat 0)
               ∘ (nat n ∘ int8 1 ∘ V.replicate)
               ∘ (V.foldl ∘ nat n ∘ equalVerify)
           )
         ∘ (pick #vec64 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
         ∘ (pick #vec8 ∘ dup ∘ V.reverse ∘ sort ∘ equalVerify)
         ∘ ( begin
-              ∘ lambda2 (untuple ∘ toInt ∘ swap ∘ toInt ∘ add ∘ add)
+              ∘ quot2 (untuple ∘ toInt ∘ swap ∘ toInt ∘ add ∘ add)
               ∘ int 0
               ∘ (pick #vec8 ∘ pick #vec8 ∘ V.zip)
               ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ lambda2 (toInt ∘ swap ∘ add)
+              ∘ quot2 (toInt ∘ swap ∘ add)
               ∘ int 0
               ∘ ( begin
-                    ∘ ( (lambda2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
-                          Fn s (s :> TLambda '[TInt64, TInt8] '[TInt64])
+                    ∘ ( (quot2 (toInt ∘ swap ∘ toInt ∘ add ∘ fromInt)) ::
+                          Fn s (s :> TQuot '[TInt64, TInt8] '[TInt64])
                       )
                     ∘ (pick #vec64 ∘ pick #vec8 ∘ V.zipWith)
                 )
               ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1)) ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (lambda2 (toInt ∘ add) ∘ int 0)
-              ∘ (lambda1 (int64 10 ∘ mul) ∘ pick #vec64 ∘ V.map)
+              ∘ (quot2 (toInt ∘ add) ∘ int 0)
+              ∘ (quot1 (int64 10 ∘ mul) ∘ pick #vec64 ∘ V.map)
               ∘ (V.foldl ∘ int (fromIntegral $ n * (n + 1) * 5))
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ lambda2 (toInt ∘ add)
+              ∘ quot2 (toInt ∘ add)
               ∘ int 0
               ∘ ( begin
-                    ∘ lambda1 (int64 2 ∘ mod ∘ int64 0 ∘ equal)
+                    ∘ quot1 (int64 2 ∘ mod ∘ int64 0 ∘ equal)
                     ∘ (pick #vec64 ∘ V.filter)
                 )
               ∘ (V.foldl ∘ int 650 ∘ equalVerify)

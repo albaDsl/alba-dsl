@@ -61,9 +61,9 @@ progBasics =
           ∘ (emptyInt64 ∘ ifJust opNop (int64 0) ∘ int64 0 ∘ equalVerify)
       )
     ∘ ( begin
-          ∘ (int8 2 ∘ lambda1 int64To8 ∘ int64 1 ∘ just ∘ maybe)
+          ∘ (int8 2 ∘ quot1 int64To8 ∘ int64 1 ∘ just ∘ maybe)
           ∘ (int8 1 ∘ equalVerify)
-          ∘ (int8 2 ∘ lambda1 int64To8 ∘ nothing ∘ maybe)
+          ∘ (int8 2 ∘ quot1 int64To8 ∘ nothing ∘ maybe)
           ∘ (int8 2 ∘ equalVerify)
       )
     ∘ ( begin

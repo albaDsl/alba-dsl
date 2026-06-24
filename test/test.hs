@@ -18,7 +18,7 @@ import TestIntPushing (testIntPushing)
 import TestInteger (testInteger)
 import TestIntrospection (testIntrospection)
 import TestInvalidStack (testInvalidStack)
-import TestLambdas (testLambdas)
+import TestQuotations (testQuotations)
 import TestLibConditionals (testLibConditionals)
 import TestLibEither (testLibEither)
 import TestLibMaybe (testLibMaybe)
@@ -69,7 +69,7 @@ tests =
       testInteger,
       testIntrospection,
       testInvalidStack,
-      testLambdas,
+      testQuotations,
       testLibConditionals,
       testLibEither,
       testLibTuple,

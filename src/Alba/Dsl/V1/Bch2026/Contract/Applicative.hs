@@ -25,13 +25,14 @@ import Alba.Dsl.V1.Bch2026.Contract.TMaybe
     just,
     nothing,
   )
-import Alba.Dsl.V1.Bch2026.Lang (fn, invoke2, lambda0)
-import Alba.Dsl.V1.Bch2026.Stack (TLambda)
+import Alba.Dsl.V1.Bch2026.Lang (fn)
+import Alba.Dsl.V1.Bch2026.Quotations (invoke2, quot0)
+import Alba.Dsl.V1.Bch2026.Stack (TQuot)
 import Prelude ()
 
 liftA2Maybe ::
   (StackEntry a, StackEntry b) =>
-  Fn (s :> TLambda '[a, b] '[c] :> TMaybe a :> TMaybe b) (s :> TMaybe c)
+  Fn (s :> TQuot '[a, b] '[c] :> TMaybe a :> TMaybe b) (s :> TMaybe c)
 liftA2Maybe =
   fn
     ( begin
@@ -43,4 +44,4 @@ liftA2Maybe =
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
+fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'

@@ -15,7 +15,7 @@ module Alba.Dsl.V1.Common.FunctionState
     getCallerFunctionId,
     getCallerConstantId,
     getCallerRtConstantId,
-    getCallerLambdaId,
+    getCallerQuotationId,
   )
 where
 
@@ -52,7 +52,7 @@ registerFunction fId fs@FunctionState {ft} =
         Standard {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
         Constant {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
         RuntimeConstant {} -> fs {ft = IM.insert fId (fn (Just 1)) ft}
-        Lambda {} -> fs {ft = IM.insert fId (fn Nothing) ft}
+        Quotation {} -> fs {ft = IM.insert fId (fn Nothing) ft}
         Named _ -> fs {ft = IM.insert fId (fn (Just 0)) ft}
         Absolute idx ->
           fs {ft = IM.insert fId (Function Nothing (Just idx) (Just 0)) ft}
@@ -137,10 +137,10 @@ getCallerRtConstantId = convert <$> getCallerFunctionId
       RuntimeConstant moduleName line col funName
     convert _ = error ""
 
-getCallerLambdaId :: (HasCallStack) => Maybe FunctionId
-getCallerLambdaId = convert <$> getCallerFunctionId
+getCallerQuotationId :: (HasCallStack) => Maybe FunctionId
+getCallerQuotationId = convert <$> getCallerFunctionId
   where
     convert :: FunctionId -> FunctionId
     convert (Standard moduleName line col funName) =
-      Lambda moduleName line col funName
+      Quotation moduleName line col funName
     convert _ = error ""

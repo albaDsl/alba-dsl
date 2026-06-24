@@ -4,6 +4,7 @@ module TestLibVector (testLibVector) where
 
 import Alba.Dsl.V1.Bch2026
   ( Bytes,
+    Env,
     Fn,
     Stack (..),
     StackEntry,
@@ -12,7 +13,12 @@ import Alba.Dsl.V1.Bch2026
     begin,
     bytes,
     cast,
+    emptyProg,
+    fn,
     i2nUnsafe,
+    quot0,
+    quot1,
+    quot2,
     n2i,
     name,
     nat,
@@ -24,6 +30,7 @@ import Alba.Dsl.V1.Bch2026
     opTrue,
     pick,
     roll,
+    runEnv,
     (∘),
   )
 import Alba.Dsl.V1.Bch2026.Contract.PackFs (PackFs)
@@ -56,15 +63,6 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
   )
 import Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances ()
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
-import Alba.Dsl.V1.Bch2026.Lang
-  ( emptyProg,
-    fn,
-    lambda0,
-    lambda1,
-    lambda2,
-    runEnv,
-  )
-import Alba.Dsl.V1.Bch2026.Stack (Env)
 import Numeric.Natural (Natural)
 import QuickCheckSupport (BytesSize (..))
 import Test.Tasty (TestTree, testGroup)
@@ -293,12 +291,12 @@ progConstruction =
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 3 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
               ∘ (int64 1 ∘ int64 2 ∘ int64 3 ∘ V.empty)
               ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (nat 3 ∘ lambda1 (int8 2 ∘ mul) ∘ int8 2 ∘ V.iterateN)
+              ∘ (nat 3 ∘ quot1 (int8 2 ∘ mul) ∘ int8 2 ∘ V.iterateN)
               ∘ (int8 2 ∘ int8 4 ∘ int8 8 ∘ V.empty)
               ∘ (V.cons ∘ V.cons ∘ V.cons ∘ equalVerify)
           )
@@ -310,15 +308,15 @@ progConcatenation =
   runEnv
     ( begin
         ∘ ( begin
-              ∘ (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 3 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
               ∘ (int64 1 ∘ V.empty ∘ V.cons ∘ int64 2 ∘ V.snoc ∘ int64 3)
               ∘ (V.snoc ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ ( (nat 3 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate) ::
+              ∘ ( (nat 3 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate) ::
                     Env s (s :> V.TVector TInt64)
                 )
-              ∘ ( (nat 3 ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate) ::
+              ∘ ( (nat 3 ∘ quot1 (n2i ∘ fromInt) ∘ V.generate) ::
                     Env s (s :> V.TVector TInt64)
                 )
               ∘ V.append
@@ -359,27 +357,27 @@ progMapping =
   runEnv
     ( begin
         ∘ ( begin
-              ∘ (lambda1 (int8 2 ∘ mul) ∘ int8Vector ∘ V.map)
+              ∘ (quot1 (int8 2 ∘ mul) ∘ int8Vector ∘ V.map)
               ∘ (int8 0 ∘ int8 2 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ (lambda1 (int64 2 ∘ mul) ∘ int64Vector ∘ V.map)
+              ∘ (quot1 (int64 2 ∘ mul) ∘ int64Vector ∘ V.map)
               ∘ (int64 0 ∘ int64 2 ∘ int64 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (lambda1 addExclamation ∘ bytes128Vector ∘ V.map)
+              ∘ (quot1 addExclamation ∘ bytes128Vector ∘ V.map)
               ∘ (bytes128 (b0 <> "!") ∘ bytes128 (b1 <> "!"))
               ∘ (bytes128 (b2 <> "!") ∘ V.empty ∘ V.cons ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ (lambda1 int8to64 ∘ int8Vector ∘ V.map)
+              ∘ (quot1 int8to64 ∘ int8Vector ∘ V.map)
               ∘ (int64Vector ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ lambda1 (toInt ∘ i2nUnsafe ∘ takeVec ∘ V.take)
+              ∘ quot1 (toInt ∘ i2nUnsafe ∘ takeVec ∘ V.take)
               ∘ (inputVec ∘ V.concatMap)
               ∘ V.intv [1, 2, 1, 1, 2, 3]
               ∘ equalVerify
@@ -429,7 +427,7 @@ progZipping =
               ∘ equalVerify
           )
         ∘ ( begin
-              ∘ lambda2 tuple
+              ∘ quot2 tuple
               ∘ (int64Vector ∘ int8Vector ∘ V.zipWith)
               ∘ (int64 0 ∘ int8 0 ∘ tuple)
               ∘ (int64 1 ∘ int8 1 ∘ tuple)
@@ -444,9 +442,9 @@ progZipping =
               ∘ (int64Vector ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ lambda2 add
+              ∘ quot2 add
               ∘ int64Vector
-              ∘ (dup ∘ lambda1 (int64 1 ∘ add) ∘ swap ∘ V.map)
+              ∘ (dup ∘ quot1 (int64 1 ∘ add) ∘ swap ∘ V.map)
               ∘ V.zipWith
               ∘ (int64 1 ∘ int64 3 ∘ int64 5 ∘ V.empty)
               ∘ (V.cons ∘ V.cons ∘ V.cons)
@@ -460,8 +458,8 @@ progFiltering =
   runEnv
     ( begin
         ∘ ( begin
-              ∘ (nat 10 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (lambda1 (int8 3 ∘ lessThan) ∘ swap ∘ V.filter)
+              ∘ (nat 10 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (quot1 (int8 3 ∘ lessThan) ∘ swap ∘ V.filter)
               ∘ (int8 1 ∘ int8 2 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ equalVerify
           )
@@ -473,31 +471,31 @@ progUpdates =
   runEnv
     ( begin
         ∘ ( begin
-              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (lambda1 add1 ∘ nat 2 ∘ rot ∘ V.adjust)
+              ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (quot1 add1 ∘ nat 2 ∘ rot ∘ V.adjust)
               ∘ (int8 1 ∘ int8 2 ∘ int8 4 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (lambda1 add1 ∘ nat 0 ∘ rot ∘ V.adjust)
+              ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (quot1 add1 ∘ nat 0 ∘ rot ∘ V.adjust)
               ∘ (int8 2 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
-              ∘ (lambda1 add1 ∘ nat 3 ∘ rot ∘ V.adjust)
+              ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (quot1 add1 ∘ nat 3 ∘ rot ∘ V.adjust)
               ∘ (int8 1 ∘ int8 2 ∘ int8 3 ∘ int8 5 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
               ∘ (nat 0 ∘ int8 10 ∘ rot ∘ V.updateElem)
               ∘ (int8 10 ∘ int8 2 ∘ int8 3 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
           )
         ∘ ( begin
-              ∘ (nat 4 ∘ lambda1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
+              ∘ (nat 4 ∘ quot1 (add1 ∘ n2i ∘ fromInt) ∘ V.generate)
               ∘ (nat 2 ∘ int8 10 ∘ rot ∘ V.updateElem)
               ∘ (int8 1 ∘ int8 2 ∘ int8 10 ∘ int8 4 ∘ V.empty ∘ V.cons ∘ V.cons)
               ∘ (V.cons ∘ V.cons ∘ equalVerify)
@@ -506,7 +504,7 @@ progUpdates =
     )
 
 fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = lambda0 (errCanNotHappen) ∘ swap ∘ fromMaybe'
+fromJust = quot0 (errCanNotHappen) ∘ swap ∘ fromMaybe'
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
 propReverse :: BytesSize -> Bool
@@ -571,7 +569,7 @@ propHeadTailUncons (BytesSize size) =
       runEnv
         ( begin
             ∘ name #vec (testVector len')
-            ∘ (lambda2 tuple ∘ pick #vec ∘ V.head)
+            ∘ (quot2 tuple ∘ pick #vec ∘ V.head)
             ∘ (pick #vec ∘ V.tail ∘ liftA2Maybe)
             ∘ (roll #vec ∘ V.uncons ∘ equal)
         )
@@ -587,7 +585,7 @@ propLastInitUnsnoc (BytesSize size) =
       runEnv
         ( begin
             ∘ name #vec (testVector len')
-            ∘ (lambda2 tuple ∘ pick #vec ∘ V.init)
+            ∘ (quot2 tuple ∘ pick #vec ∘ V.init)
             ∘ (pick #vec ∘ V.last ∘ liftA2Maybe)
             ∘ (roll #vec ∘ V.unsnoc ∘ equal)
         )
@@ -644,7 +642,7 @@ propZipWithUnzip (BytesSize size1) (BytesSize size2) =
       runEnv
         ( begin
             ∘ (name #vec1 (testVector len1') ∘ name #vec2 (testVector len2'))
-            ∘ (lambda2 tuple ∘ dup)
+            ∘ (quot2 tuple ∘ dup)
             ∘ (pick #vec1 ∘ pick #vec2 ∘ V.zipWith ∘ V.unzip ∘ V.zipWith)
             ∘ name #minLen (nat len1' ∘ nat len2' ∘ min)
             ∘ (pick #minLen ∘ roll #vec1 ∘ V.take)
@@ -663,7 +661,7 @@ propFilterKeepAll (BytesSize size) =
       runEnv
         ( begin
             ∘ (testVector len' ∘ dup)
-            ∘ (lambda1 (drop ∘ opTrue) ∘ swap ∘ V.filter ∘ equal)
+            ∘ (quot1 (drop ∘ opTrue) ∘ swap ∘ V.filter ∘ equal)
         )
 
     overhead :: Integer
@@ -679,7 +677,7 @@ propFilterKeepNone (BytesSize size) =
       runEnv
         ( begin
             ∘ (V.empty ∘ testVector len')
-            ∘ (lambda1 (drop ∘ opFalse) ∘ swap ∘ V.filter ∘ equal)
+            ∘ (quot1 (drop ∘ opFalse) ∘ swap ∘ V.filter ∘ equal)
         )
 
 -- 'overhead' leaves room for the extra data used in 'foldlF'.
@@ -693,8 +691,8 @@ propMapComposition (BytesSize size) =
       runEnv
         ( begin
             ∘ name #vec (testVector len')
-            ∘ (lambda1 f ∘ lambda1 g ∘ pick #vec ∘ V.map ∘ V.map)
-            ∘ (lambda1 (g ∘ f) ∘ roll #vec ∘ V.map)
+            ∘ (quot1 f ∘ quot1 g ∘ pick #vec ∘ V.map ∘ V.map)
+            ∘ (quot1 (g ∘ f) ∘ roll #vec ∘ V.map)
             ∘ equal
         )
 
@@ -718,7 +716,7 @@ propMapIdentity (BytesSize size) =
       runEnv
         ( begin
             ∘ name #vec (testVector len')
-            ∘ (pick #vec ∘ lambda1 emptyProg ∘ roll #vec ∘ V.map ∘ equal)
+            ∘ (pick #vec ∘ quot1 emptyProg ∘ roll #vec ∘ V.map ∘ equal)
         )
 
     overhead :: Integer
@@ -732,9 +730,9 @@ propFolding (BytesSize size) =
     prog len' =
       runEnv
         ( begin
-            ∘ (lambda2 add ∘ int64 0 ∘ testVector len' ∘ V.foldl)
+            ∘ (quot2 add ∘ int64 0 ∘ testVector len' ∘ V.foldl)
             ∘ (int64 sum ∘ equalVerify)
-            ∘ (lambda2 add ∘ int64 0 ∘ testVector len' ∘ V.foldr)
+            ∘ (quot2 add ∘ int64 0 ∘ testVector len' ∘ V.foldr)
             ∘ (int64 sum ∘ equalVerify)
             ∘ opTrue
         )
@@ -752,13 +750,13 @@ propUnfolding (NonNegative n) = (n <= 1000) ==> isTrue' (evaluateProg prog)
     prog =
       runEnv
         ( begin
-            ∘ lambda1
+            ∘ quot1
               ( begin
                   ∘ (dup ∘ int64 0 ∘ equal)
                   ∘ opIf (drop ∘ nothing) (int64 1 ∘ swap ∘ sub1 ∘ tuple ∘ just)
               )
             ∘ (int64 n ∘ V.unfoldr)
-            ∘ (lambda2 add ∘ int64 0 ∘ rot ∘ V.foldl)
+            ∘ (quot2 add ∘ int64 0 ∘ rot ∘ V.foldl)
             ∘ (int64 (fromIntegral n) ∘ equalVerify)
             ∘ opTrue
         )
@@ -796,7 +794,7 @@ b2 :: Bytes
 b2 = ""
 
 testVector :: Natural -> Env s (s :> V.TVector TInt64)
-testVector len = nat len ∘ lambda1 (n2i ∘ fromInt) ∘ V.generate
+testVector len = nat len ∘ quot1 (n2i ∘ fromInt) ∘ V.generate
 
 testVectorElemSize :: Integer
 testVectorElemSize = 8

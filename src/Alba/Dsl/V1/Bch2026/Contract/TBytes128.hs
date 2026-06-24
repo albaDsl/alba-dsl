@@ -21,7 +21,7 @@ import Alba.Dsl.V1.Bch2026
     fn,
     i2nUnsafe,
     int,
-    lambda1,
+    quot1,
     n2i,
     name,
     name2,
@@ -73,8 +73,8 @@ bytes128PackFs =
   constant
     ( begin
         . size @TBytes128
-        . lambda1 (pack @TBytes128)
-        . lambda1 (unpack @TBytes128)
+        . quot1 (pack @TBytes128)
+        . quot1 (unpack @TBytes128)
         . mkPackFsM
     )
 

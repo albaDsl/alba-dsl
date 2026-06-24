@@ -16,7 +16,7 @@ import Alba.Dsl.V1.Bch2026
     TFunctionId,
     THash256,
     TInt,
-    TLambda,
+    TQuot,
     TNat,
     begin,
     bytes,
@@ -52,7 +52,7 @@ importLibrary ::
   Fn
     ( s
         :> TFunctionId
-        :> TLambda '[TBytes] '[TBytes]
+        :> TQuot '[TBytes] '[TBytes]
         :> TNat
         :> TNat
         :> TNat

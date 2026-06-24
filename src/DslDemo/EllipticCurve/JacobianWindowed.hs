@@ -21,9 +21,9 @@ import Alba.Dsl.V1.Bch2026
     del,
     fn,
     i2nUnsafe,
-    lambda0,
-    lambda2,
-    lambda4,
+    quot0,
+    quot2,
+    quot4,
     n2i,
     name,
     nat,
@@ -77,7 +77,7 @@ type TTable = TVector TPointJ
 
 setupTableM :: Natural -> Env (s :> TPoint) (s :> TTable)
 setupTableM windowSize =
-  (toJacobian . lambda2 EC.ecAddJ . apply2 . nat numValues . swap)
+  (toJacobian . quot2 EC.ecAddJ . apply2 . nat numValues . swap)
     . (makeIdentity . V.iterateN)
   where
     numValues = 2 ^ windowSize
@@ -94,7 +94,7 @@ ecMulM windowSize =
     . (ns2 #tab #n . pick #n . nat 0 . equal)
     . (opIf (del #tab . del #n . makeIdentity))
       ( begin
-          . (roll #tab . nat windowSize . lambda4 f . apply4_2)
+          . (roll #tab . nat windowSize . quot4 f . apply4_2)
           . (makeIdentity . roll #n . digitsM windowSize . V.foldr)
       )
     . fromJacobian
@@ -114,7 +114,7 @@ ecMulM windowSize =
       )
 
     fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-    fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
+    fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'
 
 doubleN :: Fn (s :> TNat :> TPointJ) (s :> TPointJ)
 doubleN =
@@ -126,7 +126,7 @@ doubleN =
     . nip
 
 digitsM :: Natural -> Env (s :> TNat) (s :> V.TVector TInt8)
-digitsM windowSize = nat numValues . lambda2 f . apply2 . swap . V.unfoldr
+digitsM windowSize = nat numValues . quot2 f . apply2 . swap . V.unfoldr
   where
     numValues = 2 ^ windowSize
 

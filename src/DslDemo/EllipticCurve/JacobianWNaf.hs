@@ -20,10 +20,10 @@ import Alba.Dsl.V1.Bch2026
     fn,
     i2nUnsafe,
     int,
-    lambda0,
-    lambda1,
-    lambda2,
-    lambda3,
+    quot0,
+    quot1,
+    quot2,
+    quot3,
     n2i,
     name,
     name2,
@@ -94,7 +94,7 @@ setupTable :: Bch.Env (s :> TPoint) (s :> TTable)
 setupTable =
   fn
     ( (toJacobian . ns #p . nat numValues . pick #p . dup . EC.ecAddJ)
-        . (lambda2 EC.ecAddJ . apply2 . roll #p . V.iterateN)
+        . (quot2 EC.ecAddJ . apply2 . roll #p . V.iterateN)
     )
   where
     numValues = 2 ^ (windowSize - 1) - 1
@@ -105,7 +105,7 @@ ecMul =
     ( (ns2 #tab #n . pick #n . nat 0 . equal)
         . (opIf (del #tab . del #n . makeIdentity))
           ( name2 #chunks #z (roll #n . chunksM . untuple)
-              . (roll #tab . lambda3 f . apply3)
+              . (roll #tab . quot3 f . apply3)
               . (makeIdentity . roll #chunks . V.foldr)
               . (roll #z . swap . doubleN)
           )
@@ -125,14 +125,14 @@ ecMul =
         . (div . V.lookup . fromJust . swap . opWhen EC.ecNegateJ)
 
     fromJust :: forall a s. (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-    fromJust = lambda0 errCanNotHappen . swap . fromMaybe'
+    fromJust = quot0 errCanNotHappen . swap . fromMaybe'
 
 chunksM :: Env (s :> TNat) (s :> TTuple (V.TVector (TTuple TInt16 TInt16)) TNat)
 chunksM =
   (n2i . ns #n)
     . (name #z0 (pick #n . countTrailingZeros))
     . (name #n' (roll #n . pick #z0 . opRShiftNum))
-    . (lambda1 step . roll #n' . V.unfoldr . roll #z0 . tuple)
+    . (quot1 step . roll #n' . V.unfoldr . roll #z0 . tuple)
   where
     step :: Fn (s :> TInt) (s :> TMaybe (TTuple (TTuple TInt16 TInt16) TInt))
     step =

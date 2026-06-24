@@ -32,7 +32,7 @@ progSort :: Fn s (s :> TBool)
 progSort =
   runEnv
     ( begin
-        ∘ (nat 11 ∘ lambda1 (toInt ∘ i2nUnsafe) ∘ unsorted)
+        ∘ (nat 11 ∘ quot1 (toInt ∘ i2nUnsafe) ∘ unsorted)
         ∘ (VA.countingSortDesc ∘ sorted ∘ equalVerify)
         ∘ opTrue
     )
@@ -51,7 +51,7 @@ propSort xs =
     isTrue' $
       evaluateProg
         ( runEnv
-            ( (nat w ∘ lambda1 (toInt ∘ i2nUnsafe) ∘ bytes xs' ∘ toVector)
+            ( (nat w ∘ quot1 (toInt ∘ i2nUnsafe) ∘ bytes xs' ∘ toVector)
                 ∘ (VA.countingSortDesc ∘ bytes ((B.reverse P.. B.sort) xs'))
                 ∘ (toVector ∘ equal)
             )

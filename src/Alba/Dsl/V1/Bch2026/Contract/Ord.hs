@@ -14,10 +14,10 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TInt,
-    TLambda,
+    TQuot,
     TNat,
     cast,
-    lambda2,
+    quot2,
     opGreaterThan,
     opGreaterThanOrEqual,
     opLessThan,
@@ -47,16 +47,16 @@ class (BlobEq a) => Ord a where
   ordRec :: Fn s (s :> TOrdRec a)
 
 -- Only holds 'lessThanOrEqual' for now.
-mkOrdM :: Fn (s :> TLambda '[a, a] '[TBool]) (s :> TOrdRec a)
+mkOrdM :: Fn (s :> TQuot '[a, a] '[TBool]) (s :> TOrdRec a)
 mkOrdM = fromRaw
 
-getLessThanOrEqual :: Fn (s :> TOrdRec a) (s :> TLambda '[a, a] '[TBool])
+getLessThanOrEqual :: Fn (s :> TOrdRec a) (s :> TQuot '[a, a] '[TBool])
 getLessThanOrEqual = toRaw
 
-fromRaw :: Fn (s :> TLambda '[a, a] '[TBool]) (s :> TOrdRec a)
+fromRaw :: Fn (s :> TQuot '[a, a] '[TBool]) (s :> TOrdRec a)
 fromRaw = cast
 
-toRaw :: Fn (s :> TOrdRec a) (s :> TLambda '[a, a] '[TBool])
+toRaw :: Fn (s :> TOrdRec a) (s :> TQuot '[a, a] '[TBool])
 toRaw = cast
 
 instance Ord TInt where
@@ -67,7 +67,7 @@ instance Ord TInt where
   min = opMin
   max = opMax
   within = opWithin
-  ordRec = lambda2 (lessThanOrEqual @TInt) . mkOrdM
+  ordRec = quot2 (lessThanOrEqual @TInt) . mkOrdM
 
 instance Ord TNat where
   lessThan = opLessThan
@@ -77,4 +77,4 @@ instance Ord TNat where
   min = opMin
   max = opMax
   within = opWithin
-  ordRec = lambda2 (lessThanOrEqual @TNat) . mkOrdM
+  ordRec = quot2 (lessThanOrEqual @TNat) . mkOrdM

@@ -71,7 +71,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBool,
     TBytes,
-    TLambda,
+    TQuot,
     TNat,
     begin,
     bytes,
@@ -82,11 +82,11 @@ import Alba.Dsl.V1.Bch2026
     int,
     invoke1,
     invoke2,
-    lambda0,
-    lambda1,
-    lambda2,
-    lambda3,
-    lambda4,
+    quot0,
+    quot1,
+    quot2,
+    quot3,
+    quot4,
     name,
     name2,
     nat,
@@ -212,10 +212,10 @@ head = packFsRec @a . swap . headF
 headF :: (StackEntry a) => Fn (s :> TPackFs a :> TVector a) (s :> TMaybe a)
 headF = fn (unconsF . nothing . fstJust . rot . maybe)
 
--- Save a fn slot by factoring out lambda used in more than one place.
+-- Save a fn slot by factoring out quotation used in more than one place.
 fstJust ::
-  (StackEntry a, StackEntry b) => Fn s (s :> TLambda '[TTuple a b] '[TMaybe a])
-fstJust = lambda1 (fst . just)
+  (StackEntry a, StackEntry b) => Fn s (s :> TQuot '[TTuple a b] '[TMaybe a])
+fstJust = quot1 (fst . just)
 
 last :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TMaybe a)
 last = packFsRec @a . swap . lastF
@@ -224,8 +224,8 @@ lastF :: (StackEntry a) => Fn (s :> TPackFs a :> TVector a) (s :> TMaybe a)
 lastF = fn (unsnocF . nothing . sndJust . rot . maybe)
 
 sndJust ::
-  (StackEntry a, StackEntry b) => Fn s (s :> TLambda '[TTuple a b] '[TMaybe b])
-sndJust = lambda1 (snd . just)
+  (StackEntry a, StackEntry b) => Fn s (s :> TQuot '[TTuple a b] '[TMaybe b])
+sndJust = quot1 (snd . just)
 
 -- ## Slicing.
 init :: forall a s. (PackFs a) => Fn (s :> TVector a) (s :> TMaybe (TVector a))
@@ -336,23 +336,23 @@ replicate = packFsRec @a . rot . rot . replicateF
 
 replicateF ::
   (StackEntry a) => Env (s :> TPackFs a :> TNat :> a) (s :> TVector a)
-replicateF = fn (lambda2 nip . apply2 . generateF)
+replicateF = fn (quot2 nip . apply2 . generateF)
 
 generate ::
   forall a s.
-  (PackFs a) => Env (s :> TNat :> TLambda '[TNat] '[a]) (s :> TVector a)
+  (PackFs a) => Env (s :> TNat :> TQuot '[TNat] '[a]) (s :> TVector a)
 generate = packFsRec @a . rot . rot . generateF
 
 generateF ::
   forall a s.
   (StackEntry a) =>
-  Env (s :> TPackFs a :> TNat :> TLambda '[TNat] '[a]) (s :> TVector a)
-generateF = fn (lambda3 f . apply3_2 . nat 0 . unfoldrF)
+  Env (s :> TPackFs a :> TNat :> TQuot '[TNat] '[a]) (s :> TVector a)
+generateF = fn (quot3 f . apply3_2 . nat 0 . unfoldrF)
   where
     f ::
       (StackEntry a) =>
       Fn
-        (s :> TNat :> TNat :> TLambda '[TNat] '[a])
+        (s :> TNat :> TNat :> TQuot '[TNat] '[a])
         (s :> TMaybe (TTuple a TNat))
     f =
       begin
@@ -366,7 +366,7 @@ generateF = fn (lambda3 f . apply3_2 . nat 0 . unfoldrF)
 
 iterateN ::
   forall a s.
-  (PackFs a) => Env (s :> TNat :> TLambda '[a] '[a] :> a) (s :> TVector a)
+  (PackFs a) => Env (s :> TNat :> TQuot '[a] '[a] :> a) (s :> TVector a)
 iterateN =
   begin
     . ns3 #cnt #f #val
@@ -374,13 +374,13 @@ iterateN =
 
 iterateNF ::
   (StackEntry a) =>
-  Env (s :> TPackFs a :> TNat :> TLambda '[a] '[a] :> a) (s :> TVector a)
-iterateNF = fn (swap . lambda2 f . apply2 . rot . rot . tuple . unfoldrF)
+  Env (s :> TPackFs a :> TNat :> TQuot '[a] '[a] :> a) (s :> TVector a)
+iterateNF = fn (swap . quot2 f . apply2 . rot . rot . tuple . unfoldrF)
   where
     f ::
       (StackEntry a) =>
       Fn
-        (s :> TTuple TNat a :> TLambda '[a] '[a])
+        (s :> TTuple TNat a :> TQuot '[a] '[a])
         (s :> TMaybe (TTuple a (TTuple TNat a)))
     f =
       begin
@@ -396,14 +396,14 @@ iterateNF = fn (swap . lambda2 f . apply2 . rot . rot . tuple . unfoldrF)
 unfoldr ::
   forall a b s.
   (PackFs a, StackEntry b) =>
-  Fn (s :> TLambda '[b] '[TMaybe (TTuple a b)] :> b) (s :> TVector a)
+  Fn (s :> TQuot '[b] '[TMaybe (TTuple a b)] :> b) (s :> TVector a)
 unfoldr = ns2 #f #val . packFsRec @a . roll #f . roll #val . unfoldrF
 
 unfoldrF ::
   forall a b s.
   (StackEntry a, StackEntry b) =>
   Fn
-    (s :> TPackFs a :> TLambda '[b] '[TMaybe (TTuple a b)] :> b)
+    (s :> TPackFs a :> TQuot '[b] '[TMaybe (TTuple a b)] :> b)
     (s :> TVector a)
 unfoldrF = fn (empty . opUntil loop . nip . nip . nip)
   where
@@ -412,7 +412,7 @@ unfoldrF = fn (empty . opUntil loop . nip . nip . nip)
       Loop
         ( s
             :> TPackFs a
-            :> TLambda '[b] '[TMaybe (TTuple a b)]
+            :> TQuot '[b] '[TMaybe (TTuple a b)]
             :> b
             :> TVector a
         )
@@ -467,7 +467,7 @@ reverseF :: (StackEntry a) => Env (s :> TPackFs a :> TVector a) (s :> TVector a)
 reverseF =
   fn
     ( begin
-        . (ns2 #packFs #vec . roll #packFs . dup . lambda3 (swap . rot . consF))
+        . (ns2 #packFs #vec . roll #packFs . dup . quot3 (swap . rot . consF))
         . (apply3 . empty . roll #vec . foldlF)
     )
 
@@ -475,54 +475,54 @@ reverseF =
 map ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  Env (s :> TLambda '[a] '[b] :> TVector a) (s :> TVector b)
+  Env (s :> TQuot '[a] '[b] :> TVector a) (s :> TVector b)
 map = packFsRec @a . packFsRec @b . opRoll 3 . opRoll 3 . mapF
 
 mapF ::
   forall a b s.
   (StackEntry a, StackEntry b) =>
   Env
-    (s :> TPackFs a :> TPackFs b :> TLambda '[a] '[b] :> TVector a)
+    (s :> TPackFs a :> TPackFs b :> TQuot '[a] '[b] :> TVector a)
     (s :> TVector b)
 mapF =
   fn
     ( begin
         . (ns4 #pfsA #pfsB #f #vec . roll #pfsA . roll #pfsB . roll #f)
-        . (lambda4 f . apply4_2 . empty . roll #vec . foldlF)
+        . (quot4 f . apply4_2 . empty . roll #vec . foldlF)
     )
   where
     f ::
       (StackEntry a, StackEntry b) =>
       Fn
-        (s :> TVector b :> a :> TPackFs b :> TLambda '[a] '[b])
+        (s :> TVector b :> a :> TPackFs b :> TQuot '[a] '[b])
         (s :> TVector b)
     f =
       begin
         . (ns4 #vecB #a #pfsB #f . roll #pfsB . roll #vecB . rollN #a . roll #f)
         . (un #a . invoke1 . snocF)
 
-type CMapLambda a b = TLambda '[a] '[TVector b]
+type CMapQuot a b = TQuot '[a] '[TVector b]
 
 concatMap ::
   forall a b s.
   (PackFs a, PackFs b) =>
-  Env (s :> CMapLambda a b :> TVector a) (s :> TVector b)
+  Env (s :> CMapQuot a b :> TVector a) (s :> TVector b)
 concatMap = packFsRec @a . rot . rot . concatMapF
 
 concatMapF ::
   forall a b s.
   (StackEntry a, StackEntry b) =>
-  Env (s :> TPackFs a :> CMapLambda a b :> TVector a) (s :> TVector b)
+  Env (s :> TPackFs a :> CMapQuot a b :> TVector a) (s :> TVector b)
 concatMapF =
   fn
     ( begin
         . (ns3 #pfsA #f #vec . roll #pfsA . roll #f)
-        . (lambda3 f . apply3 . empty . roll #vec . foldlF)
+        . (quot3 f . apply3 . empty . roll #vec . foldlF)
     )
   where
     f ::
       (StackEntry a, StackEntry b) =>
-      Fn (s :> TVector b :> a :> CMapLambda a b) (s :> TVector b)
+      Fn (s :> TVector b :> a :> CMapQuot a b) (s :> TVector b)
     f =
       begin
         . (ns3 #vecB #a #f . roll #vecB . rollN #a . roll #f)
@@ -549,12 +549,12 @@ zipF ::
         :> TVector b
     )
     (s :> TVector (TTuple a b))
-zipF = fn (lambda2 tuple . rot . rot . zipWithF)
+zipF = fn (quot2 tuple . rot . rot . zipWithF)
 
 zipWith ::
   forall a b c s.
   (PackFs a, PackFs b, PackFs c) =>
-  Fn (s :> TLambda '[a, b] '[c] :> TVector a :> TVector b) (s :> TVector c)
+  Fn (s :> TQuot '[a, b] '[c] :> TVector a :> TVector b) (s :> TVector c)
 zipWith =
   begin
     . (packFsRec @a . packFsRec @b . packFsRec @c)
@@ -565,7 +565,7 @@ type ZipWithFArgs s a b c =
     :> TPackFs a
     :> TPackFs b
     :> TPackFs c
-    :> TLambda '[a, b] '[c]
+    :> TQuot '[a, b] '[c]
     :> TVector a
     :> TVector b
 
@@ -582,8 +582,8 @@ zipWithF = fn (empty . opUntil loop . nip . nip . nip . nip . nip . nip)
         . ns7 #pfsA #pfsB #pfsC #f #vecA #vecB #res
         . (pick #pfsA . pick #vecA . unconsF)
         . (pick #pfsB . pick #vecB . unconsF . op2Dup)
-        . (lambdaFst . swap . Maybe.map . swap)
-        . (lambdaFst . swap . Maybe.map . swap)
+        . (quotFst . swap . Maybe.map . swap)
+        . (quotFst . swap . Maybe.map . swap)
         . (pick #f . rot . rot . liftA2Maybe)
         . ifJust
           ( begin
@@ -597,10 +597,10 @@ zipWithF = fn (empty . opUntil loop . nip . nip . nip . nip . nip . nip)
               . (un6 #pfsB #pfsC #f #vecA #vecB #res)
           )
 
-    lambdaFst ::
+    quotFst ::
       (StackEntry a) =>
-      Fn s (s :> TLambda '[TTuple a (TVector a)] '[a])
-    lambdaFst = lambda1 fst
+      Fn s (s :> TQuot '[TTuple a (TVector a)] '[a])
+    quotFst = quot1 fst
 
 unzip ::
   forall a b s.
@@ -644,25 +644,25 @@ unzipF =
 filter ::
   forall a s.
   (PackFs a) =>
-  Env (s :> TLambda '[a] '[TBool] :> TVector a) (s :> TVector a)
+  Env (s :> TQuot '[a] '[TBool] :> TVector a) (s :> TVector a)
 filter = packFsRec @a . rot . rot . filterF
 
 filterF ::
   forall a s.
   (StackEntry a) =>
-  Env (s :> TPackFs a :> TLambda '[a] '[TBool] :> TVector a) (s :> TVector a)
+  Env (s :> TPackFs a :> TQuot '[a] '[TBool] :> TVector a) (s :> TVector a)
 filterF =
   fn
     ( begin
         . ns3 #packFs #f #vec
-        . (pick #packFs . (roll #packFs . roll #f . lambda4 f . apply4_2))
+        . (pick #packFs . (roll #packFs . roll #f . quot4 f . apply4_2))
         . (empty . roll #vec . foldlF)
     )
   where
     f ::
       (StackEntry a) =>
       Fn
-        (s :> TVector a :> a :> TPackFs a :> TLambda '[a] '[TBool])
+        (s :> TVector a :> a :> TPackFs a :> TQuot '[a] '[TBool])
         (s :> TVector a)
     f =
       begin
@@ -674,7 +674,7 @@ filterF =
 foldl ::
   forall a b s.
   (StackEntry b, PackFs a) =>
-  Fn (s :> TLambda '[b, a] '[b] :> b :> TVector a) (s :> b)
+  Fn (s :> TQuot '[b, a] '[b] :> b :> TVector a) (s :> b)
 foldl =
   begin
     . (ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec)
@@ -682,12 +682,12 @@ foldl =
 
 foldlF ::
   (StackEntry a, StackEntry b) =>
-  Fn (s :> TPackFs a :> TLambda '[b, a] '[b] :> b :> TVector a) (s :> b)
+  Fn (s :> TPackFs a :> TQuot '[b, a] '[b] :> b :> TVector a) (s :> b)
 foldlF = fn (swap . opUntil loop . nip . nip . nip)
   where
     loop ::
       (StackEntry a, StackEntry b) =>
-      Loop (s :> TPackFs a :> TLambda '[b, a] '[b] :> TVector a :> b)
+      Loop (s :> TPackFs a :> TQuot '[b, a] '[b] :> TVector a :> b)
     loop =
       begin
         . (ns4 #packFs #f #vec #acc . tcPick . pick #vec . unconsF)
@@ -702,7 +702,7 @@ foldlF = fn (swap . opUntil loop . nip . nip . nip)
 foldr ::
   forall a b s.
   (StackEntry b, PackFs a) =>
-  Fn (s :> TLambda '[a, b] '[b] :> b :> TVector a) (s :> b)
+  Fn (s :> TQuot '[a, b] '[b] :> b :> TVector a) (s :> b)
 foldr =
   begin
     . (ns3 #f #val #vec . packFsRec @a . roll #f . rollN #val . roll #vec)
@@ -710,12 +710,12 @@ foldr =
 
 foldrF ::
   (StackEntry a, StackEntry b) =>
-  Fn (s :> TPackFs a :> TLambda '[a, b] '[b] :> b :> TVector a) (s :> b)
+  Fn (s :> TPackFs a :> TQuot '[a, b] '[b] :> b :> TVector a) (s :> b)
 foldrF = fn (swap . opUntil loop . nip . nip . nip)
   where
     loop ::
       (StackEntry a, StackEntry b) =>
-      Loop (s :> TPackFs a :> TLambda '[a, b] '[b] :> TVector a :> b)
+      Loop (s :> TPackFs a :> TQuot '[a, b] '[b] :> TVector a :> b)
     loop =
       begin
         . (ns4 #packFs #f #vec #acc . tcPick . pick #vec . unsnocF)
@@ -753,12 +753,12 @@ updateElemF =
 adjust ::
   forall a s.
   (PackFs a) =>
-  Fn (s :> TLambda '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+  Fn (s :> TQuot '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
 adjust = packFsRec @a . opRoll 3 . opRoll 3 . opRoll 3 . adjustF
 
 adjustF ::
   (StackEntry a) =>
-  Fn (s :> TPackFs a :> TLambda '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
+  Fn (s :> TPackFs a :> TQuot '[a] '[a] :> TNat :> TVector a) (s :> TVector a)
 adjustF =
   fn
     ( begin
@@ -772,7 +772,7 @@ adjustF =
 -- ## Misc.
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
+fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'
 
 -- ## Casting.
 fromRaw :: Fn (s :> TBytes) (s :> TVector a)

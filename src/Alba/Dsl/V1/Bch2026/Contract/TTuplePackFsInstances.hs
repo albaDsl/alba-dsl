@@ -6,9 +6,10 @@ module Alba.Dsl.V1.Bch2026.Contract.TTuplePackFsInstances where
 import Alba.Dsl.V1.Bch2026
   ( Fn,
     Stack ((:>)),
+    TQuot,
     begin,
     constant,
-    lambda1,
+    quot1,
     nat,
     (.),
   )
@@ -44,8 +45,8 @@ tuplePackFs1 =
   constant
     ( begin
         . size @(TTuple TInt8 TInt8)
-        . lambda1 (pack @(TTuple TInt8 TInt8))
-        . lambda1 (unpack @(TTuple TInt8 TInt8))
+        . quot1 (pack @(TTuple TInt8 TInt8))
+        . quot1 (unpack @(TTuple TInt8 TInt8))
         . mkPackFsM
     )
 
@@ -63,8 +64,8 @@ tuplePackFs2 =
   constant
     ( begin
         . size @(TTuple TInt64 TInt8)
-        . lambda1 (pack @(TTuple TInt64 TInt8))
-        . lambda1 (unpack @(TTuple TInt64 TInt8))
+        . quot1 (pack @(TTuple TInt64 TInt8))
+        . quot1 (unpack @(TTuple TInt64 TInt8))
         . mkPackFsM
     )
 
@@ -82,8 +83,8 @@ tuplePackFs3 =
   constant
     ( begin
         . size @(TTuple TInt64 TBytes128)
-        . lambda1 (pack @(TTuple TInt64 TBytes128))
-        . lambda1 (unpack @(TTuple TInt64 TBytes128))
+        . quot1 (pack @(TTuple TInt64 TBytes128))
+        . quot1 (unpack @(TTuple TInt64 TBytes128))
         . mkPackFsM
     )
 
@@ -101,8 +102,8 @@ tuplePackFs4 =
   constant
     ( begin
         . size @(TTuple TInt64 TInt64)
-        . lambda1 (pack @(TTuple TInt64 TInt64))
-        . lambda1 (unpack @(TTuple TInt64 TInt64))
+        . quot1 (pack @(TTuple TInt64 TInt64))
+        . quot1 (unpack @(TTuple TInt64 TInt64))
         . mkPackFsM
     )
 
@@ -120,7 +121,7 @@ tuplePackFs5 =
   constant
     ( begin
         . size @(TTuple TInt16 TInt16)
-        . lambda1 (pack @(TTuple TInt16 TInt16))
-        . lambda1 (unpack @(TTuple TInt16 TInt16))
+        . quot1 (pack @(TTuple TInt16 TInt16))
+        . quot1 (unpack @(TTuple TInt16 TInt16))
         . mkPackFsM
     )

@@ -13,8 +13,8 @@ import Alba.Dsl.V1.Bch2026
     constant,
     fn,
     int,
-    lambda1,
-    lambda2,
+    quot1,
+    quot2,
     nat,
     op1Add,
     op1Sub,
@@ -67,7 +67,7 @@ instance Ord TInt16 where
   min = toRaw2 . opMin . fromRaw
   max = toRaw2 . opMax . fromRaw
   within = toRaw3 . opWithin
-  ordRec = lambda2 (lessThanOrEqual @TInt16) . mkOrdM
+  ordRec = quot2 (lessThanOrEqual @TInt16) . mkOrdM
 
 instance Integral TInt16 where
   add = toRaw2 . opAdd . fromInt
@@ -95,8 +95,8 @@ int16PackFs =
   constant
     ( begin
         . size @TInt16
-        . lambda1 (pack @TInt16)
-        . lambda1 (unpack @TInt16)
+        . quot1 (pack @TInt16)
+        . quot1 (unpack @TInt16)
         . mkPackFsM
     )
 

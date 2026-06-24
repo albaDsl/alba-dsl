@@ -11,7 +11,7 @@ import Alba.Dsl.V1.Bch2026
     del,
     fn,
     invoke2,
-    lambda0,
+    quot0,
     name,
     name2,
     nat,
@@ -138,4 +138,4 @@ mergeF =
 
 -- Used from contexts where it is expected to never fail.
 fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
+fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'

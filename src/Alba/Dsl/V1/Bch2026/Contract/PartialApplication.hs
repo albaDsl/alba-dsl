@@ -18,7 +18,7 @@ import Alba.Dsl.V1.Bch2026
     StackEntry,
     TBytes,
     TInt,
-    TLambda,
+    TQuot,
     TRuntimeState,
     begin,
     cast,
@@ -37,10 +37,10 @@ import Prelude (($))
 
 apply1 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s :> t2 :> TLambda '[t1] '[r1]) (s :> TLambda '[] '[r1])
+  Env (s :> t2 :> TQuot '[t1] '[r1]) (s :> TQuot '[] '[r1])
 apply1 = toTyped applyTop
 
-applyTop :: FnU -- <arg> <lambda> -- <lambda'>
+applyTop :: FnU -- <arg> <quot> -- <quot'>
 applyTop = fromTyped $ fn (toTyped f)
   where
     f :: FnU
@@ -52,15 +52,15 @@ applyTop = fromTyped $ fn (toTyped f)
 
 apply2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s :> t2 :> TLambda '[t1, t2] '[r1]) (s :> TLambda '[t1] '[r1])
+  Env (s :> t2 :> TQuot '[t1, t2] '[r1]) (s :> TQuot '[t1] '[r1])
 apply2 = toTyped applyTop
 
 apply2_2 ::
   (StackEntry t1, StackEntry t2, StackEntry r1) =>
-  Env (s :> t1 :> t2 :> TLambda '[t1, t2] '[r1]) (s :> TLambda '[] '[r1])
+  Env (s :> t1 :> t2 :> TQuot '[t1, t2] '[r1]) (s :> TQuot '[] '[r1])
 apply2_2 = toTyped applyTop2
 
-applyTop2 :: FnU -- <argN-1> <argN> <lambda> -- <lambda'>
+applyTop2 :: FnU -- <argN-1> <argN> <quot> -- <quot'>
 applyTop2 = fromTyped $ fn (toTyped f)
   where
     f :: FnU
@@ -74,26 +74,26 @@ applyTop2 = fromTyped $ fn (toTyped f)
 
 apply3 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  Env (s :> t3 :> TLambda '[t1, t2, t3] '[r1]) (s :> TLambda '[t1, t2] '[r1])
+  Env (s :> t3 :> TQuot '[t1, t2, t3] '[r1]) (s :> TQuot '[t1, t2] '[r1])
 apply3 = toTyped applyTop
 
 apply3_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry r1) =>
-  Env (s :> t2 :> t3 :> TLambda '[t1, t2, t3] '[r1]) (s :> TLambda '[t1] '[r1])
+  Env (s :> t2 :> t3 :> TQuot '[t1, t2, t3] '[r1]) (s :> TQuot '[t1] '[r1])
 apply3_2 = toTyped applyTop2
 
 apply4 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
   Env
-    (s :> t4 :> TLambda '[t1, t2, t3, t4] '[r1])
-    (s :> TLambda '[t1, t2, t3] '[r1])
+    (s :> t4 :> TQuot '[t1, t2, t3, t4] '[r1])
+    (s :> TQuot '[t1, t2, t3] '[r1])
 apply4 = toTyped applyTop
 
 apply4_2 ::
   (StackEntry t1, StackEntry t2, StackEntry t3, StackEntry t4, StackEntry r1) =>
   Env
-    (s :> t3 :> t4 :> TLambda '[t1, t2, t3, t4] '[r1])
-    (s :> TLambda '[t1, t2] '[r1])
+    (s :> t3 :> t4 :> TQuot '[t1, t2, t3, t4] '[r1])
+    (s :> TQuot '[t1, t2] '[r1])
 apply4_2 = toTyped applyTop2
 
 freshId :: Env s (s :> TBytes)

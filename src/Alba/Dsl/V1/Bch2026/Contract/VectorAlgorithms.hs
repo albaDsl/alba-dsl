@@ -10,13 +10,13 @@ import Alba.Dsl.V1.Bch2026
     Fn,
     Stack ((:>)),
     StackEntry,
-    TLambda,
+    TQuot,
     TNat,
     i2nUnsafe,
     int,
     invoke1,
-    lambda0,
-    lambda1,
+    quot0,
+    quot1,
     n2i,
     name,
     ns,
@@ -44,7 +44,7 @@ import Prelude (undefined)
 countingSortDesc ::
   forall a s.
   (PackFs a) =>
-  Env (s :> TNat :> TLambda '[a] '[TNat] :> TVector a) (s :> TVector a)
+  Env (s :> TNat :> TQuot '[a] '[TNat] :> TVector a) (s :> TVector a)
 countingSortDesc =
   ( ns3 #w #key #vec
       . name #n (pick #vec . V.length)
@@ -55,7 +55,7 @@ countingSortDesc =
                 . (pick #key . roll #vec)
                 . (dup . pick #i . i2nUnsafe . V.lookup . fromJust . ns #val)
                 . (roll #key . un #val . invoke1)
-                . (lambda1 add1 . swap . roll #counts . V.adjust)
+                . (quot1 add1 . swap . roll #counts . V.adjust)
                 . (roll #i . int 1)
             )
             . (nip . nip)
@@ -90,4 +90,4 @@ countingSortDesc =
   )
 
 fromJust :: (StackEntry a) => Fn (s :> TMaybe a) (s :> a)
-fromJust = lambda0 (errCanNotHappen) . swap . fromMaybe'
+fromJust = quot0 (errCanNotHappen) . swap . fromMaybe'

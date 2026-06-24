@@ -19,7 +19,7 @@ import Alba.Dsl.V1.Bch2026
     cast,
     constant,
     fn,
-    lambda1,
+    quot1,
     nat,
     (.),
   )
@@ -70,7 +70,7 @@ pointPackFs :: Fn s (s :> TPackFs TPointJ)
 pointPackFs =
   constant
     ( begin
-        . (size @TPointJ . lambda1 (pack @TPointJ) . lambda1 (unpack @TPointJ))
+        . (size @TPointJ . quot1 (pack @TPointJ) . quot1 (unpack @TPointJ))
         . mkPackFsM
     )
 

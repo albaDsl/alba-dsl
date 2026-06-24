@@ -127,7 +127,7 @@ reportCoreError :: CoreCtx -> [Var] -> CoreM ()
 reportCoreError ctx vars = do
   let msg =
         vcat
-          [ text "AlbaDsl: fn/lambda/constant body is not a closed expression."
+          [ text "AlbaDsl: fn/quot/constant body is not a closed expression."
               <+> text "Captured values:",
             nest
               2

@@ -111,7 +111,7 @@ progSort :: Fn s (s :> TBool)
 progSort =
   runEnv
     ( begin
-        ∘ (nat 10 ∘ lambda1 (toInt64 ∘ base ∘ add) ∘ generate)
+        ∘ (nat 10 ∘ quot1 (toInt64 ∘ base ∘ add) ∘ generate)
         ∘ (opDup ∘ reverse ∘ MS.sort ∘ equal)
     )
   where
@@ -147,5 +147,5 @@ progRuntimeFunctions =
         ∘ opTrue
     )
   where
-    f = lambda2 opSub
-    g = lambda3 opWithin
+    f = quot2 opSub
+    g = quot3 opWithin
