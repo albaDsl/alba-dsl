@@ -1,7 +1,4 @@
 -- Copyright (c) 2026 albaDsl
-{-# OPTIONS_GHC -Wno-unused-imports #-}
-{-# OPTIONS_GHC -Wno-unused-local-binds #-}
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
 
 module DslDemo.EllipticCurve.JacobianWNafGlv
   ( TTable,
@@ -21,10 +18,8 @@ import Alba.Dsl.V1.Bch2026.Contract.Prelude
 import Alba.Dsl.V1.Bch2026.Contract.TVector (TVector)
 import Alba.Dsl.V1.Bch2026.Contract.TVector qualified as V
 import Alba.Dsl.V1.Bch2026.Contract.TVectorUnsafe qualified as V
-import Alba.Dsl.V1.Bch2026.Contract.VectorAlgorithms (countingSortDesc)
 import Alba.Dsl.V1.Bch2026.QuotationsB qualified as QB
 import DslDemo.EllipticCurve.AffineAdd qualified as AP
-import DslDemo.EllipticCurve.Common (countTrailingZeros, doubleN, mods)
 import DslDemo.EllipticCurve.Constants qualified as C
 import DslDemo.EllipticCurve.Field (feMul, pushFe)
 import DslDemo.EllipticCurve.Jacobian
@@ -34,12 +29,12 @@ import DslDemo.EllipticCurve.Jacobian
     toJacobian,
   )
 import DslDemo.EllipticCurve.JacobianAdd qualified as EC
-import DslDemo.EllipticCurve.JacobianPoint (TPointJ, fromJacobian)
+import DslDemo.EllipticCurve.JacobianPoint (TPointJ)
 import DslDemo.EllipticCurve.JacobianPoint qualified as JP
 import DslDemo.EllipticCurve.JacobianWNafInterleaved (ecMulInterleaved)
 import DslDemo.EllipticCurve.Point (TPoint)
 import DslDemo.EllipticCurve.Point qualified as AP
-import Prelude (Int, fromIntegral, id, undefined, (-), (^))
+import Prelude (fromIntegral, id)
 
 type TWindowSize = TInt16
 
