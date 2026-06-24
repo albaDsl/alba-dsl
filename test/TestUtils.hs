@@ -146,9 +146,17 @@ evaluateScript code (s, alt) context = do
       resSpec =
         let state = (BchSpec.startState BchSpec.vmParamsStandard) {code, s, alt}
          in toTestResult $ BchSpec.evaluateScript context state
-  unless (res2025 == res2026 && res2026 == resSpec) $
+  unless (res2025 == res2026 && stacks res2026 == stacks resSpec) $
     error "Bch2025 / Bch2026 / BchSpec results don't match."
   res2026
+  where
+    -- Since BchSpec has different opcost we just compare stacks.
+    stacks ::
+      Either (ScriptError, Maybe TestResult) TestResult ->
+      Either (ScriptError, Maybe (VmStack, VmStack)) (VmStack, VmStack)
+    stacks (Left (err, Just tr)) = Left (err, Just (tr.s, tr.alt))
+    stacks (Left (err, Nothing)) = Left (err, Nothing)
+    stacks (Right tr) = Right (tr.s, tr.alt)
 
 toTestResult ::
   Either (ScriptError, Maybe VmState) VmState ->

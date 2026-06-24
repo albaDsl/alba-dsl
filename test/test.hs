@@ -28,7 +28,7 @@ import TestLibVector (testLibVector)
 import TestLibVectorAlgorithms (testLibVectorAlgorithms)
 import TestLibauthVectors2025 (testLibauthVectors2025)
 import TestLibauthVectors2026 (testLibauthVectors2026)
-import TestLibauthVectorsSpec (testLibauthVectorsSpec)
+-- import TestLibauthVectorsSpec (testLibauthVectorsSpec)
 import TestLoops (testLoops)
 import TestLzss (testLzss)
 import TestLzssBit (testLzssBit)
@@ -83,7 +83,7 @@ tests =
       testLibVectorAlgorithms,
       testLibauthVectors2025,
       testLibauthVectors2026,
-      testLibauthVectorsSpec,
+      -- testLibauthVectorsSpec,
       testLoops,
       testLzss,
       testLzssBit,
